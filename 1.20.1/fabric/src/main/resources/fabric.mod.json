@@ -1,0 +1,33 @@
+{
+    "schemaVersion": 1,
+    "id": "bullethell",
+    "version": "${version}",
+    "name": "Bullethell",
+    "description": "Bullethell is a fantasy race mod for Minecraft.",
+    "authors": [
+        "mc_jojo3"
+    ],
+    "contact": {},
+    "license": "All Rights Reserved",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "mc.sayda.bullethell.fabric.BullethellFabric"
+        ],
+        "client": [
+            "mc.sayda.bullethell.fabric.BullethellFabricClient"
+        ]
+    },
+    "mixins": [
+        "bullethell-common.mixins.json",
+        "bullethell-fabric.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=0.14.0",
+        "minecraft": ">=1.20.1",
+        "architectury": ">=9.0.0",
+        "twilight_lib": ">=2.0.0",
+        "pehkui": "*",
+        "kanos_config": "*"
+    }
+}

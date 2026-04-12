@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.fabricmc.net' }
+        maven { url = 'https://maven.architectury.dev/' }
+        maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://maven.neoforged.net/releases' }
+    }
+}
+
+// includeBuild('../twilight-lib')
+
+rootProject.name = 'bullethell'
+
+include '1.20.1:common'
+include '1.20.1:fabric'
+include '1.20.1:forge'

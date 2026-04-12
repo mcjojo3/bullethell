@@ -1,0 +1,54 @@
+plugins {
+    id 'architectury-plugin' version "${architectury_plugin_version}"
+    id 'dev.architectury.loom' version "${loom_version}" apply false
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'architectury-plugin'
+    apply plugin: 'maven-publish'
+
+    archivesBaseName = rootProject.mod_id
+    group = rootProject.mod_group_id
+    version = rootProject.mod_version
+
+    repositories {
+        mavenCentral()
+        maven { url "https://maven.parchmentmc.org" }
+        maven { url "https://maven.quiltmc.org/repository/release/" }
+        maven { url "https://maven.neoforged.net/releases/" }
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.minecraftforge.net/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://maven.terraformersmc.com/" }
+        maven { url "https://repo.spongepowered.org/repository/maven-public/" }
+        maven { url "https://maven.ladysnake.org/releases" }
+        maven { url "https://jitpack.io" }
+        maven { url "https://api.modrinth.com/maven" }
+        maven { url "https://maven.virtuoel.dev/releases" }
+        maven { url "https://www.cursemaven.com" }
+        maven { url "https://maven.blamejared.com" }
+        maven { url "https://dvs1.progwml6.com/files/maven/" }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+
+    tasks.withType(Jar).configureEach {
+        duplicatesStrategy = DuplicatesStrategy.WARN
+        includeEmptyDirs = false
+    }
+
+    java {
+        withSourcesJar()
+    }
+}
+
+subprojects {
+    dependencies {
+        implementation "com.google.code.findbugs:jsr305:3.0.2"
+        compileOnly "io.github.llamalad7:mixinextras-common:0.5.3"
+        annotationProcessor "io.github.llamalad7:mixinextras-common:0.5.3"
+    }
+}

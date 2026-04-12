@@ -1,0 +1,25 @@
+architectury {
+    common(rootProject.property('1_20_1_enabled_platforms').split(","))
+}
+
+group = rootProject.mod_group_id
+archivesBaseName = "bullethell-1.20.1-common"
+
+loom {
+    mixin.defaultRefmapName = "bullethell-common.refmap.json"
+}
+
+
+
+dependencies {
+    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin json properties
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    // Architectury API
+    modApi "dev.architectury:architectury:${rootProject.property('1_20_1_architectury_version')}"
+    // Utilities
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
+    api "com.google.code.findbugs:jsr305:3.0.2"
+    modImplementation files("${rootProject.projectDir.parentFile}/twilight-lib/1.20.1/common/build/libs/twilight_lib-1.20.1-common-${rootProject.twilight_lib_version}.jar")
+    modApi "curse.maven:pehkui-319596:4684391"
+    modCompileOnly "mezz.jei:jei-1.20.1-common-api:15.2.0.27"
+}

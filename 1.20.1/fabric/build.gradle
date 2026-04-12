@@ -1,0 +1,82 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+loom {
+    mixin {
+        defaultRefmapName = "bullethell-fabric.refmap.json"
+    }
+}
+
+
+
+configurations {
+    common
+    shadowCommon
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.property('1_20_1_fabric_api_version')}"
+    modApi "dev.architectury:architectury-fabric:${rootProject.property('1_20_1_architectury_version')}"
+
+    common(project(path: ":1.20.1:common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: ":1.20.1:common", configuration: "transformProductionFabric")) { transitive = false }
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
+
+    // Twilight Lib - Direct File Dependency
+    modImplementation files("${rootProject.projectDir.parentFile}/twilight-lib/1.20.1/fabric/build/libs/twilight_lib-1.20.1-fabric-${rootProject.twilight_lib_version}.jar")
+
+    // Cardinal Components API
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.2.3"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.2.3"
+    modImplementation "curse.maven:pehkui-319596:4684391"
+    modImplementation "com.github.Virtuoel:KanosConfig:0.4.1"
+    modRuntimeOnly "io.github.llamalad7:mixinextras-fabric:0.5.3"
+    modRuntimeOnly "mezz.jei:jei-1.20.1-fabric:15.2.0.27"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+shadowJar {
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = "dev-shadow"
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    archiveClassifier = null
+}
+
+jar {
+    archiveClassifier = "dev"
+}
+
+sourcesJar {
+    def commonSources = project(":1.20.1:common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
