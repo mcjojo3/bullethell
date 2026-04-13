@@ -1,0 +1,37 @@
+package mc.sayda.bullethell.boss;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Complete definition of a boss fight, loaded from a JSON datafile.
+ *
+ * Place JSON files at:
+ *   {@code data/bullethell/bosses/<id>.json}
+ * inside the mod JAR (i.e., in {@code common/src/main/resources/}).
+ *
+ * The fight proceeds through {@link #phases} in order.  Phase 0 starts
+ * immediately; each subsequent phase begins when the previous phase's HP
+ * reaches zero.  The encounter ends when the last phase is cleared.
+ */
+public class BossDefinition {
+
+    /** Unique ID - must match the JSON file name (without extension). */
+    public String id = "unknown";
+
+    /** Human-readable display name shown in the HUD and dialog boxes. */
+    public String name = "Unknown Boss";
+
+    /**
+     * Optional intro dialogue shown after all waves clear and before the fight
+     * begins.  Lines are auto-advanced by their {@code delayTicks} value.
+     * Leave empty to skip straight to phase 0.
+     */
+    public List<DialogLine> introDialog = new ArrayList<>();
+
+    /**
+     * Ordered list of phases.  Index 0 is the opening phase.
+     * Each phase transitions automatically when its own HP hits zero.
+     */
+    public List<PhaseDefinition> phases = new ArrayList<>();
+}

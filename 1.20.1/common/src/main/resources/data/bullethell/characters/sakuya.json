@@ -1,0 +1,14 @@
+{
+  "id": "sakuya",
+  "name": "Sakuya Izayoi",
+  "texture": "textures/characters/sakuya.png",
+  "tintColor": 14540253,
+  "hitRadius": 2.5,
+  "grazeRadius": 11.0,
+  "pickupRadius": 19.0,
+  "speedNormal": 10.5,
+  "speedFocused": 5.0,
+  "startingLives": 3,
+  "startingBombs": 3,
+  "description": "Precise & Time stop"
+}

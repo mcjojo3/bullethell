@@ -1,0 +1,124 @@
+{
+  "id": "prototype_boss",
+  "name": "Forest Spirit",
+
+  "_design_notes": [
+    "Structure mirrors TH7 PCB mid-bosses: NonSpell → SpellCard → NonSpell → SpellCard → NonSpell → Final SpellCard.",
+    "Movement uses phaseStartTick offset so each phase begins at centre with sin(0)=0 - no position jumps.",
+    "NonSpell phases: sparse aimed/ring; recognisable but survivable - the WARM-UP before the card.",
+    "SpellCard phases: dense, visually distinctive, timed bonus. Difficulty tiers: Easy=900t, Normal=700t, Hard=480t, Lunatic=260t.",
+    "Cooldown units are server ticks (20 TPS). DifficultyConfig.speedMult/densityMult scales bullet speed/count.",
+    "Pattern reference (PatternEngine): SPIRAL, AIMED, RING, SPREAD, DENSE_RING"
+  ],
+
+  "phases": [
+
+    {
+      "_note": "NonSpell 1 - Intro curtain fire. Wide 3-way aimed + slow ring. Player learns movement.",
+      "hp": 1500,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 1",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 110,
+      "music": "love_colored_master_spark",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 16, "bulletType": "RICE", "arms": 3,  "speed": 2.6, "spread": 0.30 },
+        { "pattern": "RING",  "cooldown": 22, "bulletType": "ORB",  "arms": 8,  "speed": 2.0 }
+      ]
+    },
+
+    {
+      "_note": "Spell 1 'Phantom Sign: Haunting Ripple' - TH7-style dense expanding rings + aimed. Classic 'don't get cornered' spell.",
+      "hp": 2250,
+      "isSpellCard": true,
+      "spellName": "\"Phantom Sign: Haunting Ripple\"",
+      "spellDurationTicks": [900, 700, 480, 260],
+      "spellBonus": 50000,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 85,
+      "music": "",
+      "attacks": [
+        { "pattern": "DENSE_RING", "cooldown": 16, "bulletType": "BUBBLE", "arms": 12, "speed": 2.4 },
+        { "pattern": "AIMED",      "cooldown": 12, "bulletType": "STAR",   "arms": 3,  "speed": 3.0, "spread": 0.18 },
+        { "pattern": "DENSE_RING", "cooldown": 16, "bulletType": "BUBBLE", "arms": 12, "speed": 2.4 }
+      ]
+    },
+
+    {
+      "_note": "NonSpell 2 - Escalation: faster aimed spread + ring barrage. More bullets, less time to react.",
+      "hp": 1900,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 2",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 140,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPREAD", "cooldown": 13, "bulletType": "RICE",   "arms": 7,  "speed": 3.0 },
+        { "pattern": "AIMED",  "cooldown":  9, "bulletType": "STAR",   "arms": 3,  "speed": 3.6, "spread": 0.22 },
+        { "pattern": "RING",   "cooldown": 18, "bulletType": "ORB",    "arms": 12, "speed": 2.6 }
+      ]
+    },
+
+    {
+      "_note": "Spell 2 'Life Sign: Cherry Blossom Storm' - PCB-style CIRCLE movement + spiral arms + aimed barrage. Requires pattern-reading across both axes.",
+      "hp": 2750,
+      "isSpellCard": true,
+      "spellName": "\"Life Sign: Cherry Blossom Storm\"",
+      "spellDurationTicks": [820, 640, 440, 230],
+      "spellBonus": 75000,
+      "movement": "CIRCLE",
+      "moveSpeed": 88,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPIRAL",    "cooldown":  6, "bulletType": "ORB",    "arms": 10, "speed": 3.0 },
+        { "pattern": "AIMED",     "cooldown": 11, "bulletType": "STAR",   "arms": 5,  "speed": 3.8, "spread": 0.14 },
+        { "pattern": "DENSE_RING","cooldown": 14, "bulletType": "BUBBLE", "arms": 14, "speed": 2.8 }
+      ]
+    },
+
+    {
+      "_note": "NonSpell 3 - Pre-final assault. Rapid small shots interleaved with heavy rings. Very fast cycle.",
+      "hp": 2100,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 3",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 160,
+      "music": "",
+      "attacks": [
+        { "pattern": "RING",      "cooldown": 11, "bulletType": "RICE",   "arms": 14, "speed": 3.2 },
+        { "pattern": "AIMED",     "cooldown":  7, "bulletType": "STAR",   "arms": 3,  "speed": 4.4, "spread": 0.16 },
+        { "pattern": "DENSE_RING","cooldown": 14, "bulletType": "BUBBLE", "arms": 10, "speed": 3.6 },
+        { "pattern": "AIMED",     "cooldown":  7, "bulletType": "STAR",   "arms": 5,  "speed": 4.0, "spread": 0.12 }
+      ]
+    },
+
+    {
+      "_note": "Final Spell 'Death Boundary: Eternal Nothingness' - Inspired by TH7 Yuyuko last spell. All patterns cycle at high density. Tight Lunatic timer. Circular orbit makes safe spots constantly shift.",
+      "hp": 3500,
+      "isSpellCard": true,
+      "spellName": "\"Death Boundary: Eternal Nothingness\"",
+      "spellDurationTicks": [720, 560, 380, 190],
+      "spellBonus": 120000,
+      "movement": "CIRCLE",
+      "moveSpeed": 115,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPIRAL",    "cooldown":  4, "bulletType": "ORB",    "arms": 14, "speed": 3.6 },
+        { "pattern": "DENSE_RING","cooldown":  8, "bulletType": "BUBBLE", "arms": 18, "speed": 3.2 },
+        { "pattern": "AIMED",     "cooldown":  6, "bulletType": "STAR",   "arms": 5,  "speed": 4.6, "spread": 0.12 },
+        { "pattern": "RING",      "cooldown":  9, "bulletType": "RICE",   "arms": 20, "speed": 3.0 },
+        { "pattern": "SPIRAL",    "cooldown":  4, "bulletType": "ORB",    "arms": 14, "speed": 3.6 }
+      ]
+    }
+
+  ]
+}

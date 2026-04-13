@@ -33,9 +33,6 @@ dependencies {
     common(project(path: ":1.20.1:common", configuration: "namedElements")) { transitive = false }
     shadowCommon(project(path: ":1.20.1:common", configuration: "transformProductionForge")) { transitive = false }
     
-    // Twilight Lib - Direct File Dependency
-    modImplementation files("${rootProject.projectDir.parentFile}/twilight-lib/1.20.1/forge/build/libs/twilight_lib-1.20.1-forge-${rootProject.twilight_lib_version}.jar")
-    modImplementation "curse.maven:pehkui-319596:5393101"
     forgeRuntimeLibrary "io.github.llamalad7:mixinextras-common:0.5.3"
     modRuntimeOnly "mezz.jei:jei-1.20.1-forge:15.2.0.27"
 }

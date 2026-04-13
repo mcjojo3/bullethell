@@ -1,0 +1,182 @@
+{
+  "at_the_end_of_spring": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:at_the_end_of_spring",
+        "stream": true
+      }
+    ]
+  },
+  "bamboo_forest_of_the_full_moon": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:bamboo_forest_of_the_full_moon",
+        "stream": true
+      }
+    ]
+  },
+  "crazy_backup_dancers": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:crazy_backup_dancers",
+        "stream": true
+      }
+    ]
+  },
+  "electric_heritage": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:electric_heritage",
+        "stream": true
+      }
+    ]
+  },
+  "faraway_voyage_of_380000_kilometers": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:faraway_voyage_of_380000_kilometers",
+        "stream": true
+      }
+    ]
+  },
+  "heartfelt_fancy": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:heartfelt_fancy",
+        "stream": true
+      }
+    ]
+  },
+  "heian_alien": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:heian_alien",
+        "stream": true
+      }
+    ]
+  },
+  "into_backdoor": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:into_backdoor",
+        "stream": true
+      }
+    ]
+  },
+  "invisible_full_moon": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:invisible_full_moon",
+        "stream": true
+      }
+    ]
+  },
+  "love_colored_master_spark": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:love_colored_master_spark",
+        "stream": true
+      }
+    ]
+  },
+  "nostalgic_blood_of_the_east": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:nostalgic_blood_of_the_east",
+        "stream": true
+      }
+    ]
+  },
+  "retribution_for_the_eternal_night": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:retribution_for_the_eternal_night",
+        "stream": true
+      }
+    ]
+  },
+  "rural_makai_city_esoteria": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:rural_makai_city_esoteria",
+        "stream": true
+      }
+    ]
+  },
+  "swim_in_a_cherry_blossom_colored_sea": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:swim_in_a_cherry_blossom_colored_sea",
+        "stream": true
+      }
+    ]
+  },
+  "the_long_awaited_omagatoki": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:the_long_awaited_omagatoki",
+        "stream": true
+      }
+    ]
+  },
+  "the_princess_that_slays_dragon_kings": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:the_princess_that_slays_dragon_kings",
+        "stream": true
+      }
+    ]
+  },
+  "the_shining_needle_castle_sinking_in_the_air": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:the_shining_needle_castle_sinking_in_the_air",
+        "stream": true
+      }
+    ]
+  },
+  "the_shining_needle_castle_sinking_in_the_air_reremix": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:the_shining_needle_castle_sinking_in_the_air_reremix",
+        "stream": true
+      }
+    ]
+  },
+  "the_yorimashi_sits_between_dream_and_reality": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:the_yorimashi_sits_between_dream_and_reality",
+        "stream": true
+      }
+    ]
+  },
+  "walking_the_streets_of_a_former_hell": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:walking_the_streets_of_a_former_hell",
+        "stream": true
+      }
+    ]
+  }
+}

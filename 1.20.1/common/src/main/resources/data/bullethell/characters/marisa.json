@@ -1,0 +1,14 @@
+{
+  "id": "marisa",
+  "name": "Marisa Kirisame",
+  "texture": "textures/characters/marisa.png",
+  "tintColor": 16763904,
+  "hitRadius": 3.5,
+  "grazeRadius": 14.0,
+  "pickupRadius": 22.0,
+  "speedNormal": 11.5,
+  "speedFocused": 5.5,
+  "startingLives": 3,
+  "startingBombs": 2,
+  "description": "Fast & Powerful"
+}

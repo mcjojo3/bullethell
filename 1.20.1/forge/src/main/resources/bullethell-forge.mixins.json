@@ -1,9 +1,13 @@
 {
   "required": true,
+  "minVersion": "0.8",
   "package": "mc.sayda.bullethell.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [],
-  "client": [],
+  "client": [
+    "client.MixinKeyboardInput",
+    "client.MixinMusicManager"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

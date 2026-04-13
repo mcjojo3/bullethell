@@ -3,7 +3,7 @@
     "id": "bullethell",
     "version": "${version}",
     "name": "Bullethell",
-    "description": "Bullethell is a fantasy race mod for Minecraft.",
+    "description": "A Touhou-inspired Bullet Hell mod for Minecraft.",
     "authors": [
         "mc_jojo3"
     ],
@@ -26,8 +26,6 @@
         "fabricloader": ">=0.14.0",
         "minecraft": ">=1.20.1",
         "architectury": ">=9.0.0",
-        "twilight_lib": ">=2.0.0",
-        "pehkui": "*",
         "kanos_config": "*"
     }
 }

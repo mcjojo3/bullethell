@@ -1,0 +1,162 @@
+{
+  "id": "marisa_boss",
+  "name": "Marisa Kirisame",
+
+  "_design_notes": [
+    "Based on Marisa's TH7 (Perfect Cherry Blossom) Stage 4 boss fight.",
+    "Phase order mirrors PCB Stage 4:",
+    "  NS1 → Comet/Blazing Star → NS2 → Non-Directional Laser → NS3 → Master Spark → Final: Love & Magic Dual Spark",
+    "",
+    "LASER_ROTATING: fires 'arms' lasers evenly spread in all directions, rotating each cycle.",
+    "  Used for Non-Directional Laser: 8 beams spinning slowly.",
+    "LASER: fires one beam aimed at the player's current position.",
+    "  Used for Master Spark: wide beam, long warning (aims first then fires).",
+    "",
+    "GOLD = Marisa's gold star bullets   SPARK = bright spark for beam cores"
+  ],
+
+  "phases": [
+
+    {
+      "_note": "NonSpell 1 — Intro barrage. 5-way aimed gold fans + slow ORB ring.",
+      "hp": 1200,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 1",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 100,
+      "music": "love_colored_master_spark",
+      "attacks": [
+        { "pattern": "AIMED",  "cooldown": 16, "bulletType": "GOLD", "arms": 5,  "speed": 3.0, "spread": 0.22 },
+        { "pattern": "RING",   "cooldown": 22, "bulletType": "RICE", "arms": 10, "speed": 1.8 }
+      ]
+    },
+
+    {
+      "_note": "Spell 1 — 'Star Sign: Comet - Blazing Star' (PCB Stage 4). CIRCLE movement = Marisa orbiting. Dense gold ring bursts + small aimed clusters.",
+      "hp": 2000,
+      "isSpellCard": true,
+      "spellName": "Star Sign \"Comet - Blazing Star\"",
+      "spellDurationTicks": [900, 700, 480, 260],
+      "spellBonus": 50000,
+      "movement": "CIRCLE",
+      "moveSpeed": 70,
+      "music": "",
+      "attacks": [
+        { "pattern": "RING",  "cooldown": 12, "bulletType": "GOLD", "arms": 16, "speed": 3.5 },
+        { "pattern": "AIMED", "cooldown": 16, "bulletType": "GOLD", "arms": 3,  "speed": 4.2, "spread": 0.18 },
+        { "pattern": "RING",  "cooldown": 14, "bulletType": "STAR", "arms": 12, "speed": 2.8 }
+      ]
+    },
+
+    {
+      "_note": "NonSpell 2 — Escalation. Faster 5-way GOLD + RICE spiral.",
+      "hp": 1600,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 2",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 125,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED",  "cooldown": 12, "bulletType": "GOLD", "arms": 5,  "speed": 3.5, "spread": 0.20 },
+        { "pattern": "SPIRAL", "cooldown":  8, "bulletType": "RICE", "arms": 4,  "speed": 2.8 },
+        { "pattern": "RING",   "cooldown": 18, "bulletType": "ORB",  "arms": 12, "speed": 2.4 }
+      ]
+    },
+
+    {
+      "_note": "Spell 2 — 'Love Sign: Non-Directional Laser' (PCB Stage 4). Bidirectional beams through boss rotating each cycle. Normal: 8 arms, 35-tick cycle, 14-tick warn. Lunatic: 16 arms, 17-tick cycle, 7-tick warn. Dense bullet spam fills the safe angles.",
+      "hp": 2400,
+      "isSpellCard": true,
+      "spellName": "Love Sign \"Non-Directional Laser\"",
+      "spellDurationTicks": [820, 640, 440, 230],
+      "spellBonus": 60000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        {
+          "pattern": "LASER_ROTATING",
+          "cooldown": 35,
+          "bulletType": "LASER_HEAD",
+          "arms": 8,
+          "speed": 0,
+          "laserHalfWidth": 4,
+          "warnTicks": 14,
+          "activeTicks": 24
+        },
+        { "pattern": "AIMED",  "cooldown": 14, "bulletType": "RICE", "arms": 6, "speed": 3.4, "spread": 0.28 },
+        { "pattern": "AIMED",  "cooldown": 22, "bulletType": "GOLD", "arms": 4, "speed": 2.8, "spread": 0.38 },
+        { "pattern": "SPIRAL", "cooldown": 10, "bulletType": "RICE", "arms": 4, "speed": 2.6 },
+        { "pattern": "RING",   "cooldown": 36, "bulletType": "ORB",  "arms": 12, "speed": 1.8 }
+      ]
+    },
+
+    {
+      "_note": "NonSpell 3 — Pre-final surge. Fast 6-way GOLD + dense RICE ring + spiral.",
+      "hp": 2000,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 3",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 140,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED",  "cooldown": 10, "bulletType": "GOLD", "arms": 6,  "speed": 3.8, "spread": 0.18 },
+        { "pattern": "SPIRAL", "cooldown":  6, "bulletType": "RICE", "arms": 5,  "speed": 3.0 },
+        { "pattern": "RING",   "cooldown": 14, "bulletType": "GOLD", "arms": 16, "speed": 2.8 }
+      ]
+    },
+
+    {
+      "_note": "Spell 3 — 'Magic Sign: Master Spark' (TH7/IN). Marisa locks onto the player's X, stops, and fires a MASSIVE beam downward. Long warning (2.5 s) gives time to dodge; wide active beam (halfWidth=30) fills most of the lane. Slow GOLD rings fill the flanks while the beam charges.",
+      "hp": 2600,
+      "isSpellCard": true,
+      "spellName": "Magic Sign \"Master Spark\"",
+      "spellDurationTicks": [800, 620, 420, 220],
+      "spellBonus": 80000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        {
+          "pattern": "LASER",
+          "cooldown": 180,
+          "bulletType": "SPARK",
+          "arms": 1,
+          "speed": 0,
+          "laserHalfWidth": 28,
+          "warnTicks": 50,
+          "activeTicks": 80
+        },
+        { "pattern": "RING", "cooldown": 28, "bulletType": "GOLD", "arms": 12, "speed": 2.4 }
+      ]
+    },
+
+    {
+      "_note": "Final Spell — 'Love & Magic: Dual Spark' (PCB last word). Two SPREAD SPARK columns erupt simultaneously + rings of GOLD curtain. She orbits fast.",
+      "hp": 3000,
+      "isSpellCard": true,
+      "spellName": "Love & Magic \"Dual Spark\"",
+      "spellDurationTicks": [720, 560, 380, 190],
+      "spellBonus": 100000,
+      "movement": "CIRCLE",
+      "moveSpeed": 90,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPREAD",    "cooldown":  3, "bulletType": "SPARK", "arms": 4,  "speed": 6.5 },
+        { "pattern": "RING",      "cooldown": 20, "bulletType": "GOLD",  "arms": 14, "speed": 2.6 },
+        { "pattern": "LASER_BEAM","cooldown":  5, "bulletType": "SPARK", "arms": 3,  "speed": 7.0 },
+        { "pattern": "AIMED",     "cooldown": 18, "bulletType": "GOLD",  "arms": 5,  "speed": 3.4, "spread": 0.20 }
+      ]
+    }
+
+  ]
+}
