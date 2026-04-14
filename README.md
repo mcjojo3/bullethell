@@ -27,7 +27,8 @@ Success depends on timing and movement. Expect to fail a few times while learnin
 **Art:**
 * Sprites: [Gabrieldrawingsxd](https://www.deviantart.com/gabrieldrawingsxd/gallery)
 
-**Music:**
+**Sound:**
+* SFX: ZUN
 * Music: [Dudu28r](https://dudu28r.bandcamp.com/album/touhou-remixes-free) (Remixes)
 * Original Composer: ZUN
 
