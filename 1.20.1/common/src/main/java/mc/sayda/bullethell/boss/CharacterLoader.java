@@ -30,7 +30,8 @@ public final class CharacterLoader {
     private static final Gson GSON = new GsonBuilder().create();
     private static final Map<String, CharacterDefinition> CACHE = new HashMap<>();
 
-    private CharacterLoader() {}
+    private CharacterLoader() {
+    }
 
     /** Load a single character by ID (cached). */
     public static CharacterDefinition load(String id) {
@@ -40,12 +41,18 @@ public final class CharacterLoader {
     /** Return all registered characters in display order. */
     public static List<CharacterDefinition> loadAll() {
         List<CharacterDefinition> result = new ArrayList<>();
-        for (String id : REGISTERED_IDS) result.add(load(id));
+        for (String id : REGISTERED_IDS)
+            result.add(load(id));
         return result;
     }
 
-    public static void invalidate(String id) { CACHE.remove(id); }
-    public static void invalidateAll()        { CACHE.clear(); }
+    public static void invalidate(String id) {
+        CACHE.remove(id);
+    }
+
+    public static void invalidateAll() {
+        CACHE.clear();
+    }
 
     // ---------------------------------------------------------------- internal
 
@@ -54,7 +61,7 @@ public final class CharacterLoader {
         InputStream is = CharacterLoader.class.getClassLoader().getResourceAsStream(path);
 
         if (is == null) {
-            System.err.println("[BulletHell] Character definition not found: " + path + " — using fallback");
+            System.err.println("[BulletHell] Character definition not found: " + path + " - using fallback");
             return fallback(id);
         }
 
@@ -64,18 +71,19 @@ public final class CharacterLoader {
                 System.err.println("[BulletHell] Null character definition: " + id);
                 return fallback(id);
             }
-            if (def.id == null) def.id = id;
+            if (def.id == null)
+                def.id = id;
             return def;
         } catch (Exception e) {
-            System.err.println("[BulletHell] Failed to parse character: " + path + " — " + e.getMessage());
+            System.err.println("[BulletHell] Failed to parse character: " + path + " - " + e.getMessage());
             return fallback(id);
         }
     }
 
     private static CharacterDefinition fallback(String id) {
         CharacterDefinition def = new CharacterDefinition();
-        def.id          = id;
-        def.name        = "??? (" + id + ")";
+        def.id = id;
+        def.name = "??? (" + id + ")";
         def.description = "Missing character data";
         return def;
     }

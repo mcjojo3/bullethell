@@ -6,6 +6,7 @@
   "mixins": [],
   "client": [
     "client.MixinKeyboardInput",
+    "client.KeyMappingAccessor",
     "client.MixinMusicManager"
   ],
   "injectors": {

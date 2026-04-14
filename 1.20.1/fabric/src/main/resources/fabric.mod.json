@@ -15,7 +15,7 @@
             "mc.sayda.bullethell.fabric.BullethellFabric"
         ],
         "client": [
-            "mc.sayda.bullethell.fabric.BullethellFabricClient"
+            "mc.sayda.bullethell.fabric.client.BullethellFabricClient"
         ]
     },
     "mixins": [

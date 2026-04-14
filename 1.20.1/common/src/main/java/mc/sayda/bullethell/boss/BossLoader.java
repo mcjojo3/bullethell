@@ -32,7 +32,7 @@ public final class BossLoader {
     /**
      * Load a boss definition by ID, returning a cached instance if already loaded.
      *
-     * @param id  boss file name without extension, e.g. {@code "prototype_boss"}
+     * @param id  boss file name without extension, e.g. {@code "marisa_boss"}
      */
     public static BossDefinition load(String id) {
         return CACHE.computeIfAbsent(id, BossLoader::readFromClasspath);

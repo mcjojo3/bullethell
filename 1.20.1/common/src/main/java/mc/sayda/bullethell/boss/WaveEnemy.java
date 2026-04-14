@@ -34,4 +34,18 @@ public class WaveEnemy {
 
     /** Ticks to apply angVel before stopping rotation; 0 = no arc. */
     public int arcTicks = 0;
+
+    /**
+     * Extra ticks after the wave's base spawnTick before this enemy spawns.
+     * Used to stagger enemies within a single wave (e.g., one every 10 ticks).
+     * Default 0 = spawn with the rest of the wave.
+     */
+    public int delayTicks = 0;
+
+    /**
+     * Override the attack pattern for this specific enemy.
+     * If null or empty, falls back to {@link mc.sayda.bullethell.arena.EnemyType#defaultPattern}.
+     * Valid values: AIMED, RING, AIMED_RING, SPREAD, STREAM
+     */
+    public String pattern = null;
 }

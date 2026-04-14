@@ -136,6 +136,9 @@ public class BulletPool {
     }
 
     // ---------------------------------------------------------------- helpers
+    
+    public void setVx(int slot, float vx) { if (active[slot]) { data[slot * STRIDE + F_VX] = vx; dirty[slot] = true; } }
+    public void setVy(int slot, float vy) { if (active[slot]) { data[slot * STRIDE + F_VY] = vy; dirty[slot] = true; } }
 
     private int nextFreeSlot() {
         for (int i = 0; i < capacity; i++) if (!active[i]) return i;

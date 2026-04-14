@@ -26,7 +26,7 @@ public final class StageLoader {
      * All stage IDs available in this build, in display order.
      * Add new IDs here when you create their JSON file.
      */
-    public static final String[] REGISTERED_IDS = { "stage_1", "marisa_stage" };
+    public static final String[] REGISTERED_IDS = { "marisa_stage" };
 
     private static final Gson GSON = new GsonBuilder().create();
     private static final Map<String, StageDefinition> CACHE = new HashMap<>();
@@ -68,7 +68,7 @@ public final class StageLoader {
             }
             if (def.waves   == null) def.waves = new java.util.ArrayList<>();
             if (def.rules   == null) def.rules = new RulesetConfig();
-            if (def.bossId  == null) def.bossId = "prototype_boss";
+            if (def.bossId  == null) def.bossId = "marisa_boss";
             // Validate each wave's enemy list
             for (WaveDefinition wave : def.waves) {
                 if (wave.enemies == null) wave.enemies = new java.util.ArrayList<>();
@@ -86,7 +86,7 @@ public final class StageLoader {
         StageDefinition def = new StageDefinition();
         def.id         = id;
         def.title      = "??? (missing: " + id + ")";
-        def.bossId     = "prototype_boss";
+        def.bossId     = "marisa_boss";
         def.stageMusic = null;
         def.rules      = new RulesetConfig();
         return def;

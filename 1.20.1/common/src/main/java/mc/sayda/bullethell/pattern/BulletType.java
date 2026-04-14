@@ -10,7 +10,9 @@ public enum BulletType {
     BUBBLE     (0xFF44FFAA, 5f),  // teal
     PLAYER_SHOT(0xFF88FF44, 3f),  // green - player-fired bullets
     GOLD       (0xFFFFDD00, 4f),  // golden yellow - Marisa star bullets
-    SPARK      (0xFFFFFF88, 8f);  // bright white-yellow - Master Spark / Final Spark
+    SPARK      (0xFFFFFF88, 8f),  // bright white-yellow - Master Spark / Final Spark
+    HOMING_ORB (0xFFFF88FF, 6f),  // magenta/purple - Reimu's homing orbs
+    KUNAI      (0xFF88CCFF, 4f);  // light blue - Sakuya's knives
 
     public final int   color;
     public final float radius;

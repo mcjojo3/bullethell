@@ -6,10 +6,10 @@ import java.util.Arrays;
  * Fixed-size pool for collectible items dropped by the boss.
  *
  * Layout per slot: [x, y, vy, type, timer]
- *   x, y     - arena position
- *   vy       - vertical velocity (starts negative = floating up)
- *   type     - ItemType ordinal
- *   timer    - remaining lifetime ticks (item despawns at 0)
+ * x, y - arena position
+ * vy - vertical velocity (starts negative = floating up)
+ * type - ItemType ordinal
+ * timer - remaining lifetime ticks (item despawns at 0)
  *
  * Physics: light gravity each tick (vy += GRAVITY), capped at MAX_FALL_SPEED.
  * Items start rising, slow down, then fall.
@@ -18,35 +18,49 @@ public class ItemPool {
 
     public static final int CAPACITY = 128;
 
-    private static final int   STRIDE        = 5;
-    public  static final float INITIAL_VY    = -2.5f;
-    private static final float GRAVITY       =  0.08f;
-    private static final float MAX_FALL_SPEED=  3.5f;
-    private static final int   DEFAULT_LIFE  =  400;  // ~20 s
+    public static final int STRIDE = 6;
+    public static final float INITIAL_VY = -2.5f;
+    private static final float GRAVITY = 0.08f;
+    private static final float MAX_FALL_SPEED = 3.5f;
+    private static final int DEFAULT_LIFE = 400; // ~20 s
+    /**
+     * Speed at which bomb-attracted items fly toward the player (arena units/tick).
+     */
+    public static final float ATTRACT_SPEED = 14f;
 
-    public static final int F_X    = 0;
-    public static final int F_Y    = 1;
-    public static final int F_VY   = 2;
+    public static final int F_X = 0;
+    public static final int F_Y = 1;
+    public static final int F_VY = 2;
     public static final int F_TYPE = 3;
     public static final int F_LIFE = 4;
+    /**
+     * 1.0 = item is being attracted toward the player (bomb vacuum); 0.0 = normal
+     * fall.
+     */
+    public static final int F_ATTRACT = 5;
 
     // ---------------------------------------------------------------- item types
 
-    public static final int TYPE_POWER      = 0; // pink  - increases power level
-    public static final int TYPE_POINT      = 1; // yellow - score item
-    public static final int TYPE_FULL_POWER = 2; // blue  - max power instantly
-    public static final int TYPE_ONE_UP     = 3; // green - extra life
-    public static final int TYPE_BOMB       = 4; // orange - bomb stock +1
+    public static final int TYPE_POWER = 0; // pink - increases power level
+    public static final int TYPE_POINT = 1; // yellow - score item
+    public static final int TYPE_FULL_POWER = 2; // blue - max power instantly
+    public static final int TYPE_ONE_UP = 3; // green - extra life
+    public static final int TYPE_BOMB = 4; // orange - bomb stock +1
 
-    private static final int[]  ITEM_COLORS  = { 0xFFFF4488, 0xFFFFE600, 0xFF44AAFF, 0xFF44FF88, 0xFFFF8800 };
-    private static final int[]  ITEM_SIZES   = { 3, 3, 5, 5, 4 };
+    private static final int[] ITEM_COLORS = { 0xFFFF4488, 0xFFFFE600, 0xFF44AAFF, 0xFF44FF88, 0xFFFF8800 };
+    private static final int[] ITEM_SIZES = { 3, 3, 5, 5, 4 };
 
-    public static int  colorOf(int type) { return type < ITEM_COLORS.length ? ITEM_COLORS[type] : 0xFFFFFFFF; }
-    public static int  sizeOf (int type) { return type < ITEM_SIZES.length  ? ITEM_SIZES[type]  : 3; }
+    public static int colorOf(int type) {
+        return type < ITEM_COLORS.length ? ITEM_COLORS[type] : 0xFFFFFFFF;
+    }
+
+    public static int sizeOf(int type) {
+        return type < ITEM_SIZES.length ? ITEM_SIZES[type] : 3;
+    }
 
     // ---------------------------------------------------------------- storage
 
-    private final float[]   data   = new float[CAPACITY * STRIDE];
+    private final float[] data = new float[CAPACITY * STRIDE];
     private final boolean[] active = new boolean[CAPACITY];
     private int activeCount = 0;
 
@@ -54,13 +68,17 @@ public class ItemPool {
 
     public void tick() {
         for (int i = 0; i < CAPACITY; i++) {
-            if (!active[i]) continue;
+            if (!active[i])
+                continue;
             int b = i * STRIDE;
+            if (data[b + F_ATTRACT] != 0f)
+                continue; // attraction handled by ArenaContext
             // Apply gravity
             float vy = data[b + F_VY] + GRAVITY;
-            if (vy > MAX_FALL_SPEED) vy = MAX_FALL_SPEED;
-            data[b + F_VY]  = vy;
-            data[b + F_Y]  += vy;
+            if (vy > MAX_FALL_SPEED)
+                vy = MAX_FALL_SPEED;
+            data[b + F_VY] = vy;
+            data[b + F_Y] += vy;
             data[b + F_LIFE]--;
             if (data[b + F_LIFE] <= 0 || data[b + F_Y] > BulletPool.ARENA_H + 16f) {
                 deactivate(i);
@@ -68,46 +86,104 @@ public class ItemPool {
         }
     }
 
-    /** Client-side extrapolation (no deactivation - server corrections handle that). */
-    public void clientTick() {
+    /**
+     * Client-side extrapolation (no deactivation - server corrections handle that).
+     * Pass the player's current arena position so attracting items can be
+     * extrapolated.
+     */
+    public void clientTick(float playerX, float playerY, boolean frozen) {
         for (int i = 0; i < CAPACITY; i++) {
-            if (!active[i]) continue;
+            if (!active[i])
+                continue;
             int b = i * STRIDE;
-            float vy = data[b + F_VY] + GRAVITY;
-            if (vy > MAX_FALL_SPEED) vy = MAX_FALL_SPEED;
-            data[b + F_VY] = vy;
-            data[b + F_Y] += vy;
+            if (data[b + F_ATTRACT] != 0f) {
+                // Fly toward player (always happens even in time stop)
+                float dx = playerX - data[b + F_X];
+                float dy = playerY - data[b + F_Y];
+                float dist = (float) Math.sqrt(dx * dx + dy * dy);
+                if (dist > 0.5f) {
+                    float nx = dx / dist * ATTRACT_SPEED;
+                    float ny = dy / dist * ATTRACT_SPEED;
+                    data[b + F_X] += nx;
+                    data[b + F_Y] += ny;
+                }
+            } else if (!frozen) {
+                float vy = data[b + F_VY] + GRAVITY;
+                if (vy > MAX_FALL_SPEED)
+                    vy = MAX_FALL_SPEED;
+                data[b + F_VY] = vy;
+                data[b + F_Y] += vy;
+            }
         }
     }
 
-    // ---------------------------------------------------------------- spawn / deactivate
+    // ---------------------------------------------------------------- spawn /
+    // deactivate
 
     public int spawn(float x, float y, int type) {
         int slot = nextFreeSlot();
-        if (slot == -1) return -1;
+        if (slot == -1)
+            return -1;
         int b = slot * STRIDE;
-        data[b + F_X]    = x;
-        data[b + F_Y]    = y;
-        data[b + F_VY]   = INITIAL_VY;
+        data[b + F_X] = x;
+        data[b + F_Y] = y;
+        data[b + F_VY] = INITIAL_VY;
         data[b + F_TYPE] = type;
         data[b + F_LIFE] = DEFAULT_LIFE;
+        data[b + F_ATTRACT] = 0f;
         active[slot] = true;
         activeCount++;
         return slot;
     }
 
     public void deactivate(int slot) {
-        if (active[slot]) { active[slot] = false; activeCount--; }
+        if (active[slot]) {
+            active[slot] = false;
+            activeCount--;
+        }
     }
 
     // ---------------------------------------------------------------- getters
 
-    public float   getX(int slot)    { return data[slot * STRIDE + F_X]; }
-    public float   getY(int slot)    { return data[slot * STRIDE + F_Y]; }
-    public float   getVy(int slot)   { return data[slot * STRIDE + F_VY]; }
-    public int     getType(int slot) { return (int) data[slot * STRIDE + F_TYPE]; }
-    public boolean isActive(int slot){ return active[slot]; }
-    public int     getActiveCount()  { return activeCount; }
+    public float getX(int slot) {
+        return data[slot * STRIDE + F_X];
+    }
+
+    public float getY(int slot) {
+        return data[slot * STRIDE + F_Y];
+    }
+
+    public float getVy(int slot) {
+        return data[slot * STRIDE + F_VY];
+    }
+
+    public int getType(int slot) {
+        return (int) data[slot * STRIDE + F_TYPE];
+    }
+
+    public boolean isActive(int slot) {
+        return active[slot];
+    }
+
+    public int getActiveCount() {
+        return activeCount;
+    }
+
+    public boolean isAttracting(int slot) {
+        return data[slot * STRIDE + F_ATTRACT] != 0f;
+    }
+
+    public void setX(int slot, float x) {
+        data[slot * STRIDE + F_X] = x;
+    }
+
+    public void setY(int slot, float y) {
+        data[slot * STRIDE + F_Y] = y;
+    }
+
+    public void setAttracting(int slot, boolean val) {
+        data[slot * STRIDE + F_ATTRACT] = val ? 1f : 0f;
+    }
 
     // ---------------------------------------------------------------- network sync
 
@@ -119,18 +195,27 @@ public class ItemPool {
 
     public void setSlotData(int slot, float[] d, boolean isActive) {
         System.arraycopy(d, 0, data, slot * STRIDE, STRIDE);
-        if (isActive && !active[slot]) { active[slot] = true;  activeCount++; }
-        else if (!isActive && active[slot]) { active[slot] = false; activeCount--; }
+        if (isActive && !active[slot]) {
+            active[slot] = true;
+            activeCount++;
+        } else if (!isActive && active[slot]) {
+            active[slot] = false;
+            activeCount--;
+        }
     }
 
     public void clearAll() {
-        for (int i = 0; i < CAPACITY; i++) if (active[i]) deactivate(i);
+        for (int i = 0; i < CAPACITY; i++)
+            if (active[i])
+                deactivate(i);
     }
 
     // ---------------------------------------------------------------- helpers
 
     private int nextFreeSlot() {
-        for (int i = 0; i < CAPACITY; i++) if (!active[i]) return i;
+        for (int i = 0; i < CAPACITY; i++)
+            if (!active[i])
+                return i;
         return -1;
     }
 }

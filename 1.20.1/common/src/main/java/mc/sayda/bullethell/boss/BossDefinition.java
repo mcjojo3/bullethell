@@ -1,7 +1,9 @@
 package mc.sayda.bullethell.boss;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Complete definition of a boss fight, loaded from a JSON datafile.
@@ -28,6 +30,12 @@ public class BossDefinition {
      * Leave empty to skip straight to phase 0.
      */
     public List<DialogLine> introDialog = new ArrayList<>();
+
+    /**
+     * Character-specific intro dialogues.  If a match is found for the player's
+     * character ID (e.g., "reimu"), it takes priority over {@link #introDialog}.
+     */
+    public Map<String, List<DialogLine>> characterDialogs = new HashMap<>();
 
     /**
      * Ordered list of phases.  Index 0 is the opening phase.

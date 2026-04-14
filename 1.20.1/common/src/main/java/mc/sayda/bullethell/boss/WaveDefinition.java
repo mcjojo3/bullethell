@@ -26,6 +26,14 @@ public class WaveDefinition {
      */
     public int spawnTick = 0;
 
-    /** All enemies that spawn at the same time. */
+    /** All enemies that spawn at the same time. Ignored when {@code waveRef} is set. */
     public List<WaveEnemy> enemies = new ArrayList<>();
+
+    /**
+     * Optional reference to a reusable fairy wave template ID.
+     * When set, enemies are loaded from {@code data/bullethell/fairy_waves/<waveRef>.json}
+     * instead of the inline {@code enemies} list.
+     * The loaded enemies' positions/velocities are used as-is from the template.
+     */
+    public String waveRef = null;
 }

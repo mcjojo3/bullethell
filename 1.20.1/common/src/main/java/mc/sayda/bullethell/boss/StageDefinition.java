@@ -38,7 +38,7 @@ public class StageDefinition {
      * ID of the boss definition to load when all waves are cleared.
      * Must match a file at {@code data/bullethell/bosses/<bossId>.json}.
      */
-    public String bossId = "prototype_boss";
+    public String bossId = "marisa_boss";
 
     /**
      * Ticks to wait after the last wave clears before starting the boss intro

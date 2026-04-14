@@ -136,6 +136,45 @@ public final class PatternEngine {
         fireDenseRing(pool, bx, by, countPerRing, speed, diff, BulletType.BUBBLE);
     }
 
+    // ---------------------------------------------------------------- ring with offset
+
+    /**
+     * Uniform ring starting at {@code startAngle} radians.
+     * Pass a random angle each burst for TH6-style barrier fairies (RING pattern).
+     */
+    public static void fireRingOffset(BulletPool pool, float bx, float by,
+                                       int count, float speed,
+                                       DifficultyConfig diff, BulletType type,
+                                       float startAngle) {
+        float step = (float) (Math.PI * 2.0 / count);
+        for (int i = 0; i < count; i++) {
+            float angle = startAngle + step * i;
+            float vx = (float) Math.cos(angle) * speed * diff.speedMult;
+            float vy = (float) Math.sin(angle) * speed * diff.speedMult;
+            pool.spawn(bx, by, vx, vy, type.getId(), 200);
+        }
+    }
+
+    // ---------------------------------------------------------------- aimed fan + outer ring
+
+    /**
+     * Fires an aimed fan toward (tx, ty) PLUS a slower ring in all directions.
+     * Used by large/anchor fairies (AIMED_RING pattern) — dual-threat TH-style.
+     *
+     * @param ringCount  number of ring bullets (independent of difficulty scaling)
+     * @param ringSpeed  ring bullet speed (slower than aimed, typically 0.6×)
+     */
+    public static void fireAimedWithRing(BulletPool pool, float bx, float by,
+                                          float tx, float ty,
+                                          int aimCount, float aimSpread, float aimSpeed,
+                                          int ringCount, float ringSpeed,
+                                          DifficultyConfig diff,
+                                          BulletType aimType, BulletType ringType,
+                                          float ringStartAngle) {
+        fireAimed(pool, bx, by, tx, ty, aimCount, aimSpread, aimSpeed, diff, aimType);
+        fireRingOffset(pool, bx, by, ringCount, ringSpeed, diff, ringType, ringStartAngle);
+    }
+
     // ---------------------------------------------------------------- laser beam
 
     /**

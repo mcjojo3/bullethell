@@ -3,7 +3,11 @@
   "package": "mc.sayda.bullethell.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [],
-  "client": [],
+  "client": [
+    "client.MixinKeyboardInput",
+    "client.KeyMappingAccessor",
+    "client.MixinMusicManager"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

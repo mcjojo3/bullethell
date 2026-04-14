@@ -3,7 +3,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:at_the_end_of_spring",
+        "name": "bullethell:music/at_the_end_of_spring",
         "stream": true
       }
     ]
@@ -12,7 +12,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:bamboo_forest_of_the_full_moon",
+        "name": "bullethell:music/bamboo_forest_of_the_full_moon",
         "stream": true
       }
     ]
@@ -21,7 +21,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:crazy_backup_dancers",
+        "name": "bullethell:music/crazy_backup_dancers",
         "stream": true
       }
     ]
@@ -30,7 +30,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:electric_heritage",
+        "name": "bullethell:music/electric_heritage",
         "stream": true
       }
     ]
@@ -39,7 +39,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:faraway_voyage_of_380000_kilometers",
+        "name": "bullethell:music/faraway_voyage_of_380000_kilometers",
         "stream": true
       }
     ]
@@ -48,7 +48,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:heartfelt_fancy",
+        "name": "bullethell:music/heartfelt_fancy",
         "stream": true
       }
     ]
@@ -57,7 +57,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:heian_alien",
+        "name": "bullethell:music/heian_alien",
         "stream": true
       }
     ]
@@ -66,7 +66,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:into_backdoor",
+        "name": "bullethell:music/into_backdoor",
         "stream": true
       }
     ]
@@ -75,7 +75,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:invisible_full_moon",
+        "name": "bullethell:music/invisible_full_moon",
         "stream": true
       }
     ]
@@ -84,7 +84,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:love_colored_master_spark",
+        "name": "bullethell:music/love_colored_master_spark",
         "stream": true
       }
     ]
@@ -93,7 +93,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:nostalgic_blood_of_the_east",
+        "name": "bullethell:music/nostalgic_blood_of_the_east",
         "stream": true
       }
     ]
@@ -102,7 +102,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:retribution_for_the_eternal_night",
+        "name": "bullethell:music/retribution_for_the_eternal_night",
         "stream": true
       }
     ]
@@ -111,7 +111,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:rural_makai_city_esoteria",
+        "name": "bullethell:music/rural_makai_city_esoteria",
         "stream": true
       }
     ]
@@ -120,7 +120,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:swim_in_a_cherry_blossom_colored_sea",
+        "name": "bullethell:music/swim_in_a_cherry_blossom_colored_sea",
         "stream": true
       }
     ]
@@ -129,7 +129,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:the_long_awaited_omagatoki",
+        "name": "bullethell:music/the_long_awaited_omagatoki",
         "stream": true
       }
     ]
@@ -138,7 +138,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:the_princess_that_slays_dragon_kings",
+        "name": "bullethell:music/the_princess_that_slays_dragon_kings",
         "stream": true
       }
     ]
@@ -147,7 +147,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:the_shining_needle_castle_sinking_in_the_air",
+        "name": "bullethell:music/the_shining_needle_castle_sinking_in_the_air",
         "stream": true
       }
     ]
@@ -156,7 +156,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:the_shining_needle_castle_sinking_in_the_air_reremix",
+        "name": "bullethell:music/the_shining_needle_castle_sinking_in_the_air_reremix",
         "stream": true
       }
     ]
@@ -165,7 +165,7 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:the_yorimashi_sits_between_dream_and_reality",
+        "name": "bullethell:music/the_yorimashi_sits_between_dream_and_reality",
         "stream": true
       }
     ]
@@ -174,8 +174,24 @@
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:walking_the_streets_of_a_former_hell",
+        "name": "bullethell:music/walking_the_streets_of_a_former_hell",
         "stream": true
+      }
+    ]
+  },
+  "attack_charge": {
+    "category": "master",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/attack_charge"
+      }
+    ]
+  },
+  "master_spark": {
+    "category": "master",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/master_spark"
       }
     ]
   }

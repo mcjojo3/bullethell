@@ -1,24 +1,33 @@
 package mc.sayda.bullethell.arena;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Server-side registry of all active ArenaContexts.
- * One context per participating player; multiple contexts = splitscreen / multiplayer.
+ * One context per participating player; multiple contexts = splitscreen /
+ * multiplayer.
  *
- * Co-op: a participant joins the host's arena. playerToMatch maps participant UUID → host UUID.
+ * Co-op: a participant joins the host's arena. playerToMatch maps participant
+ * UUID → host UUID.
  */
 public class BulletHellManager {
 
     public static final BulletHellManager INSTANCE = new BulletHellManager();
 
-    private final Map<UUID, ArenaContext> arenas        = new ConcurrentHashMap<>();
+    private final Map<UUID, ArenaContext> arenas = new ConcurrentHashMap<>();
     /** participant UUID → host UUID (not present for hosts themselves). */
-    private final Map<UUID, UUID>         playerToMatch = new ConcurrentHashMap<>();
+    private final Map<UUID, UUID> playerToMatch = new ConcurrentHashMap<>();
+    /** host UUID → list of accepted participant info (pre-arena lobby). */
+    private final Map<UUID, List<ParticipantInfo>> pendingInvites = new ConcurrentHashMap<>();
 
-    private BulletHellManager() {}
+    public record ParticipantInfo(UUID uuid, mc.sayda.bullethell.boss.CharacterDefinition charDef) {}
+
+    private BulletHellManager() {
+    }
 
     // ---------------------------------------------------------------- lifecycle
 
@@ -31,7 +40,7 @@ public class BulletHellManager {
     }
 
     public ArenaContext startArena(UUID playerUuid, DifficultyConfig difficulty,
-                                   String stageId, String characterId) {
+            String stageId, String characterId) {
         ArenaContext ctx = new ArenaContext(playerUuid, difficulty, stageId, characterId);
         arenas.put(playerUuid, ctx);
         return ctx;
@@ -49,16 +58,23 @@ public class BulletHellManager {
 
     /**
      * Join an existing arena as a co-op participant.
-     * @param participantUuid  the joining player's UUID
-     * @param hostUuid         the host player's UUID (must already have an active arena)
-     * @param charDef          character definition for the joining player
+     * 
+     * @param participantUuid the joining player's UUID
+     * @param hostUuid        the host player's UUID (must already have an active
+     *                        arena)
+     * @param charDef         character definition for the joining player
      */
     public void joinMatch(UUID participantUuid, UUID hostUuid,
-                          mc.sayda.bullethell.boss.CharacterDefinition charDef) {
+            mc.sayda.bullethell.boss.CharacterDefinition charDef) {
         ArenaContext ctx = arenas.get(hostUuid);
-        if (ctx == null) return;
+        if (ctx == null)
+            return;
         ctx.addCoopPlayer(participantUuid, charDef);
         playerToMatch.put(participantUuid, hostUuid);
+        // Grant spawn invulnerability so the joining player doesn't die instantly
+        mc.sayda.bullethell.arena.PlayerState2D ps = ctx.getPlayerState(participantUuid);
+        if (ps != null)
+            ps.invulnTicks = mc.sayda.bullethell.arena.PlayerState2D.INVULN_TICKS;
     }
 
     /** Remove a co-op participant from their current match. */
@@ -66,25 +82,46 @@ public class BulletHellManager {
         UUID hostUuid = playerToMatch.remove(participantUuid);
         if (hostUuid != null) {
             ArenaContext ctx = arenas.get(hostUuid);
-            if (ctx != null) ctx.removeCoopPlayer(participantUuid);
+            if (ctx != null)
+                ctx.removeCoopPlayer(participantUuid);
+        }
+    }
+
+    // ---------------------------------------------------------------- lobby (pre-arena)
+
+    public void addPendingInvite(UUID hostUuid, ParticipantInfo info) {
+        pendingInvites.computeIfAbsent(hostUuid, k -> new ArrayList<>()).add(info);
+    }
+
+    public List<ParticipantInfo> getAndClearPendingInvites(UUID hostUuid) {
+        return pendingInvites.remove(hostUuid);
+    }
+
+    public void removePendingInvite(UUID participantUuid) {
+        for (var list : pendingInvites.values()) {
+            list.removeIf(p -> p.uuid().equals(participantUuid));
         }
     }
 
     // ---------------------------------------------------------------- query
 
     /**
-     * Get the arena for any participant — host or co-op player.
+     * Get the arena for any participant - host or co-op player.
      * Returns the host's own arena if they are the host, or the host's arena
      * if this UUID is a co-op participant.
      */
     public ArenaContext getArenaForPlayer(UUID uuid) {
         ArenaContext direct = arenas.get(uuid);
-        if (direct != null) return direct;
+        if (direct != null)
+            return direct;
         UUID hostUuid = playerToMatch.get(uuid);
         return hostUuid != null ? arenas.get(hostUuid) : null;
     }
 
-    /** True if the UUID is either a host with an active arena OR a co-op participant. */
+    /**
+     * True if the UUID is either a host with an active arena OR a co-op
+     * participant.
+     */
     public boolean isInMatch(UUID uuid) {
         return arenas.containsKey(uuid) || playerToMatch.containsKey(uuid);
     }

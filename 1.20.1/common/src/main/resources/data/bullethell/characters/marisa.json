@@ -10,5 +10,8 @@
   "speedFocused": 5.5,
   "startingLives": 3,
   "startingBombs": 2,
+  "chargeRateShooting": 1.2,
+  "chargeRateIdle": 2.5,
+  "chargeRateCharging": 6.5,
   "description": "Fast & Powerful"
 }

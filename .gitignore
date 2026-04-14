@@ -57,6 +57,7 @@ hs_err_pid*
 # Assistants & Local Tools
 .gemini/
 .history/
+/.cursor
 .env
 
 # Minecraft junk
@@ -97,3 +98,6 @@ NUL
 
 # Minecraft dev folder
 .minecraft/
+
+# Others
+/.archive

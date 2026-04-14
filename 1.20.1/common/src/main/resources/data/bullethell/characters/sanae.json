@@ -10,5 +10,8 @@
   "speedFocused": 4.8,
   "startingLives": 3,
   "startingBombs": 3,
-  "description": "Wide spread"
+  "chargeRateShooting": 1.1,
+  "chargeRateIdle": 3.2,
+  "chargeRateCharging": 5.2,
+  "description": "Explosive Miracle - wide clear"
 }
