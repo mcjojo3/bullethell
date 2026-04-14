@@ -22,408 +22,81 @@
   },
   "waves": [
     {
-      "_comment": "Wave 1 - warmup: 5 red fairies drop straight down",
+      "_comment": "Wave 1 — Warmup: 5 reds drop in a symmetric stagger from the top. RED fires 3-way aimed fan (2 Easy, 3 Normal, 4 Hard, 6 Lunatic). Teaches: stream right through the gaps.",
       "spawnTick": 0,
+      "waveRef": "five_top_reds"
+    },
+    {
+      "_comment": "Wave 2 — Introduce SPREAD: 4 yellows arc in from the left. YELLOW fires a fixed downward fan regardless of player position — environmental curtain hazard, not trackable.",
+      "spawnTick": 160,
+      "waveRef": "left_sweep_yellow"
+    },
+    {
+      "_comment": "Wave 3 — Mirror yellow sweep from the right to teach side-reading symmetry.",
+      "spawnTick": 310,
+      "waveRef": "right_sweep_yellow"
+    },
+    {
+      "_comment": "Wave 4 — Introduce AIMED fan: staggered blue waterfall from top. BLUE fires 2-way fan on Normal (1 Easy, 3 Hard, 4 Lunatic). Delicate threading required.",
+      "spawnTick": 460,
+      "waveRef": "staggered_blues_top"
+    },
+    {
+      "_comment": "Wave 5 — Introduce RING: 4 greens from both sides. GREEN fires random-start 6-bullet rings (4 Easy, 6 Normal, 8 Hard, 12 Lunatic). First random-orientation threat.",
+      "spawnTick": 620,
+      "waveRef": "green_ring_sides"
+    },
+    {
+      "_comment": "Wave 6 — Escalation: 4 reds arc in from the left. Aimed fans now from a side approach — player must track arrival direction AND bullet direction.",
+      "spawnTick": 780,
+      "waveRef": "left_sweep_red"
+    },
+    {
+      "_comment": "Wave 7 — Classic pincer: 3 reds from left + 3 yellows from right simultaneously. Player must commit to a lane. Marks the mid-stage reading challenge.",
+      "spawnTick": 940,
+      "waveRef": "pincer_red_yellow"
+    },
+    {
+      "_comment": "Wave 8 — LARGE_YELLOW mid-wave anchor: STREAM pattern (rapid single-shot harassment), flanked by 2 blue escorts. First large enemy introduction — prioritise the anchor.",
+      "spawnTick": 1100,
+      "waveRef": "large_yellow_center"
+    },
+    {
+      "_comment": "Wave 9 — Mixed cross drop: 2 BLUE corners arc out, 2 RED inner arc in, 1 YELLOW centre straight. Forces simultaneous reading of three bullet types.",
+      "spawnTick": 1300,
+      "waveRef": "mixed_cross_top"
+    },
+    {
+      "_comment": "Wave 10 — Green ring sweep from the right: 4 greens arcing CCW. After the ring introduction in wave 5 the player now faces rings from a moving source.",
+      "spawnTick": 1460,
+      "waveRef": "right_sweep_green"
+    },
+    {
+      "_comment": "Wave 11 — Dense omnidirectional convergence (inline — unique layout). 8 fairies from all angles closing in: 2 BLUE from top corners, 2 RED inner top, 2 GREEN from left, 2 YELLOW from right. Pre-boss stress test.",
+      "spawnTick": 1640,
       "enemies": [
-        {
-          "x": 60,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.0,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": 150,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.0,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": 240,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.0,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": 330,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.0,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": 420,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.0,
-          "type": "RED_FAIRY"
-        }
+        { "x":  40, "y": -20, "vx": 0.0,  "vy":  4.5, "angVel": -0.018, "arcTicks": 87, "type": "BLUE_FAIRY" },
+        { "x": 440, "y": -20, "vx": 0.0,  "vy":  4.5, "angVel":  0.018, "arcTicks": 87, "type": "BLUE_FAIRY" },
+        { "x": 160, "y": -20, "vx": 0.0,  "vy":  4.5, "angVel": -0.018, "arcTicks": 87, "type": "RED_FAIRY"  },
+        { "x": 320, "y": -20, "vx": 0.0,  "vy":  4.5, "angVel":  0.018, "arcTicks": 87, "type": "RED_FAIRY"  },
+        { "x": -20, "y":  60, "vx":  4.5, "vy":  0.0, "angVel":  0.018, "arcTicks": 87, "type": "GREEN_FAIRY" },
+        { "x": -20, "y": 110, "vx":  4.5, "vy":  0.0, "angVel":  0.018, "arcTicks": 87, "type": "GREEN_FAIRY" },
+        { "x": 500, "y":  60, "vx": -4.5, "vy":  0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" },
+        { "x": 500, "y": 110, "vx": -4.5, "vy":  0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" }
       ]
     },
     {
-      "_comment": "Wave 2 - 4 yellow from left arc CW",
-      "spawnTick": 140,
+      "_comment": "Wave 12 — Pre-boss gauntlet (inline — boss-preview layout). LARGE_RED from left + LARGE_GREEN from right as dual anchors; 6 small escorts from the top. Clear the large enemies or be overwhelmed.",
+      "spawnTick": 1860,
       "enemies": [
-        {
-          "x": -20,
-          "y": 40,
-          "vx": 4.5,
-          "vy": 0.0,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "YELLOW_FAIRY"
-        },
-        {
-          "x": -20,
-          "y": 80,
-          "vx": 4.5,
-          "vy": 0.0,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "YELLOW_FAIRY"
-        },
-        {
-          "x": -20,
-          "y": 120,
-          "vx": 4.5,
-          "vy": 0.0,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "YELLOW_FAIRY"
-        },
-        {
-          "x": -20,
-          "y": 160,
-          "vx": 4.5,
-          "vy": 0.0,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "YELLOW_FAIRY"
-        }
-      ]
-    },
-    {
-      "_comment": "Wave 3 - 4 green from right arc CCW",
-      "spawnTick": 280,
-      "enemies": [
-        {
-          "x": 500,
-          "y": 40,
-          "vx": -4.5,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "GREEN_FAIRY"
-        },
-        {
-          "x": 500,
-          "y": 80,
-          "vx": -4.5,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "GREEN_FAIRY"
-        },
-        {
-          "x": 500,
-          "y": 120,
-          "vx": -4.5,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "GREEN_FAIRY"
-        },
-        {
-          "x": 500,
-          "y": 160,
-          "vx": -4.5,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "GREEN_FAIRY"
-        }
-      ]
-    },
-    {
-      "_comment": "Wave 4 - diagonal cross: blue from corners + yellow straight",
-      "spawnTick": 420,
-      "enemies": [
-        {
-          "x": 40,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "BLUE_FAIRY"
-        },
-        {
-          "x": 130,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "BLUE_FAIRY"
-        },
-        {
-          "x": 240,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": 0.0,
-          "arcTicks": 0,
-          "type": "YELLOW_FAIRY"
-        },
-        {
-          "x": 350,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "BLUE_FAIRY"
-        },
-        {
-          "x": 440,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "BLUE_FAIRY"
-        }
-      ]
-    },
-    {
-      "_comment": "Wave 5 - pincer: 3 red left + 3 yellow right, arc toward centre",
-      "spawnTick": 560,
-      "enemies": [
-        {
-          "x": -20,
-          "y": 40,
-          "vx": 4.5,
-          "vy": 0.0,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": -20,
-          "y": 80,
-          "vx": 4.5,
-          "vy": 0.0,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": -20,
-          "y": 120,
-          "vx": 4.5,
-          "vy": 0.0,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": 500,
-          "y": 40,
-          "vx": -4.5,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "YELLOW_FAIRY"
-        },
-        {
-          "x": 500,
-          "y": 80,
-          "vx": -4.5,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "YELLOW_FAIRY"
-        },
-        {
-          "x": 500,
-          "y": 120,
-          "vx": -4.5,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "YELLOW_FAIRY"
-        }
-      ]
-    },
-    {
-      "_comment": "Wave 6 - lone LARGE_YELLOW midboss, slow drop from top centre",
-      "spawnTick": 720,
-      "enemies": [
-        {
-          "x": 240,
-          "y": -30,
-          "vx": 0.0,
-          "vy": 2.8,
-          "type": "LARGE_YELLOW"
-        }
-      ]
-    },
-    {
-      "_comment": "Wave 7 - 8-enemy omnidirectional convergence",
-      "spawnTick": 920,
-      "enemies": [
-        {
-          "x": 40,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "BLUE_FAIRY"
-        },
-        {
-          "x": 440,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "BLUE_FAIRY"
-        },
-        {
-          "x": 160,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": 320,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": -20,
-          "y": 60,
-          "vx": 4.5,
-          "vy": 0.0,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "GREEN_FAIRY"
-        },
-        {
-          "x": 500,
-          "y": 60,
-          "vx": -4.5,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "GREEN_FAIRY"
-        },
-        {
-          "x": -20,
-          "y": 110,
-          "vx": 4.5,
-          "vy": 0.0,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "YELLOW_FAIRY"
-        },
-        {
-          "x": 500,
-          "y": 110,
-          "vx": -4.5,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "YELLOW_FAIRY"
-        }
-      ]
-    },
-    {
-      "_comment": "Wave 8 - pre-boss gauntlet: LARGE_RED + LARGE_GREEN flanking + 6 small escorts",
-      "spawnTick": 1120,
-      "enemies": [
-        {
-          "x": -20,
-          "y": 70,
-          "vx": 3.8,
-          "vy": 0.0,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "LARGE_RED"
-        },
-        {
-          "x": 500,
-          "y": 70,
-          "vx": -3.8,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "LARGE_GREEN"
-        },
-        {
-          "x": 60,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "BLUE_FAIRY"
-        },
-        {
-          "x": 160,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": 240,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": 0.0,
-          "arcTicks": 0,
-          "type": "YELLOW_FAIRY"
-        },
-        {
-          "x": 320,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "RED_FAIRY"
-        },
-        {
-          "x": 420,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 4.5,
-          "angVel": 0.018,
-          "arcTicks": 87,
-          "type": "BLUE_FAIRY"
-        },
-        {
-          "x": 500,
-          "y": 130,
-          "vx": -4.5,
-          "vy": 0.0,
-          "angVel": -0.018,
-          "arcTicks": 87,
-          "type": "GREEN_FAIRY"
-        }
+        { "x": -20,  "y":  70, "vx":  3.8, "vy": 0.0, "angVel":  0.018, "arcTicks": 87, "type": "LARGE_RED"   },
+        { "x": 500,  "y":  70, "vx": -3.8, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "LARGE_GREEN" },
+        { "x":  60,  "y": -20, "vx": 0.0,  "vy": 4.5, "angVel": -0.018, "arcTicks": 87, "type": "BLUE_FAIRY", "delayTicks": 20 },
+        { "x": 160,  "y": -20, "vx": 0.0,  "vy": 4.5, "angVel": -0.018, "arcTicks": 87, "type": "RED_FAIRY",  "delayTicks": 30 },
+        { "x": 240,  "y": -20, "vx": 0.0,  "vy": 4.5, "angVel":  0.0,   "arcTicks":  0, "type": "YELLOW_FAIRY", "delayTicks": 20 },
+        { "x": 320,  "y": -20, "vx": 0.0,  "vy": 4.5, "angVel":  0.018, "arcTicks": 87, "type": "RED_FAIRY",  "delayTicks": 30 },
+        { "x": 420,  "y": -20, "vx": 0.0,  "vy": 4.5, "angVel":  0.018, "arcTicks": 87, "type": "BLUE_FAIRY", "delayTicks": 20 },
+        { "x": 500,  "y": 140, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "GREEN_FAIRY", "delayTicks": 40 }
       ]
     }
   ]

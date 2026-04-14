@@ -5,8 +5,8 @@ public enum DifficultyConfig {
 
     EASY   (0.70f, 4,  0.60f),
     NORMAL (1.00f, 6,  1.00f),
-    HARD   (1.30f, 8,  1.40f),
-    LUNATIC(1.60f, 12, 2.00f);
+    HARD   (1.35f, 8,  1.48f),
+    LUNATIC(1.85f, 14, 2.48f);
 
     /** Multiplier applied to bullet speed. */
     public final float speedMult;

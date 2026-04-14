@@ -1,0 +1,10 @@
+{
+  "id": "right_sweep_yellow",
+  "description": "4 yellow fairies entering from the right edge and arcing counter-clockwise. Mirror of left_sweep_yellow. Forces the player to manage both sides.",
+  "enemies": [
+    { "x": 500, "y":  40, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" },
+    { "x": 500, "y":  80, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" },
+    { "x": 500, "y": 120, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" },
+    { "x": 500, "y": 160, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" }
+  ]
+}

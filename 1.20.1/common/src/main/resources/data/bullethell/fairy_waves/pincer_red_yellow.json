@@ -1,0 +1,12 @@
+{
+  "id": "pincer_red_yellow",
+  "description": "Classic pincer: 3 red fairies from the left and 3 yellow from the right, both arcing toward screen centre. Player must pick a lane. Red fires aimed fans, yellow fires downward spread.",
+  "enemies": [
+    { "x": -20, "y":  40, "vx": 4.5, "vy": 0.0, "angVel": 0.018, "arcTicks": 87, "type": "RED_FAIRY" },
+    { "x": -20, "y":  80, "vx": 4.5, "vy": 0.0, "angVel": 0.018, "arcTicks": 87, "type": "RED_FAIRY" },
+    { "x": -20, "y": 120, "vx": 4.5, "vy": 0.0, "angVel": 0.018, "arcTicks": 87, "type": "RED_FAIRY" },
+    { "x": 500, "y":  40, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" },
+    { "x": 500, "y":  80, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" },
+    { "x": 500, "y": 120, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" }
+  ]
+}

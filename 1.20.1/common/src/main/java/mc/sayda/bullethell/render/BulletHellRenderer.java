@@ -277,7 +277,7 @@ public class BulletHellRenderer {
         renderHUD(gfx, ox, oy, dispW, dispH, screenW, screenH, sx, sy, phase, phaseCol);
 
         // ---- 9b. Pre-boss intro dialog ----
-        if (!state.dialogSpeaker.isEmpty()) {
+        if (!state.dialogSpeaker.isEmpty() || state.dialogReadyCount < state.dialogTotalCount) {
             renderDialog(gfx, state, ox, oy, dispW, dispH);
         }
 
@@ -594,6 +594,7 @@ public class BulletHellRenderer {
             int ox, int oy, int dw, int dh) {
         Font font = Minecraft.getInstance().font;
         int lh = font.lineHeight; // typically 9
+        boolean waitingForOthers = state.dialogReadyCount < state.dialogTotalCount && state.dialogSpeaker.isEmpty();
 
         // Box geometry - tall enough for 3 text lines + speaker name row + portrait
         int portSz = lh * 3 + 6; // portrait cell size (~33 px at lh=9)
@@ -613,8 +614,10 @@ public class BulletHellRenderer {
         boolean isBoss = "BOSS".equalsIgnoreCase(state.dialogSpeaker);
         int borderCol = isBoss ? 0xFFFFDD44 : 0xFF44FFEE;
         int nameCol = isBoss ? 0xFFFFDD44 : 0xFF44FFEE;
-        String speaker = isBoss ? state.bossName
-                : Objects.requireNonNull(mc.sayda.bullethell.boss.CharacterLoader.load(state.characterId)).name;
+        String speaker = waitingForOthers
+                ? "Ready"
+                : (isBoss ? state.bossName
+                        : Objects.requireNonNull(mc.sayda.bullethell.boss.CharacterLoader.load(state.characterId)).name);
         if (speaker == null || speaker.isEmpty())
             speaker = Objects.requireNonNullElse(state.dialogSpeaker, "Unknown");
 
@@ -649,8 +652,11 @@ public class BulletHellRenderer {
         int textX = boxX + padX;
         int textY = boxY + lh + 9;
         int textW = boxW - portSz - padX * 3;
+        String bodyText = waitingForOthers
+                ? "Waiting for other players... " + state.dialogReadyCount + "/" + state.dialogTotalCount
+                : Objects.requireNonNullElse(state.dialogText, "");
         List<FormattedCharSequence> lines = font
-                .split(Component.literal(Objects.requireNonNullElse(state.dialogText, "")), textW);
+                .split(Component.literal(bodyText), textW);
         for (int i = 0; i < Math.min(lines.size(), textLines); i++) {
             gfx.drawString(font, lines.get(i), textX, textY + i * (lh + 2), 0xFFEEEEEE, false);
         }
@@ -663,7 +669,9 @@ public class BulletHellRenderer {
         }
 
         // ---- Key hint below the box (won't clip with dialog text) ----
-        String hint = "[Z] Next  [Ctrl] Skip";
+        String hint = waitingForOthers
+                ? "Ready: " + state.dialogReadyCount + "/" + state.dialogTotalCount
+                : "[Z] Next  [Ctrl] Skip";
         gfx.drawString(font, hint, boxX + padX, boxY + boxH + 3,
                 (0x55 << 24) | 0xFFFFFF, false);
     }
@@ -1190,18 +1198,18 @@ public class BulletHellRenderer {
 
     private static void renderMasterSparkEffect(GuiGraphics gfx, int ox, int oy, float sx, float sy, int dh,
             ClientArenaState state) {
-        // Find the absolute X position of the spark
-        // If co-op, we'd use the owner's position. For now assume local.
-        int bx = ox + (int) (state.player.x * sx);
-        int beamW = (int) (40 * sx);
+        // Render beam at server-authoritative spawn location (stationary, non-following).
+        int bx = ox + (int) (state.abilityX * sx);
+        int by = oy + (int) (state.abilityY * sy);
+        int beamW = (int) (32 * sx);
 
         // Pulsing white/blue beam
         int alpha = 0xAA + (int) (Math.sin(state.bossAnimCounter * 0.5f) * 0x33);
         int color = (alpha << 24) | 0x88CCFF;
 
-        // Full vertical beam from oy to oy+dh
-        gfx.fill(bx - beamW, oy, bx + beamW, oy + dh, color);
-        gfx.fill(bx - beamW / 2, oy, bx + beamW / 2, oy + dh, 0xDDFFFFFF); // bright core
+        // Beam fires upward from spawn point.
+        gfx.fill(bx - beamW, oy, bx + beamW, by, color);
+        gfx.fill(bx - beamW / 2, oy, bx + beamW / 2, by, 0xDDFFFFFF); // bright core
     }
 
     private static int phaseColour(int phase) {

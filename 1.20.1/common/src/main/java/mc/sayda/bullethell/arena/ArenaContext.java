@@ -143,15 +143,20 @@ public class ArenaContext {
     public int masterSparkTicks = 0;
     public UUID masterSparkOwner = null;
     public float masterSparkX = 0f;
+    public float masterSparkY = 0f;
 
     // ---------------------------------------------------------------- init
     // dialog state
     private List<mc.sayda.bullethell.boss.DialogLine> activeDialog = null;
+    /** Per-player dialog script (character-specific, with intro fallback). */
+    private final java.util.LinkedHashMap<UUID, List<mc.sayda.bullethell.boss.DialogLine>> dialogScriptByPlayer = new java.util.LinkedHashMap<>();
 
-    /** Current dialog line index within {@code boss.introDialog}. */
-    private int dialogIndex = 0;
-    /** Ticks until this line auto-advances. */
-    private int dialogTicksLeft = 0;
+    /** Per-player current dialog line index within {@code activeDialog}. */
+    private final java.util.LinkedHashMap<UUID, Integer> dialogIndexByPlayer = new java.util.LinkedHashMap<>();
+    /** Per-player ticks until their current line auto-advances. */
+    private final java.util.LinkedHashMap<UUID, Integer> dialogTicksLeftByPlayer = new java.util.LinkedHashMap<>();
+    /** Per-player readiness (true when finished reading or skip-all pressed). */
+    private final java.util.LinkedHashMap<UUID, Boolean> dialogReadyByPlayer = new java.util.LinkedHashMap<>();
 
     // ---------------------------------------------------------------- enemy
     // constants
@@ -197,12 +202,19 @@ public class ArenaContext {
         coopPlayers.put(uuid, ps);
         coopBullets.put(uuid, new BulletPool(BulletPool.PLAYER_CAPACITY));
         coopCharIds.put(uuid, charDef.id);
+        if (arenaPhase == ArenaPhase.DIALOG_INTRO) {
+            initDialogStateForPlayer(uuid);
+        }
     }
 
     public void removeCoopPlayer(UUID uuid) {
         coopPlayers.remove(uuid);
         coopBullets.remove(uuid);
         coopCharIds.remove(uuid);
+        dialogScriptByPlayer.remove(uuid);
+        dialogIndexByPlayer.remove(uuid);
+        dialogTicksLeftByPlayer.remove(uuid);
+        dialogReadyByPlayer.remove(uuid);
     }
 
     /**
@@ -375,17 +387,7 @@ public class ArenaContext {
             if (!frozen)
                 tickStage();
         } else if (arenaPhase == ArenaPhase.DIALOG_INTRO) {
-            // Auto-advance dialog lines; transition to boss when all lines exhausted
-            if (dialogTicksLeft > 0) {
-                dialogTicksLeft--;
-            } else {
-                dialogIndex++;
-                if (activeDialog == null || dialogIndex >= activeDialog.size()) {
-                    transitionToBoss();
-                } else {
-                    dialogTicksLeft = activeDialog.get(dialogIndex).delayTicks;
-                }
-            }
+            tickDialogIntro();
         } else {
             if (!frozen) {
                 spellcard.tick();
@@ -431,10 +433,6 @@ public class ArenaContext {
         if (!frozen)
             tickSkillGauge(player);
 
-        if (masterSparkTicks > 0 && masterSparkOwner != null && masterSparkOwner.equals(playerUuid)) {
-            masterSparkX = player.x;
-        }
-
         for (var e : coopPlayers.entrySet()) {
             UUID cUuid = e.getKey();
             PlayerState2D cPs = e.getValue();
@@ -443,9 +441,6 @@ public class ArenaContext {
                 tickSkillGauge(cPs);
             if (cPb != null && cPs.lives >= 0) {
                 tickPlayerShots(cPs, cPb);
-            }
-            if (masterSparkTicks > 0 && masterSparkOwner != null && masterSparkOwner.equals(cUuid)) {
-                masterSparkX = cPs.x;
             }
         }
 
@@ -528,7 +523,7 @@ public class ArenaContext {
 
     /**
      * Compression factor: higher difficulties shrink the gap between waves.
-     * EASY=0.80, NORMAL=1.00, HARD=1.25, LUNATIC=1.55
+     * EASY=0.80, NORMAL=1.00, HARD=1.25, LUNATIC=1.55 (boss patterns use separate creep)
      */
     private float waveTimingMult() {
         return switch (difficulty) {
@@ -759,17 +754,26 @@ public class ArenaContext {
     }
 
     private void transitionToDialogOrBoss() {
-        // Character-specific dialogue takes priority
-        activeDialog = boss.characterDialogs.get(characterId);
-        // Fallback to generic intro if no character match found
-        if (activeDialog == null || activeDialog.isEmpty()) {
-            activeDialog = boss.introDialog;
+        dialogScriptByPlayer.clear();
+        boolean hasAnyDialog = false;
+        for (UUID participant : allParticipants()) {
+            String participantCharId = getCharacterId(participant);
+            List<mc.sayda.bullethell.boss.DialogLine> script = boss.characterDialogs.get(participantCharId);
+            if (script == null || script.isEmpty()) {
+                script = boss.introDialog;
+            }
+            dialogScriptByPlayer.put(participant, script);
+            if (script != null && !script.isEmpty()) {
+                hasAnyDialog = true;
+            }
         }
 
-        if (activeDialog != null && !activeDialog.isEmpty()) {
+        // Retain a non-null generic reference for legacy helpers/debugging.
+        activeDialog = boss.introDialog;
+
+        if (hasAnyDialog) {
             arenaPhase = ArenaPhase.DIALOG_INTRO;
-            dialogIndex = 0;
-            dialogTicksLeft = activeDialog.get(0).delayTicks;
+            resetDialogProgressForAllPlayers();
             // Boss sprite glides in from above during dialog
             bossIntroVisible = true;
             bossX = BulletPool.ARENA_W / 2f;
@@ -782,6 +786,10 @@ public class ArenaContext {
     private void transitionToBoss() {
         resetAbilityStates();
         arenaPhase = ArenaPhase.BOSS;
+        dialogScriptByPlayer.clear();
+        dialogIndexByPlayer.clear();
+        dialogTicksLeftByPlayer.clear();
+        dialogReadyByPlayer.clear();
         bossIntroVisible = false;
         bullets.clearAll();
         lasers.clearAll();
@@ -796,26 +804,103 @@ public class ArenaContext {
     // ---------------------------------------------------------------- dialog
     // control
 
-    /**
-     * Called when a player presses Z (advance one line) or Ctrl (skip all).
-     * Safe to call from any participant - dialog is shared server-side.
-     *
-     * @param skipAll true = jump straight to the boss fight; false = advance one
-     *                line
-     */
-    public void skipDialog(boolean skipAll) {
-        if (arenaPhase != ArenaPhase.DIALOG_INTRO)
+    private void resetDialogProgressForAllPlayers() {
+        dialogIndexByPlayer.clear();
+        dialogTicksLeftByPlayer.clear();
+        dialogReadyByPlayer.clear();
+        for (UUID participant : allParticipants()) {
+            initDialogStateForPlayer(participant);
+        }
+    }
+
+    private void initDialogStateForPlayer(UUID participant) {
+        List<mc.sayda.bullethell.boss.DialogLine> script = dialogScriptByPlayer.get(participant);
+        if (script == null || script.isEmpty()) {
+            dialogIndexByPlayer.put(participant, 0);
+            dialogTicksLeftByPlayer.put(participant, 0);
+            dialogReadyByPlayer.put(participant, true);
             return;
-        if (skipAll) {
+        }
+        dialogIndexByPlayer.put(participant, 0);
+        dialogTicksLeftByPlayer.put(participant, Math.max(0, script.get(0).delayTicks));
+        dialogReadyByPlayer.put(participant, false);
+    }
+
+    private void tickDialogIntro() {
+        if (dialogScriptByPlayer.isEmpty()) {
             transitionToBoss();
             return;
         }
-        // Advance to next line immediately
-        dialogIndex++;
-        if (activeDialog == null || dialogIndex >= activeDialog.size()) {
+        for (UUID participant : allParticipants()) {
+            if (!dialogReadyByPlayer.containsKey(participant)) {
+                initDialogStateForPlayer(participant);
+            }
+            if (Boolean.TRUE.equals(dialogReadyByPlayer.get(participant))) {
+                continue;
+            }
+            int ticksLeft = Math.max(0, dialogTicksLeftByPlayer.getOrDefault(participant, 0));
+            if (ticksLeft > 0) {
+                dialogTicksLeftByPlayer.put(participant, ticksLeft - 1);
+            } else {
+                advanceDialogOneLine(participant);
+            }
+        }
+        if (isDialogReadyForAllActivePlayers()) {
             transitionToBoss();
+        }
+    }
+
+    private void advanceDialogOneLine(UUID participant) {
+        List<mc.sayda.bullethell.boss.DialogLine> script = dialogScriptByPlayer.get(participant);
+        if (script == null || script.isEmpty()) {
+            dialogReadyByPlayer.put(participant, true);
+            dialogTicksLeftByPlayer.put(participant, 0);
+            dialogIndexByPlayer.put(participant, 0);
+            return;
+        }
+        int nextIndex = dialogIndexByPlayer.getOrDefault(participant, 0) + 1;
+        if (nextIndex >= script.size()) {
+            dialogReadyByPlayer.put(participant, true);
+            dialogTicksLeftByPlayer.put(participant, 0);
+            dialogIndexByPlayer.put(participant, Math.max(0, script.size() - 1));
+            return;
+        }
+        dialogIndexByPlayer.put(participant, nextIndex);
+        dialogTicksLeftByPlayer.put(participant, Math.max(0, script.get(nextIndex).delayTicks));
+    }
+
+    private boolean isDialogReadyForAllActivePlayers() {
+        for (UUID participant : allParticipants()) {
+            if (!Boolean.TRUE.equals(dialogReadyByPlayer.get(participant))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Called when a player presses Z (advance one line) or Ctrl (skip all).
+     * Safe to call from any participant - each player has an independent dialog
+     * cursor.
+     *
+     * @param participant UUID of the player issuing the dialog action
+     * @param skipAll true = jump straight to the boss fight; false = advance one
+     *                line
+     */
+    public void skipDialog(UUID participant, boolean skipAll) {
+        if (arenaPhase != ArenaPhase.DIALOG_INTRO)
+            return;
+        if (!allParticipants().contains(participant))
+            return;
+        if (skipAll) {
+            dialogReadyByPlayer.put(participant, true);
+            dialogTicksLeftByPlayer.put(participant, 0);
         } else {
-            dialogTicksLeft = activeDialog.get(dialogIndex).delayTicks;
+            // Advance this player's line immediately
+            advanceDialogOneLine(participant);
+        }
+        if (isDialogReadyForAllActivePlayers()) {
+            transitionToBoss();
         }
     }
 
@@ -825,29 +910,69 @@ public class ArenaContext {
     /**
      * Speaker of the current dialog line; empty string when no dialog is active.
      */
-    public String getDialogSpeaker() {
-        if (arenaPhase != ArenaPhase.DIALOG_INTRO
-                || activeDialog == null || activeDialog.isEmpty()
-                || dialogIndex >= activeDialog.size())
+    public String getDialogSpeaker(UUID participant) {
+        if (Boolean.TRUE.equals(dialogReadyByPlayer.get(participant)))
             return "";
-        return activeDialog.get(dialogIndex).speaker;
+        int idx = dialogIndexByPlayer.getOrDefault(participant, 0);
+        List<mc.sayda.bullethell.boss.DialogLine> script = dialogScriptByPlayer.get(participant);
+        if (arenaPhase != ArenaPhase.DIALOG_INTRO
+                || script == null || script.isEmpty()
+                || idx >= script.size())
+            return "";
+        return script.get(idx).speaker;
     }
 
     /** Text of the current dialog line; empty string when no dialog is active. */
-    public String getDialogText() {
-        if (arenaPhase != ArenaPhase.DIALOG_INTRO
-                || activeDialog == null || activeDialog.isEmpty()
-                || dialogIndex >= activeDialog.size())
+    public String getDialogText(UUID participant) {
+        if (Boolean.TRUE.equals(dialogReadyByPlayer.get(participant)))
             return "";
-        return activeDialog.get(dialogIndex).text;
+        int idx = dialogIndexByPlayer.getOrDefault(participant, 0);
+        List<mc.sayda.bullethell.boss.DialogLine> script = dialogScriptByPlayer.get(participant);
+        if (arenaPhase != ArenaPhase.DIALOG_INTRO
+                || script == null || script.isEmpty()
+                || idx >= script.size())
+            return "";
+        return script.get(idx).text;
     }
 
     /** Increments with each new line; lets the client reset slide-in animation. */
-    public int getDialogLineIndex() {
-        return dialogIndex;
+    public int getDialogLineIndex(UUID participant) {
+        return dialogIndexByPlayer.getOrDefault(participant, 0);
+    }
+
+    public int getDialogReadyCount() {
+        int ready = 0;
+        for (UUID participant : allParticipants()) {
+            if (Boolean.TRUE.equals(dialogReadyByPlayer.get(participant))) {
+                ready++;
+            }
+        }
+        return ready;
+    }
+
+    public int getDialogParticipantCount() {
+        return allParticipants().size();
     }
 
     // ================================================================ BOSS PHASE
+
+    /**
+     * Effective bullet density for boss patterns: base difficulty plus a gentle rise
+     * through phase index, with an extra bump on Lunatic so top difficulty stays
+     * clearly above Hard.
+     */
+    private float bossDensityMult() {
+        float phaseCreep = 1f + Math.min(0.30f, bossPhase * 0.034f);
+        float lunaticExtra = (difficulty == DifficultyConfig.LUNATIC) ? 1.12f : 1f;
+        return difficulty.densityMult * phaseCreep * lunaticExtra;
+    }
+
+    /** Effective bullet speed multiplier for boss patterns (see {@link #bossDensityMult()}). */
+    private float bossSpeedMult() {
+        float phaseCreep = 1f + Math.min(0.22f, bossPhase * 0.026f);
+        float lunaticExtra = (difficulty == DifficultyConfig.LUNATIC) ? 1.10f : 1f;
+        return difficulty.speedMult * phaseCreep * lunaticExtra;
+    }
 
     private void tickBossAI() {
         lasers.tick();
@@ -880,35 +1005,36 @@ public class ArenaContext {
         PatternStep step = phase.attacks.get(attackIndex % phase.attacks.size());
         attackIndex++;
         executeAttack(step);
-        // Scale cooldown inversely with densityMult: Lunatic fires ~2× as often as
-        // Normal
-        patternCooldown = Math.max(1, (int) (step.cooldown / difficulty.densityMult));
+        patternCooldown = Math.max(1, (int) (step.cooldown / bossDensityMult()));
     }
 
     private void executeAttack(PatternStep step) {
         BulletType type = bulletTypeByName(step.bulletType);
-        int scaledArms = Math.max(1, Math.round(step.arms * difficulty.densityMult));
+        float dens = bossDensityMult();
+        float spdRatio = bossSpeedMult() / difficulty.speedMult;
+        int scaledArms = Math.max(1, Math.round(step.arms * dens));
+        float effSpeed = step.speed * spdRatio;
         switch (step.pattern == null ? "RING" : step.pattern.toUpperCase()) {
             case "SPIRAL" -> {
                 PatternEngine.fireSpiral(bullets, bossX, bossY, spiralAngle,
-                        scaledArms, step.speed, difficulty, type);
+                        scaledArms, effSpeed, difficulty, type);
                 spiralAngle += (float) (Math.PI * 2.0 / scaledArms) * 0.15f;
             }
             case "AIMED" -> PatternEngine.fireAimed(bullets, bossX, bossY,
-                    player.x, player.y, scaledArms, step.spread, step.speed, difficulty, type);
+                    player.x, player.y, scaledArms, step.spread, effSpeed, difficulty, type);
             case "RING" -> PatternEngine.fireRing(bullets, bossX, bossY,
-                    scaledArms, step.speed, difficulty, type);
+                    scaledArms, effSpeed, difficulty, type);
             case "SPREAD" -> PatternEngine.fireSpread(bullets, bossX, bossY,
-                    scaledArms, step.speed, difficulty, type);
+                    scaledArms, effSpeed, difficulty, type);
             case "DENSE_RING" -> PatternEngine.fireDenseRing(bullets, bossX, bossY,
-                    scaledArms, step.speed, difficulty, type);
+                    scaledArms, effSpeed, difficulty, type);
             case "LASER_BEAM" -> PatternEngine.fireLaserBeam(bullets, bossX, bossY,
-                    player.x, player.y, scaledArms, step.speed, difficulty, type);
+                    player.x, player.y, scaledArms, effSpeed, difficulty, type);
             case "LASER" -> {
                 // Single directional laser aimed at the player's current position (Master
                 // Spark).
                 float angle = (float) Math.atan2(player.y - bossY, player.x - bossX);
-                int scaledWarn = Math.max(10, (int) (step.warnTicks / difficulty.densityMult));
+                int scaledWarn = Math.max(10, (int) (step.warnTicks / dens));
                 lasers.spawn(bossX, bossY, angle, step.laserHalfWidth,
                         scaledWarn, step.activeTicks, type.getId(), false);
             }
@@ -916,7 +1042,7 @@ public class ArenaContext {
                 // Bidirectional beams radiating in all directions (Non-Directional Laser).
                 // Difficulty scaling: more beams + shorter warning on harder difficulties.
                 // Normal: arms=8, warn=14 | Lunatic: arms=16, warn=7
-                int scaledWarn = Math.max(6, (int) (step.warnTicks / difficulty.densityMult));
+                int scaledWarn = Math.max(6, (int) (step.warnTicks / dens));
                 float angleStep = (float) (Math.PI * 2.0 / scaledArms);
                 for (int i = 0; i < scaledArms; i++) {
                     lasers.spawn(bossX, bossY, spiralAngle + angleStep * i,
@@ -925,7 +1051,7 @@ public class ArenaContext {
                 spiralAngle += 0.45f; // ~26° per fire cycle - visible rotation
             }
             default -> PatternEngine.fireRing(bullets, bossX, bossY,
-                    scaledArms, step.speed, difficulty, type);
+                    scaledArms, effSpeed, difficulty, type);
         }
     }
 
@@ -1381,13 +1507,15 @@ public class ArenaContext {
         switch (cid) {
             case "marisa" -> {
                 if (level >= 3) {
-                    masterSparkTicks = 100; // 5 seconds of beam
+                    masterSparkTicks = 20; // 1 second stationary beam
                     masterSparkOwner = uuid;
                     masterSparkX = ps.x;
+                    masterSparkY = Math.max(0f, ps.y - 32f);
                 } else if (level >= 2) {
                     masterSparkTicks = 20; // 1 second burst
                     masterSparkOwner = uuid;
                     masterSparkX = ps.x;
+                    masterSparkY = Math.max(0f, ps.y - 32f);
                 }
             }
             case "sakuya" -> {
@@ -1433,9 +1561,10 @@ public class ArenaContext {
     }
 
     private void tickMasterSpark() {
-        // Clear all bullets in a vertical column
-        float hw = 40f; // wide beam
+        // Stationary vertical beam spawned in front of Marisa.
+        float hw = 32f; // beam half-width (arena units)
         float x = masterSparkX;
+        float y = masterSparkY;
 
         // Find owner to award gauge
         PlayerState2D ownerPs = getPlayerState(masterSparkOwner);
@@ -1444,7 +1573,7 @@ public class ArenaContext {
         for (int i = 0; i < EnemyPool.CAPACITY; i++) {
             if (!enemies.isActive(i))
                 continue;
-            float dist = getLaserDistance(enemies.getX(i), enemies.getY(i), x, BulletPool.ARENA_H, -1.570796f, false);
+            float dist = getLaserDistance(enemies.getX(i), enemies.getY(i), x, y, -1.570796f, false);
             if (dist >= 0 && dist < hw) {
                 if (enemies.damage(i, 5))
                     killEnemy(i, ownerPs != null ? ownerPs : player);
@@ -1453,7 +1582,7 @@ public class ArenaContext {
 
         // Damage boss in beam
         if (bossMaxHp > 0) {
-            float dist = getLaserDistance(bossX, bossY, x, BulletPool.ARENA_H, -1.570796f, false);
+            float dist = getLaserDistance(bossX, bossY, x, y, -1.570796f, false);
             if (dist >= 0 && dist < hw) {
                 bossHp = Math.max(0, bossHp - 10);
                 if (bossHp == 0)
@@ -1465,7 +1594,7 @@ public class ArenaContext {
         for (int i = 0; i < bullets.getCapacity(); i++) {
             if (!bullets.isActive(i))
                 continue;
-            float dist = getLaserDistance(bullets.getX(i), bullets.getY(i), x, BulletPool.ARENA_H, -1.570796f, false);
+            float dist = getLaserDistance(bullets.getX(i), bullets.getY(i), x, y, -1.570796f, false);
             if (dist >= 0 && dist < hw) {
                 bullets.deactivate(i);
             }
@@ -1565,6 +1694,7 @@ public class ArenaContext {
         timeStopOwner = null;
         masterSparkTicks = 0;
         masterSparkOwner = null;
+        masterSparkY = 0f;
     }
 
     private void applyDeath(UUID uuid) {

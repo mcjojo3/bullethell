@@ -1,0 +1,10 @@
+{
+  "id": "left_sweep_red",
+  "description": "4 red fairies entering from the left arcing CW. RED fires aimed fans - danger increases with difficulty (3-way Normal, 4-way Hard, 6-way Lunatic).",
+  "enemies": [
+    { "x": -20, "y":  50, "vx": 4.5, "vy": 0.0, "angVel": 0.018, "arcTicks": 87, "type": "RED_FAIRY" },
+    { "x": -20, "y":  90, "vx": 4.5, "vy": 0.0, "angVel": 0.018, "arcTicks": 87, "type": "RED_FAIRY" },
+    { "x": -20, "y": 130, "vx": 4.5, "vy": 0.0, "angVel": 0.018, "arcTicks": 87, "type": "RED_FAIRY" },
+    { "x": -20, "y": 170, "vx": 4.5, "vy": 0.0, "angVel": 0.018, "arcTicks": 87, "type": "RED_FAIRY" }
+  ]
+}

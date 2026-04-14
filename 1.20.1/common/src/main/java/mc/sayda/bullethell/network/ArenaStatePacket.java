@@ -20,6 +20,7 @@ public class ArenaStatePacket {
     public final int bossHp, bossMaxHp, bossPhase;
     public final int skillGauge, chargeLevel;
     public final int abilityType, abilityTicks;
+    public final float abilityX, abilityY;
     public final UUID abilityOwner;
     public final long score;
     public final int spellTimerTicks, spellTimerTotal;
@@ -30,6 +31,7 @@ public class ArenaStatePacket {
     public final boolean bossIntroVisible;
     public final String dialogSpeaker, dialogText;
     public final int dialogLineIndex;
+    public final int dialogReadyCount, dialogTotalCount;
     /** True when this player is dead but spectating coop partners. */
     public final boolean spectating;
 
@@ -60,14 +62,20 @@ public class ArenaStatePacket {
             this.abilityType = 1;
             this.abilityTicks = ctx.timeStopTicks;
             this.abilityOwner = ctx.timeStopOwner;
+            this.abilityX = 0f;
+            this.abilityY = 0f;
         } else if (ctx.masterSparkTicks > 0) {
             this.abilityType = 2;
             this.abilityTicks = ctx.masterSparkTicks;
             this.abilityOwner = ctx.masterSparkOwner;
+            this.abilityX = ctx.masterSparkX;
+            this.abilityY = ctx.masterSparkY;
         } else {
             this.abilityType = 0;
             this.abilityTicks = 0;
             this.abilityOwner = new UUID(0, 0);
+            this.abilityX = 0f;
+            this.abilityY = 0f;
         }
 
         this.score = ctx.score.getScore();
@@ -82,26 +90,28 @@ public class ArenaStatePacket {
         this.bossId = ctx.boss != null ? ctx.boss.id : "";
         this.bossName = ctx.boss != null ? ctx.boss.name : "";
         this.bossIntroVisible = ctx.bossIntroVisible;
-        this.dialogSpeaker = ctx.getDialogSpeaker();
-        this.dialogText = ctx.getDialogText();
-        this.dialogLineIndex = ctx.getDialogLineIndex();
+        this.dialogSpeaker = ctx.getDialogSpeaker(playerUuid);
+        this.dialogText = ctx.getDialogText(playerUuid);
+        this.dialogLineIndex = ctx.getDialogLineIndex(playerUuid);
+        this.dialogReadyCount = ctx.getDialogReadyCount();
+        this.dialogTotalCount = ctx.getDialogParticipantCount();
         // Player is spectating when all their lives are spent (lives < 0)
         this.spectating = (ps.lives < 0);
     }
 
     public static ArenaStatePacket stopped() {
-        return new ArenaStatePacket(false, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new UUID(0, 0),
-                0, 0, 0, "", "", false, false, "reimu", "", "", false, "", "", 0);
+        return new ArenaStatePacket(false, false, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0f, 0f, new UUID(0, 0),
+                0, 0, 0, "", "", false, false, "reimu", "", "", false, "", "", 0, 0, 0);
     }
 
     private ArenaStatePacket(boolean active, boolean spectating,
             float px, float py, int lives, int bombs, int graze, int power, int pIdx,
             float bx, float by, int hp, int maxHp, int phase,
-            int skillGauge, int chargeLevel, int abilityType, int abilityTicks, UUID abilityOwner,
+            int skillGauge, int chargeLevel, int abilityType, int abilityTicks, float abilityX, float abilityY, UUID abilityOwner,
             long score, int timerTicks, int timerTotal, String musicTrackId,
             String spellName, boolean activeSpellCard, boolean declaring,
             String characterId, String bossId, String bossName, boolean bossIntroVisible,
-            String dialogSpeaker, String dialogText, int dialogLineIndex) {
+            String dialogSpeaker, String dialogText, int dialogLineIndex, int dialogReadyCount, int dialogTotalCount) {
         this.active = active;
         this.spectating = spectating;
         this.playerX = px;
@@ -120,6 +130,8 @@ public class ArenaStatePacket {
         this.chargeLevel = chargeLevel;
         this.abilityType = abilityType;
         this.abilityTicks = abilityTicks;
+        this.abilityX = abilityX;
+        this.abilityY = abilityY;
         this.abilityOwner = abilityOwner;
         this.score = score;
         this.spellTimerTicks = timerTicks;
@@ -135,6 +147,8 @@ public class ArenaStatePacket {
         this.dialogSpeaker = dialogSpeaker;
         this.dialogText = dialogText;
         this.dialogLineIndex = dialogLineIndex;
+        this.dialogReadyCount = dialogReadyCount;
+        this.dialogTotalCount = dialogTotalCount;
     }
 
     // ---------------------------------------------------------------- codec
@@ -161,6 +175,8 @@ public class ArenaStatePacket {
         buf.writeVarInt(chargeLevel);
         buf.writeVarInt(abilityType);
         buf.writeVarInt(abilityTicks);
+        buf.writeFloat(abilityX);
+        buf.writeFloat(abilityY);
         buf.writeUUID(abilityOwner);
         buf.writeLong(score);
         buf.writeVarInt(spellTimerTicks);
@@ -176,6 +192,8 @@ public class ArenaStatePacket {
         buf.writeUtf(dialogSpeaker);
         buf.writeUtf(dialogText);
         buf.writeVarInt(dialogLineIndex);
+        buf.writeVarInt(dialogReadyCount);
+        buf.writeVarInt(dialogTotalCount);
     }
 
     @SuppressWarnings("null")
@@ -188,13 +206,13 @@ public class ArenaStatePacket {
                 buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
                 buf.readFloat(), buf.readFloat(),
                 buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
-                buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readUUID(),
+                buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readUUID(),
                 buf.readLong(),
                 buf.readVarInt(), buf.readVarInt(),
                 buf.readUtf(), buf.readUtf(),
                 buf.readBoolean(), buf.readBoolean(),
                 buf.readUtf(), buf.readUtf(), buf.readUtf(),
                 buf.readBoolean(),
-                buf.readUtf(), buf.readUtf(), buf.readVarInt());
+                buf.readUtf(), buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
     }
 }

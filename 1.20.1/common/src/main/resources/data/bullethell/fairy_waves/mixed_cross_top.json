@@ -1,0 +1,11 @@
+{
+  "id": "mixed_cross_top",
+  "description": "5 mixed-type fairies dropping from the top in a cross layout: blue on outer corners arc outward, red at inner positions arc inward, yellow center drops straight. Forces the player to read multiple threat types simultaneously.",
+  "enemies": [
+    { "x":  40, "y": -20, "vx": 0.0, "vy": 4.5, "angVel": -0.018, "arcTicks": 87, "type": "BLUE_FAIRY" },
+    { "x": 130, "y": -20, "vx": 0.0, "vy": 4.5, "angVel": -0.018, "arcTicks": 87, "type": "RED_FAIRY" },
+    { "x": 240, "y": -20, "vx": 0.0, "vy": 4.5, "angVel":  0.0,   "arcTicks":  0, "type": "YELLOW_FAIRY" },
+    { "x": 350, "y": -20, "vx": 0.0, "vy": 4.5, "angVel":  0.018, "arcTicks": 87, "type": "RED_FAIRY" },
+    { "x": 440, "y": -20, "vx": 0.0, "vy": 4.5, "angVel":  0.018, "arcTicks": 87, "type": "BLUE_FAIRY" }
+  ]
+}

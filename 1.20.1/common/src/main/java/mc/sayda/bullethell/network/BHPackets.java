@@ -44,6 +44,7 @@ public final class BHPackets {
     public static final ResourceLocation GAME_EVENT        = id("game_event");
     public static final ResourceLocation OPEN_CHAR_SELECT  = id("open_char_select");
     public static final ResourceLocation OPEN_JOIN_SELECT  = id("open_join_select");
+    public static final ResourceLocation OPEN_CHALLENGE    = id("open_challenge");
 
     // C → S
     public static final ResourceLocation PLAYER_POS        = id("player_pos");
@@ -100,7 +101,7 @@ public final class BHPackets {
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
                 ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(sender.getUUID());
-                if (arena != null) arena.skipDialog(pkt.skipAll);
+                if (arena != null) arena.skipDialog(sender.getUUID(), pkt.skipAll);
             });
         });
 
@@ -240,6 +241,10 @@ public final class BHPackets {
 
     public static void sendOpenJoinSelect(ServerPlayer player, OpenJoinSelectPacket pkt) {
         FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, OPEN_JOIN_SELECT, b);
+    }
+
+    public static void sendOpenChallenge(ServerPlayer player, OpenChallengePacket pkt) {
+        FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, OPEN_CHALLENGE, b);
     }
 
     // ---------------------------------------------------------------- Client → Server helpers

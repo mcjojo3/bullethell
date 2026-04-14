@@ -56,6 +56,8 @@ public class ClientArenaState {
     // Active Ability State
     public int abilityType = 0; // 0=none, 1=timestop, 2=masterspark
     public int abilityTicks = 0;
+    public float abilityX = 0f;
+    public float abilityY = 0f;
     public java.util.UUID abilityOwner = new java.util.UUID(0, 0);
 
     public long score;
@@ -120,6 +122,8 @@ public class ClientArenaState {
     public String dialogSpeaker = "";
     public String dialogText = "";
     public int dialogLineIndex = -1;
+    public int dialogReadyCount = 0;
+    public int dialogTotalCount = 0;
     public int dialogSlideInTick = 0;
 
     // ---------------------------------------------------------------- packet
@@ -139,11 +143,11 @@ public class ClientArenaState {
     public void applyArenaState(boolean pktActive, boolean pktSpectating, float playerX, float playerY,
             int lives, int bombs, int graze, int power, int pIdx,
             float bossX, float bossY, int bossHp, int bossMaxHp, int bossPhase,
-            int skillGauge, int chargeLevel, int abilityType, int abilityTicks, java.util.UUID abilityOwner,
+            int skillGauge, int chargeLevel, int abilityType, int abilityTicks, float abilityX, float abilityY, java.util.UUID abilityOwner,
             long score, int spellTimerTicks, int spellTimerTotal,
             String musicTrackId, String spellName, boolean activeSpellCard, boolean declaring,
             String characterId, String bossId, String bossName, boolean bossIntroVisible,
-            String dialogSpeaker, String dialogText, int dialogLineIndex) {
+            String dialogSpeaker, String dialogText, int dialogLineIndex, int dialogReadyCount, int dialogTotalCount) {
 
         active = pktActive;
         spectating = pktSpectating;
@@ -185,6 +189,8 @@ public class ClientArenaState {
         this.chargeLevel = chargeLevel;
         this.abilityType = abilityType;
         this.abilityTicks = abilityTicks;
+        this.abilityX = abilityX;
+        this.abilityY = abilityY;
         this.abilityOwner = abilityOwner;
         this.score = score;
         this.spellTimerTicks = spellTimerTicks;
@@ -208,6 +214,8 @@ public class ClientArenaState {
         this.dialogLineIndex = dialogLineIndex;
         this.dialogSpeaker = dialogSpeaker;
         this.dialogText = dialogText;
+        this.dialogReadyCount = dialogReadyCount;
+        this.dialogTotalCount = dialogTotalCount;
     }
 
     public void applyPlayerBulletSync(float[][] allSlotData, boolean[] allActive) {
@@ -243,11 +251,11 @@ public class ClientArenaState {
         applyArenaState(pkt.active, pkt.spectating, pkt.playerX, pkt.playerY,
                 pkt.lives, pkt.bombs, pkt.graze, pkt.power, pkt.playerIndex,
                 pkt.bossX, pkt.bossY, pkt.bossHp, pkt.bossMaxHp, pkt.bossPhase,
-                pkt.skillGauge, pkt.chargeLevel, pkt.abilityType, pkt.abilityTicks, pkt.abilityOwner,
+                pkt.skillGauge, pkt.chargeLevel, pkt.abilityType, pkt.abilityTicks, pkt.abilityX, pkt.abilityY, pkt.abilityOwner,
                 pkt.score, pkt.spellTimerTicks, pkt.spellTimerTotal,
                 pkt.musicTrackId, pkt.spellName, pkt.activeSpellCard, pkt.declaring,
                 pkt.characterId, pkt.bossId, pkt.bossName, pkt.bossIntroVisible,
-                pkt.dialogSpeaker, pkt.dialogText, pkt.dialogLineIndex);
+                pkt.dialogSpeaker, pkt.dialogText, pkt.dialogLineIndex, pkt.dialogReadyCount, pkt.dialogTotalCount);
     }
 
     public void applyBulletDelta(BulletDeltaPacket pkt) {
@@ -353,6 +361,8 @@ public class ClientArenaState {
         chargeLevel = 0;
         abilityType = 0;
         abilityTicks = 0;
+        abilityX = 0f;
+        abilityY = 0f;
         abilityOwner = new java.util.UUID(0, 0);
         currentMusicTrackId = "";
         characterId = "reimu";
@@ -362,6 +372,8 @@ public class ClientArenaState {
         dialogSpeaker = "";
         dialogText = "";
         dialogLineIndex = -1;
+        dialogReadyCount = 0;
+        dialogTotalCount = 0;
         dialogSlideInTick = 0;
         animRow = 0;
         animLeanFrame = 0;

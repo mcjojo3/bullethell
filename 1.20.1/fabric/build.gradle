@@ -38,7 +38,6 @@ dependencies {
     modImplementation "com.github.Virtuoel:KanosConfig:0.4.1"
     modRuntimeOnly "io.github.llamalad7:mixinextras-fabric:0.5.3"
     modRuntimeOnly "mezz.jei:jei-1.20.1-fabric:15.2.0.27"
-    modImplementation "de.siphalor.amecs.amecs-api-legacy:amecs-api-legacy-mc1.20.0:1.8.2"
 }
 
 processResources {

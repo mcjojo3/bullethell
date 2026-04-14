@@ -73,5 +73,11 @@ public final class BHClientPackets {
             OpenJoinSelectPacket pkt = OpenJoinSelectPacket.decode(buf);
             ctx.queue(() -> Minecraft.getInstance().setScreen(new JoinCharacterSelectScreen(pkt.hostUuid, pkt.hostName)));
         });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.OPEN_CHALLENGE, (buf, ctx) -> {
+            OpenChallengePacket pkt = OpenChallengePacket.decode(buf);
+            ctx.queue(() -> Minecraft.getInstance().setScreen(
+                    new mc.sayda.bullethell.client.screen.ChallengeScreen(pkt)));
+        });
     }
 }

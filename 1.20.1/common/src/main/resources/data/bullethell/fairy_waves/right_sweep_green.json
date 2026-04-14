@@ -1,0 +1,10 @@
+{
+  "id": "right_sweep_green",
+  "description": "4 green fairies entering from the right arcing CCW. GREEN fires random-angle ring bursts - creates rotating wall patterns. 6 bullets Normal, 8 Hard, 12 Lunatic.",
+  "enemies": [
+    { "x": 500, "y":  50, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "GREEN_FAIRY" },
+    { "x": 500, "y":  90, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "GREEN_FAIRY" },
+    { "x": 500, "y": 130, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "GREEN_FAIRY" },
+    { "x": 500, "y": 170, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "GREEN_FAIRY" }
+  ]
+}
