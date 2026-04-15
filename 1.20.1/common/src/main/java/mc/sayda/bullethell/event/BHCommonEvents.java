@@ -8,6 +8,7 @@ import mc.sayda.bullethell.arena.BulletHellManager;
 import mc.sayda.bullethell.arena.BulletPool;
 import mc.sayda.bullethell.arena.GameEvent;
 import mc.sayda.bullethell.command.BulletHellCommands;
+import mc.sayda.bullethell.debug.BHDebugMode;
 import mc.sayda.bullethell.network.ArenaStatePacket;
 import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.network.BulletDeltaPacket;
@@ -152,6 +153,7 @@ public class BHCommonEvents {
 
         PlayerEvent.PLAYER_QUIT.register(player -> {
             UUID uuid = player.getUUID();
+            BHDebugMode.clear(uuid);
             if (!BulletHellManager.INSTANCE.hasArena(uuid)
                     && BulletHellManager.INSTANCE.isInMatch(uuid)) {
                 BulletHellManager.INSTANCE.leaveMatch(uuid);

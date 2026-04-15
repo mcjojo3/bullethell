@@ -48,10 +48,29 @@ public class CharacterDefinition {
     /** Movement speed (arena units / tick) while holding focus (Shift). */
     public float speedFocused = 4.5f;
 
-    // TH19 Charge Rates (multipliers for gauge gain)
+    // TH19-style controls (Z shoot, X charge): passive build when X is not held.
+    /** Multiplier for passive charge while shooting (smaller = slower). */
     public float chargeRateShooting = 1.0f;
+    /** Multiplier for passive charge while idle (not shooting). */
     public float chargeRateIdle = 3.0f;
+    /**
+     * Extra multiplier while holding X after PoFV startup — scales how fast each
+     * level fills (see {@link #chargeSpeedFrames}).
+     */
     public float chargeRateCharging = 5.0f;
+
+    /**
+     * Touhou 9 PoFV: frames to fill one charge level while holding X (after the
+     * 9-frame startup where the bar does not move). Wiki values, e.g. Reimu 25,
+     * Marisa 31.
+     */
+    public double chargeSpeedFrames = 31.0;
+
+    /**
+     * Touhou 9 PoFV: ticks after releasing a charge skill before a new charge can
+     * build (Lv.1 attack recovery). Reimu 41, Marisa 36, etc.
+     */
+    public int chargeDelayAfterSkill = 41;
 
     /** Lives (continues) at the start of a run. */
     public int startingLives = 3;

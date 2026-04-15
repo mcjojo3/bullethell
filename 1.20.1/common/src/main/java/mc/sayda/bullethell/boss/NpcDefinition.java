@@ -7,7 +7,7 @@ package mc.sayda.bullethell.boss;
  * Example JSON:
  * <pre>
  * {
- *   "id": "marisa_npc",
+ *   "id": "marisa",
  *   "displayName": "Kirisame Marisa",
  *   "challengeText": "Heh, wanna see my ordinary magic? Come at me, ze!",
  *   "stageId": "marisa_stage"

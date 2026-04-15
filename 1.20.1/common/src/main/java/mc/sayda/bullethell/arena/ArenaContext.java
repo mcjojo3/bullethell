@@ -2,6 +2,9 @@ package mc.sayda.bullethell.arena;
 
 import mc.sayda.bullethell.boss.BossDefinition;
 import mc.sayda.bullethell.boss.BossLoader;
+import mc.sayda.bullethell.boss.CharacterDefinition;
+import mc.sayda.bullethell.debug.BHDebugMode;
+import mc.sayda.bullethell.entity.BHAttributes;
 import mc.sayda.bullethell.boss.FairyWaveLoader;
 import mc.sayda.bullethell.boss.PatternStep;
 import mc.sayda.bullethell.boss.PhaseDefinition;
@@ -144,6 +147,8 @@ public class ArenaContext {
     public UUID masterSparkOwner = null;
     public float masterSparkX = 0f;
     public float masterSparkY = 0f;
+    /** 1–3: PoFV Illusion Laser scaling ({@link #tickMasterSpark}). */
+    private int masterSparkLevel = 0;
 
     // ---------------------------------------------------------------- init
     // dialog state
@@ -192,12 +197,14 @@ public class ArenaContext {
     private final java.util.LinkedHashMap<UUID, String> coopCharIds = new java.util.LinkedHashMap<>();
 
     /** Add a co-op participant. Called when another player joins the match. */
-    public void addCoopPlayer(UUID uuid, mc.sayda.bullethell.boss.CharacterDefinition charDef) {
-        int startLives = (rules.startingLives >= 0) ? rules.startingLives : charDef.startingLives;
-        int startBombs = (rules.startingBombs >= 0) ? rules.startingBombs : charDef.startingBombs;
+    public void addCoopPlayer(UUID uuid, mc.sayda.bullethell.boss.CharacterDefinition charDef,
+            net.minecraft.world.entity.LivingEntity participantAttributes) {
+        int startLives = resolveStartingLives(charDef, participantAttributes);
+        int startBombs = resolveStartingBombs(charDef, participantAttributes);
         PlayerState2D ps = new PlayerState2D(charDef.hitRadius, charDef.grazeRadius,
                 charDef.pickupRadius, charDef.speedNormal, charDef.speedFocused,
                 charDef.chargeRateShooting, charDef.chargeRateIdle, charDef.chargeRateCharging,
+                charDef.chargeSpeedFrames, charDef.chargeDelayAfterSkill,
                 startLives, startBombs);
         coopPlayers.put(uuid, ps);
         coopBullets.put(uuid, new BulletPool(BulletPool.PLAYER_CAPACITY));
@@ -262,12 +269,19 @@ public class ArenaContext {
 
     /** Start the default stage (stage_1) at NORMAL difficulty with Reimu. */
     public ArenaContext(UUID playerUuid, DifficultyConfig difficulty) {
-        this(playerUuid, difficulty, "stage_1", "reimu");
+        this(playerUuid, difficulty, "stage_1", "reimu", null);
     }
 
     /** Start a specific stage with the default character. */
     public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, String stageId) {
-        this(playerUuid, difficulty, stageId, "reimu");
+        this(playerUuid, difficulty, stageId, "reimu", null);
+    }
+
+    /**
+     * Start a specific stage with a specific character (no attribute bonuses).
+     */
+    public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, String stageId, String characterId) {
+        this(playerUuid, difficulty, stageId, characterId, null);
     }
 
     /**
@@ -277,8 +291,10 @@ public class ArenaContext {
      *                    {@code data/bullethell/stages/}
      * @param characterId file name (without .json) under
      *                    {@code data/bullethell/characters/}
+     * @param hostAttributes host player for {@link BHAttributes} bonuses, or null
      */
-    public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, String stageId, String characterId) {
+    public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, String stageId, String characterId,
+            net.minecraft.world.entity.LivingEntity hostAttributes) {
         this.playerUuid = playerUuid;
         this.arenaId = ID_GEN.getAndIncrement();
         this.difficulty = difficulty;
@@ -306,11 +322,12 @@ public class ArenaContext {
         // Apply character-specific stats; stage rules can override lives/bombs
         mc.sayda.bullethell.boss.CharacterDefinition charDef = mc.sayda.bullethell.boss.CharacterLoader
                 .load(this.characterId);
-        int startLives = (rules.startingLives >= 0) ? rules.startingLives : charDef.startingLives;
-        int startBombs = (rules.startingBombs >= 0) ? rules.startingBombs : charDef.startingBombs;
+        int startLives = resolveStartingLives(charDef, hostAttributes);
+        int startBombs = resolveStartingBombs(charDef, hostAttributes);
         player = new PlayerState2D(charDef.hitRadius, charDef.grazeRadius, charDef.pickupRadius,
                 charDef.speedNormal, charDef.speedFocused,
                 charDef.chargeRateShooting, charDef.chargeRateIdle, charDef.chargeRateCharging,
+                charDef.chargeSpeedFrames, charDef.chargeDelayAfterSkill,
                 startLives, startBombs);
 
         // Boss position is set when BOSS phase begins
@@ -326,6 +343,25 @@ public class ArenaContext {
         if (scheduledEnemies.isEmpty()) {
             transitionToDialogOrBoss();
         }
+    }
+
+    /**
+     * Stage rules override the character's {@link CharacterDefinition#startingLives};
+     * then {@link BHAttributes#EXTRA_LIVES} on {@code player} adds on top.
+     */
+    private int resolveStartingLives(CharacterDefinition charDef,
+            net.minecraft.world.entity.LivingEntity player) {
+        int base = (rules.startingLives >= 0) ? rules.startingLives : charDef.startingLives;
+        return base + BHAttributes.extraLivesBonus(player);
+    }
+
+    /**
+     * Same as {@link #resolveStartingLives} for bombs; total is capped at 9.
+     */
+    private int resolveStartingBombs(CharacterDefinition charDef,
+            net.minecraft.world.entity.LivingEntity player) {
+        int base = (rules.startingBombs >= 0) ? rules.startingBombs : charDef.startingBombs;
+        return Math.min(9, base + BHAttributes.extraBombsBonus(player));
     }
 
     // ---------------------------------------------------------------- inner types
@@ -479,6 +515,38 @@ public class ArenaContext {
             if (ps.invulnTicks > 0)
                 ps.invulnTicks--;
         }
+
+        refreshDebugGodMode();
+    }
+
+    /**
+     * Operator debug: infinite lives/bombs and long invulnerability for the
+     * toggled participant(s).
+     */
+    private void refreshDebugGodMode() {
+        if (BHDebugMode.isGodMode(playerUuid))
+            applyDebugGod(player);
+        for (var e : coopPlayers.entrySet()) {
+            if (BHDebugMode.isGodMode(e.getKey()))
+                applyDebugGod(e.getValue());
+        }
+    }
+
+    private static void applyDebugGod(PlayerState2D ps) {
+        ps.lives = Math.max(ps.lives, 9);
+        ps.bombs = 9;
+        ps.invulnTicks = Math.max(ps.invulnTicks, 600);
+        ps.deathPendingTicks = 0;
+    }
+
+    /** Arena tick counter (waves + boss); for debug HUD only. */
+    public int getDebugArenaTick() {
+        return stageTick;
+    }
+
+    /** Boss pattern cooldown remaining; for debug HUD (0 during waves / dialog). */
+    public int getDebugBossPatternCooldown() {
+        return patternCooldown;
     }
 
     private void tickStage() {
@@ -491,32 +559,42 @@ public class ArenaContext {
         if (ps.lives < 0)
             return;
 
-        // 1. Passive Regeneration
-        // In TH19, gauge fills faster when NOT shooting
-        float gain = ps.shooting ? ps.chargeRateShooting : ps.chargeRateIdle;
-
-        // Sakuya's Time Stop pauses other players' gauges if freezer is active
+        // Sakuya's Time Stop pauses gauge build for everyone involved
         if (timeStopTicks > 0)
             return;
 
-        // 2. Charging Logic (Holding X)
-        if (ps.isCharging) {
-            gain += ps.chargeRateCharging;
+        if (ps.chargeLockoutTicks > 0) {
+            ps.chargeLockoutTicks--;
+            ps.syncChargePacketFields();
+            return;
         }
 
-        ps.skillGauge = Math.min(PlayerState2D.MAX_GAUGE, ps.skillGauge + (int) gain);
+        // Gray stock: passive only while X is not held (TH19: Z still shoots).
+        if (!ps.isCharging) {
+            float mult = ps.shooting ? ps.chargeRateShooting : ps.chargeRateIdle;
+            double passive = mult * (3.0 / 2000.0) * PlayerState2D.CHARGE_GLOBAL_SPEED_MULT;
+            ps.storedChargeProgress = Math.min(PlayerState2D.CHARGE_LEVEL_MAX,
+                    ps.storedChargeProgress + passive);
+        } else {
+            ps.chargeConsecutiveHoldTicks++;
+            // New press: restart colored hold meter (PoFV).
+            if (ps.chargeConsecutiveHoldTicks == 1)
+                ps.holdChargeProgress = 0.0;
+            // Touhou 9: first 9 frames of holding charge, the bar does not move.
+            if (ps.chargeConsecutiveHoldTicks > PlayerState2D.POFV_CHARGE_STARTUP_FRAMES
+                    && ps.holdChargeProgress < PlayerState2D.CHARGE_LEVEL_MAX) {
+                double per = (1.0 / ps.chargeSpeedFrames) * PlayerState2D.CHARGE_GLOBAL_SPEED_MULT;
+                ps.holdChargeProgress = Math.min(PlayerState2D.CHARGE_LEVEL_MAX,
+                        ps.holdChargeProgress + per);
+            }
+            // Hold cannot exceed stored stock (same bar, colored sits on gray).
+            ps.holdChargeProgress = Math.min(ps.holdChargeProgress, ps.storedChargeProgress);
+        }
 
-        // 3. Update Discrete Levels
-        if (ps.skillGauge >= 2000)
-            ps.chargeLevel = 4;
-        else if (ps.skillGauge >= 1000)
-            ps.chargeLevel = 3;
-        else if (ps.skillGauge >= 500)
-            ps.chargeLevel = 2;
-        else if (ps.skillGauge >= 200)
-            ps.chargeLevel = 1;
-        else
-            ps.chargeLevel = 0;
+        if (!ps.isCharging)
+            ps.chargeConsecutiveHoldTicks = 0;
+
+        ps.syncChargePacketFields();
     }
 
     // ================================================================ WAVE PHASE
@@ -530,7 +608,9 @@ public class ArenaContext {
             case EASY -> 0.80f;
             case NORMAL -> 1.00f;
             case HARD -> 1.25f;
-            case LUNATIC -> 1.55f;
+            // Higher = wave spawn ticks shrink more (tighter spacing). Lunatic
+            // stage sections typically run denser than Hard (TH6–TH15 pacing).
+            case LUNATIC -> 1.74f;
         };
     }
 
@@ -704,8 +784,7 @@ public class ArenaContext {
         score.addScore(type.scoreValue);
         killCounter++;
 
-        // Award Skill Gauge on kill
-        ps.skillGauge = Math.min(PlayerState2D.MAX_GAUGE, ps.skillGauge + 30);
+        ps.addStoredChargeProgress(30 * 3.0 / 2000.0);
 
         // On-kill death burst (Lunatic-style)
         if (rules.onKillDeathBurstCount > 0) {
@@ -974,6 +1053,34 @@ public class ArenaContext {
         return difficulty.speedMult * phaseCreep * lunaticExtra;
     }
 
+    /**
+     * Living player closest to the boss — boss aimed patterns and lasers target this
+     * player so co-op feels like shared pressure instead of always targeting the host.
+     */
+    private PlayerState2D getBossAimTarget() {
+        PlayerState2D closest = null;
+        float bestD2 = Float.MAX_VALUE;
+        if (player.lives >= 0) {
+            float dx = player.x - bossX;
+            float dy = player.y - bossY;
+            bestD2 = dx * dx + dy * dy;
+            closest = player;
+        }
+        for (var e : coopPlayers.entrySet()) {
+            PlayerState2D ps = e.getValue();
+            if (ps.lives < 0)
+                continue;
+            float dx = ps.x - bossX;
+            float dy = ps.y - bossY;
+            float d2 = dx * dx + dy * dy;
+            if (d2 < bestD2) {
+                bestD2 = d2;
+                closest = ps;
+            }
+        }
+        return closest != null ? closest : player;
+    }
+
     private void tickBossAI() {
         lasers.tick();
         PhaseDefinition phase = currentBossPhase();
@@ -1005,11 +1112,19 @@ public class ArenaContext {
         PatternStep step = phase.attacks.get(attackIndex % phase.attacks.size());
         attackIndex++;
         executeAttack(step);
-        patternCooldown = Math.max(1, (int) (step.cooldown / bossDensityMult()));
+        int cd = Math.max(1, (int) (step.cooldown / bossDensityMult()));
+        // LASER_BEAM is a rapid faux-laser burst; on Lunatic bossDensityMult can
+        // shrink cooldown to 1–2 ticks and stack two “spark columns” unreadably.
+        // TH-style Master Spark support fire is one stream at a time with gaps.
+        String pat = step.pattern == null ? "" : step.pattern.toUpperCase();
+        if ("LASER_BEAM".equals(pat))
+            cd = Math.max(8, cd);
+        patternCooldown = cd;
     }
 
     private void executeAttack(PatternStep step) {
         BulletType type = bulletTypeByName(step.bulletType);
+        PlayerState2D aimTarget = getBossAimTarget();
         float dens = bossDensityMult();
         float spdRatio = bossSpeedMult() / difficulty.speedMult;
         int scaledArms = Math.max(1, Math.round(step.arms * dens));
@@ -1021,7 +1136,21 @@ public class ArenaContext {
                 spiralAngle += (float) (Math.PI * 2.0 / scaledArms) * 0.15f;
             }
             case "AIMED" -> PatternEngine.fireAimed(bullets, bossX, bossY,
-                    player.x, player.y, scaledArms, step.spread, effSpeed, difficulty, type);
+                    aimTarget.x, aimTarget.y, scaledArms, step.spread, effSpeed, difficulty, type);
+            case "AIMED_RING" -> {
+                int scaledAimArms = scaledArms;
+                int scaledRingArms = Math.max(6,
+                        Math.min(20, Math.round(step.ringArms * Math.min(dens, 1.35f))));
+                float ringSp = step.ringSpeed > 0.01f ? step.ringSpeed * spdRatio : effSpeed * 0.52f;
+                BulletType ringType = (step.ringBulletType != null && !step.ringBulletType.isEmpty())
+                        ? bulletTypeByName(step.ringBulletType)
+                        : BulletType.ORB;
+                float ringStart = random.nextFloat() * (float) (Math.PI * 2.0);
+                PatternEngine.fireAimedWithRing(bullets, bossX, bossY,
+                        aimTarget.x, aimTarget.y,
+                        scaledAimArms, step.spread, effSpeed,
+                        scaledRingArms, ringSp, difficulty, type, ringType, ringStart);
+            }
             case "RING" -> PatternEngine.fireRing(bullets, bossX, bossY,
                     scaledArms, effSpeed, difficulty, type);
             case "SPREAD" -> PatternEngine.fireSpread(bullets, bossX, bossY,
@@ -1029,11 +1158,11 @@ public class ArenaContext {
             case "DENSE_RING" -> PatternEngine.fireDenseRing(bullets, bossX, bossY,
                     scaledArms, effSpeed, difficulty, type);
             case "LASER_BEAM" -> PatternEngine.fireLaserBeam(bullets, bossX, bossY,
-                    player.x, player.y, scaledArms, effSpeed, difficulty, type);
+                    aimTarget.x, aimTarget.y, scaledArms, effSpeed, difficulty, type);
             case "LASER" -> {
                 // Single directional laser aimed at the player's current position (Master
                 // Spark).
-                float angle = (float) Math.atan2(player.y - bossY, player.x - bossX);
+                float angle = (float) Math.atan2(aimTarget.y - bossY, aimTarget.x - bossX);
                 int scaledWarn = Math.max(10, (int) (step.warnTicks / dens));
                 lasers.spawn(bossX, bossY, angle, step.laserHalfWidth,
                         scaledWarn, step.activeTicks, type.getId(), false);
@@ -1283,7 +1412,10 @@ public class ArenaContext {
     }
 
     private void checkEnemyBulletsVsPlayer(UUID uuid, PlayerState2D ps) {
-        if (ps.deathPendingTicks > 0 || ps.invulnTicks > 0)
+        if (ps.deathPendingTicks > 0)
+            return;
+        boolean god = BHDebugMode.isGodMode(uuid);
+        if (!god && ps.invulnTicks > 0)
             return;
 
         float hr2 = ps.hitRadius * ps.hitRadius;
@@ -1298,12 +1430,14 @@ public class ArenaContext {
 
             if (distSq <= hr2) {
                 bullets.deactivate(i);
+                if (god)
+                    continue;
                 ps.deathPendingTicks = PlayerState2D.DEATH_BOMB_GRACE;
                 ps.personalEvents.add(GameEvent.HIT);
                 return;
             } else if (distSq <= gr2 && rules.grazeScoringEnabled) {
                 ps.graze++;
-                ps.skillGauge = Math.min(PlayerState2D.MAX_GAUGE, ps.skillGauge + 20); // Award Skill Gauge on Graze
+                ps.addStoredChargeProgress(20 * 3.0 / 2000.0);
                 score.onGraze();
                 ps.personalEvents.add(GameEvent.GRAZE);
                 if (ps.graze % 50 == 0)
@@ -1313,7 +1447,10 @@ public class ArenaContext {
     }
 
     private void checkLasersVsPlayer(UUID uuid, PlayerState2D ps) {
-        if (ps.deathPendingTicks > 0 || ps.invulnTicks > 0)
+        if (ps.deathPendingTicks > 0)
+            return;
+        boolean god = BHDebugMode.isGodMode(uuid);
+        if (!god && ps.invulnTicks > 0)
             return;
         for (int i = 0; i < LaserPool.CAPACITY; i++) {
             if (!lasers.isFiring(i))
@@ -1332,6 +1469,8 @@ public class ArenaContext {
 
             // 1. Hitbox Check (more forgiving)
             if (dist - (ps.hitRadius * LASER_HITBOX_SCALE) < hw) {
+                if (god)
+                    continue;
                 ps.deathPendingTicks = PlayerState2D.DEATH_BOMB_GRACE;
                 pendingEvents.add(GameEvent.HIT);
                 return;
@@ -1340,7 +1479,7 @@ public class ArenaContext {
             // 2. Graze Check (build gauge)
             if (dist - ps.grazeRadius < hw) {
                 // Award small amount per tick while in beam vicinity
-                ps.skillGauge = Math.min(PlayerState2D.MAX_GAUGE, ps.skillGauge + 2);
+                ps.addStoredChargeProgress(2 * 3.0 / 2000.0);
                 // Continuous laser graze event - throttled by sound engine usually
                 if (stageTick % 10 == 0)
                     ps.personalEvents.add(GameEvent.GRAZE);
@@ -1456,25 +1595,37 @@ public class ArenaContext {
         float itemY = items.getY(i);
         items.deactivate(i);
 
-        float heightFrac = 1.0f - itemY / BulletPool.ARENA_H;
         switch (type) {
-            case ItemPool.TYPE_POINT -> {
-                int val = (int) (rules.pointItemMinValue +
-                        (rules.pointItemMaxValue - rules.pointItemMinValue) * heightFrac);
-                score.addScore(val);
-            }
+            case ItemPool.TYPE_POINT -> score.addScore(pointItemScoreAtHeight(itemY));
             case ItemPool.TYPE_POWER -> {
-                score.onPowerItemPickup();
-                ps.power = Math.min(PlayerState2D.MAX_POWER, ps.power + 4);
+                if (ps.power >= PlayerState2D.MAX_POWER) {
+                    // Item stays TYPE_POWER in the world for co-op; max-power
+                    // collector gets point value instead of a wasted pickup.
+                    score.addScore(pointItemScoreAtHeight(itemY));
+                } else {
+                    score.onPowerItemPickup();
+                    ps.power = Math.min(PlayerState2D.MAX_POWER, ps.power + 4);
+                }
             }
             case ItemPool.TYPE_FULL_POWER -> {
-                score.onPowerItemPickup();
-                ps.power = PlayerState2D.MAX_POWER;
+                if (ps.power >= PlayerState2D.MAX_POWER) {
+                    score.addScore(pointItemScoreAtHeight(itemY));
+                } else {
+                    score.onPowerItemPickup();
+                    ps.power = PlayerState2D.MAX_POWER;
+                }
             }
             case ItemPool.TYPE_ONE_UP -> ps.lives++;
             case ItemPool.TYPE_BOMB -> ps.bombs = Math.min(ps.bombs + 1, 9);
         }
         pendingEvents.add(GameEvent.ITEM_PICKUP);
+    }
+
+    /** Same height→score mapping as a {@link ItemPool#TYPE_POINT} pickup. */
+    private int pointItemScoreAtHeight(float itemY) {
+        float heightFrac = 1.0f - itemY / BulletPool.ARENA_H;
+        return (int) (rules.pointItemMinValue
+                + (rules.pointItemMaxValue - rules.pointItemMinValue) * heightFrac);
     }
 
     // ---------------------------------------------------------------- TH19
@@ -1485,112 +1636,200 @@ public class ArenaContext {
         if (ps == null || ps.lives < 0)
             return;
 
-        int level = ps.chargeLevel;
-        if (level < 1)
-            return; // Need at least Lvl 1
+        /*
+         * PoFV: colored hold bar picks release level; gray stock pays (level − 1)
+         * only for L2+; L1 never drains stock. Cast is capped by 1 + floor(stock).
+         */
+        int held = (int) Math.floor(ps.holdChargeProgress + 1e-9);
+        ps.holdChargeProgress = 0.0;
+        ps.chargeConsecutiveHoldTicks = 0;
+        if (held < 1) {
+            ps.syncChargePacketFields();
+            return;
+        }
 
-        // Consume gauge based on level reached
-        // Lvl 1: consume 200, Lvl 2: consume 500, Lvl 3: consume 1000
-        int cost = level >= 3 ? 1000 : (level >= 2 ? 500 : 200);
-        ps.skillGauge = Math.max(0, ps.skillGauge - cost);
+        int stockLevels = Math.min(PlayerState2D.CHARGE_LEVEL_MAX,
+                (int) Math.floor(ps.storedChargeProgress + 1e-9));
+        int maxCast = Math.min(PlayerState2D.CHARGE_LEVEL_MAX, 1 + stockLevels);
+        int castLevel = Math.min(held, maxCast);
+        int cost = castLevel - 1;
+        ps.storedChargeProgress = Math.max(0.0, ps.storedChargeProgress - cost);
+        ps.chargeLockoutTicks = ps.chargeDelayAfterSkill;
+        ps.syncChargePacketFields();
 
-        // Reset charge level after use
-        ps.chargeLevel = 0;
-
-        triggerCharacterSkill(uuid, ps, level);
+        triggerCharacterSkill(uuid, ps, castLevel);
         pendingEvents.add(GameEvent.SKILL_USED); // Use skill event for the distinct visual effect
     }
 
+    /**
+     * TH09 PoFV-style charge attacks (Reimu / Marisa / Sakuya) and TH19-inspired
+     * Sanae miracles. {@code level} is 1–3 from the hold meter + stock rules.
+     */
     private void triggerCharacterSkill(UUID uuid, PlayerState2D ps, int level) {
         String cid = getCharacterId(uuid);
 
         switch (cid) {
             case "marisa" -> {
-                if (level >= 3) {
-                    masterSparkTicks = 20; // 1 second stationary beam
-                    masterSparkOwner = uuid;
-                    masterSparkX = ps.x;
-                    masterSparkY = Math.max(0f, ps.y - 32f);
-                } else if (level >= 2) {
-                    masterSparkTicks = 20; // 1 second burst
-                    masterSparkOwner = uuid;
-                    masterSparkX = ps.x;
-                    masterSparkY = Math.max(0f, ps.y - 32f);
-                }
+                // PoFV: Illusion Laser — thin forward laser; stronger levels last longer
+                // and hit harder (still one shared beam for networking simplicity).
+                masterSparkOwner = uuid;
+                masterSparkX = ps.x;
+                masterSparkY = Math.max(0f, ps.y - 32f);
+                masterSparkLevel = Math.min(3, Math.max(1, level));
+                masterSparkTicks = switch (masterSparkLevel) {
+                    case 1 -> 12;
+                    case 2 -> 14; // deliberately below half of L3 so 2×L2 < 1×L3 for same stock
+                    default -> 26;
+                };
             }
             case "sakuya" -> {
+                // PoFV: L1 Jack the Ripper (knife stream); L2 denser volley + radial burst;
+                // L3 Private Square–style time stop + knife ring for resume wave.
                 if (level >= 3) {
-                    timeStopTicks = 60; // 3 seconds freeze
+                    timeStopTicks = 60;
                     timeStopOwner = uuid;
+                    fireSakuyaKnifeRing(uuid, ps, 20);
                 } else if (level >= 2) {
-                    // Knife freeze toss
-                    fireTimeStopKnives(ps);
+                    fireSakuyaJackRipper(uuid, ps, 18, 0.12f);
+                    PatternEngine.fireRing(getBulletPool(uuid), ps.x, ps.y, 14, 3.4f, difficulty, BulletType.KUNAI);
+                } else {
+                    fireSakuyaJackRipper(uuid, ps, 10, 0.08f);
                 }
             }
             case "reimu" -> {
-                int count = level >= 3 ? 12 : 4;
-                fireHomingOrbs(ps, count);
+                // PoFV: L1 Hakurei Amulet; L2 Yin-Yang Sign (dual rings + amulets); L3
+                // Dream Seal (denser rings + more homing amulets).
+                fireReimuChargeAttack(uuid, ps, level);
             }
             case "sanae" -> {
-                float radius = level >= 3 ? 180f : 80f;
-                clearBulletsInRadius(ps.x, ps.y, radius);
+                // TH19-style: miracle bullet erase + wind/blessing burst (wiki page sparse).
+                fireSanaeMiracle(uuid, ps, level);
+            }
+            default -> {
             }
         }
     }
 
-    private void fireHomingOrbs(PlayerState2D ps, int count) {
+    /** PoFV Hakurei Amulet / Yin-Yang Sign / Dream Seal approximations. */
+    private void fireReimuChargeAttack(UUID uuid, PlayerState2D ps, int level) {
+        BulletPool pb = getBulletPool(uuid);
+        float px = ps.x;
+        float py = ps.y - 8f;
+        if (level <= 1) {
+            fireHomingOrbs(ps, pb, 4);
+            return;
+        }
+        if (level == 2) {
+            PatternEngine.fireRing(pb, px, py, 12, 3.6f, difficulty, BulletType.RICE);
+            PatternEngine.fireRing(pb, px, py, 10, 2.3f, difficulty, BulletType.STAR);
+            fireHomingOrbs(ps, pb, 5);
+            return;
+        }
+        PatternEngine.fireRing(pb, px, py, 18, 4.0f, difficulty, BulletType.RICE);
+        PatternEngine.fireRing(pb, px, py, 16, 2.6f, difficulty, BulletType.ORB);
+        fireHomingOrbs(ps, pb, 10);
+    }
+
+    private void fireHomingOrbs(PlayerState2D ps, BulletPool pb, int count) {
         for (int i = 0; i < count; i++) {
-            float angle = (float) (i * Math.PI * 2 / count);
+            float angle = (float) (i * Math.PI * 2 / Math.max(1, count));
             float vx = (float) Math.cos(angle) * 4f;
             float vy = (float) Math.sin(angle) * 4f;
-            // PatternEngine needs a PLAYER bullet pool.
-            playerBullets.spawn(ps.x, ps.y, vx, vy, BulletType.HOMING_ORB.getId(), 200);
+            pb.spawn(ps.x, ps.y, vx, vy, BulletType.HOMING_ORB.getId(), 200);
         }
     }
 
+    /**
+     * PoFV Jack the Ripper: knives aimed toward boss (or upward in wave phases).
+     */
+    private void fireSakuyaJackRipper(UUID uuid, PlayerState2D ps, int count, float spread) {
+        BulletPool pb = getBulletPool(uuid);
+        float tx = bossMaxHp > 0 ? bossX : ps.x;
+        float ty = bossMaxHp > 0 ? bossY : ps.y - 220f;
+        float base = (float) Math.atan2(ty - ps.y, tx - ps.x);
+        for (int i = 0; i < count; i++) {
+            float ang = base + (i - (count - 1) / 2f) * spread;
+            float sp = 11.5f * difficulty.speedMult;
+            pb.spawn(ps.x, ps.y, (float) Math.cos(ang) * sp, (float) Math.sin(ang) * sp,
+                    BulletType.KUNAI.getId(), 140);
+        }
+    }
 
-    private void fireTimeStopKnives(PlayerState2D ps) {
-        // Spawns knives that have 0 velocity for a while, then launch
-        for (int i = 0; i < 16; i++) {
-            float ang = (float) (random.nextFloat() * Math.PI * 2);
-            float dist = 20f + random.nextFloat() * 20f;
+    /** Ring of knives used with Sakuya L3 time stop (launches when time resumes). */
+    private void fireSakuyaKnifeRing(UUID uuid, PlayerState2D ps, int count) {
+        BulletPool pb = getBulletPool(uuid);
+        float step = (float) (Math.PI * 2.0 / count);
+        for (int i = 0; i < count; i++) {
+            float ang = step * i;
+            float dist = 22f + random.nextFloat() * 8f;
             float kx = ps.x + (float) Math.cos(ang) * dist;
             float ky = ps.y + (float) Math.sin(ang) * dist;
-            playerBullets.spawn(kx, ky, 0, -12, BulletType.KUNAI.getId(), 100);
+            pb.spawn(kx, ky, 0f, -12f, BulletType.KUNAI.getId(), 120);
         }
+    }
+
+    /** TH19-inspired: bullet miracle + outward wind (stars / bubbles). */
+    private void fireSanaeMiracle(UUID uuid, PlayerState2D ps, int level) {
+        float cx = ps.x;
+        float cy = ps.y;
+        if (level <= 1) {
+            clearBulletsInRadius(cx, cy, 72f, ps);
+            PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 10, 3.2f, difficulty, BulletType.BUBBLE);
+            return;
+        }
+        if (level == 2) {
+            clearBulletsInRadius(cx, cy, 115f, ps);
+            PatternEngine.fireSpiral(getBulletPool(uuid), cx, cy - 6f, 0f, 10, 3.6f, difficulty, BulletType.STAR);
+            PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 12, 2.8f, difficulty, BulletType.BUBBLE);
+            return;
+        }
+        clearBulletsInRadius(cx, cy, 200f, ps);
+        PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 22, 4.2f, difficulty, BulletType.STAR);
+        PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 16, 3.0f, difficulty, BulletType.BUBBLE);
     }
 
     private void tickMasterSpark() {
-        // Stationary vertical beam spawned in front of Marisa.
-        float hw = 32f; // beam half-width (arena units)
+        // PoFV Illusion Laser: vertical beam; width and damage scale with charge level.
+        int lv = masterSparkLevel > 0 ? masterSparkLevel : 3;
+        float hw = switch (lv) {
+            case 1 -> 15f;
+            case 2 -> 19f;
+            default -> 34f;
+        };
+        int enemyDmg = switch (lv) {
+            case 1 -> 3;
+            case 2 -> 3;
+            default -> 6;
+        };
+        int bossDmg = switch (lv) {
+            case 1 -> 6;
+            case 2 -> 7;
+            default -> 14;
+        };
         float x = masterSparkX;
         float y = masterSparkY;
 
-        // Find owner to award gauge
         PlayerState2D ownerPs = getPlayerState(masterSparkOwner);
 
-        // Kill enemies in beam
         for (int i = 0; i < EnemyPool.CAPACITY; i++) {
             if (!enemies.isActive(i))
                 continue;
             float dist = getLaserDistance(enemies.getX(i), enemies.getY(i), x, y, -1.570796f, false);
             if (dist >= 0 && dist < hw) {
-                if (enemies.damage(i, 5))
+                if (enemies.damage(i, enemyDmg))
                     killEnemy(i, ownerPs != null ? ownerPs : player);
             }
         }
 
-        // Damage boss in beam
         if (bossMaxHp > 0) {
             float dist = getLaserDistance(bossX, bossY, x, y, -1.570796f, false);
             if (dist >= 0 && dist < hw) {
-                bossHp = Math.max(0, bossHp - 10);
+                bossHp = Math.max(0, bossHp - bossDmg);
                 if (bossHp == 0)
                     checkBossPhaseTransition();
             }
         }
 
-        // Clear bullets in beam
         for (int i = 0; i < bullets.getCapacity(); i++) {
             if (!bullets.isActive(i))
                 continue;
@@ -1694,13 +1933,19 @@ public class ArenaContext {
         timeStopOwner = null;
         masterSparkTicks = 0;
         masterSparkOwner = null;
+        masterSparkX = 0f;
         masterSparkY = 0f;
+        masterSparkLevel = 0;
     }
 
     private void applyDeath(UUID uuid) {
         PlayerState2D ps = getPlayerState(uuid);
         if (ps == null)
             return;
+        if (BHDebugMode.isGodMode(uuid)) {
+            ps.deathPendingTicks = 0;
+            return;
+        }
 
         spellcard.fail();
 
@@ -1730,7 +1975,7 @@ public class ArenaContext {
                 resetAbilityStates();
             }
 
-            clearBulletsInRadius(ps.x, ps.y, DEATH_CLEAR_RADIUS);
+            clearBulletsInRadius(ps.x, ps.y, DEATH_CLEAR_RADIUS, null);
             ps.deathPendingTicks = 0;
             ps.invulnTicks = PlayerState2D.INVULN_TICKS;
         } else {
@@ -1744,7 +1989,10 @@ public class ArenaContext {
      * Deactivate every enemy bullet whose centre is within {@code radius} of (cx,
      * cy).
      */
-    private void clearBulletsInRadius(float cx, float cy, float r) {
+    /**
+     * @param gaugeRecipient if non-null, PoFV-style charge is awarded for each bullet cleared (Sanae skill).
+     */
+    private void clearBulletsInRadius(float cx, float cy, float r, PlayerState2D gaugeRecipient) {
         float r2 = r * r;
         int count = 0;
         for (int i = 0; i < bullets.getCapacity(); i++) {
@@ -1757,19 +2005,22 @@ public class ArenaContext {
                 count++;
             }
         }
-        // Sanae's Miracle: award gauge for bullets cleared
-        if (count > 0) {
-            // Find Sanae player (simplified: award to host for now)
-            player.skillGauge = Math.min(PlayerState2D.MAX_GAUGE, player.skillGauge + count * 2);
-        }
+        if (gaugeRecipient != null && count > 0)
+            gaugeRecipient.addStoredChargeProgress(count * (2 * 3.0 / 2000.0));
     }
 
     /** Activate a bomb for the specified participant. */
     public void activateBomb(UUID uuid) {
         PlayerState2D ps = getPlayerState(uuid);
-        if (ps == null || ps.bombs <= 0)
+        if (ps == null)
             return;
-        ps.bombs--;
+        boolean dbg = BHDebugMode.isGodMode(uuid);
+        if (!dbg && ps.bombs <= 0)
+            return;
+        if (!dbg)
+            ps.bombs--;
+        else
+            ps.bombs = 9;
         bullets.clearAll();
         // Kill all small (non-large) enemies; mark their drops as attracted toward the
         // player

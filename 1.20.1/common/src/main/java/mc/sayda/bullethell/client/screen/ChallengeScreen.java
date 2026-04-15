@@ -1,5 +1,6 @@
 package mc.sayda.bullethell.client.screen;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import mc.sayda.bullethell.network.OpenChallengePacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -103,22 +104,32 @@ public class ChallengeScreen extends Screen {
     }
 
     /**
-     * Draws the NPC portrait texture (assets/bullethell/textures/entities/<npcId>.png).
-     * Falls back to a coloured placeholder if the texture isn't loaded.
+     * Draws the boss portrait using the shared boss sprite sheet convention:
+     *   {@code assets/bullethell/textures/bosses/<base>_boss.png}
+     * where {@code <base>} is the NPC id with any trailing {@code _npc} stripped.
+     *
+     * Sheet layout matches the arena renderer: 256×256, 4×4 grid, 64×64 per frame.
+     * Frame 0 (top-left) is used as a static idle portrait.
      */
     private void drawPortrait(GuiGraphics gfx, int x, int y) {
-        // Derive texture path from npc id (strip trailing "_npc" suffix if present)
-        String texId = pkt.npcId.endsWith("_npc")
+        String base = pkt.npcId.endsWith("_npc")
                 ? pkt.npcId.substring(0, pkt.npcId.length() - 4)
                 : pkt.npcId;
-        ResourceLocation tex = new ResourceLocation("bullethell", "textures/entities/" + texId + ".png");
+        ResourceLocation tex = new ResourceLocation("bullethell", "textures/bosses/" + base + "_boss.png");
 
-        // Solid border around portrait
+        // Border + background
         gfx.fill(x - 2, y - 2, x + PORTRAIT_SIZE + 2, y + PORTRAIT_SIZE + 2, 0xFF555577);
         gfx.fill(x, y, x + PORTRAIT_SIZE, y + PORTRAIT_SIZE, 0xFF111133);
 
-        // Blit the sprite — assume the texture is at least 64×64 and take the top-left tile
-        gfx.blit(tex, x, y, 0, 0, PORTRAIT_SIZE, PORTRAIT_SIZE, PORTRAIT_SIZE, PORTRAIT_SIZE);
+        // Frame 0, row 0 of the 256×256 sprite sheet scaled to PORTRAIT_SIZE×PORTRAIT_SIZE
+        try {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            gfx.blit(tex, x, y, PORTRAIT_SIZE, PORTRAIT_SIZE, 0f, 0f, 64, 64, 256, 256);
+            RenderSystem.disableBlend();
+        } catch (Exception ignored) {
+            // Texture missing — background placeholder is already drawn above
+        }
     }
 
     @Override

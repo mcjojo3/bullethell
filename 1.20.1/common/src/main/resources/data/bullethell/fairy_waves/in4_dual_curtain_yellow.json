@@ -1,0 +1,12 @@
+{
+  "id": "in4_dual_curtain_yellow",
+  "description": "Pure IN8-style double curtain: yellow fairies only, three per side arcing inward. SPREAD fans stack into lane pressure (bamboo-corridor reading) without red aimed overlap.",
+  "enemies": [
+    { "x": -20, "y":  45, "vx": 4.4, "vy": 0.0, "angVel":  0.018, "arcTicks": 90, "type": "YELLOW_FAIRY" },
+    { "x": -20, "y":  95, "vx": 4.4, "vy": 0.0, "angVel":  0.018, "arcTicks": 90, "type": "YELLOW_FAIRY" },
+    { "x": -20, "y": 145, "vx": 4.4, "vy": 0.0, "angVel":  0.018, "arcTicks": 90, "type": "YELLOW_FAIRY" },
+    { "x": 500, "y":  45, "vx": -4.4, "vy": 0.0, "angVel": -0.018, "arcTicks": 90, "type": "YELLOW_FAIRY" },
+    { "x": 500, "y":  95, "vx": -4.4, "vy": 0.0, "angVel": -0.018, "arcTicks": 90, "type": "YELLOW_FAIRY" },
+    { "x": 500, "y": 145, "vx": -4.4, "vy": 0.0, "angVel": -0.018, "arcTicks": 90, "type": "YELLOW_FAIRY" }
+  ]
+}

@@ -28,17 +28,58 @@ public class PlayerState2D {
     public int bombs;
     public int graze;
     public boolean focused;
-    public boolean isCharging; // New field for TH19 charging
-    
-    // TH19 Charge Rates
+    public boolean isCharging;
+
+    /** TH19-style rate multipliers (used with PoFV timing). */
     public float chargeRateShooting;
     public float chargeRateIdle;
     public float chargeRateCharging;
 
-    // TH19 Charge System
-    public int skillGauge    = 0;
-    public int chargeLevel   = 0; // 0..4
-    public static final int MAX_GAUGE = 2000;
+    /**
+     * PoFV gray "stock" bar (0.0–3.0 levels): grazing, kills, passive build while
+     * not holding X. Higher spells spend stock per wiki (Lv. N costs N−1 stock).
+     */
+    public double storedChargeProgress = 0.0;
+
+    /**
+     * PoFV colored bar while holding X (0.0–3.0): fills at {@link #chargeSpeedFrames}
+     * per level after startup; on release, cast level is derived from this, not
+     * from draining all stock for L1.
+     */
+    public double holdChargeProgress = 0.0;
+
+    /** Frames X held this press; resets when X released. Used for 9f startup. */
+    public int chargeConsecutiveHoldTicks = 0;
+
+    /** Ticks remaining before charging can build after a charge skill (PoFV). */
+    public int chargeLockoutTicks = 0;
+
+    /** PoFV frames per level while holding X (after startup); from character JSON. */
+    public double chargeSpeedFrames = 31.0;
+
+    /** PoFV charge delay after a cast; from character JSON. */
+    public int chargeDelayAfterSkill = 41;
+
+    /** Milli-levels (0–3000) of {@link #storedChargeProgress} for HUD / network. */
+    public int skillGauge = 0;
+
+    /** Milli-levels (0–3000) of {@link #holdChargeProgress} while holding X. */
+    public int holdChargeGauge = 0;
+
+    /** Floor of stored stock (0–3) for HUD pips. */
+    public int chargeLevel = 0;
+
+    /** Touhou 9: first 9 frames of holding X, the charge bar does not advance. */
+    public static final int POFV_CHARGE_STARTUP_FRAMES = 9;
+
+    /** Level 4 (PoFV boss / split-screen) is not implemented. */
+    public static final int CHARGE_LEVEL_MAX = 3;
+
+    /**
+     * Applied to passive stock, hold fill after startup, and stock rewards
+     * ({@link #addStoredChargeProgress}) — tweak global charge pacing.
+     */
+    public static final double CHARGE_GLOBAL_SPEED_MULT = 1.28;
 
     /** Counts down after a hit; if > 0 and a bomb arrives, death is cancelled. */
     public int deathPendingTicks = 0;
@@ -102,7 +143,8 @@ public class PlayerState2D {
 
     /** Default constructor - uses built-in constants (Reimu baseline). */
     public PlayerState2D() {
-        this(HIT_RADIUS, GRAZE_RADIUS, PICKUP_RADIUS, SPEED_NORMAL, SPEED_FOCUSED, 1.0f, 3.0f, 5.0f, 3, 3);
+        this(HIT_RADIUS, GRAZE_RADIUS, PICKUP_RADIUS, SPEED_NORMAL, SPEED_FOCUSED,
+                1.0f, 3.0f, 5.0f, 31.0, 41, 3, 3);
     }
 
     /**
@@ -112,6 +154,7 @@ public class PlayerState2D {
     public PlayerState2D(float hitRadius, float grazeRadius, float pickupRadius,
             float speedNormal, float speedFocused,
             float chargeRateShooting, float chargeRateIdle, float chargeRateCharging,
+            double chargeSpeedFrames, int chargeDelayAfterSkill,
             int startingLives, int startingBombs) {
         this.hitRadius = hitRadius;
         this.grazeRadius = grazeRadius;
@@ -121,11 +164,36 @@ public class PlayerState2D {
         this.chargeRateShooting = chargeRateShooting;
         this.chargeRateIdle = chargeRateIdle;
         this.chargeRateCharging = chargeRateCharging;
+        this.chargeSpeedFrames = Math.max(1.0, chargeSpeedFrames);
+        this.chargeDelayAfterSkill = Math.max(0, chargeDelayAfterSkill);
         setSpawnPosition();
         lives = startingLives;
         bombs = startingBombs;
         graze = 0;
         focused = false;
+        syncChargePacketFields();
+    }
+
+    /** Sync packet/HUD ints from {@link #storedChargeProgress} and {@link #holdChargeProgress}. */
+    public void syncChargePacketFields() {
+        double s = Math.min(CHARGE_LEVEL_MAX, Math.max(0.0, storedChargeProgress));
+        storedChargeProgress = s;
+        double h = Math.min(CHARGE_LEVEL_MAX, Math.max(0.0, holdChargeProgress));
+        // Colored hold cannot exceed gray stock (PoFV wheel).
+        h = Math.min(h, s);
+        holdChargeProgress = h;
+        skillGauge = (int) Math.round(s * 1000.0);
+        holdChargeGauge = (int) Math.round(h * 1000.0);
+        chargeLevel = Math.min(CHARGE_LEVEL_MAX, (int) Math.floor(s + 1e-9));
+    }
+
+    /** Add to stored (gray) stock — kills, graze, passive; respects lockout. */
+    public void addStoredChargeProgress(double delta) {
+        if (chargeLockoutTicks > 0)
+            return;
+        double d = delta * CHARGE_GLOBAL_SPEED_MULT;
+        storedChargeProgress = Math.min(CHARGE_LEVEL_MAX, Math.max(0.0, storedChargeProgress + d));
+        syncChargePacketFields();
     }
 
     /**

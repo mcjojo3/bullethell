@@ -49,9 +49,10 @@ public class ClientArenaState {
     public float bossX, bossY;
     public int bossHp, bossMaxHp, bossPhase;
 
-    // TH19 Charge System
+    // PoFV: gray stock (skillGauge) + colored hold (holdChargeGauge); chargeLevel = floor(stock).
     public int skillGauge = 0;
     public int chargeLevel = 0;
+    public int holdChargeGauge = 0;
 
     // Active Ability State
     public int abilityType = 0; // 0=none, 1=timestop, 2=masterspark
@@ -79,6 +80,12 @@ public class ClientArenaState {
 
     /** True when this player is dead but watching the coop partner's run. */
     public boolean spectating = false;
+
+    /** Operator {@code /bullethell debug} god-mode (from server). */
+    public boolean debugGodMode = false;
+    public int debugArenaTick = 0;
+    public int debugPatternCooldown = 0;
+    public int debugEnemyBulletCount = 0;
 
     /**
      * Track ID for the current phase's music (empty = no music).
@@ -143,14 +150,19 @@ public class ClientArenaState {
     public void applyArenaState(boolean pktActive, boolean pktSpectating, float playerX, float playerY,
             int lives, int bombs, int graze, int power, int pIdx,
             float bossX, float bossY, int bossHp, int bossMaxHp, int bossPhase,
-            int skillGauge, int chargeLevel, int abilityType, int abilityTicks, float abilityX, float abilityY, java.util.UUID abilityOwner,
+            int skillGauge, int chargeLevel, int holdChargeGauge, int abilityType, int abilityTicks, float abilityX, float abilityY, java.util.UUID abilityOwner,
             long score, int spellTimerTicks, int spellTimerTotal,
             String musicTrackId, String spellName, boolean activeSpellCard, boolean declaring,
             String characterId, String bossId, String bossName, boolean bossIntroVisible,
-            String dialogSpeaker, String dialogText, int dialogLineIndex, int dialogReadyCount, int dialogTotalCount) {
+            String dialogSpeaker, String dialogText, int dialogLineIndex, int dialogReadyCount, int dialogTotalCount,
+            boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount) {
 
         active = pktActive;
         spectating = pktSpectating;
+        this.debugGodMode = debugGodMode;
+        this.debugArenaTick = debugArenaTick;
+        this.debugPatternCooldown = debugPatternCooldown;
+        this.debugEnemyBulletCount = debugEnemyBulletCount;
         if (!active) {
             BHScaleManager.restoreOriginalScale();
             reset();
@@ -187,6 +199,7 @@ public class ClientArenaState {
         this.bossPhase = bossPhase;
         this.skillGauge = skillGauge;
         this.chargeLevel = chargeLevel;
+        this.holdChargeGauge = holdChargeGauge;
         this.abilityType = abilityType;
         this.abilityTicks = abilityTicks;
         this.abilityX = abilityX;
@@ -251,11 +264,12 @@ public class ClientArenaState {
         applyArenaState(pkt.active, pkt.spectating, pkt.playerX, pkt.playerY,
                 pkt.lives, pkt.bombs, pkt.graze, pkt.power, pkt.playerIndex,
                 pkt.bossX, pkt.bossY, pkt.bossHp, pkt.bossMaxHp, pkt.bossPhase,
-                pkt.skillGauge, pkt.chargeLevel, pkt.abilityType, pkt.abilityTicks, pkt.abilityX, pkt.abilityY, pkt.abilityOwner,
+                pkt.skillGauge, pkt.chargeLevel, pkt.holdChargeGauge, pkt.abilityType, pkt.abilityTicks, pkt.abilityX, pkt.abilityY, pkt.abilityOwner,
                 pkt.score, pkt.spellTimerTicks, pkt.spellTimerTotal,
                 pkt.musicTrackId, pkt.spellName, pkt.activeSpellCard, pkt.declaring,
                 pkt.characterId, pkt.bossId, pkt.bossName, pkt.bossIntroVisible,
-                pkt.dialogSpeaker, pkt.dialogText, pkt.dialogLineIndex, pkt.dialogReadyCount, pkt.dialogTotalCount);
+                pkt.dialogSpeaker, pkt.dialogText, pkt.dialogLineIndex, pkt.dialogReadyCount, pkt.dialogTotalCount,
+                pkt.debugGodMode, pkt.debugArenaTick, pkt.debugPatternCooldown, pkt.debugEnemyBulletCount);
     }
 
     public void applyBulletDelta(BulletDeltaPacket pkt) {
@@ -357,8 +371,13 @@ public class ClientArenaState {
     public void reset() {
         active = false;
         spectating = false;
+        debugGodMode = false;
+        debugArenaTick = 0;
+        debugPatternCooldown = 0;
+        debugEnemyBulletCount = 0;
         skillGauge = 0;
         chargeLevel = 0;
+        holdChargeGauge = 0;
         abilityType = 0;
         abilityTicks = 0;
         abilityX = 0f;

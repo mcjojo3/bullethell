@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.network;
 
 import dev.architectury.networking.NetworkManager;
+import mc.sayda.bullethell.BHControlSettings;
 import mc.sayda.bullethell.client.ClientArenaState;
 import mc.sayda.bullethell.network.AllPlayerBulletsSyncPacket;
 import mc.sayda.bullethell.client.screen.JoinCharacterSelectScreen;
@@ -78,6 +79,11 @@ public final class BHClientPackets {
             OpenChallengePacket pkt = OpenChallengePacket.decode(buf);
             ctx.queue(() -> Minecraft.getInstance().setScreen(
                     new mc.sayda.bullethell.client.screen.ChallengeScreen(pkt)));
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.CONTROL_SCHEME, (buf, ctx) -> {
+            ControlSchemePacket pkt = ControlSchemePacket.decode(buf);
+            ctx.queue(() -> BHControlSettings.applyFromNetwork(pkt.scheme));
         });
     }
 }

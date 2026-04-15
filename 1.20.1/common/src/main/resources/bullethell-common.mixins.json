@@ -3,7 +3,9 @@
   "minVersion": "0.8",
   "package": "mc.sayda.bullethell.mixin",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [],
+  "mixins": [
+    "MixinPlayerBHAttributes"
+  ],
   "client": [
     "client.MixinKeyboardInput",
     "client.MixinMusicManager",

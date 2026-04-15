@@ -29,7 +29,7 @@ Success depends on timing and movement. Expect to fail a few times while learnin
 
 **Sound:**
 * SFX: ZUN
-* Music: [Dudu28r](https://dudu28r.bandcamp.com/album/touhou-remixes-free) (Remixes)
+* Music: [Artifex](https://www.youtube.com/channel/UCJJw7f7Y50ulh0hx_gRgEEg) (Remakes)
 * Original Composer: ZUN
 
 **Touhou Project:**

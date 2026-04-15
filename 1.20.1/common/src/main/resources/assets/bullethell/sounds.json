@@ -1,180 +1,666 @@
 {
-  "at_the_end_of_spring": {
+  "a_dream_more_scarlet_than_red": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/at_the_end_of_spring",
+        "name": "bullethell:music/a_dream_more_scarlet_than_red",
         "stream": true
       }
     ]
   },
-  "bamboo_forest_of_the_full_moon": {
+  "a_soul_as_scarlet_as_a_ground_cherry": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/bamboo_forest_of_the_full_moon",
+        "name": "bullethell:music/a_soul_as_scarlet_as_a_ground_cherry",
         "stream": true
       }
     ]
   },
-  "crazy_backup_dancers": {
+  "apparitions_stalk_the_night": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/crazy_backup_dancers",
+        "name": "bullethell:music/apparitions_stalk_the_night",
         "stream": true
       }
     ]
   },
-  "electric_heritage": {
+  "the_young_descendant_of_tepes": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/electric_heritage",
+        "name": "bullethell:music/the_young_descendant_of_tepes",
         "stream": true
       }
     ]
   },
-  "faraway_voyage_of_380000_kilometers": {
+  "beloved_tomboyish_girl": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/faraway_voyage_of_380000_kilometers",
+        "name": "bullethell:music/beloved_tomboyish_girl",
         "stream": true
       }
     ]
   },
-  "heartfelt_fancy": {
+  "beloved_tomboyish_girl_2": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/heartfelt_fancy",
+        "name": "bullethell:music/beloved_tomboyish_girl_2",
         "stream": true
       }
     ]
   },
-  "heian_alien": {
+  "lunate_elf": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/heian_alien",
+        "name": "bullethell:music/lunate_elf",
         "stream": true
       }
     ]
   },
-  "into_backdoor": {
+  "shanghai_scarlet_teahouse_chinese_tea": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/into_backdoor",
+        "name": "bullethell:music/shanghai_scarlet_teahouse_chinese_tea",
         "stream": true
       }
     ]
   },
-  "invisible_full_moon": {
+  "voile_the_magic_library": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/invisible_full_moon",
+        "name": "bullethell:music/voile_the_magic_library",
         "stream": true
       }
     ]
   },
-  "love_colored_master_spark": {
+  "locked_girl_the_girls_sealed_room": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/love_colored_master_spark",
+        "name": "bullethell:music/locked_girl_the_girls_sealed_room",
         "stream": true
       }
     ]
   },
-  "nostalgic_blood_of_the_east": {
+  "lunar_clock_luna_dial": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/nostalgic_blood_of_the_east",
+        "name": "bullethell:music/lunar_clock_luna_dial",
         "stream": true
       }
     ]
   },
-  "retribution_for_the_eternal_night": {
+  "lunar_clock_luna_dial_2": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/retribution_for_the_eternal_night",
+        "name": "bullethell:music/lunar_clock_luna_dial_2",
         "stream": true
       }
     ]
   },
-  "rural_makai_city_esoteria": {
+  "the_maid_and_the_pocket_watch_of_blood": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/rural_makai_city_esoteria",
+        "name": "bullethell:music/the_maid_and_the_pocket_watch_of_blood",
         "stream": true
       }
     ]
   },
-  "swim_in_a_cherry_blossom_colored_sea": {
+  "the_centennial_festival_for_magical_girls": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/swim_in_a_cherry_blossom_colored_sea",
+        "name": "bullethell:music/the_centennial_festival_for_magical_girls",
         "stream": true
       }
     ]
   },
-  "the_long_awaited_omagatoki": {
+  "an_eternity_more_transient_than_scarlet": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/the_long_awaited_omagatoki",
+        "name": "bullethell:music/an_eternity_more_transient_than_scarlet",
         "stream": true
       }
     ]
   },
-  "the_princess_that_slays_dragon_kings": {
+  "shanghai_alice_of_meiji_17": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/the_princess_that_slays_dragon_kings",
+        "name": "bullethell:music/shanghai_alice_of_meiji_17",
         "stream": true
       }
     ]
   },
-  "the_shining_needle_castle_sinking_in_the_air": {
+  "septette_for_the_dead_princess": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/the_shining_needle_castle_sinking_in_the_air",
+        "name": "bullethell:music/septette_for_the_dead_princess",
         "stream": true
       }
     ]
   },
-  "the_shining_needle_castle_sinking_in_the_air_reremix": {
+  "septette_for_the_dead_princess_2": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/the_shining_needle_castle_sinking_in_the_air_reremix",
+        "name": "bullethell:music/septette_for_the_dead_princess_2",
         "stream": true
       }
     ]
   },
-  "the_yorimashi_sits_between_dream_and_reality": {
+  "u_n_owen_was_her": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/the_yorimashi_sits_between_dream_and_reality",
+        "name": "bullethell:music/u_n_owen_was_her",
         "stream": true
       }
     ]
   },
-  "walking_the_streets_of_a_former_hell": {
+  "u_n_owen_was_her_2": {
     "category": "music",
     "sounds": [
       {
-        "name": "bullethell:music/walking_the_streets_of_a_former_hell",
+        "name": "bullethell:music/u_n_owen_was_her_2",
+        "stream": true
+      }
+    ]
+  },
+  "scarlet_tower_eastern_dream": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/scarlet_tower_eastern_dream",
+        "stream": true
+      }
+    ]
+  },
+  "ghostly_dream_snow_or_cherry_petal": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/ghostly_dream_snow_or_cherry_petal",
+        "stream": true
+      }
+    ]
+  },
+  "eastern_ghostly_dream_ancient_temple": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/eastern_ghostly_dream_ancient_temple",
+        "stream": true
+      }
+    ]
+  },
+  "crystallized_silver": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/crystallized_silver",
+        "stream": true
+      }
+    ]
+  },
+  "the_fantastic_tales_from_tohno": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/the_fantastic_tales_from_tohno",
+        "stream": true
+      }
+    ]
+  },
+  "diao_ye_zong_withered_leaf": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/diao_ye_zong_withered_leaf",
+        "stream": true
+      }
+    ]
+  },
+  "diao_ye_zong_withered_leaf_2": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/diao_ye_zong_withered_leaf_2",
+        "stream": true
+      }
+    ]
+  },
+  "doll_judgement_the_girl_who_played_with_peoples_shapes": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/doll_judgement_the_girl_who_played_with_peoples_shapes",
+        "stream": true
+      }
+    ]
+  },
+  "the_doll_maker_of_bucuresti": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/the_doll_maker_of_bucuresti",
+        "stream": true
+      }
+    ]
+  },
+  "the_capital_city_of_flowers_in_the_sky": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/the_capital_city_of_flowers_in_the_sky",
+        "stream": true
+      }
+    ]
+  },
+  "dream_of_a_spring_breeze": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/dream_of_a_spring_breeze",
+        "stream": true
+      }
+    ]
+  },
+  "ultimate_truth": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/ultimate_truth",
+        "stream": true
+      }
+    ]
+  },
+  "bloom_nobly_ink_black_cherry_blossom_border_of_life": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/bloom_nobly_ink_black_cherry_blossom_border_of_life",
+        "stream": true
+      }
+    ]
+  },
+  "border_of_life": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/border_of_life",
+        "stream": true
+      }
+    ]
+  },
+  "hiroari_shoots_a_strange_bird_till_when": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/hiroari_shoots_a_strange_bird_till_when",
+        "stream": true
+      }
+    ]
+  },
+  "phantom_band_phantom_ensemble": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/phantom_band_phantom_ensemble",
+        "stream": true
+      }
+    ]
+  },
+  "a_maidens_illusionary_funeral_necro_fantasy": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/a_maidens_illusionary_funeral_necro_fantasy",
+        "stream": true
+      }
+    ]
+  },
+  "necrofantasia": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/necrofantasia",
+        "stream": true
+      }
+    ]
+  },
+  "spiritual_domination": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/spiritual_domination",
+        "stream": true
+      }
+    ]
+  },
+  "spiritual_domination_who_done_it": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/spiritual_domination_who_done_it",
+        "stream": true
+      }
+    ]
+  },
+  "paradise_deep_mountain": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/paradise_deep_mountain",
+        "stream": true
+      }
+    ]
+  },
+  "sakura_sakura_japanize_dream": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/sakura_sakura_japanize_dream",
+        "stream": true
+      }
+    ]
+  },
+  "eternal_night_vignette_eastern_night": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/eternal_night_vignette_eastern_night",
+        "stream": true
+      }
+    ]
+  },
+  "illusionary_night_ghostly_eyes": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/illusionary_night_ghostly_eyes",
+        "stream": true
+      }
+    ]
+  },
+  "song_of_the_night_sparrow_night_bird": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/song_of_the_night_sparrow_night_bird",
+        "stream": true
+      }
+    ]
+  },
+  "wriggling_autumn_moon_mooned_insect": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/wriggling_autumn_moon_mooned_insect",
+        "stream": true
+      }
+    ]
+  },
+  "wriggling_autumn_moon_mooned_insect_2": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/wriggling_autumn_moon_mooned_insect_2",
+        "stream": true
+      }
+    ]
+  },
+  "eastern_youkai_beauty": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/eastern_youkai_beauty",
+        "stream": true
+      }
+    ]
+  },
+  "plain_asia": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/plain_asia",
+        "stream": true
+      }
+    ]
+  },
+  "plain_asia_2": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/plain_asia_2",
+        "stream": true
+      }
+    ]
+  },
+  "retribution_for_the_eternal_night_imperishable_night": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/retribution_for_the_eternal_night_imperishable_night",
+        "stream": true
+      }
+    ]
+  },
+  "maidens_capriccio_dream_battle": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/maidens_capriccio_dream_battle",
+        "stream": true
+      }
+    ]
+  },
+  "love_coloured_master_spark": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/love_coloured_master_spark",
+        "stream": true
+      }
+    ]
+  },
+  "love_coloured_master_spark_2": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/love_coloured_master_spark_2",
+        "stream": true
+      }
+    ]
+  },
+  "cinderella_cage_kagome_kagome": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/cinderella_cage_kagome_kagome",
+        "stream": true
+      }
+    ]
+  },
+  "lunatic_eyes_invisible_full_moon_remade": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/lunatic_eyes_invisible_full_moon_remade",
+        "stream": true
+      }
+    ]
+  },
+  "lunatic_eyes_invisible_full_moon_2023": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/lunatic_eyes_invisible_full_moon_2023",
+        "stream": true
+      }
+    ]
+  },
+  "voyage_1969": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/voyage_1969",
+        "stream": true
+      }
+    ]
+  },
+  "voyage_1969_2": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/voyage_1969_2",
+        "stream": true
+      }
+    ]
+  },
+  "extend_ash_person_of_hourai": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/extend_ash_person_of_hourai",
+        "stream": true
+      }
+    ]
+  },
+  "extend_ash_person_of_hourai_2": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/extend_ash_person_of_hourai_2",
+        "stream": true
+      }
+    ]
+  },
+  "gensokyo_millennium_history_of_the_moon": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/gensokyo_millennium_history_of_the_moon",
+        "stream": true
+      }
+    ]
+  },
+  "gensokyo_millennium_history_of_the_moon_2": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/gensokyo_millennium_history_of_the_moon_2",
+        "stream": true
+      }
+    ]
+  },
+  "flight_of_the_bamboo_cutter_lunatic_princess": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/flight_of_the_bamboo_cutter_lunatic_princess",
+        "stream": true
+      }
+    ]
+  },
+  "flight_of_the_bamboo_cutter_lunatic_princess_2": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/flight_of_the_bamboo_cutter_lunatic_princess_2",
+        "stream": true
+      }
+    ]
+  },
+  "deaf_to_all_but_the_song": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/deaf_to_all_but_the_song",
+        "stream": true
+      }
+    ]
+  },
+  "evening_primrose": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/evening_primrose",
+        "stream": true
+      }
+    ]
+  },
+  "eternal_dream_mystical_maple": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/eternal_dream_mystical_maple",
+        "stream": true
+      }
+    ]
+  },
+  "nostalgic_blood_of_the_east_old_world": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/nostalgic_blood_of_the_east_old_world",
+        "stream": true
+      }
+    ]
+  },
+  "nostalgic_blood_of_the_east_old_world_2": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/nostalgic_blood_of_the_east_old_world_2",
+        "stream": true
+      }
+    ]
+  },
+  "reach_for_the_moon_immortal_smoke": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/reach_for_the_moon_immortal_smoke",
+        "stream": true
+      }
+    ]
+  },
+  "reach_for_the_moon_immortal_smoke_2": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/reach_for_the_moon_immortal_smoke_2",
+        "stream": true
+      }
+    ]
+  },
+  "voyage_1970": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/voyage_1970",
+        "stream": true
+      }
+    ]
+  },
+  "voyage_1970_2021": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/voyage_1970_2021",
         "stream": true
       }
     ]

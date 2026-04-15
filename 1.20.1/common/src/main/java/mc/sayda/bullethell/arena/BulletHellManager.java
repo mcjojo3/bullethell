@@ -1,5 +1,7 @@
 package mc.sayda.bullethell.arena;
 
+import net.minecraft.server.level.ServerPlayer;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +48,17 @@ public class BulletHellManager {
         return ctx;
     }
 
+    /**
+     * Starts an arena for the host and applies their {@link mc.sayda.bullethell.entity.BHAttributes}
+     * bonuses to starting lives/bombs.
+     */
+    public ArenaContext startArena(ServerPlayer host, DifficultyConfig difficulty,
+            String stageId, String characterId) {
+        ArenaContext ctx = new ArenaContext(host.getUUID(), difficulty, stageId, characterId, host);
+        arenas.put(host.getUUID(), ctx);
+        return ctx;
+    }
+
     public void stopArena(UUID playerUuid) {
         ArenaContext ctx = arenas.remove(playerUuid);
         if (ctx != null) {
@@ -63,13 +76,14 @@ public class BulletHellManager {
      * @param hostUuid        the host player's UUID (must already have an active
      *                        arena)
      * @param charDef         character definition for the joining player
+     * @param participant     joining player (for attribute bonuses)
      */
     public void joinMatch(UUID participantUuid, UUID hostUuid,
-            mc.sayda.bullethell.boss.CharacterDefinition charDef) {
+            mc.sayda.bullethell.boss.CharacterDefinition charDef, ServerPlayer participant) {
         ArenaContext ctx = arenas.get(hostUuid);
         if (ctx == null)
             return;
-        ctx.addCoopPlayer(participantUuid, charDef);
+        ctx.addCoopPlayer(participantUuid, charDef, participant);
         playerToMatch.put(participantUuid, hostUuid);
         // Grant spawn invulnerability so the joining player doesn't die instantly
         mc.sayda.bullethell.arena.PlayerState2D ps = ctx.getPlayerState(participantUuid);

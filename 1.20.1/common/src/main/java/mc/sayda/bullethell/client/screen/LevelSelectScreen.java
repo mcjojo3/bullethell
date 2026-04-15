@@ -6,6 +6,7 @@ import mc.sayda.bullethell.boss.StageLoader;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -103,10 +104,13 @@ public class LevelSelectScreen extends Screen {
             gfx.vLine(bx + CARD_W - 1, cardTopY, cardTopY + CARD_H, brd);
 
             int cx = bx + CARD_W / 2;
-            int textY = cardTopY + 16;
-
-            gfx.drawCenteredString(font, stage.title, cx, textY, col);
-            textY += font.lineHeight + 8;
+            int maxTitleW = CARD_W - 12;
+            int textY = cardTopY + 8;
+            for (String line : wrapStageTitleTwoLines(font, stage.title, maxTitleW)) {
+                gfx.drawCenteredString(font, line, cx, textY, col);
+                textY += font.lineHeight;
+            }
+            textY += 6;
 
             gfx.hLine(bx + 8, bx + CARD_W - 9, textY - 3, sel ? (col & 0x00FFFFFF | 0x66000000) : 0x22FFFFFF);
 
@@ -188,5 +192,79 @@ public class LevelSelectScreen extends Screen {
         return (index >= 0 && index < STAGE_COLORS.length)
                 ? STAGE_COLORS[index]
                 : 0xFFCCCCCC;
+    }
+
+    /**
+     * Fits long stage names into the narrow stage card: at most two centered
+     * lines, word-wrapped; explicit newline in the title forces a line break.
+     */
+    private static String[] wrapStageTitleTwoLines(Font font, String title, int maxWidth) {
+        if (title == null || title.isEmpty())
+            return new String[] { "" };
+        int nl = title.indexOf('\n');
+        if (nl >= 0) {
+            String a = title.substring(0, nl).trim();
+            String b = title.substring(nl + 1).trim();
+            if (font.width(b) > maxWidth)
+                b = truncateToMaxWidth(font, b, maxWidth);
+            return new String[] { a, b };
+        }
+        if (font.width(title) <= maxWidth)
+            return new String[] { title };
+
+        String[] words = title.trim().split("\\s+");
+        if (words.length == 0)
+            return new String[] { title };
+        if (words.length == 1)
+            return splitLongTokenTwoLines(font, words[0], maxWidth);
+
+        StringBuilder line1 = new StringBuilder(words[0]);
+        int i = 1;
+        while (i < words.length) {
+            String candidate = line1 + " " + words[i];
+            if (font.width(candidate) <= maxWidth) {
+                line1 = new StringBuilder(candidate);
+                i++;
+            } else
+                break;
+        }
+        if (i >= words.length) {
+            // Single token consumed all words (should not happen); fall back
+            return splitLongTokenTwoLines(font, line1.toString(), maxWidth);
+        }
+        StringBuilder line2 = new StringBuilder(words[i++]);
+        while (i < words.length)
+            line2.append(' ').append(words[i++]);
+        String second = line2.toString();
+        if (font.width(second) > maxWidth)
+            second = truncateToMaxWidth(font, second, maxWidth);
+        return new String[] { line1.toString(), second };
+    }
+
+    private static String[] splitLongTokenTwoLines(Font font, String word, int maxWidth) {
+        int bestCut = 1;
+        for (int cut = 1; cut < word.length(); cut++) {
+            if (font.width(word.substring(0, cut)) <= maxWidth
+                    && font.width(word.substring(cut)) <= maxWidth)
+                bestCut = cut;
+        }
+        String a = word.substring(0, bestCut);
+        String b = word.substring(bestCut);
+        if (font.width(b) > maxWidth)
+            b = truncateToMaxWidth(font, b, maxWidth);
+        return new String[] { a, b };
+    }
+
+    private static String truncateToMaxWidth(Font font, String s, int maxWidth) {
+        if (font.width(s) <= maxWidth)
+            return s;
+        String ell = "...";
+        int budget = maxWidth - font.width(ell);
+        if (budget <= 0)
+            return ell;
+        String t = s;
+        while (t.length() > 0 && font.width(t) > budget)
+            t = t.substring(0, t.length() - 1);
+        return t + ell;
     }
 }

@@ -5,6 +5,7 @@ import mc.sayda.bullethell.Bullethell;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.boss.CharacterDefinition;
 import mc.sayda.bullethell.boss.CharacterLoader;
+import mc.sayda.bullethell.entity.BHAttributes;
 import mc.sayda.bullethell.network.BHPackets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -126,7 +127,12 @@ public class CharacterSelectScreen extends Screen {
             int cx = bx + CARD_W / 2;
             gfx.drawCenteredString(font, ch.name, cx, infoY, sel ? 0xFFFFDD00 : 0xFFCCCCCC);
             gfx.drawCenteredString(font, ch.description, cx, infoY + font.lineHeight + 2, 0xFF8888AA);
-            String stats = "\u2665" + ch.startingLives + "  \u2736" + ch.startingBombs
+            var pl = Minecraft.getInstance().player;
+            int attrL = BHAttributes.extraLivesBonus(pl);
+            int attrB = BHAttributes.extraBombsBonus(pl);
+            int dispLives = ch.startingLives + attrL;
+            int dispBombs = Math.min(9, ch.startingBombs + attrB);
+            String stats = "\u2665" + dispLives + "  \u2736" + dispBombs
                     + "  Spd:" + (int) ch.speedNormal;
             gfx.drawCenteredString(font, stats, cx, infoY + font.lineHeight * 2 + 4, 0xFF7799CC);
 

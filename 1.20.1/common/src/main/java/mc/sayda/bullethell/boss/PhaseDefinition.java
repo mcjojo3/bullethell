@@ -64,8 +64,8 @@ public class PhaseDefinition {
     /**
      * Music track ID to play during this phase.
      * Must match a key in {@code assets/bullethell/sounds.json}, e.g.
-     * {@code "love_colored_master_spark"}.
-     * {@code null} or omitted = keep playing whatever was already running.
+     * {@code "love_coloured_master_spark"}.
+     * {@code null}, omitted, or {@code ""} = keep playing whatever was already running.
      */
     public String music = null;
 

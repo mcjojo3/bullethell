@@ -1,0 +1,10 @@
+{
+  "id": "in4_crossing_aimed_blues",
+  "description": "TH8 IN Stage 4–style crossing entry: blue fairies dive from upper corners with opposite arc bias so their AIMED fans converge toward centre. Mimics bamboo-stage diagonal streams.",
+  "enemies": [
+    { "x":  35, "y": -25, "vx":  1.8, "vy": 3.6, "angVel":  0.022, "arcTicks": 75, "type": "BLUE_FAIRY", "delayTicks":  0 },
+    { "x": 120, "y": -25, "vx":  0.9, "vy": 3.8, "angVel":  0.018, "arcTicks": 70, "type": "BLUE_FAIRY", "delayTicks": 18 },
+    { "x": 445, "y": -25, "vx": -1.8, "vy": 3.6, "angVel": -0.022, "arcTicks": 75, "type": "BLUE_FAIRY", "delayTicks":  0 },
+    { "x": 360, "y": -25, "vx": -0.9, "vy": 3.8, "angVel": -0.018, "arcTicks": 70, "type": "BLUE_FAIRY", "delayTicks": 18 }
+  ]
+}

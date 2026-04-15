@@ -8,13 +8,16 @@ package mc.sayda.bullethell.boss;
  * <pre>
  * { "pattern": "SPIRAL", "cooldown": 8, "bulletType": "ORB", "arms": 6, "speed": 2.5 }
  * { "pattern": "AIMED",  "cooldown": 12, "bulletType": "STAR", "arms": 5, "speed": 3.0, "spread": 0.20 }
+ * { "pattern": "AIMED_RING", "cooldown": 20, "bulletType": "GOLD", "arms": 5, "spread": 0.22, "speed": 3.0,
+ *   "ringArms": 10, "ringSpeed": 1.6, "ringBulletType": "RICE" }
  * </pre>
  */
 public class PatternStep {
 
     /**
      * Pattern type to fire.
-     * Valid values: SPIRAL, AIMED, RING, SPREAD, DENSE_RING
+     * Valid values: SPIRAL, AIMED, AIMED_RING, RING, SPREAD, DENSE_RING, LASER_BEAM,
+     * LASER, LASER_ROTATING
      */
     public String pattern = "RING";
 
@@ -38,6 +41,23 @@ public class PatternStep {
 
     /** Fan spread in radians between adjacent shots. Only used by AIMED. */
     public float spread = 0.20f;
+
+    // ---- AIMED_RING (aimed fan + omnidirectional ring) ----
+
+    /**
+     * Ring bullet count for {@code AIMED_RING}. Capped when scaling on Lunatic to avoid
+     * runaway density.
+     */
+    public int ringArms = 10;
+
+    /**
+     * Ring bullet speed; if zero, defaults to ~0.52× the aim {@link #speed} after
+     * difficulty scaling in {@code ArenaContext}.
+     */
+    public float ringSpeed = 0f;
+
+    /** Ring bullet type name; empty = {@code ORB}. */
+    public String ringBulletType = "";
 
     // ---- Laser-specific fields (only used by LASER / LASER_ROTATING patterns) ----
 

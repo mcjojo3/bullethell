@@ -48,13 +48,14 @@ public class BHNpc extends PathfinderMob {
 
     public BHNpc(EntityType<? extends BHNpc> type, Level level, String defaultNpcId) {
         super(type, level);
+        // super() calls defineSynchedData() before this.defaultNpcId is assigned,
+        // so we must set the synched value explicitly here.
         this.defaultNpcId = defaultNpcId;
+        this.entityData.set(NPC_ID, defaultNpcId);
         this.setCustomNameVisible(true);
-        this.setInvulnerable(true);
-        // Set display name immediately from the NPC definition
         NpcDefinition def = NpcLoader.load(defaultNpcId);
         if (!def.displayName.isEmpty()) {
-            this.setCustomName(net.minecraft.network.chat.Component.literal(def.displayName));
+            this.setCustomName(Component.literal(def.displayName));
         }
     }
 
@@ -63,7 +64,9 @@ public class BHNpc extends PathfinderMob {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(NPC_ID, defaultNpcId);
+        // Use empty string as the initial value — the real ID is applied in the
+        // constructor (and restored from NBT by readAdditionalSaveData).
+        this.entityData.define(NPC_ID, "");
     }
 
     public void setNpcId(String id) {
@@ -115,16 +118,17 @@ public class BHNpc extends PathfinderMob {
         return InteractionResult.sidedSuccess(this.level().isClientSide);
     }
 
-    // ---------------------------------------------------------------- despawn / hurt
+    // ---------------------------------------------------------------- despawn / targeting
 
     @Override
     public boolean removeWhenFarAway(double distSq) {
         return false; // Never despawn
     }
 
+    /** Prevents hostile mob AI (zombies, skeletons, etc.) from selecting this NPC as a target. */
     @Override
-    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
-        return false; // Invulnerable to all damage
+    public boolean canBeSeenAsEnemy() {
+        return false;
     }
 
     // ---------------------------------------------------------------- NBT

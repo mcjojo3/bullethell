@@ -312,8 +312,8 @@ public class BulletHellRenderer {
             renderBossIndicator(gfx, state, bossScrX, ox, dispH + oy, dispW, screenW, phaseCol);
         }
 
-        // ---- 13. Charge Bar HUD (above indicator) ----
-        renderChargeBar(gfx, ox, dispH + oy - 12, dispW, state);
+        // ---- 13. Charge Bar HUD (above indicator; PoFV gray + hold overlay) ----
+        renderChargeBar(gfx, ox, dispH + oy - 14, dispW, state);
 
         // ---- 14. Master Spark Overlay ----
         if (state.abilityType == 2 && state.abilityTicks > 0) {
@@ -526,7 +526,8 @@ public class BulletHellRenderer {
 
         int hudY = oy + 40; // Drop down below boss HP bar
         int rowStep = lh + 6;
-        int panelH = rowStep * 4 + 4;
+        int statRows = 4 + (state.debugGodMode ? 4 : 0);
+        int panelH = rowStep * statRows + 4;
 
         // Semi-transparent background panel for readability
         gfx.fill(hudX - 4, hudY - 4, hudX + statPanelW, hudY + panelH, 0x88000018);
@@ -543,6 +544,15 @@ public class BulletHellRenderer {
         gfx.drawString(font, bombsStr, hudX, hudY + rowStep, 0xFFFF3FA4, true);
         gfx.drawString(font, grazeStr, hudX, hudY + rowStep * 2, 0xFFFFE600, true);
         gfx.drawString(font, pwrStr, hudX, hudY + rowStep * 3, pwrColor, true);
+
+        if (state.debugGodMode) {
+            int dbgY = hudY + rowStep * 4;
+            int dbgCol = 0xFF66FF66;
+            gfx.drawString(font, "DBG GOD", hudX, dbgY, dbgCol, true);
+            gfx.drawString(font, "tick " + state.debugArenaTick, hudX, dbgY + rowStep, 0xFFAAFFAA, true);
+            gfx.drawString(font, "pat " + state.debugPatternCooldown, hudX, dbgY + rowStep * 2, 0xFFAAFFAA, true);
+            gfx.drawString(font, "eBul " + state.debugEnemyBulletCount, hudX, dbgY + rowStep * 3, 0xFFAAFFAA, true);
+        }
 
         // ---- Teammate HUD (Left side) ----
         if (!state.coopPlayers.isEmpty()) {
@@ -1165,35 +1175,33 @@ public class BulletHellRenderer {
     }
 
     private static void renderChargeBar(GuiGraphics gfx, int ox, int y, int dw, ClientArenaState state) {
-        int barH = 6;
         int barW = dw / 2;
         int bx = ox + (dw - barW) / 2;
+        final int maxMilli = 3000; // 3 levels (no L4)
+        int barH = 6;
 
-        // Background
         gfx.fill(bx - 1, y - 1, bx + barW + 1, y + barH + 1, 0x88000000);
 
-        // Fill based on gauge (0-2000)
-        float fillFrac = state.skillGauge / 2000f;
-        int fillW = (int) (barW * fillFrac);
+        int stockW = (int) (barW * Math.min(1f, state.skillGauge / (float) maxMilli));
+        gfx.fill(bx, y, bx + stockW, y + barH, 0xFF505058);
 
-        // Color based on current level
-        int color = state.chargeLevel >= 4 ? 0xFFFF44FF
-                : state.chargeLevel >= 3 ? 0xFFFF44FF
-                        : state.chargeLevel >= 2 ? 0xFF00FFE0 : state.chargeLevel >= 1 ? 0xFF00AAFF : 0xFF555555;
+        int rawHoldW = (int) (barW * Math.min(1f, state.holdChargeGauge / (float) maxMilli));
+        int holdW = Math.min(stockW, rawHoldW);
+        int holdFloor = Math.min(3, state.holdChargeGauge / 1000);
+        int hiColor = holdFloor >= 3 ? 0xFFFF66FF
+                : holdFloor >= 2 ? 0xFF44FFFF
+                        : holdFloor >= 1 ? 0xFF66CCFF : 0xFF88AAFF;
+        if (holdW > 0)
+            gfx.fill(bx, y, bx + holdW, y + barH, 0xDD000000 | (hiColor & 0xFFFFFF));
 
-        gfx.fill(bx, y, bx + fillW, y + barH, 0xAA000000 | (color & 0xFFFFFF));
+        gfx.vLine(bx + barW / 3, y - 1, y + barH + 1, 0xAAFFFFFF);
+        gfx.vLine(bx + 2 * barW / 3, y - 1, y + barH + 1, 0xAAFFFFFF);
 
-        // Threshold pips at Lv1 (200), Lv2 (500), Lv3 (1000) — not at 2000 (bar edge)
-        gfx.vLine(bx + (int) (barW * (200f / 2000f)), y - 1, y + barH + 1, 0xAAFFFFFF);
-        gfx.vLine(bx + (int) (barW * (500f / 2000f)), y - 1, y + barH + 1, 0xAAFFFFFF);
-        gfx.vLine(bx + (int) (barW * (1000f / 2000f)), y - 1, y + barH + 1, 0xAAFFFFFF);
-
-        // Always-visible label: gauge value and level
         Font font = Minecraft.getInstance().font;
-        String label = state.chargeLevel >= 4
-                ? "MAX"
-                : state.skillGauge + "/2000";
-        gfx.drawString(font, label, bx + barW + 4, y - 1, color, true);
+        int stockFloor = Math.min(3, state.chargeLevel);
+        // Held (X) / charge (gray stock)
+        String label = holdFloor + "/" + stockFloor;
+        gfx.drawString(font, label, bx + barW + 4, y - 1, hiColor, true);
     }
 
     private static void renderMasterSparkEffect(GuiGraphics gfx, int ox, int oy, float sx, float sy, int dh,

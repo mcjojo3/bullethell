@@ -1,6 +1,8 @@
 package mc.sayda.bullethell;
 
 import com.mojang.logging.LogUtils;
+import mc.sayda.bullethell.entity.BHAttributes;
+import mc.sayda.bullethell.entity.BHEntities;
 import mc.sayda.bullethell.event.BHCommonEvents;
 import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.sound.BHSounds;
@@ -15,5 +17,7 @@ public class Bullethell {
         BHPackets.register();
         BHCommonEvents.register();
         BHSounds.register();
+        BHAttributes.register();
+        BHEntities.register();
     }
 }

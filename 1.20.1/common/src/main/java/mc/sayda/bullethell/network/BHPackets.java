@@ -45,6 +45,7 @@ public final class BHPackets {
     public static final ResourceLocation OPEN_CHAR_SELECT  = id("open_char_select");
     public static final ResourceLocation OPEN_JOIN_SELECT  = id("open_join_select");
     public static final ResourceLocation OPEN_CHALLENGE    = id("open_challenge");
+    public static final ResourceLocation CONTROL_SCHEME    = id("control_scheme");
 
     // C → S
     public static final ResourceLocation PLAYER_POS        = id("player_pos");
@@ -142,7 +143,7 @@ public final class BHPackets {
 
                 if (arena != null) {
                     // Join active match immediately
-                    BulletHellManager.INSTANCE.joinMatch(sender.getUUID(), pkt.hostUuid, charDef);
+                    BulletHellManager.INSTANCE.joinMatch(sender.getUUID(), pkt.hostUuid, charDef, sender);
                     sendFullSync(sender, arena);
                     int pIdx = 0;
                     int c = 2;
@@ -247,6 +248,12 @@ public final class BHPackets {
         FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, OPEN_CHALLENGE, b);
     }
 
+    public static void sendControlScheme(ServerPlayer player, ControlSchemePacket pkt) {
+        FriendlyByteBuf b = buf();
+        pkt.encode(b);
+        NetworkManager.sendToPlayer(player, CONTROL_SCHEME, b);
+    }
+
     // ---------------------------------------------------------------- Client → Server helpers
 
     @Environment(EnvType.CLIENT)
@@ -304,7 +311,7 @@ public final class BHPackets {
                                    String stageId, String characterId) {
         BulletHellManager.INSTANCE.stopArena(player.getUUID());
         ArenaContext ctx = BulletHellManager.INSTANCE.startArena(
-                player.getUUID(), diff, stageId, characterId);
+                player, diff, stageId, characterId);
         sendFullSync(player, ctx);
         sendToPlayer(player, new ArenaStatePacket(ctx, player.getUUID(), 1));
 
@@ -315,7 +322,7 @@ public final class BHPackets {
             for (BulletHellManager.ParticipantInfo info : pending) {
                 ServerPlayer p = player.server.getPlayerList().getPlayer(info.uuid());
                 if (p != null) {
-                    BulletHellManager.INSTANCE.joinMatch(p.getUUID(), player.getUUID(), info.charDef());
+                    BulletHellManager.INSTANCE.joinMatch(p.getUUID(), player.getUUID(), info.charDef(), p);
                     sendFullSync(p, ctx);
                     int pIdx = 0;
                     int c = 2;
