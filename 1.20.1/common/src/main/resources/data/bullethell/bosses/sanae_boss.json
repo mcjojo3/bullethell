@@ -1,0 +1,215 @@
+{
+  "id": "sanae_boss",
+  "name": "Sanae Kochiya",
+  "_design_notes": [
+    "Mountain of Faith (TH10) Stage 5 roster from Touhou Wiki / sanae_spellcards.pdf: midboss Esoterica \"Gray Thaumaturgy\", then Miracle \"Daytime Guest Stars\", Sea Opening \"The Day the Sea Split\", Preparation \"Star Ritual to Call the Godly Winds\", Miracle \"God's Wind\".",
+    "Nonspells between spellcards follow Touhou pacing; patterns use existing PatternStep types (LASER_ROTATING pentagram = 5 spokes)."
+  ],
+  "introDialog": [
+    {
+      "speaker": "BOSS",
+      "text": "The wind from Moriya carries my miracle. If you still stand here, face it with everything you have!",
+      "delayTicks": 170
+    }
+  ],
+  "characterDialogs": {
+    "reimu": [
+      { "speaker": "BOSS", "text": "Hakurei shrine maiden? Then you know faith is won in the sky, not on paper.", "delayTicks": 165 },
+      { "speaker": "PLAYER", "text": "I'll settle this incident whether your god helps or not.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Good. Show me that resolve in your dodging!", "delayTicks": 150 }
+    ],
+    "marisa": [
+      { "speaker": "BOSS", "text": "A magician from the forest? Don't expect miracles to wait politely in line.", "delayTicks": 165 },
+      { "speaker": "PLAYER", "text": "Miracles, stars, whatever — I'll graze through and steal the win, ze!", "delayTicks": 135 },
+      { "speaker": "BOSS", "text": "Then keep up with the wind until the last spell breaks!", "delayTicks": 155 }
+    ],
+    "sakuya": [
+      { "speaker": "BOSS", "text": "Scarlet Devil Mansion's maid, all the way up the mountain? You must be serious.", "delayTicks": 165 },
+      { "speaker": "PLAYER", "text": "Time is on my side — I'll clear your patterns all the same.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Then let the gale test whether your clocks can keep their tick.", "delayTicks": 155 }
+    ],
+    "sanae": [
+      { "speaker": "BOSS", "text": "Another me? Fine — let's see which faith the mountain answers!", "delayTicks": 165 },
+      { "speaker": "PLAYER", "text": "I'll prove I'm not just a copy!", "delayTicks": 115 },
+      { "speaker": "BOSS", "text": "Words won't decide it. The danmaku will.", "delayTicks": 145 }
+    ],
+    "cirno": [
+      { "speaker": "BOSS", "text": "A fairy climbed this high? Either brave or very lost.", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "I'm the strongest! Your wind can't blow that away!", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "We'll see if ice can anchor you when the gale hits.", "delayTicks": 150 }
+    ]
+  },
+  "victoryDialog": "Amazing... even Kanako would call that a worthy miracle.",
+  "defeatDialog": "Faith needs practice too. Come back when you're ready.",
+  "victoryDialogByCharacter": {
+    "reimu": "The Hakurei shine even outside your shrine. Respect.",
+    "marisa": "You really did bulldoze through — just try not to blow up the shrine, ze.",
+    "sakuya": "Precision and nerve — Lady Remilia would notice that composure.",
+    "sanae": "So I can lose to myself... guess I need more training.",
+    "cirno": "Strongest fairy after all? I'll remember that chill."
+  },
+  "defeatDialogByCharacter": {
+    "reimu": "Your feet hesitated before your faith did.",
+    "marisa": "Too greedy on the spark, not enough on the wind.",
+    "sakuya": "Even perfect timing slips in a gale.",
+    "sanae": "Miracles don't wait for doubt.",
+    "cirno": "The strongest title needs more than bravado."
+  },
+  "phases": [
+    {
+      "_note": "Nonspell 1 — mountain green/blue pressure + light rings.",
+      "hp": 1400,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 1",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 118,
+      "music": "faith_is_for_the_transient_people",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 12, "scalingProfile": "PRECISION", "bulletType": "RICE", "arms": 6, "speed": 3.5, "spread": 0.20 },
+        { "pattern": "RING_OFFSET", "cooldown": 19, "scalingProfile": "GEOMETRY", "bulletType": "BUBBLE", "arms": 11, "speed": 2.2 },
+        { "pattern": "AIMED_RING", "cooldown": 18, "bulletType": "STAR", "arms": 5, "spread": 0.18, "speed": 3.4, "ringArms": 10, "ringSpeed": 1.65, "ringBulletType": "RICE" }
+      ]
+    },
+    {
+      "_note": "Midboss spell card — Esoterica \"Gray Thaumaturgy\" (muted orb/lattice feel).",
+      "hp": 1950,
+      "isSpellCard": true,
+      "spellName": "Esoterica \"Gray Thaumaturgy\"",
+      "spellDurationTicks": [740, 600, 460, 240],
+      "spellBonus": 52000,
+      "movement": "CIRCLE",
+      "moveSpeed": 82,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPIRAL", "cooldown": 6, "minCooldown": 5, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.72, "bulletType": "ORB", "arms": 7, "speed": 2.45, "bulletScale": 1.1, "hitboxScale": 0.52 },
+        { "pattern": "RING_OFFSET", "cooldown": 17, "scalingProfile": "BURST", "bulletType": "NEEDLE", "arms": 13, "speed": 2.35 },
+        { "pattern": "DENSE_RING", "cooldown": 20, "bulletType": "ORB", "arms": 11, "speed": 2.05, "bulletScale": 1.25, "hitboxScale": 0.42, "maxScaledArms": 14 },
+        { "pattern": "AIMED", "cooldown": 11, "scalingProfile": "PRECISION", "bulletType": "RICE", "arms": 5, "speed": 3.7, "spread": 0.16 }
+      ]
+    },
+    {
+      "_note": "Nonspell 2 — tighter aimed + bubble offset.",
+      "hp": 1500,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 2",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 132,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "STAR", "arms": 6, "speed": 3.65, "spread": 0.18 },
+        { "pattern": "AIMED_RING", "cooldown": 17, "bulletType": "GOLD", "arms": 5, "spread": 0.20, "speed": 3.3, "ringArms": 11, "ringSpeed": 1.7, "ringBulletType": "RICE" },
+        { "pattern": "RING", "cooldown": 22, "bulletType": "BUBBLE", "arms": 12, "speed": 1.85 }
+      ]
+    },
+    {
+      "_note": "Miracle \"Daytime Guest Stars\" — bright comet streams + star rings.",
+      "hp": 2100,
+      "isSpellCard": true,
+      "spellName": "Miracle \"Daytime Guest Stars\"",
+      "spellDurationTicks": [780, 620, 480, 250],
+      "spellBonus": 62000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 9, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 7, "speed": 3.9, "spread": 0.14 },
+        { "pattern": "SPREAD", "cooldown": 7, "bulletType": "STAR", "arms": 6, "speed": 4.6 },
+        { "pattern": "AIMED_RING", "cooldown": 15, "bulletType": "GOLD", "arms": 5, "spread": 0.16, "speed": 3.6, "ringArms": 14, "ringSpeed": 1.8, "ringBulletType": "STAR" },
+        { "pattern": "RING_OFFSET", "cooldown": 18, "bulletType": "ORB", "arms": 12, "speed": 2.15, "bulletScale": 1.2, "hitboxScale": 0.48 }
+      ]
+    },
+    {
+      "_note": "Nonspell 3 — crossing rice + spiral lane checks.",
+      "hp": 1650,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 3",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 138,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPIRAL", "cooldown": 7, "bulletType": "RICE", "arms": 6, "speed": 2.5 },
+        { "pattern": "AIMED", "cooldown": 11, "bulletType": "BUBBLE", "arms": 5, "speed": 3.5, "spread": 0.22 },
+        { "pattern": "RING", "cooldown": 20, "bulletType": "STAR", "arms": 11, "speed": 2.0 }
+      ]
+    },
+    {
+      "_note": "Sea Opening \"The Day the Sea Split\" — wide beams + curtain pressure (split-lane read).",
+      "hp": 2300,
+      "isSpellCard": true,
+      "spellName": "Sea Opening \"The Day the Sea Split\"",
+      "spellDurationTicks": [760, 600, 450, 230],
+      "spellBonus": 72000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "LASER_BEAM", "cooldown": 10, "bulletType": "SPARK", "arms": 3, "speed": 6.2 },
+        { "pattern": "LASER", "cooldown": 95, "bulletType": "SPARK", "arms": 1, "speed": 0, "laserHalfWidth": 52, "warnTicks": 40, "activeTicks": 58 },
+        { "pattern": "AIMED", "cooldown": 12, "bulletType": "GOLD", "arms": 6, "speed": 3.4, "spread": 0.20 },
+        { "pattern": "LASER_BEAM", "cooldown": 11, "bulletType": "SPARK", "arms": 4, "speed": 5.8 },
+        { "pattern": "RING_OFFSET", "cooldown": 21, "bulletType": "BUBBLE", "arms": 13, "speed": 2.1 }
+      ]
+    },
+    {
+      "_note": "Nonspell 4 — pre-ritual harassment.",
+      "hp": 1750,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 4",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "CIRCLE",
+      "moveSpeed": 88,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "STAR", "arms": 7, "speed": 3.55, "spread": 0.17 },
+        { "pattern": "AIMED_RING", "cooldown": 16, "bulletType": "RICE", "arms": 5, "spread": 0.22, "speed": 3.2, "ringArms": 10, "ringSpeed": 1.75, "ringBulletType": "BUBBLE" },
+        { "pattern": "DENSE_RING", "cooldown": 19, "bulletType": "GOLD", "arms": 12, "speed": 2.2, "maxScaledArms": 15 }
+      ]
+    },
+    {
+      "_note": "Preparation \"Star Ritual to Call the Godly Winds\" — pentagram laser spokes + orb lane.",
+      "hp": 2450,
+      "isSpellCard": true,
+      "spellName": "Preparation \"Star Ritual to Call the Godly Winds\"",
+      "spellDurationTicks": [800, 640, 490, 260],
+      "spellBonus": 85000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "LASER_ROTATING", "cooldown": 32, "bulletType": "LASER_HEAD", "arms": 5, "speed": 0, "laserHalfWidth": 6, "warnTicks": 12, "activeTicks": 22 },
+        { "pattern": "AIMED_RING", "cooldown": 14, "bulletType": "GOLD", "arms": 5, "spread": 0.15, "speed": 3.5, "ringArms": 11, "ringSpeed": 1.95, "ringBulletType": "STAR" },
+        { "pattern": "RING_OFFSET", "cooldown": 17, "bulletType": "ORB", "arms": 12, "speed": 2.25, "bulletScale": 1.2, "hitboxScale": 0.45 },
+        { "pattern": "SPREAD", "cooldown": 8, "bulletType": "RICE", "arms": 5, "speed": 4.5 }
+      ]
+    },
+    {
+      "_note": "Miracle \"God's Wind\" — finale: spirals, bounce bursts, dense curtains.",
+      "hp": 2800,
+      "isSpellCard": true,
+      "spellName": "Miracle \"God's Wind\"",
+      "spellDurationTicks": [760, 580, 420, 210],
+      "spellBonus": 100000,
+      "movement": "CIRCLE",
+      "moveSpeed": 94,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPIRAL", "cooldown": 5, "minCooldown": 4, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.78, "bulletType": "RICE", "arms": 8, "speed": 2.45, "maxScaledArms": 11 },
+        { "pattern": "BOUNCE", "burstCount": 2, "burstInterval": 7, "cooldown": 42, "minCooldown": 36, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 5, "speed": 3.1, "spread": 0.12, "bounceCount": 2, "bounceDamping": 0.94 },
+        { "pattern": "AIMED", "cooldown": 9, "bulletType": "GOLD", "arms": 7, "speed": 3.85, "spread": 0.18 },
+        { "pattern": "LASER_BEAM", "cooldown": 11, "bulletType": "SPARK", "arms": 4, "speed": 6.4 },
+        { "pattern": "DENSE_RING", "cooldown": 16, "bulletType": "BUBBLE", "arms": 13, "speed": 2.35, "maxScaledArms": 16 }
+      ]
+    }
+  ]
+}

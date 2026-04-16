@@ -55,6 +55,20 @@ public class PhaseDefinition {
     public String movement = "SINE_WAVE";
 
     /**
+     * Optional lower difficulty bound (inclusive) for this phase.
+     * Empty/null = no lower bound.
+     * Example values: "EASY", "NORMAL", "HARD", "LUNATIC".
+     */
+    public String minDifficulty = "";
+
+    /**
+     * Optional upper difficulty bound (inclusive) for this phase.
+     * Empty/null = no upper bound.
+     * Example values: "EASY", "NORMAL", "HARD", "LUNATIC".
+     */
+    public String maxDifficulty = "";
+
+    /**
      * Amplitude of the boss movement, in arena units.
      * For SINE_WAVE: horizontal swing distance from centre.
      * For CIRCLE: orbit radius.
@@ -78,4 +92,10 @@ public class PhaseDefinition {
 
     /** Ordered list of attack steps, cycled repeatedly while this phase is active. */
     public List<PatternStep> attacks = new ArrayList<>();
+
+    /**
+     * Optional extra stationary emitters for this phase (Flandre clones/traps, etc.).
+     * Each emitter runs its own PatternStep list independently, aimed at the current boss target.
+     */
+    public List<BossEmitterDefinition> emitters = new ArrayList<>();
 }

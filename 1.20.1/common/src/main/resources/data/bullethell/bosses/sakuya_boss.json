@@ -1,0 +1,262 @@
+{
+  "id": "sakuya_boss",
+  "name": "Sakuya Izayoi",
+  "_design_notes": [
+    "TH6 Stage 5 strict split: E/N uses Clock Corpse -> Luna Clock -> Manipulating Doll; H/L uses Jack the Ludo Bile -> The World -> Killing Doll.",
+    "Alternating nonspells are shared while spellcards are difficulty-gated.",
+    "AIMED/SPREAD use bulletType KNIFE (knife.png); RING/SPIRAL/BOUNCE/RING_OFFSET knife walls use KUNAI (kunai.png, slightly smaller sprite, same hitbox).",
+    "Balance pass: minCooldown + maxScaledArms on high-arm steps; spellDurationTicks ladder for E/N and H/L spell timers; see wiki/sakuya-th06-reconstruction.md.",
+    "Blueprint (PatternStep): bulletLifetimeTicks — RING/SPIRAL/RING_OFFSET 200, AIMED/SPREAD 220, BOUNCE 250. ringStartAngleRad -1 on RING_OFFSET (random), 0 on RING. bulletAngularVelocity/spawn offsets unused."
+  ],
+  "introDialog": [
+    {
+      "speaker": "BOSS",
+      "text": "Trespassing in the Scarlet Devil Mansion uninvited? I shall have to stop you here.",
+      "delayTicks": 160
+    }
+  ],
+  "characterDialogs": {
+    "reimu": [
+      { "speaker": "BOSS", "text": "Hakurei shrine maiden, your visit was not scheduled. I must escort you out.", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "You can try, but I'm finishing this incident first.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Then I shall delay your incident until dawn, if you survive that long.", "delayTicks": 155 }
+    ],
+    "marisa": [
+      { "speaker": "BOSS", "text": "Magician, once again you enter without permission.", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "Permission slips are boring. Danmaku is faster.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Speed without discipline is merely noise. I will silence it.", "delayTicks": 155 }
+    ],
+    "sakuya": [
+      { "speaker": "BOSS", "text": "An imitation maid? Very well. Let's see how your time compares to mine.", "delayTicks": 170 },
+      { "speaker": "PLAYER", "text": "I only need one opening.", "delayTicks": 120 },
+      { "speaker": "BOSS", "text": "One opening is all I require as well.", "delayTicks": 140 }
+    ],
+    "sanae": [
+      { "speaker": "BOSS", "text": "A guest from the mountain? The mansion is closed tonight.", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "Then I'll open it by force.", "delayTicks": 120 },
+      { "speaker": "BOSS", "text": "Foolish. The door you seek is a wall of knives.", "delayTicks": 150 }
+    ],
+    "cirno": [
+      { "speaker": "BOSS", "text": "A fairy reached this far? Unexpected. Do not waste my time.", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "I'm not wasting it, I'm freezing it!", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Time is mine to stop, not yours to freeze. Enough prattle.", "delayTicks": 155 }
+    ]
+  },
+  "victoryDialog": "You have potential. Return after sharpening your technique.",
+  "defeatDialog": "Order restored. Please see yourself out.",
+  "victoryDialogByCharacter": {
+    "reimu": "A precise victory. Lady Remilia will remember this.",
+    "marisa": "As troublesome as ever, magician.",
+    "sakuya": "So this is my other self's answer... impressive.",
+    "sanae": "Your resolve is admirable. Your manners need work.",
+    "cirno": "A fairy with this much force... noted."
+  },
+  "defeatDialogByCharacter": {
+    "reimu": "Your rhythm broke. I only followed the gap.",
+    "marisa": "Recklessness without timing is just noise.",
+    "sakuya": "Your timing lagged behind mine.",
+    "sanae": "Faith did not save you from precision.",
+    "cirno": "Strength without control melts quickly."
+  },
+  "phases": [
+    {
+      "_note": "Nonspell 1 — baseline aimed knife pressure.",
+      "hp": 1200,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 1",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 115,
+      "music": "lunar_clock_luna_dial",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 12, "minCooldown": 7, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 6, "maxScaledArms": 10, "speed": 3.65, "spread": 0.16, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 9, "minCooldown": 6, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 4, "maxScaledArms": 8, "speed": 4.3, "spread": 0.10, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 18, "minCooldown": 14, "scalingProfile": "BURST", "bulletType": "GOLD", "arms": 9, "maxScaledArms": 14, "speed": 2.0, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "Conjuring \"Misdirection\" (E/N) — side-dash style aimed knife flurries.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 1700,
+      "isSpellCard": true,
+      "spellName": "Conjuring \"Misdirection\"",
+      "spellDurationTicks": [750, 600, 0, 0],
+      "spellBonus": 52000,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 172,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 7, "minCooldown": 5, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 7, "maxScaledArms": 11, "speed": 4.35, "spread": 0.10, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 7, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 5, "maxScaledArms": 9, "speed": 4.8, "spread": 0.08, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 8, "minCooldown": 6, "scalingProfile": "BURST", "bulletType": "KNIFE", "arms": 4, "maxScaledArms": 9, "speed": 5.2, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Conjuring \"Mesmerizing Misdirection\" (H/L) — TH6-style lanes + bursts: engine burstCount/burstInterval = volleys then cooldown (reposition). BOUNCE restored; spiral + scarlet ring between bounce windows.",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 1880,
+      "isSpellCard": true,
+      "spellName": "Conjuring \"Mesmerizing Misdirection\"",
+      "spellDurationTicks": [0, 0, 460, 235],
+      "spellBonus": 65000,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 96,
+      "music": "",
+      "attacks": [
+        { "pattern": "BOUNCE", "burstCount": 2, "burstInterval": 8, "cooldown": 46, "minCooldown": 38, "scalingProfile": "PRECISION", "bulletType": "KUNAI", "arms": 5, "speed": 3.2, "spread": 0.10, "bounceCount": 2, "bounceDamping": 0.95, "bulletLifetimeTicks": 250 },
+        { "pattern": "SPIRAL", "burstCount": 2, "burstInterval": 5, "cooldown": 24, "minCooldown": 20, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.62, "speedDifficultyWeight": 0.58, "cooldownDifficultyWeight": 0.55, "bulletType": "KUNAI", "arms": 5, "armsMin": 5, "armsMax": 6, "speed": 2.85, "speedMin": 2.65, "speedMax": 3.05, "maxScaledArms": 7, "bulletLifetimeTicks": 200 },
+        { "pattern": "RING_OFFSET", "cooldown": 22, "minCooldown": 18, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.5, "speedDifficultyWeight": 0.5, "bulletType": "SCARLET", "arms": 10, "armsMin": 9, "armsMax": 12, "speed": 1.78, "speedMin": 1.68, "speedMax": 1.88, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "Nonspell 2 — denser knife + ring interleave.",
+      "hp": 1350,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 2",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 125,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 7, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 6, "maxScaledArms": 10, "speed": 3.85, "spread": 0.17, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 16, "minCooldown": 13, "scalingProfile": "BURST", "bulletType": "GOLD", "arms": 10, "maxScaledArms": 15, "speed": 2.2, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "SPREAD", "cooldown": 8, "minCooldown": 6, "scalingProfile": "BURST", "bulletType": "KNIFE", "arms": 4, "maxScaledArms": 9, "speed": 5.0, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Illusion Existence \"Clock Corpse\" (E/N) — random small bullets, then arced/lane knife pressure.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 1950,
+      "isSpellCard": true,
+      "spellName": "Illusion Existence \"Clock Corpse\"",
+      "spellDurationTicks": [740, 590, 0, 0],
+      "spellBonus": 62000,
+      "movement": "CIRCLE",
+      "moveSpeed": 84,
+      "music": "",
+      "attacks": [
+        { "pattern": "RING_OFFSET", "cooldown": 12, "minCooldown": 10, "scalingProfile": "BURST", "bulletType": "STAR", "arms": 14, "maxScaledArms": 18, "speed": 2.05, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 7, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 7, "maxScaledArms": 11, "speed": 4.05, "spread": 0.16, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 8, "minCooldown": 6, "scalingProfile": "BURST", "bulletType": "KNIFE", "arms": 6, "maxScaledArms": 11, "speed": 5.1, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 14, "minCooldown": 11, "scalingProfile": "BURST", "bulletType": "KUNAI", "arms": 9, "maxScaledArms": 14, "speed": 2.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "Illusion Phantom \"Jack the Ludo Bile\" (H/L) — large red bullets + 3-direction knife aim.",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2120,
+      "isSpellCard": true,
+      "spellName": "Illusion Phantom \"Jack the Ludo Bile\"",
+      "spellDurationTicks": [0, 0, 440, 225],
+      "spellBonus": 78000,
+      "movement": "CIRCLE",
+      "moveSpeed": 92,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPREAD", "cooldown": 8, "minCooldown": 6, "scalingProfile": "BURST", "bulletType": "SCARLET_LARGE", "arms": 3, "maxScaledArms": 5, "speed": 4.9, "bulletScale": 1.48, "hitboxScale": 0.76, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 8, "minCooldown": 6, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 3, "maxScaledArms": 6, "speed": 4.45, "spread": 0.26, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 8, "minCooldown": 6, "scalingProfile": "BURST", "bulletType": "KNIFE", "arms": 6, "maxScaledArms": 11, "speed": 5.3, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Nonspell 3 — final baseline before last cards.",
+      "hp": 1450,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 3",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 132,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 9, "minCooldown": 7, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 7, "maxScaledArms": 11, "speed": 3.95, "spread": 0.16, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 15, "minCooldown": 12, "scalingProfile": "BURST", "bulletType": "GOLD", "arms": 11, "maxScaledArms": 16, "speed": 2.3, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "Illusion Image \"Luna Clock\" (E/N) — organized rings + lane knives with redirected angles.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 2250,
+      "isSpellCard": true,
+      "spellName": "Illusion Image \"Luna Clock\"",
+      "spellDurationTicks": [710, 565, 0, 0],
+      "spellBonus": 86000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "RING", "cooldown": 14, "minCooldown": 11, "scalingProfile": "GEOMETRY", "bulletType": "STAR", "arms": 14, "maxScaledArms": 18, "speed": 2.2, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 7, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 6, "maxScaledArms": 10, "speed": 4.1, "spread": 0.13, "bulletLifetimeTicks": 220 },
+        { "pattern": "BOUNCE", "cooldown": 12, "minCooldown": 9, "scalingProfile": "PRECISION", "bulletType": "KUNAI", "arms": 6, "maxScaledArms": 11, "speed": 4.0, "spread": 0.15, "bounceCount": 1, "bounceDamping": 0.96, "bulletLifetimeTicks": 250 },
+        { "pattern": "RING_OFFSET", "cooldown": 15, "minCooldown": 12, "scalingProfile": "BURST", "bulletType": "KUNAI", "arms": 10, "maxScaledArms": 15, "speed": 2.55, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "Illusion World \"The World\" (H/L) — Luna Clock variant with fireball-like bullets and redirected knives.",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2400,
+      "isSpellCard": true,
+      "spellName": "Illusion World \"The World\"",
+      "spellDurationTicks": [0, 0, 390, 205],
+      "spellBonus": 98000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "RING", "cooldown": 12, "minCooldown": 9, "scalingProfile": "GEOMETRY", "bulletType": "HOMING_ORB", "arms": 12, "maxScaledArms": 17, "speed": 2.35, "bulletScale": 1.22, "hitboxScale": 0.44, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "BOUNCE", "cooldown": 11, "minCooldown": 8, "scalingProfile": "BURST", "bulletType": "HOMING_ORB", "arms": 6, "maxScaledArms": 11, "speed": 3.9, "spread": 0.2, "bounceCount": 2, "bounceDamping": 0.94, "bulletScale": 1.2, "hitboxScale": 0.46, "bulletLifetimeTicks": 250 },
+        { "pattern": "AIMED", "cooldown": 9, "minCooldown": 6, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 7, "maxScaledArms": 11, "speed": 4.15, "spread": 0.14, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 13, "minCooldown": 10, "scalingProfile": "BURST", "bulletType": "KUNAI", "arms": 12, "maxScaledArms": 17, "speed": 2.65, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "Maid Secret Skill \"Manipulating Doll\" (E/N) — blue then denser red knife waves, then redirected knives.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 2450,
+      "isSpellCard": true,
+      "spellName": "Maid Secret Skill \"Manipulating Doll\"",
+      "spellDurationTicks": [690, 545, 0, 0],
+      "spellBonus": 105000,
+      "movement": "CIRCLE",
+      "moveSpeed": 90,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 9, "minCooldown": 6, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 6, "maxScaledArms": 10, "speed": 4.0, "spread": 0.18, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 9, "minCooldown": 6, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 6, "maxScaledArms": 10, "speed": 4.35, "spread": 0.10, "bulletLifetimeTicks": 220 },
+        { "pattern": "BOUNCE", "cooldown": 12, "minCooldown": 9, "scalingProfile": "BURST", "bulletType": "KUNAI", "arms": 7, "maxScaledArms": 12, "speed": 4.1, "spread": 0.16, "bounceCount": 1, "bounceDamping": 0.95, "bulletLifetimeTicks": 250 },
+        { "pattern": "RING_OFFSET", "cooldown": 14, "minCooldown": 11, "scalingProfile": "BURST", "bulletType": "KUNAI", "arms": 10, "maxScaledArms": 15, "speed": 2.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "Maid Secret Skill \"Killing Doll\" (H/L) — circular knife aim and large redirected knife waves.",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2620,
+      "isSpellCard": true,
+      "spellName": "Maid Secret Skill \"Killing Doll\"",
+      "spellDurationTicks": [0, 0, 350, 185],
+      "spellBonus": 120000,
+      "movement": "CIRCLE",
+      "moveSpeed": 102,
+      "music": "",
+      "attacks": [
+        { "pattern": "RING", "cooldown": 12, "minCooldown": 9, "scalingProfile": "GEOMETRY", "bulletType": "KUNAI", "arms": 12, "maxScaledArms": 17, "speed": 2.95, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "SPREAD", "cooldown": 8, "minCooldown": 6, "scalingProfile": "BURST", "bulletType": "KNIFE", "arms": 10, "maxScaledArms": 15, "speed": 5.35, "bulletLifetimeTicks": 220 },
+        { "pattern": "BOUNCE", "cooldown": 10, "minCooldown": 6, "scalingProfile": "SPAM", "pressureSoftCap": 0.60, "pressureArmDrop": 0.44, "pressureCooldownBoost": 4, "bulletType": "KUNAI", "arms": 9, "maxScaledArms": 14, "speed": 4.2, "spread": 0.18, "bounceCount": 2, "bounceDamping": 0.94, "bulletLifetimeTicks": 250 },
+        { "pattern": "RING_OFFSET", "cooldown": 13, "minCooldown": 10, "scalingProfile": "BURST", "bulletType": "GOLD", "arms": 12, "maxScaledArms": 17, "speed": 2.4, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    }
+  ]
+}

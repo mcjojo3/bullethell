@@ -1,0 +1,8 @@
+{
+  "id": "th6_extra_sub1_center",
+  "description": "TH06 ecldata7 Timeline0 ins_0(Sub1,192,-48,800,2): center library fan fairy (Sub1). Mod center x=240.",
+  "enemies": [
+    { "x": 220, "y": -24, "vx": 0.0, "vy": 3.5, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 0 },
+    { "x": 260, "y": -24, "vx": 0.0, "vy": 3.5, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 4 }
+  ]
+}

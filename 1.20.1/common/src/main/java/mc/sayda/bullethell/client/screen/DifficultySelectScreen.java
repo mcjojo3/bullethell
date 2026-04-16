@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.client.screen;
 
 import mc.sayda.bullethell.arena.DifficultyConfig;
+import mc.sayda.bullethell.network.BHPackets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -32,6 +33,7 @@ public class DifficultySelectScreen extends Screen {
     };
 
     private final String stageId;
+    private final int maxAllowedDifficultyOrdinal;
 
     private int selectedIndex = 1;
 
@@ -39,8 +41,14 @@ public class DifficultySelectScreen extends Screen {
     private int cardTopY;
 
     public DifficultySelectScreen(String stageId) {
+        this(stageId, DifficultyConfig.LUNATIC.ordinal());
+    }
+
+    public DifficultySelectScreen(String stageId, int maxAllowedDifficultyOrdinal) {
         super(Component.literal("Select Difficulty"));
         this.stageId = stageId;
+        this.maxAllowedDifficultyOrdinal = maxAllowedDifficultyOrdinal;
+        this.selectedIndex = Math.min(1, Math.max(0, maxAllowedDifficultyOrdinal));
     }
 
     @Override
@@ -62,14 +70,29 @@ public class DifficultySelectScreen extends Screen {
             int bx   = cardStartX + i * (CARD_W + CARD_GAP);
             int btnX = bx + (CARD_W - 80) / 2;
             int btnY = cardTopY + CARD_H - BTN_H - 6;
+            boolean allowed = isAllowed(i);
 
-            addRenderableWidget(Button.builder(
+            Button b = Button.builder(
                     Component.literal(i == selectedIndex ? "SELECT" : "PICK"),
-                    btn -> { selectedIndex = idx; confirm(); })
+                    btn -> {
+                        if (!isAllowed(idx))
+                            return;
+                        selectedIndex = idx;
+                        confirm();
+                    })
                     .pos(btnX, btnY)
                     .size(80, BTN_H)
-                    .build());
+                    .build();
+            b.active = allowed;
+            addRenderableWidget(b);
         }
+
+        addRenderableWidget(Button.builder(
+                Component.literal("SHARE LAST RUN"),
+                btn -> BHPackets.sendShareLastRun())
+                .pos(width / 2 - 60, height - 32)
+                .size(120, 20)
+                .build());
     }
 
     @Override
@@ -86,6 +109,7 @@ public class DifficultySelectScreen extends Screen {
             int col  = COLORS[i];
             int bx   = cardStartX + i * (CARD_W + CARD_GAP);
             boolean sel = (i == selectedIndex);
+            boolean allowed = isAllowed(i);
 
             gfx.fill(bx, cardTopY, bx + CARD_W, cardTopY + CARD_H,
                     sel ? 0xFF1A1A38 : 0xFF0A0A1E);
@@ -97,27 +121,32 @@ public class DifficultySelectScreen extends Screen {
 
             int cx   = bx + CARD_W / 2;
             int nameY = cardTopY + 18;
-            gfx.drawCenteredString(font, diff.name(), cx, nameY, col);
+            gfx.drawCenteredString(font, diff.name(), cx, nameY, allowed ? col : 0xFF666666);
 
             String sub  = SUBTITLES[i];
             int    subY = nameY + font.lineHeight + 6;
             if (font.width(sub) <= CARD_W - 8) {
-                gfx.drawCenteredString(font, sub, cx, subY, 0xFF8888AA);
+                gfx.drawCenteredString(font, sub, cx, subY, allowed ? 0xFF8888AA : 0xFF555566);
             } else {
                 int mid = sub.length() / 2;
                 int sp  = sub.indexOf(' ', mid);
                 if (sp < 0) sp = mid;
-                gfx.drawCenteredString(font, sub.substring(0, sp).trim(),  cx, subY,                   0xFF8888AA);
-                gfx.drawCenteredString(font, sub.substring(sp).trim(),     cx, subY + font.lineHeight,  0xFF8888AA);
+                int subCol = allowed ? 0xFF8888AA : 0xFF555566;
+                gfx.drawCenteredString(font, sub.substring(0, sp).trim(),  cx, subY,                   subCol);
+                gfx.drawCenteredString(font, sub.substring(sp).trim(),     cx, subY + font.lineHeight,  subCol);
             }
 
             int swatchY = cardTopY + CARD_H - BTN_H - 14;
+            int sw = allowed ? col : 0xFF444444;
             gfx.fill(bx + 10, swatchY, bx + CARD_W - 10, swatchY + 3,
-                    sel ? col : (col & 0x00FFFFFF | 0x66000000));
+                    sel ? sw : (sw & 0x00FFFFFF | 0x66000000));
 
-            if (sel) {
+            if (sel && allowed) {
                 gfx.drawCenteredString(font, "\u25bc", cx,
                         cardTopY + CARD_H - BTN_H - 5, col);
+            }
+            if (!allowed) {
+                gfx.drawCenteredString(font, "LOCKED", cx, cardTopY + CARD_H - BTN_H - 26, 0xFFAA4444);
             }
         }
 
@@ -140,8 +169,9 @@ public class DifficultySelectScreen extends Screen {
     }
 
     private void confirm() {
-        Minecraft.getInstance().setScreen(
-                new CharacterSelectScreen(DIFFS[selectedIndex], stageId));
+        if (!isAllowed(selectedIndex))
+            return;
+        Minecraft.getInstance().setScreen(new CharacterSelectScreen(DIFFS[selectedIndex], stageId));
     }
 
     @Override
@@ -150,6 +180,10 @@ public class DifficultySelectScreen extends Screen {
         if (keyCode == 262 && selectedIndex < DIFFS.length - 1)    { selectedIndex++; rebuildButtons(); return true; }
         if (keyCode == 257 || keyCode == 335)                      { confirm(); return true; }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    private boolean isAllowed(int difficultyOrdinal) {
+        return difficultyOrdinal <= maxAllowedDifficultyOrdinal;
     }
 
     @Override

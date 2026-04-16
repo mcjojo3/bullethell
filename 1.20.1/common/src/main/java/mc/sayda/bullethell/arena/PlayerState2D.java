@@ -77,7 +77,7 @@ public class PlayerState2D {
 
     /**
      * Applied to passive stock, hold fill after startup, and stock rewards
-     * ({@link #addStoredChargeProgress}) — tweak global charge pacing.
+     * ({@link #addStoredChargeProgress}) - tweak global charge pacing.
      */
     public static final double CHARGE_GLOBAL_SPEED_MULT = 1.28;
 
@@ -187,7 +187,7 @@ public class PlayerState2D {
         chargeLevel = Math.min(CHARGE_LEVEL_MAX, (int) Math.floor(s + 1e-9));
     }
 
-    /** Add to stored (gray) stock — kills, graze, passive; respects lockout. */
+    /** Add to stored (gray) stock - kills, graze, passive; respects lockout. */
     public void addStoredChargeProgress(double delta) {
         if (chargeLockoutTicks > 0)
             return;

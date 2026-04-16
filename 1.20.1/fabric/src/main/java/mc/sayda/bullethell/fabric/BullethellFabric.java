@@ -9,7 +9,13 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 public class BullethellFabric implements ModInitializer {
     @Override
     public void onInitialize() {
+        mc.sayda.bullethell.config.fabric.FabricBullethellConfig.load();
         Bullethell.init();
         FabricDefaultAttributeRegistry.register(BHEntities.MARISA_NPC.get(), BHNpc.createAttributes());
+        FabricDefaultAttributeRegistry.register(BHEntities.REMILIA_NPC.get(), BHNpc.createAttributes());
+        FabricDefaultAttributeRegistry.register(BHEntities.SAKUYA_NPC.get(), BHNpc.createAttributes());
+        FabricDefaultAttributeRegistry.register(BHEntities.CIRNO_NPC.get(), BHNpc.createAttributes());
+        FabricDefaultAttributeRegistry.register(BHEntities.SANAE_NPC.get(), BHNpc.createAttributes());
+        FabricDefaultAttributeRegistry.register(BHEntities.FLANDRE_NPC.get(), BHNpc.createAttributes());
     }
 }

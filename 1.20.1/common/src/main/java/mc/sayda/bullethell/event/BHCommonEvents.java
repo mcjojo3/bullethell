@@ -3,10 +3,17 @@ package mc.sayda.bullethell.event;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.event.events.common.TickEvent;
+import mc.sayda.bullethell.BHGameRules;
+import mc.sayda.bullethell.BossRushMode;
+import mc.sayda.bullethell.BossProgression;
 import mc.sayda.bullethell.arena.ArenaContext;
+import mc.sayda.bullethell.arena.ArenaEndShareSnapshot;
 import mc.sayda.bullethell.arena.BulletHellManager;
+import mc.sayda.bullethell.arena.LastArenaShareState;
 import mc.sayda.bullethell.arena.BulletPool;
 import mc.sayda.bullethell.arena.GameEvent;
+import mc.sayda.bullethell.boss.CharacterDefinition;
+import mc.sayda.bullethell.boss.CharacterLoader;
 import mc.sayda.bullethell.command.BulletHellCommands;
 import mc.sayda.bullethell.debug.BHDebugMode;
 import mc.sayda.bullethell.network.ArenaStatePacket;
@@ -28,6 +35,9 @@ import java.util.UUID;
 public class BHCommonEvents {
 
     private static int syncTick = 0;
+    private record CarryState(int lives, int bombs, int graze, int power,
+            double storedChargeProgress, double holdChargeProgress) {
+    }
 
     public static void register() {
         TickEvent.SERVER_POST.register(server -> {
@@ -41,6 +51,7 @@ public class BHCommonEvents {
                 UUID uuid = entry.getKey();
                 ArenaContext ctx = entry.getValue();
 
+                ctx.setGloballyPaused(BHGameRules.isGlobalPauseEnabled(server) && ctx.hasPausedParticipants());
                 ctx.tick();
 
                 ServerPlayer host = server.getPlayerList().getPlayer(uuid);
@@ -50,6 +61,24 @@ public class BHCommonEvents {
                 }
 
                 if (ctx.isOver()) {
+                    if (ctx.isWon()) {
+                        String bossId = (ctx.boss != null) ? ctx.boss.id : "";
+                        for (UUID pid : ctx.allParticipants()) {
+                            ServerPlayer p = server.getPlayerList().getPlayer(pid);
+                            if (p == null || bossId == null || bossId.isBlank())
+                                continue;
+                            boolean improved = BossProgression.grantClearThroughDifficulty(p, bossId, ctx.difficulty);
+                            if (improved) {
+                                p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                                        "[BulletHell] Recorded clear: " + bossId + " (" + ctx.difficulty.name() + ")."));
+                            }
+                        }
+                    }
+                    if (tryContinueToNextStage(server, uuid, ctx)) {
+                        // tryContinueToNextStage() already replaces the arena for this host UUID.
+                        // Do NOT queue removal here, or end-of-tick cleanup can delete the new arena.
+                        continue;
+                    }
                     for (UUID pid : ctx.allParticipants()) {
                         ServerPlayer p = server.getPlayerList().getPlayer(pid);
                         if (p != null) {
@@ -162,9 +191,116 @@ public class BHCommonEvents {
             }
         });
 
+        PlayerEvent.PLAYER_JOIN.register(player -> {
+            BossProgression.ensureRootAdvancement((ServerPlayer) player);
+        });
+
         CommandRegistrationEvent.EVENT.register((dispatcher, registryAccess, environment) -> {
             BulletHellCommands.register(dispatcher);
         });
+    }
+
+    /**
+     * If stage chaining is configured, start the next stage immediately after a clear.
+     * Keeps difficulty and each participant's character selection; this is a fresh stage.
+     */
+    private static boolean tryContinueToNextStage(net.minecraft.server.MinecraftServer server, UUID hostUuid, ArenaContext ctx) {
+        if (!BossRushMode.isEnabled())
+            return false;
+        if (!ctx.isWon())
+            return false;
+        String nextStageId = ctx.stage.nextStageId;
+        if (nextStageId == null || nextStageId.isBlank())
+            return false;
+
+        ServerPlayer host = server.getPlayerList().getPlayer(hostUuid);
+        if (host == null)
+            return false;
+
+        java.util.LinkedHashMap<UUID, CarryState> carry = new java.util.LinkedHashMap<>();
+        for (UUID pid : ctx.allParticipants()) {
+            var ps = ctx.getPlayerState(pid);
+            if (ps != null) {
+                carry.put(pid, new CarryState(
+                        ps.lives, ps.bombs, ps.graze, ps.power,
+                        ps.storedChargeProgress, ps.holdChargeProgress));
+            }
+        }
+        long carryScore = ctx.score.getScore();
+
+        for (UUID pid : ctx.allParticipants()) {
+            ServerPlayer p = server.getPlayerList().getPlayer(pid);
+            if (p != null) {
+                sendEndStats(p, ctx);
+                p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "[BulletHell] Continuing to next stage: " + nextStageId));
+            }
+        }
+
+        java.util.LinkedHashMap<UUID, String> coopChars = new java.util.LinkedHashMap<>();
+        for (UUID pid : ctx.getCoopPlayers().keySet()) {
+            coopChars.put(pid, ctx.getCharacterId(pid));
+        }
+
+        BHPackets.startArena(host, ctx.difficulty, nextStageId, ctx.characterId);
+        ArenaContext nextCtx = BulletHellManager.INSTANCE.getArenaForPlayer(hostUuid);
+        if (nextCtx == null)
+            return true;
+
+        for (var e : coopChars.entrySet()) {
+            ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
+            if (p == null)
+                continue;
+            CharacterDefinition charDef = CharacterLoader.load(e.getValue());
+            BulletHellManager.INSTANCE.joinMatch(p.getUUID(), hostUuid, charDef, p);
+            BHPackets.sendFullSync(p, nextCtx);
+            int pIdx = 0;
+            int c = 2;
+            for (UUID cid : nextCtx.getCoopPlayers().keySet()) {
+                if (cid.equals(p.getUUID())) {
+                    pIdx = c;
+                    break;
+                }
+                c++;
+            }
+            BHPackets.sendToPlayer(p, new ArenaStatePacket(nextCtx, p.getUUID(), pIdx));
+        }
+
+        // Shared run score/stats carry over through chained stages.
+        nextCtx.score.addScore(carryScore);
+        for (var e : carry.entrySet()) {
+            var ps = nextCtx.getPlayerState(e.getKey());
+            if (ps == null)
+                continue;
+            var cs = e.getValue();
+            ps.lives = cs.lives();
+            ps.bombs = cs.bombs();
+            ps.graze = cs.graze();
+            ps.power = cs.power();
+            ps.storedChargeProgress = cs.storedChargeProgress();
+            ps.holdChargeProgress = Math.min(cs.holdChargeProgress(), cs.storedChargeProgress());
+            ps.syncChargePacketFields();
+        }
+
+        // Push refreshed per-player state immediately after carry-over.
+        for (UUID pid : nextCtx.allParticipants()) {
+            ServerPlayer p = server.getPlayerList().getPlayer(pid);
+            if (p == null)
+                continue;
+            int pIdx = (pid.equals(nextCtx.playerUuid)) ? 1 : 0;
+            if (pIdx == 0) {
+                int c = 2;
+                for (UUID cid : nextCtx.getCoopPlayers().keySet()) {
+                    if (cid.equals(pid)) {
+                        pIdx = c;
+                        break;
+                    }
+                    c++;
+                }
+            }
+            BHPackets.sendToPlayer(p, new ArenaStatePacket(nextCtx, pid, pIdx));
+        }
+        return true;
     }
 
     public static BulletDeltaPacket buildBulletDelta(ArenaContext ctx) {
@@ -190,48 +326,9 @@ public class BHCommonEvents {
     }
 
     private static void sendEndStats(ServerPlayer player, ArenaContext ctx) {
-        mc.sayda.bullethell.arena.PlayerState2D ps = ctx.getPlayerState(player.getUUID());
-        if (ps == null)
-            ps = ctx.player;
-        long score = ctx.score.getScore();
-        int lives = ps.lives;
-        int bombs = ps.bombs;
-        int graze = ps.graze;
-        int captured = ctx.getSpellsCaptured();
-        int attempted = ctx.getSpellsAttempted();
-        String charName = mc.sayda.bullethell.boss.CharacterLoader.load(ctx.getCharacterId(player.getUUID())).name;
-
-        if (ctx.isWon()) {
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§6§l╔══════ STAGE CLEAR ══════╗"));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e  Character: §f" + charName));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e  Score: §f" + String.format("%,d", score)));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e  Lives: §f" + lives + "  §eBombs: §f" + bombs));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e  Graze: §f" + graze));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e  Spells: §f" + captured + " / " + attempted + " captured"
-                            + (attempted > 0 && captured == attempted ? " §a§l(PERFECT!)" : "")));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§6§l╚═══════════════════════╝"));
-        } else {
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§c§l╔════════ GAME OVER ════════╗"));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e  Character: §f" + charName));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e  Score: §f" + String.format("%,d", score)));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e  Graze: §f" + graze));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e  Spells: §f" + captured + " / " + attempted + " captured"));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§e  Progress: §f" + String.format("%.1f%%", ctx.getCompletionPercentage())));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                    "§c§l╚══════════════════════════╝"));
-        }
+        ArenaEndShareSnapshot snap = ArenaEndShareSnapshot.capture(player, ctx);
+        LastArenaShareState.record(player.getUUID(), snap);
+        for (var line : snap.buildLines())
+            player.sendSystemMessage(line);
     }
 }

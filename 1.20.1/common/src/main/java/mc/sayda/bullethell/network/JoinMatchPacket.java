@@ -4,7 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.UUID;
 
-/** C → S | joiner confirmed a character — joins the host's arena as co-op. */
+/** C → S | joiner confirmed a character - joins the host's arena as co-op. */
 public class JoinMatchPacket {
 
     public final UUID   hostUuid;

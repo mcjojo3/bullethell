@@ -36,4 +36,16 @@ public class WaveDefinition {
      * The loaded enemies' positions/velocities are used as-is from the template.
      */
     public String waveRef = null;
+
+    /**
+     * Optional difficulty gate (same semantics as {@link PhaseDefinition#minDifficulty}).
+     * Empty = no lower bound. Example: {@code "HARD"} = skip on Easy/Normal.
+     */
+    public String minDifficulty = "";
+
+    /**
+     * Optional difficulty ceiling (same semantics as {@link PhaseDefinition#maxDifficulty}).
+     * Empty = no upper bound.
+     */
+    public String maxDifficulty = "";
 }

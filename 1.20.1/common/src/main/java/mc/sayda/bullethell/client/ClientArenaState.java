@@ -109,8 +109,8 @@ public class ClientArenaState {
 
     // --- boss sprite animation ---
     public int bossAnimCounter = 0;
-    public boolean bossMoving = false;
-    private float prevBossX = -1f;
+    /** -1 left, 0 idle, +1 right (server-authoritative). */
+    public int bossMoveDir = 0;
 
     // --- sprite sheet animation ---
     public int animRow = 0;
@@ -149,7 +149,7 @@ public class ClientArenaState {
 
     public void applyArenaState(boolean pktActive, boolean pktSpectating, float playerX, float playerY,
             int lives, int bombs, int graze, int power, int pIdx,
-            float bossX, float bossY, int bossHp, int bossMaxHp, int bossPhase,
+            float bossX, float bossY, int bossHp, int bossMaxHp, int bossPhase, int bossMoveDir,
             int skillGauge, int chargeLevel, int holdChargeGauge, int abilityType, int abilityTicks, float abilityX, float abilityY, java.util.UUID abilityOwner,
             long score, int spellTimerTicks, int spellTimerTotal,
             String musicTrackId, String spellName, boolean activeSpellCard, boolean declaring,
@@ -190,8 +190,7 @@ public class ClientArenaState {
         this.player.graze = graze;
         this.power = power;
         this.playerIndex = pIdx;
-        this.bossMoving = (prevBossX >= 0f) && (Math.abs(bossX - prevBossX) > 0.3f);
-        this.prevBossX = bossX;
+        this.bossMoveDir = bossMoveDir;
         this.bossX = bossX;
         this.bossY = bossY;
         this.bossHp = bossHp;
@@ -263,7 +262,7 @@ public class ClientArenaState {
     public void applyArenaState(ArenaStatePacket pkt) {
         applyArenaState(pkt.active, pkt.spectating, pkt.playerX, pkt.playerY,
                 pkt.lives, pkt.bombs, pkt.graze, pkt.power, pkt.playerIndex,
-                pkt.bossX, pkt.bossY, pkt.bossHp, pkt.bossMaxHp, pkt.bossPhase,
+                pkt.bossX, pkt.bossY, pkt.bossHp, pkt.bossMaxHp, pkt.bossPhase, pkt.bossMoveDir,
                 pkt.skillGauge, pkt.chargeLevel, pkt.holdChargeGauge, pkt.abilityType, pkt.abilityTicks, pkt.abilityX, pkt.abilityY, pkt.abilityOwner,
                 pkt.score, pkt.spellTimerTicks, pkt.spellTimerTotal,
                 pkt.musicTrackId, pkt.spellName, pkt.activeSpellCard, pkt.declaring,
@@ -399,8 +398,7 @@ public class ClientArenaState {
         animIdleFrame = 0;
         animIdleTick = 0;
         bossAnimCounter = 0;
-        bossMoving = false;
-        prevBossX = -1f;
+        bossMoveDir = 0;
         bullets.clearAll();
         playerBullets.clearAll();
         allPlayerBullets.clear();

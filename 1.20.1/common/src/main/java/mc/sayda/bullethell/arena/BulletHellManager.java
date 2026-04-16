@@ -1,5 +1,6 @@
 package mc.sayda.bullethell.arena;
 
+import mc.sayda.bullethell.boss.StageDefinition;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class BulletHellManager {
     // ---------------------------------------------------------------- lifecycle
 
     public ArenaContext startArena(UUID playerUuid, DifficultyConfig difficulty) {
-        return startArena(playerUuid, difficulty, "stage_1", "reimu");
+        return startArena(playerUuid, difficulty, "marisa_stage", "reimu");
     }
 
     public ArenaContext startArena(UUID playerUuid, DifficultyConfig difficulty, String stageId) {
@@ -55,6 +56,19 @@ public class BulletHellManager {
     public ArenaContext startArena(ServerPlayer host, DifficultyConfig difficulty,
             String stageId, String characterId) {
         ArenaContext ctx = new ArenaContext(host.getUUID(), difficulty, stageId, characterId, host);
+        arenas.put(host.getUUID(), ctx);
+        return ctx;
+    }
+
+    /**
+     * Starts from a resolved {@link StageDefinition}. If {@code skipToBossPhase1Based} is
+     * {@code >= 1}, waves and intro dialog are skipped and that boss phase begins (1-based).
+     */
+    public ArenaContext startArena(ServerPlayer host, DifficultyConfig difficulty, StageDefinition stage,
+            String characterId, int skipToBossPhase1Based) {
+        ArenaContext ctx = new ArenaContext(host.getUUID(), difficulty, stage, characterId, host);
+        if (skipToBossPhase1Based >= 1)
+            ctx.debugSkipToBossPhase(skipToBossPhase1Based - 1);
         arenas.put(host.getUUID(), ctx);
         return ctx;
     }
@@ -141,6 +155,7 @@ public class BulletHellManager {
     }
 
     /** @deprecated Use {@link #getArenaForPlayer(UUID)} for co-op-aware lookup. */
+    @Deprecated
     public ArenaContext getArena(UUID playerUuid) {
         return arenas.get(playerUuid);
     }

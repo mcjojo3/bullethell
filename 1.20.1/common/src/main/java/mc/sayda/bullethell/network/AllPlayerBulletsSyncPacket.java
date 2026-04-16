@@ -33,7 +33,7 @@ public class AllPlayerBulletsSyncPacket {
             BulletPool pool = ctx.getBulletPool(pid);
             if (pool == null) { idx++; continue; }
             int cap = BulletPool.PLAYER_CAPACITY;
-            float[][] data   = new float[cap][6];
+            float[][] data   = new float[cap][BulletPool.STRIDE];
             boolean[] active = new boolean[cap];
             for (int i = 0; i < cap; i++) {
                 data[i]   = pool.getSlotData(i);
@@ -63,11 +63,11 @@ public class AllPlayerBulletsSyncPacket {
         List<PlayerBullets> list = new ArrayList<>(count);
         for (int p = 0; p < count; p++) {
             int pidx = buf.readVarInt();
-            float[][] data   = new float[BulletPool.PLAYER_CAPACITY][6];
+            float[][] data   = new float[BulletPool.PLAYER_CAPACITY][BulletPool.STRIDE];
             boolean[] active = new boolean[BulletPool.PLAYER_CAPACITY];
             for (int i = 0; i < BulletPool.PLAYER_CAPACITY; i++) {
                 active[i] = buf.readBoolean();
-                if (active[i]) for (int j = 0; j < 6; j++) data[i][j] = buf.readFloat();
+                if (active[i]) for (int j = 0; j < BulletPool.STRIDE; j++) data[i][j] = buf.readFloat();
             }
             list.add(new PlayerBullets(pidx, data, active));
         }

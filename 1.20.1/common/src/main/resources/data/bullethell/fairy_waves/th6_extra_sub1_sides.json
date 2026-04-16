@@ -1,0 +1,8 @@
+{
+  "id": "th6_extra_sub1_sides",
+  "description": "Timeline0 ins_0(Sub1) at TH x=32 and 352, delay 600 — paired outer columns (mod 40,440).",
+  "enemies": [
+    { "x": 40, "y": -24, "vx": 0.0, "vy": 3.55, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 0 },
+    { "x": 440, "y": -24, "vx": 0.0, "vy": 3.55, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 6 }
+  ]
+}

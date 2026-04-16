@@ -1,7 +1,10 @@
 package mc.sayda.bullethell;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Bullet hell input layout. {@link #TH19} matches Touhou 19-style defaults in
@@ -31,5 +34,10 @@ public enum BHControlScheme {
 
     public String id() {
         return name().toLowerCase(Locale.ROOT);
+    }
+
+    /** All registered scheme IDs in declaration order, for command suggestions and error messages. */
+    public static List<String> allIds() {
+        return Arrays.stream(values()).map(BHControlScheme::id).collect(Collectors.toUnmodifiableList());
     }
 }

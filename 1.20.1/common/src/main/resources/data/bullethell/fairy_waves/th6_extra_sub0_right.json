@@ -1,0 +1,8 @@
+{
+  "id": "th6_extra_sub0_right",
+  "description": "TH06 ecldata7 Timeline0: ins_2(Sub0) at TH x=320,352 y=-48 — right mirror column (scaled 400,440).",
+  "enemies": [
+    { "x": 400, "y": -22, "vx": 0.0, "vy": 3.65, "type": "BLUE_FAIRY", "delayTicks": 0 },
+    { "x": 440, "y": -22, "vx": 0.0, "vy": 3.65, "type": "BLUE_FAIRY", "delayTicks": 0 }
+  ]
+}

@@ -58,7 +58,7 @@ public final class NpcLoader {
         def.id = id;
         def.displayName = id;
         def.challengeText = "...";
-        def.stageId = "stage_1";
+        def.stageId = "marisa_stage";
         return def;
     }
 }

@@ -2,7 +2,7 @@ package mc.sayda.bullethell.network;
 
 import net.minecraft.network.FriendlyByteBuf;
 
-/** C → S | every client tick — directional input + focus/shoot/charge flags. */
+/** C → S | every client tick - directional input + focus/shoot/charge flags. */
 public class PlayerPos2DPacket {
 
     public final float   dx, dy;

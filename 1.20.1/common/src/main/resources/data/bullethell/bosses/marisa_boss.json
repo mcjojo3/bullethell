@@ -2,7 +2,7 @@
   "id": "marisa_boss",
   "name": "Marisa Kirisame",
   "_design_notes": [
-    "Inspired by Marisa's Imperishable Night (TH8) Stage 4B-style fight — feel-based, not a frame-perfect port.",
+    "Inspired by Marisa's Imperishable Night (TH8) Stage 4B-style fight - feel-based, not a frame-perfect port.",
     "Phase flow: opening aimed pressure -> Magic Sign \"Milky Way\" -> nonspell -> Starlight Typhoon-style (aimed + spark beams + optional laser wheel) -> late nonspell -> Love Sign \"Master Spark\" -> Final Sign \"Double Spark\".",
     "Patterns favor AIMED, LASER_BEAM, and AIMED_RING (fan + ring) toward the nearest living player (co-op).",
     "LASER_ROTATING: bidirectional beams, one burst in the Typhoon phase for a laser-wheel moment.",
@@ -10,108 +10,47 @@
   ],
   "characterDialogs": {
     "reimu": [
-      {
-        "speaker": "BOSS",
-        "text": "Yo, Reimu! Late as usual. I already 'borrowed' all the good loot from this place!",
-        "delayTicks": 160
-      },
-      {
-        "speaker": "PLAYER",
-        "text": "Marisa... Give it back before the owner files a complaint that I'll have to deal with.",
-        "delayTicks": 140
-      },
-      {
-        "speaker": "BOSS",
-        "text": "No way, finders keepers, ze! Besides, I need a tough test dummy for my new star magic.",
-        "delayTicks": 180
-      },
-      {
-        "speaker": "PLAYER",
-        "text": "I really don't have time for your games today. Get out of my way or get exterminated.",
-        "delayTicks": 120
-      },
-      {
-        "speaker": "BOSS",
-        "text": "That's the spirit! Let's see if your dodging is as sharp as your tongue! Here I come!",
-        "delayTicks": 160
-      }
+      { "speaker": "BOSS", "text": "Yo, Reimu. I borrowed the good stuff first, try and take it back, ze!", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "Return it now, Marisa. If not, I'll exterminate first and ask later.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Ha! Try exterminating after you survive this star shower, ze!", "delayTicks": 155 }
     ],
     "marisa": [
-      {
-        "speaker": "BOSS",
-        "text": "Hey, wait a second! You're wearing my clothes! And my hat! What gives, ze?!",
-        "delayTicks": 160
-      },
-      {
-        "speaker": "PLAYER",
-        "text": "I could say the exact same thing to you, faker! Is this some kind of tanuki trick?",
-        "delayTicks": 140
-      },
-      {
-        "speaker": "BOSS",
-        "text": "A fake?! I'm the one and only ordinary magician! I'll prove it with my firepower!",
-        "delayTicks": 180
-      },
-      {
-        "speaker": "PLAYER",
-        "text": "Bring it on! I'll blast you so hard you'll forget my name! I mean, your name!",
-        "delayTicks": 120
-      },
-      {
-        "speaker": "BOSS",
-        "text": "Whoever survives gets exclusive rights to the Master Spark! Let's go!",
-        "delayTicks": 160
-      }
+      { "speaker": "BOSS", "text": "Hold up, another me? Then let's settle who's the real ordinary magician!", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "Fine by me. Winner keeps the title and the Master Spark bragging rights!", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Guess that means two Master Sparks, let's see whose is brighter, ze!", "delayTicks": 155 }
+ 
     ],
     "sakuya": [
-      {
-        "speaker": "BOSS",
-        "text": "Oh hey, Sakuya! Perfect timing. Tell Patchy I'll return those books... eventually.",
-        "delayTicks": 160
-      },
-      {
-        "speaker": "PLAYER",
-        "text": "Lady Patchouli specifically sent me to retrieve them today, Marisa. With force, if necessary.",
-        "delayTicks": 140
-      },
-      {
-        "speaker": "BOSS",
-        "text": "Force? Sounds like fun! But you'll have to catch me first!",
-        "delayTicks": 180
-      },
-      {
-        "speaker": "PLAYER",
-        "text": "Time is literally on my side. I will clean up this mess and take back the Mansion's property.",
-        "delayTicks": 120
-      }
+      { "speaker": "BOSS", "text": "Oh hey, Sakuya. Tell Patchy I'll return those books... eventually.", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "Lady Patchouli sent me for them now. If needed, by force.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Knives versus lasers, bring it, I'll return the favor with interest!", "delayTicks": 155 }
     ],
     "sanae": [
-      {
-        "speaker": "BOSS",
-        "text": "Well, well, if it isn't the Moriya Shrine's poster girl. Out collecting faith today?",
-        "delayTicks": 160
-      },
-      {
-        "speaker": "PLAYER",
-        "text": "Exactly! And defeating a notorious thief like you will surely boost our shrine's reputation!",
-        "delayTicks": 140
-      },
-      {
-        "speaker": "BOSS",
-        "text": "Notorious thief? I'm just an ordinary magician! You can't beat me with miracles alone, ze.",
-        "delayTicks": 180
-      },
-      {
-        "speaker": "PLAYER",
-        "text": "Common sense doesn't apply in Gensokyo! Prepare to face the power of a living god!",
-        "delayTicks": 120
-      },
-      {
-        "speaker": "BOSS",
-        "text": "Ha! I don't need gods, just my Mini-Hakkero! Eat my stardust!",
-        "delayTicks": 160
-      }
+      { "speaker": "BOSS", "text": "Moriya's wind priestess, huh? Looking for faith points in a duel?", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "Exactly. Beating you should make for excellent shrine publicity.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Great headline, hope your dodging keeps up with the front page, ze!", "delayTicks": 155 }
+    ],
+    "cirno": [
+      { "speaker": "BOSS", "text": "Cirno?! Alright, strongest fairy, try dodging my stars!", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "I'll freeze your magic and prove who's strongest!", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Ice versus stars, let's see which one shatters first!", "delayTicks": 150 }
     ]
+  },
+  "victoryDialog": "Not bad at all. Next time I'll bring an even bigger spark, ze!",
+  "defeatDialog": "Heh, stars don't lie. Come back after more practice.",
+  "victoryDialogByCharacter": {
+    "reimu": "You got me this round, Reimu. Don't get lazy just because you won.",
+    "marisa": "What?! I lost to... me? Fine, you can borrow the title for now.",
+    "sakuya": "Ow, those knives are no joke. Tell Patchy I still owe her... maybe.",
+    "sanae": "Okay, miracle girl, that was flashy. I admit it, you earned that win.",
+    "cirno": "Whoa, the strongest really did it. Remind me not to underestimate fairies."
+  },
+  "defeatDialogByCharacter": {
+    "reimu": "That all you've got, shrine maiden? I expected cleaner dodging.",
+    "marisa": "Fake or not, I'm still the one and only ordinary magician!",
+    "sakuya": "Too slow, maid. Time waits for no one, especially not you.",
+    "sanae": "Common sense from outside won't save you here, ze!",
+    "cirno": "Even the strongest needs better footing. Try again, Cirno."
   },
   "phases": [
     {
@@ -126,20 +65,10 @@
       "moveSpeed": 100,
       "music": "love_coloured_master_spark",
       "attacks": [
-        {"pattern": "AIMED", "cooldown": 14, "bulletType": "GOLD", "arms": 5, "speed": 3.1, "spread": 0.22},
-        {"pattern": "AIMED", "cooldown": 12, "bulletType": "GOLD", "arms": 7, "speed": 2.9, "spread": 0.16},
-        {
-          "pattern": "AIMED_RING",
-          "cooldown": 20,
-          "bulletType": "GOLD",
-          "arms": 5,
-          "spread": 0.20,
-          "speed": 3.0,
-          "ringArms": 10,
-          "ringSpeed": 1.65,
-          "ringBulletType": "RICE"
-        },
-        {"pattern": "RING", "cooldown": 24, "bulletType": "RICE", "arms": 10, "speed": 1.75}
+        { "pattern": "AIMED", "cooldown": 14, "bulletType": "GOLD", "arms": 5, "speed": 3.1, "spread": 0.22 },
+        { "pattern": "AIMED", "cooldown": 12, "bulletType": "GOLD", "arms": 7, "speed": 2.9, "spread": 0.16 },
+        { "pattern": "AIMED_RING", "cooldown": 20, "bulletType": "GOLD", "arms": 5, "spread": 0.20, "speed": 3.0, "ringArms": 10, "ringSpeed": 1.65, "ringBulletType": "RICE" },
+        { "pattern": "RING", "cooldown": 24, "bulletType": "RICE", "arms": 10, "speed": 1.75 }
       ]
     },
     {
@@ -153,22 +82,12 @@
       "moveSpeed": 70,
       "music": "",
       "attacks": [
-        {"pattern": "AIMED", "cooldown": 11, "bulletType": "GOLD", "arms": 6, "speed": 3.5, "spread": 0.20},
-        {"pattern": "LASER_BEAM", "cooldown": 9, "bulletType": "SPARK", "arms": 3, "speed": 6.0},
-        {"pattern": "AIMED", "cooldown": 13, "bulletType": "STAR", "arms": 5, "speed": 3.2, "spread": 0.24},
-        {
-          "pattern": "AIMED_RING",
-          "cooldown": 18,
-          "bulletType": "GOLD",
-          "arms": 5,
-          "spread": 0.18,
-          "speed": 3.4,
-          "ringArms": 12,
-          "ringSpeed": 1.55,
-          "ringBulletType": "ORB"
-        },
-        {"pattern": "RING", "cooldown": 16, "bulletType": "GOLD", "arms": 14, "speed": 2.9},
-        {"pattern": "AIMED", "cooldown": 12, "bulletType": "GOLD", "arms": 4, "speed": 4.0, "spread": 0.14}
+        { "pattern": "AIMED", "cooldown": 11, "bulletType": "GOLD", "arms": 6, "speed": 3.5, "spread": 0.20 },
+        { "pattern": "LASER_BEAM", "cooldown": 9, "bulletType": "SPARK", "arms": 3, "speed": 6.0 },
+        { "pattern": "AIMED", "cooldown": 13, "bulletType": "STAR", "arms": 5, "speed": 3.2, "spread": 0.24 },
+        { "pattern": "AIMED_RING", "cooldown": 18, "bulletType": "GOLD", "arms": 5, "spread": 0.18, "speed": 3.4, "ringArms": 12, "ringSpeed": 1.55, "ringBulletType": "ORB" },
+        { "pattern": "RING", "cooldown": 16, "bulletType": "GOLD", "arms": 14, "speed": 2.9 },
+        { "pattern": "AIMED", "cooldown": 12, "bulletType": "GOLD", "arms": 4, "speed": 4.0, "spread": 0.14 }
       ]
     },
     {
@@ -183,20 +102,10 @@
       "moveSpeed": 125,
       "music": "",
       "attacks": [
-        {"pattern": "AIMED", "cooldown": 10, "bulletType": "GOLD", "arms": 6, "speed": 3.6, "spread": 0.19},
-        {
-          "pattern": "AIMED_RING",
-          "cooldown": 17,
-          "bulletType": "GOLD",
-          "arms": 5,
-          "spread": 0.22,
-          "speed": 3.2,
-          "ringArms": 10,
-          "ringSpeed": 1.7,
-          "ringBulletType": "RICE"
-        },
-        {"pattern": "SPIRAL", "cooldown": 9, "bulletType": "RICE", "arms": 4, "speed": 2.7},
-        {"pattern": "AIMED", "cooldown": 11, "bulletType": "RICE", "arms": 7, "speed": 3.0, "spread": 0.26}
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "GOLD", "arms": 6, "speed": 3.6, "spread": 0.19 },
+        { "pattern": "AIMED_RING", "cooldown": 17, "bulletType": "GOLD", "arms": 5, "spread": 0.22, "speed": 3.2, "ringArms": 10, "ringSpeed": 1.7, "ringBulletType": "RICE" },
+        { "pattern": "SPIRAL", "cooldown": 9, "bulletType": "RICE", "arms": 4, "speed": 2.7 },
+        { "pattern": "AIMED", "cooldown": 11, "bulletType": "RICE", "arms": 7, "speed": 3.0, "spread": 0.26 }
       ]
     },
     {
@@ -210,32 +119,13 @@
       "moveSpeed": 0,
       "music": "",
       "attacks": [
-        {"pattern": "LASER_BEAM", "cooldown": 10, "bulletType": "SPARK", "arms": 3, "speed": 6.5},
-        {"pattern": "AIMED", "cooldown": 11, "bulletType": "GOLD", "arms": 5, "speed": 3.5, "spread": 0.21},
-        {
-          "pattern": "AIMED_RING",
-          "cooldown": 19,
-          "bulletType": "STAR",
-          "arms": 5,
-          "spread": 0.25,
-          "speed": 3.1,
-          "ringArms": 11,
-          "ringSpeed": 1.6,
-          "ringBulletType": "RICE"
-        },
-        {"pattern": "LASER_BEAM", "cooldown": 11, "bulletType": "SPARK", "arms": 4, "speed": 6.0},
-        {
-          "pattern": "LASER_ROTATING",
-          "cooldown": 38,
-          "bulletType": "LASER_HEAD",
-          "arms": 8,
-          "speed": 0,
-          "laserHalfWidth": 7,
-          "warnTicks": 14,
-          "activeTicks": 22
-        },
-        {"pattern": "AIMED", "cooldown": 13, "bulletType": "RICE", "arms": 6, "speed": 3.2, "spread": 0.28},
-        {"pattern": "RING", "cooldown": 26, "bulletType": "ORB", "arms": 10, "speed": 1.55}
+        { "pattern": "LASER_BEAM", "cooldown": 10, "bulletType": "SPARK", "arms": 3, "speed": 6.5 },
+        { "pattern": "AIMED", "cooldown": 11, "bulletType": "GOLD", "arms": 5, "speed": 3.5, "spread": 0.21 },
+        { "pattern": "AIMED_RING", "cooldown": 19, "bulletType": "STAR", "arms": 5, "spread": 0.25, "speed": 3.1, "ringArms": 11, "ringSpeed": 1.6, "ringBulletType": "RICE" },
+        { "pattern": "LASER_BEAM", "cooldown": 11, "bulletType": "SPARK", "arms": 4, "speed": 6.0 },
+        { "pattern": "LASER_ROTATING", "cooldown": 38, "bulletType": "LASER_HEAD", "arms": 8, "speed": 0, "laserHalfWidth": 7, "warnTicks": 14, "activeTicks": 22 },
+        { "pattern": "AIMED", "cooldown": 13, "bulletType": "RICE", "arms": 6, "speed": 3.2, "spread": 0.28 },
+        { "pattern": "RING", "cooldown": 26, "bulletType": "ORB", "arms": 10, "speed": 1.55 }
       ]
     },
     {
@@ -250,24 +140,14 @@
       "moveSpeed": 140,
       "music": "",
       "attacks": [
-        {"pattern": "AIMED", "cooldown": 9, "bulletType": "GOLD", "arms": 7, "speed": 3.9, "spread": 0.17},
-        {
-          "pattern": "AIMED_RING",
-          "cooldown": 16,
-          "bulletType": "GOLD",
-          "arms": 6,
-          "spread": 0.18,
-          "speed": 3.5,
-          "ringArms": 12,
-          "ringSpeed": 1.75,
-          "ringBulletType": "ORB"
-        },
-        {"pattern": "AIMED", "cooldown": 10, "bulletType": "GOLD", "arms": 5, "speed": 4.0, "spread": 0.15},
-        {"pattern": "RING", "cooldown": 15, "bulletType": "GOLD", "arms": 14, "speed": 2.6}
+        { "pattern": "AIMED", "cooldown": 9, "bulletType": "GOLD", "arms": 7, "speed": 3.9, "spread": 0.17 },
+        { "pattern": "AIMED_RING", "cooldown": 16, "bulletType": "GOLD", "arms": 6, "spread": 0.18, "speed": 3.5, "ringArms": 12, "ringSpeed": 1.75, "ringBulletType": "ORB" },
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "GOLD", "arms": 5, "speed": 4.0, "spread": 0.15 },
+        { "pattern": "RING", "cooldown": 15, "bulletType": "GOLD", "arms": 14, "speed": 2.6 }
       ]
     },
     {
-      "_note": "Love Sign \"Master Spark\": IN-style one main wide LASER with star/aimed support — one LASER_BEAM gust before the beam, then bullet pressure (no second overlapping spark column).",
+      "_note": "Love Sign \"Master Spark\": IN-style one main wide LASER with star/aimed support - one LASER_BEAM gust before the beam, then bullet pressure (no second overlapping spark column).",
       "hp": 2600,
       "isSpellCard": true,
       "spellName": "Love Sign \"Master Spark\"",
@@ -277,24 +157,15 @@
       "moveSpeed": 0,
       "music": "",
       "attacks": [
-        {"pattern": "AIMED", "cooldown": 10, "bulletType": "GOLD", "arms": 6, "speed": 3.3, "spread": 0.20},
-        {"pattern": "LASER_BEAM", "cooldown": 12, "bulletType": "SPARK", "arms": 3, "speed": 6.2},
-        {"pattern": "AIMED", "cooldown": 10, "bulletType": "RICE", "arms": 4, "speed": 3.8, "spread": 0.14},
-        {"pattern": "RING", "cooldown": 13, "bulletType": "GOLD", "arms": 12, "speed": 2.15},
-        {"pattern": "AIMED", "cooldown": 10, "bulletType": "GOLD", "arms": 5, "speed": 3.4, "spread": 0.19},
-        {
-          "pattern": "LASER",
-          "cooldown": 125,
-          "bulletType": "SPARK",
-          "arms": 1,
-          "speed": 0,
-          "laserHalfWidth": 75,
-          "warnTicks": 48,
-          "activeTicks": 72
-        },
-        {"pattern": "AIMED", "cooldown": 12, "bulletType": "GOLD", "arms": 6, "speed": 3.5, "spread": 0.18},
-        {"pattern": "AIMED", "cooldown": 11, "bulletType": "STAR", "arms": 5, "speed": 3.6, "spread": 0.20},
-        {"pattern": "RING", "cooldown": 14, "bulletType": "GOLD", "arms": 12, "speed": 2.35}
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "GOLD", "arms": 6, "speed": 3.3, "spread": 0.20 },
+        { "pattern": "LASER_BEAM", "cooldown": 12, "bulletType": "SPARK", "arms": 3, "speed": 6.2 },
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "RICE", "arms": 4, "speed": 3.8, "spread": 0.14 },
+        { "pattern": "RING", "cooldown": 13, "bulletType": "GOLD", "arms": 12, "speed": 2.15 },
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "GOLD", "arms": 5, "speed": 3.4, "spread": 0.19 },
+        { "pattern": "LASER", "cooldown": 125, "bulletType": "SPARK", "arms": 1, "speed": 0, "laserHalfWidth": 75, "warnTicks": 48, "activeTicks": 72 },
+        { "pattern": "AIMED", "cooldown": 12, "bulletType": "GOLD", "arms": 6, "speed": 3.5, "spread": 0.18 },
+        { "pattern": "AIMED", "cooldown": 11, "bulletType": "STAR", "arms": 5, "speed": 3.6, "spread": 0.20 },
+        { "pattern": "RING", "cooldown": 14, "bulletType": "GOLD", "arms": 12, "speed": 2.35 }
       ]
     },
     {
@@ -308,22 +179,12 @@
       "moveSpeed": 90,
       "music": "",
       "attacks": [
-        {"pattern": "SPREAD", "cooldown": 3, "bulletType": "SPARK", "arms": 5, "speed": 6.5},
-        {"pattern": "LASER_BEAM", "cooldown": 10, "bulletType": "SPARK", "arms": 3, "speed": 6.8},
-        {"pattern": "AIMED", "cooldown": 10, "bulletType": "GOLD", "arms": 6, "speed": 3.9, "spread": 0.19},
-        {
-          "pattern": "AIMED_RING",
-          "cooldown": 16,
-          "bulletType": "GOLD",
-          "arms": 5,
-          "spread": 0.21,
-          "speed": 3.6,
-          "ringArms": 14,
-          "ringSpeed": 1.8,
-          "ringBulletType": "STAR"
-        },
-        {"pattern": "RING", "cooldown": 13, "bulletType": "GOLD", "arms": 16, "speed": 2.55},
-        {"pattern": "AIMED", "cooldown": 11, "bulletType": "GOLD", "arms": 5, "speed": 4.0, "spread": 0.17}
+        { "pattern": "SPREAD", "cooldown": 3, "bulletType": "SPARK", "arms": 5, "speed": 6.5 },
+        { "pattern": "LASER_BEAM", "cooldown": 10, "bulletType": "SPARK", "arms": 3, "speed": 6.8 },
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "GOLD", "arms": 6, "speed": 3.9, "spread": 0.19 },
+        { "pattern": "AIMED_RING", "cooldown": 16, "bulletType": "GOLD", "arms": 5, "spread": 0.21, "speed": 3.6, "ringArms": 14, "ringSpeed": 1.8, "ringBulletType": "STAR" },
+        { "pattern": "RING", "cooldown": 13, "bulletType": "GOLD", "arms": 16, "speed": 2.55 },
+        { "pattern": "AIMED", "cooldown": 11, "bulletType": "GOLD", "arms": 5, "speed": 4.0, "spread": 0.17 }
       ]
     }
   ]

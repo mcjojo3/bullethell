@@ -23,7 +23,7 @@
   },
   "waves": [
     {
-      "_comment": "IN4 opening: aggressive star fairies (red) rain from top in stagger — similar to early IN stage-4 top spawns before side pressure ramps.",
+      "_comment": "IN4 opening: aggressive star fairies (red) rain from top in stagger - similar to early IN stage-4 top spawns before side pressure ramps.",
       "spawnTick": 0,
       "waveRef": "five_top_reds"
     },
@@ -33,7 +33,7 @@
       "waveRef": "left_sweep_yellow"
     },
     {
-      "_comment": "Mirror curtain from the right — IN4 loves bilateral symmetry.",
+      "_comment": "Mirror curtain from the right - IN4 loves bilateral symmetry.",
       "spawnTick": 285,
       "waveRef": "right_sweep_yellow"
     },
@@ -43,17 +43,17 @@
       "waveRef": "in4_crossing_aimed_blues"
     },
     {
-      "_comment": "Staggered top blues (waterfall aimed) — sustained density after the crossing wave.",
+      "_comment": "Staggered top blues (waterfall aimed) - sustained density after the crossing wave.",
       "spawnTick": 555,
       "waveRef": "staggered_blues_top"
     },
     {
-      "_comment": "Ring walls from both screen edges (green) — IN barrier-fairy behaviour.",
+      "_comment": "Ring walls from both screen edges (green) - IN barrier-fairy behaviour.",
       "spawnTick": 700,
       "waveRef": "green_ring_sides"
     },
     {
-      "_comment": "IN4 ‘canopy’: greens drop from the top with drift so rings stack vertically.",
+      "_comment": "IN4 ‘canopy': greens drop from the top with drift so rings stack vertically.",
       "spawnTick": 850,
       "waveRef": "in4_green_ceiling"
     },
@@ -63,12 +63,12 @@
       "waveRef": "left_sweep_red"
     },
     {
-      "_comment": "Mixed crossfire: aimed reds one side, yellow curtains the other — core IN4 reading.",
+      "_comment": "Mixed crossfire: aimed reds one side, yellow curtains the other - core IN4 reading.",
       "spawnTick": 1120,
       "waveRef": "pincer_red_yellow"
     },
     {
-      "_comment": "Large anchor (STREAM) + escorts — mid-section anchor fairy like IN’s heavier wave pieces.",
+      "_comment": "Large anchor (STREAM) + escorts - mid-section anchor fairy like IN's heavier wave pieces.",
       "spawnTick": 1260,
       "waveRef": "large_yellow_center"
     },
@@ -78,12 +78,12 @@
       "waveRef": "mixed_cross_top"
     },
     {
-      "_comment": "Green ring sweep from the right — rotating walls from a moving source.",
+      "_comment": "Green ring sweep from the right - rotating walls from a moving source.",
       "spawnTick": 1575,
       "waveRef": "right_sweep_green"
     },
     {
-      "_comment": "Double yellow curtain only — deep bamboo-lane lane pressure before the convergence gauntlet.",
+      "_comment": "Double yellow curtain only - deep bamboo-lane lane pressure before the convergence gauntlet.",
       "spawnTick": 1735,
       "waveRef": "in4_dual_curtain_yellow"
     },

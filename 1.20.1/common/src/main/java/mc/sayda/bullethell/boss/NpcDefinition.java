@@ -16,7 +16,7 @@ package mc.sayda.bullethell.boss;
  */
 public class NpcDefinition {
 
-    /** Unique ID — must match the filename (without .json). */
+    /** Unique ID - must match the filename (without .json). */
     public String id = "";
 
     /** Name shown above the NPC head and in the challenge dialog. */
@@ -29,5 +29,5 @@ public class NpcDefinition {
     public String challengeText = "I challenge you to a danmaku duel!";
 
     /** Stage ID that starts when the player accepts the challenge. */
-    public String stageId = "stage_1";
+    public String stageId = "marisa_stage";
 }

@@ -1,0 +1,327 @@
+{
+  "id": "remilia_boss",
+  "name": "Remilia Scarlet",
+  "_design_notes": [
+    "ECL mapping: wiki/remilia-th06-reconstruction.md — decompiled ecldata6_bullets.txt (e.g. G:\\thtk-bin-12\\th6). Phase _note fields name TH06 subs (Sub30–Sub45 spells, Sub19–Sub22 nonspell drivers).",
+    "EoSD Stage 6 (TH6) Remilia roster: E/N = Heaven's Punishment Star of David, Nether Sign Scarlet Netherworld, Curse Vlad Tepes, Scarlet Shoot, Red Magic. H/L = Divine Punishment Young Demon Lord, Hell Sign Mountain of a Thousand Needles, Divine Art Vampire Illusion, Scarlet Meister, Scarlet Gensokyo.",
+    "Projectile parity: sparse large scarlet orbs use bulletScale + forgiving hitboxScale (hit smaller than draw). True LaserPool spokes on Star of David / Young Demon Lord / Gensokyo; Scarlet Meister is MEISTER_CYCLE (shotgun + mentos trail toward player + spin bursts; uses phase bulletType + scales from JSON). Scarlet Gensokyo bounces use large scarlet orbs (not HOMING_ORB — enemy bullets do not run player homing tick).",
+    "Engine: bulletScale/hitboxScale/densityScale/maxScaledArms on PatternStep; optional speed/spread/arms min-max sampling; adaptive scalingProfile/pressure throttles for readability; MEISTER_CYCLE; RAIN, NEEDLE, RING_OFFSET, BOUNCE, SCARLET / SCARLET_LARGE / SCARLET_MENTOS, LASER / LASER_ROTATING / LASER_BEAM, SPIRAL, DENSE_RING.",
+    "Visual parity: scarlet orb families render as texture-backed tinted orbs with layered glow, while mentos/needles keep geometric silhouettes for lane readability.",
+    "Blueprint (PatternStep): bulletLifetimeTicks — RING/SPIRAL/RING_OFFSET/DENSE_RING 200, AIMED/SPREAD/LASER_BEAM 220, RAIN 230, BOUNCE 250. LASER / LASER_ROTATING use LaserPool (warn/active/halfWidth). LASER_BEAM is a bullet fan (not LaserPool): optional laserBeamSpread rad (default ~0.04); omit warn/active. AIMED_RING omits lifetime so aim≈220 and ring≈200. ringStartAngleRad -1 on RING_OFFSET / AIMED_RING ring, 0 on RING/DENSE_RING. MEISTER_CYCLE is scripted separately."
+  ],
+  "_validation_matrix": [
+    "EASY/NORMAL: Star of David reads as six-spoke laser web + layered orbs; Netherworld scarlet rain + fewer large wall orbs; Vlad lanes clear; Scarlet Shoot spear columns + scarlet; Red Magic layered (not uniform flood).",
+    "HARD/LUNATIC: Young Demon Lord denser spokes + spiral; Mountain needle lattice; Vampire Illusion lasers + blood-orb pressure; Meister cycles aim→spin→rest with CIRCLE movement; Gensokyo finale mixed geometry.",
+    "Network: enemy BulletPool STRIDE=9 sync (delta + full + player pools); co-op bullets/lasers unchanged protocol aside from float count.",
+    "Regression: graze/hit use bullet radius × hitScale; large orbs remain fair vs sprite size."
+  ],
+  "introDialog": [
+    { "speaker": "BOSS", "text": "Welcome to my castle at the end of the night. I am Remilia Scarlet - show me your fate.", "delayTicks": 170 }
+  ],
+  "characterDialogs": {
+    "reimu": [
+      { "speaker": "BOSS", "text": "Hakurei shrine maiden, your fate brought you to my throne. Entertain me.", "delayTicks": 170 },
+      { "speaker": "PLAYER", "text": "Fine. I'll end this night and drag you into daylight.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Daylight? How quaint. Stay until I decide the moon's color.", "delayTicks": 160 }
+    ],
+    "marisa": [
+      { "speaker": "BOSS", "text": "Back again, little thief? Then steal your victory if you can.", "delayTicks": 170 },
+      { "speaker": "PLAYER", "text": "Heh, I was planning to. Add your title to the loot list, ze.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Bold words, prove your worth in scarlet wind before you count your spoils.", "delayTicks": 165 }
+    ],
+    "sakuya": [
+      { "speaker": "BOSS", "text": "A maid who turns her blades toward her mistress? Fascinating.", "delayTicks": 170 },
+      { "speaker": "PLAYER", "text": "Tonight I follow my own judgment.", "delayTicks": 120 },
+      { "speaker": "BOSS", "text": "Then let judgment be written in the rhythm of your blood.", "delayTicks": 155 }
+    ],
+    "sanae": [
+      { "speaker": "BOSS", "text": "A living god's priestess challenges a devil? Delightful irony.", "delayTicks": 170 },
+      { "speaker": "PLAYER", "text": "Then let's see whether destiny favors gods or devils.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Spoken well, now bleed poetry into the sky and show me.", "delayTicks": 160 }
+    ],
+    "cirno": [
+      { "speaker": "BOSS", "text": "A fairy at my doorstep. Are you lost, or merely fearless?", "delayTicks": 170 },
+      { "speaker": "PLAYER", "text": "Neither! I'm here to beat the final boss!", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Final? Adorable. The night rewards those who outlast fairy tales.", "delayTicks": 165 }
+    ]
+  },
+  "victoryDialog": "How unexpected... perhaps fate has teeth after all.",
+  "defeatDialog": "Your fate was sealed the moment you stepped into my hall.",
+  "victoryDialogByCharacter": {
+    "reimu": "So this is the shrine maiden who defies destiny. Splendid.",
+    "marisa": "You really did steal the night from me, magician.",
+    "sakuya": "A blade turned inward can still cut deep. Well done.",
+    "sanae": "Divine conviction overcame vampiric pride. Intriguing.",
+    "cirno": "A fairy who reaches this throne... truly extraordinary."
+  },
+  "defeatDialogByCharacter": {
+    "reimu": "Even exorcists stumble in scarlet darkness.",
+    "marisa": "Greed clouded your aim, little magician.",
+    "sakuya": "Loyalty wavered, and so did your hand.",
+    "sanae": "Faith falters when blood moonlight rises.",
+    "cirno": "Bravery alone cannot rule the night."
+  },
+  "phases": [
+    {
+      "_note": "ECL Sub20 — ins_118 laser web + ins_67 spiral + ins_75 fans (nonspell). Order: laser burst → spiral → aimed → ring wall.",
+      "hp": 1650,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 1",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 128,
+      "music": "septette_for_the_dead_princess",
+      "attacks": [
+        { "pattern": "LASER_BEAM", "cooldown": 26, "minCooldown": 20, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 4, "speed": 4.35, "laserBeamSpread": 0.06, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPIRAL", "cooldown": 6, "minCooldown": 4, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.76, "bulletType": "SCARLET", "arms": 7, "speed": 2.35, "bulletScale": 1.2, "hitboxScale": 0.48, "bulletLifetimeTicks": 200 },
+        { "pattern": "AIMED", "cooldown": 11, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 5, "speed": 3.65, "spread": 0.17, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 18, "scalingProfile": "BURST", "bulletType": "SCARLET", "arms": 11, "speed": 2.2, "bulletScale": 1.18, "hitboxScale": 0.5, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "ECL Sub30 天罰「スターオブダビデ」 (E/N) — six-spoke laser web, large blue joint bullets, star-circle lane layers.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 2150,
+      "isSpellCard": true,
+      "spellName": "Heaven's Punishment \"Star of David\"",
+      "spellDurationTicks": [820, 660, 0, 0],
+      "spellBonus": 70000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "LASER_ROTATING", "cooldown": 34, "bulletType": "LASER_HEAD", "arms": 6, "speed": 0, "laserHalfWidth": 6, "warnTicks": 12, "activeTicks": 22 },
+        { "pattern": "AIMED_RING", "cooldown": 13, "bulletType": "STAR", "arms": 5, "spread": 0.14, "speed": 3.8, "ringArms": 10, "ringSpeed": 2.05, "ringBulletType": "ORB", "bulletScale": 1.22, "hitboxScale": 0.45, "ringStartAngleRad": -1 },
+        { "pattern": "RING_OFFSET", "cooldown": 18, "bulletType": "SCARLET", "arms": 12, "speed": 2.05, "bulletScale": 1.36, "hitboxScale": 0.4, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "SPREAD", "cooldown": 7, "bulletType": "STAR", "arms": 5, "speed": 4.8, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub31 神罰「幼きデーモンロード」 (H/L) — rotating spoke web plus crossing yellow/blue large lines.",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2400,
+      "isSpellCard": true,
+      "spellName": "Divine Punishment \"Young Demon Lord\"",
+      "spellDurationTicks": [0, 0, 470, 250],
+      "spellBonus": 90000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "LASER_ROTATING", "cooldown": 28, "bulletType": "LASER_HEAD", "arms": 10, "speed": 0, "laserHalfWidth": 6, "warnTicks": 10, "activeTicks": 20 },
+        { "pattern": "SPREAD", "cooldown": 6, "bulletType": "GOLD", "arms": 6, "speed": 4.95, "bulletScale": 1.28, "hitboxScale": 0.44, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 6, "bulletType": "STAR", "arms": 6, "speed": 5.15, "bulletScale": 1.18, "hitboxScale": 0.48, "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 16, "bulletType": "ORB", "arms": 12, "speed": 2.25, "maxScaledArms": 15, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 }
+      ]
+    },
+    {
+      "_note": "ECL Sub21 — ins_118 + ins_68 large + ins_75 fans; ins_5 angle 0. Sub21-weighted: laser → spiral → large volley → ring.",
+      "hp": 1750,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 2",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 146,
+      "music": "",
+      "attacks": [
+        { "pattern": "LASER_BEAM", "cooldown": 22, "minCooldown": 17, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 3, "speed": 4.2, "laserBeamSpread": 0.06, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPIRAL", "cooldown": 5, "minCooldown": 4, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.8, "bulletType": "ORB", "arms": 8, "speed": 2.45, "maxScaledArms": 11, "bulletLifetimeTicks": 200 },
+        { "pattern": "AIMED", "cooldown": 12, "scalingProfile": "PRECISION", "bulletType": "SCARLET_LARGE", "arms": 4, "speed": 3.65, "spread": 0.14, "bulletScale": 1.35, "hitboxScale": 0.55, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 16, "scalingProfile": "BURST", "bulletType": "STAR", "arms": 12, "speed": 2.35, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "ECL Sub32 冥符「紅色の冥界」 (E/N) — scarlet curtain rain + dense red walls.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 2300,
+      "isSpellCard": true,
+      "spellName": "Nether Sign \"Scarlet Netherworld\"",
+      "spellDurationTicks": [760, 610, 0, 0],
+      "spellBonus": 80000,
+      "movement": "CIRCLE",
+      "moveSpeed": 95,
+      "music": "",
+      "attacks": [
+        { "pattern": "RAIN", "cooldown": 5, "bulletType": "SCARLET", "arms": 12, "armsMin": 10, "armsMax": 13, "speed": 3.5, "speedMin": 3.25, "speedMax": 3.7, "spread": 0.12, "spreadMin": 0.08, "spreadMax": 0.14, "rainTop": -14, "rainWidth": 560, "densityScale": 0.88, "bulletLifetimeTicks": 230 },
+        { "pattern": "RAIN", "cooldown": 9, "bulletType": "ORB", "arms": 8, "speed": 2.85, "spread": 0.08, "rainTop": -18, "rainWidth": 480, "bulletLifetimeTicks": 230 },
+        { "pattern": "DENSE_RING", "cooldown": 18, "bulletType": "SCARLET", "arms": 12, "speed": 2.05, "bulletScale": 1.85, "hitboxScale": 0.36, "maxScaledArms": 14, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "AIMED", "cooldown": 11, "bulletType": "ORB", "arms": 5, "speed": 3.55, "spread": 0.17, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub33 — ins_82 ±skew lanes + ins_70 needle curtains (no big ring); loop ins_3(120) + ins_50/ins_47 rotation. Emulate: narrow skew RAIN + LASER_BEAM stakes + aimed needles.",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2550,
+      "isSpellCard": true,
+      "spellName": "Hell Sign \"Mountain of a Thousand Needles\"",
+      "spellDurationTicks": [0, 0, 420, 220],
+      "spellBonus": 100000,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 92,
+      "music": "",
+      "attacks": [
+        { "pattern": "RAIN", "cooldown": 5, "minCooldown": 4, "scalingProfile": "BURST", "bulletType": "NEEDLE", "arms": 14, "armsMin": 12, "armsMax": 17, "speed": 3.95, "speedMin": 3.75, "speedMax": 4.15, "spread": 0.032, "spreadMin": 0.022, "spreadMax": 0.045, "rainTop": -14, "rainWidth": 560, "bulletLifetimeTicks": 240 },
+        { "pattern": "RAIN", "cooldown": 6, "minCooldown": 5, "scalingProfile": "BURST", "bulletType": "NEEDLE", "arms": 11, "speed": 3.4, "spread": 0.065, "spreadMin": 0.048, "spreadMax": 0.09, "rainTop": -20, "rainWidth": 440, "bulletLifetimeTicks": 230 },
+        { "pattern": "LASER_BEAM", "cooldown": 11, "minCooldown": 9, "scalingProfile": "PRECISION", "bulletType": "NEEDLE", "arms": 4, "speed": 5.0, "laserBeamSpread": 0.03141593, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 12, "minCooldown": 10, "scalingProfile": "PRECISION", "bulletType": "NEEDLE", "arms": 6, "speed": 3.7, "spread": 0.13, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub22 — ins_5(-10007, π) opposite fan vs Sub21; ins_118 + ins_75. Order: laser → spiral → ring → aimed+ring.",
+      "hp": 1850,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 3",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 150,
+      "music": "",
+      "attacks": [
+        { "pattern": "LASER_BEAM", "cooldown": 21, "minCooldown": 16, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 3, "speed": 4.25, "laserBeamSpread": 0.06, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPIRAL", "cooldown": 5, "minCooldown": 4, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.84, "bulletType": "SCARLET", "arms": 9, "speed": 2.55, "bulletScale": 1.28, "hitboxScale": 0.44, "maxScaledArms": 12, "bulletLifetimeTicks": 200 },
+        { "pattern": "RING_OFFSET", "cooldown": 14, "scalingProfile": "BURST", "bulletType": "SCARLET", "arms": 12, "speed": 2.45, "bulletScale": 1.2, "hitboxScale": 0.48, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED_RING", "cooldown": 17, "minCooldown": 8, "scalingProfile": "SPAM", "pressureSoftCap": 0.62, "pressureArmDrop": 0.42, "pressureCooldownBoost": 5, "bulletType": "RICE", "arms": 4, "spread": 0.18, "speed": 3.35, "ringArms": 8, "ringSpeed": 1.75, "ringBulletType": "ORB", "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "ECL Sub34 呪詛「ブラド・ツェペシュの呪い」 (E/N) — knife circles + red spiral trails.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 2400,
+      "isSpellCard": true,
+      "spellName": "Curse \"Curse of Vlad Tepes\"",
+      "spellDurationTicks": [740, 590, 0, 0],
+      "spellBonus": 90000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "RING", "cooldown": 16, "bulletType": "KUNAI", "arms": 12, "speed": 2.75, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "BOUNCE", "cooldown": 10, "bulletType": "KUNAI", "arms": 6, "speed": 3.65, "spread": 0.18, "bounceCount": 2, "bounceDamping": 0.94, "bulletLifetimeTicks": 250 },
+        { "pattern": "SPIRAL", "cooldown": 6, "bulletType": "SCARLET", "arms": 7, "speed": 2.25, "bulletScale": 1.28, "hitboxScale": 0.44, "bulletLifetimeTicks": 200 },
+        { "pattern": "RING_OFFSET", "cooldown": 15, "bulletType": "SCARLET", "arms": 12, "speed": 2.2, "bulletScale": 1.2, "hitboxScale": 0.48, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "ECL Sub35 神術「吸血鬼幻想」 (H/L) — large aimed volleys + red trail pressure.",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2700,
+      "isSpellCard": true,
+      "spellName": "Divine Art \"Vampire Illusion\"",
+      "spellDurationTicks": [0, 0, 390, 205],
+      "spellBonus": 110000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "SCARLET_LARGE", "arms": 6, "speed": 4.8, "spread": 0.13, "bulletScale": 1.55, "hitboxScale": 0.76, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 5, "bulletType": "SCARLET_MENTOS", "arms": 7, "speed": 4.75, "bulletLifetimeTicks": 220 },
+        { "pattern": "BOUNCE", "cooldown": 12, "bulletType": "SCARLET", "arms": 6, "speed": 3.45, "spread": 0.17, "bounceCount": 2, "bounceDamping": 0.93, "bulletScale": 1.2, "hitboxScale": 0.48, "bulletLifetimeTicks": 250 },
+        { "pattern": "RING_OFFSET", "cooldown": 14, "bulletType": "SCARLET", "arms": 10, "speed": 2.15, "bulletScale": 1.15, "hitboxScale": 0.5, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "ECL terminal nonspell — faster Sub20–Sub22 mix: laser web + spiral + aimed + star ring.",
+      "hp": 2000,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 4",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 160,
+      "music": "",
+      "attacks": [
+        { "pattern": "LASER_BEAM", "cooldown": 18, "minCooldown": 14, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 4, "speed": 4.5, "laserBeamSpread": 0.06, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPIRAL", "cooldown": 4, "minCooldown": 3, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.86, "bulletType": "ORB", "arms": 10, "speed": 2.6, "maxScaledArms": 13, "bulletLifetimeTicks": 200 },
+        { "pattern": "AIMED", "cooldown": 9, "scalingProfile": "PRECISION", "bulletType": "SCARLET", "arms": 6, "speed": 4.0, "spread": 0.15, "bulletScale": 1.2, "hitboxScale": 0.48, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 13, "scalingProfile": "BURST", "bulletType": "STAR", "arms": 13, "speed": 2.45, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "ECL Sub38 紅符「スカーレットシュート」 (E/N) — 5-way large volleys + direct large shots.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 2600,
+      "isSpellCard": true,
+      "spellName": "Scarlet Sign \"Scarlet Shoot\"",
+      "spellDurationTicks": [700, 560, 0, 0],
+      "spellBonus": 100000,
+      "movement": "CIRCLE",
+      "moveSpeed": 100,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 8, "bulletType": "SCARLET_LARGE", "arms": 5, "armsMin": 5, "armsMax": 5, "speed": 4.75, "speedMin": 4.6, "speedMax": 4.95, "spread": 0.115, "bulletScale": 1.5, "hitboxScale": 0.76, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 5, "bulletType": "SCARLET_MENTOS", "arms": 6, "speed": 4.6, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "SCARLET_LARGE", "arms": 3, "armsMin": 3, "armsMax": 3, "speed": 5.05, "spread": 0.02, "bulletScale": 1.55, "hitboxScale": 0.72, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 7, "bulletType": "SCARLET_LARGE", "arms": 5, "armsMin": 5, "armsMax": 5, "speed": 5.0, "speedMin": 4.85, "speedMax": 5.2, "spread": 0.11, "bulletScale": 1.5, "hitboxScale": 0.74, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 4, "bulletType": "SCARLET_MENTOS", "arms": 7, "speed": 4.9, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub39 紅符「スカーレットマイスタ」 (H/L) — ins_108 Sub44; MEISTER_CYCLE: aimed shotgun + mentos tail + rotating bursts (engine). bulletType sizes main volleys.",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2850,
+      "isSpellCard": true,
+      "spellName": "Scarlet Sign \"Scarlet Meister\"",
+      "spellDurationTicks": [0, 0, 370, 195],
+      "spellBonus": 120000,
+      "movement": "CIRCLE",
+      "moveSpeed": 105,
+      "music": "",
+      "attacks": [
+        { "pattern": "MEISTER_CYCLE", "cooldown": 1, "bulletType": "SCARLET_LARGE", "arms": 1, "speed": 0, "bulletScale": 1.42, "hitboxScale": 0.72, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub43 「レッドマジック」 (E/N) — large bounces + mentos/scarlet trail pressure (scarlet orbs, not homing type).",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 3000,
+      "isSpellCard": true,
+      "spellName": "\"Red Magic\"",
+      "spellDurationTicks": [660, 520, 0, 0],
+      "spellBonus": 120000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "BOUNCE", "cooldown": 11, "scalingProfile": "BURST", "bulletType": "SCARLET_LARGE", "arms": 6, "speed": 3.55, "spread": 0.14, "bounceCount": 2, "bounceDamping": 0.94, "bulletScale": 1.32, "hitboxScale": 0.48, "bulletLifetimeTicks": 250 },
+        { "pattern": "SPREAD", "cooldown": 5, "bulletType": "SCARLET_MENTOS", "arms": 8, "speed": 4.8, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPIRAL", "cooldown": 5, "bulletType": "SCARLET", "arms": 8, "speed": 2.35, "bulletScale": 1.25, "hitboxScale": 0.44, "bulletLifetimeTicks": 200 },
+        { "pattern": "RING_OFFSET", "cooldown": 15, "bulletType": "SCARLET", "arms": 12, "speed": 2.2, "bulletScale": 1.2, "hitboxScale": 0.48, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "ECL Sub44/Sub45 「紅魔の世界」 (H/L) — large bouncing scarlet orbs + mentos + rings (tuned down vs HOMING_ORB label; enemy pool has no homing tick).",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 3300,
+      "isSpellCard": true,
+      "spellName": "\"Scarlet Gensokyo\"",
+      "spellDurationTicks": [0, 0, 340, 180],
+      "spellBonus": 150000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "BOUNCE", "cooldown": 14, "minCooldown": 11, "scalingProfile": "BURST", "pressureSoftCap": 0.48, "pressureArmDrop": 0.42, "pressureCooldownBoost": 5, "bulletType": "SCARLET_LARGE", "arms": 6, "armsMin": 5, "armsMax": 7, "speed": 3.35, "speedMin": 3.15, "speedMax": 3.55, "spread": 0.11, "spreadMin": 0.09, "spreadMax": 0.13, "bounceCount": 2, "bounceDamping": 0.94, "bulletScale": 1.35, "hitboxScale": 0.5, "bulletLifetimeTicks": 250 },
+        { "pattern": "SPREAD", "cooldown": 5, "scalingProfile": "GEOMETRY", "bulletType": "SCARLET_MENTOS", "arms": 8, "speed": 4.75, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 16, "minCooldown": 11, "scalingProfile": "BURST", "bulletType": "SCARLET_LARGE", "arms": 11, "speed": 2.35, "bulletScale": 1.42, "hitboxScale": 0.76, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "SPIRAL", "cooldown": 6, "minCooldown": 4, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.76, "bulletType": "SCARLET", "arms": 8, "speed": 2.3, "bulletScale": 1.22, "hitboxScale": 0.46, "bulletLifetimeTicks": 200 },
+        { "pattern": "SPREAD", "cooldown": 5, "scalingProfile": "GEOMETRY", "bulletType": "SCARLET_MENTOS", "arms": 8, "speed": 4.75, "bulletLifetimeTicks": 220 }
+      ]
+    }
+  ]
+}

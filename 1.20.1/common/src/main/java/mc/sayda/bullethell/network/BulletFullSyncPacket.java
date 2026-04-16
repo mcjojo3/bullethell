@@ -17,7 +17,7 @@ public class BulletFullSyncPacket {
 
     public static BulletFullSyncPacket fromContext(ArenaContext ctx) {
         int cap = BulletPool.ENEMY_CAPACITY;
-        float[][] data = new float[cap][6]; boolean[] active = new boolean[cap];
+        float[][] data = new float[cap][BulletPool.STRIDE]; boolean[] active = new boolean[cap];
         for (int i = 0; i < cap; i++) { data[i] = ctx.bullets.getSlotData(i); active[i] = ctx.bullets.isActive(i); }
         return new BulletFullSyncPacket(data, active);
     }
@@ -31,10 +31,10 @@ public class BulletFullSyncPacket {
 
     public static BulletFullSyncPacket decode(FriendlyByteBuf buf) {
         int cap = BulletPool.ENEMY_CAPACITY;
-        float[][] data = new float[cap][6]; boolean[] active = new boolean[cap];
+        float[][] data = new float[cap][BulletPool.STRIDE]; boolean[] active = new boolean[cap];
         for (int i = 0; i < cap; i++) {
             active[i] = buf.readBoolean();
-            if (active[i]) for (int j = 0; j < 6; j++) data[i][j] = buf.readFloat();
+            if (active[i]) for (int j = 0; j < BulletPool.STRIDE; j++) data[i][j] = buf.readFloat();
         }
         return new BulletFullSyncPacket(data, active);
     }

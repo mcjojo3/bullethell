@@ -19,6 +19,7 @@ public class ArenaStatePacket {
     public final int lives, bombs, graze, power, playerIndex;
     public final float bossX, bossY;
     public final int bossHp, bossMaxHp, bossPhase;
+    public final int bossMoveDir;
     public final int skillGauge, chargeLevel, holdChargeGauge;
     public final int abilityType, abilityTicks;
     public final float abilityX, abilityY;
@@ -63,6 +64,7 @@ public class ArenaStatePacket {
         this.bossHp = ctx.bossHp;
         this.bossMaxHp = ctx.bossMaxHp;
         this.bossPhase = ctx.bossPhase;
+        this.bossMoveDir = ctx.getBossMoveDir();
         this.skillGauge = ps.skillGauge;
         this.chargeLevel = ps.chargeLevel;
         this.holdChargeGauge = ps.holdChargeGauge;
@@ -117,7 +119,7 @@ public class ArenaStatePacket {
     public static ArenaStatePacket stopped() {
         return new ArenaStatePacket(false, false,
                 0f, 0f, 0, 0, 0, 0, 0,
-                0f, 0f, 0, 0, 0,
+                0f, 0f, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0f, 0f, new UUID(0, 0),
                 0L, 0, 0, "", "", false, false,
                 "reimu", "", "", false, "", "", 0, 0, 0,
@@ -126,7 +128,7 @@ public class ArenaStatePacket {
 
     private ArenaStatePacket(boolean active, boolean spectating,
             float px, float py, int lives, int bombs, int graze, int power, int pIdx,
-            float bx, float by, int hp, int maxHp, int phase,
+            float bx, float by, int hp, int maxHp, int phase, int bossMoveDir,
             int skillGauge, int chargeLevel, int holdChargeGauge, int abilityType, int abilityTicks, float abilityX, float abilityY, UUID abilityOwner,
             long score, int timerTicks, int timerTotal, String musicTrackId,
             String spellName, boolean activeSpellCard, boolean declaring,
@@ -147,6 +149,7 @@ public class ArenaStatePacket {
         this.bossHp = hp;
         this.bossMaxHp = maxHp;
         this.bossPhase = phase;
+        this.bossMoveDir = bossMoveDir;
         this.skillGauge = skillGauge;
         this.chargeLevel = chargeLevel;
         this.holdChargeGauge = holdChargeGauge;
@@ -197,6 +200,7 @@ public class ArenaStatePacket {
         buf.writeVarInt(bossHp);
         buf.writeVarInt(bossMaxHp);
         buf.writeVarInt(bossPhase);
+        buf.writeVarInt(bossMoveDir);
         buf.writeVarInt(skillGauge);
         buf.writeVarInt(chargeLevel);
         buf.writeVarInt(holdChargeGauge);
@@ -246,6 +250,7 @@ public class ArenaStatePacket {
         int hp = buf.readVarInt();
         int maxHp = buf.readVarInt();
         int phase = buf.readVarInt();
+        int bossMoveDir = buf.readVarInt();
         int skillGauge = buf.readVarInt();
         int chargeLevel = buf.readVarInt();
         int holdChargeGauge = buf.readVarInt();
@@ -279,7 +284,7 @@ public class ArenaStatePacket {
         }
         return new ArenaStatePacket(true, spectating,
                 px, py, lives, bombs, graze, power, pIdx,
-                bx, by, hp, maxHp, phase,
+                bx, by, hp, maxHp, phase, bossMoveDir,
                 skillGauge, chargeLevel, holdChargeGauge, abilityType, abilityTicks, abilityX, abilityY, abilityOwner,
                 score, timerTicks, timerTotal,
                 musicTrackId, spellName, activeSpellCard, declaring,

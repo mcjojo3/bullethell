@@ -1,0 +1,10 @@
+{
+  "id": "th6_flandre_extra_sides",
+  "description": "Legacy; replaced by th6_extra_sub7_side_pair + Timeline0-accurate ladder. Kept for reference.",
+  "enemies": [
+    { "x": -28, "y": 96, "vx": 4.4, "vy": 0.0, "type": "RED_FAIRY", "pattern": "AIMED", "delayTicks": 0 },
+    { "x": 508, "y": 112, "vx": -4.4, "vy": 0.0, "type": "RED_FAIRY", "pattern": "AIMED", "delayTicks": 6 },
+    { "x": -28, "y": 128, "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "pattern": "AIMED", "delayTicks": 14 },
+    { "x": 508, "y": 144, "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "pattern": "AIMED", "delayTicks": 20 }
+  ]
+}

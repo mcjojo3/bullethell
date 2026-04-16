@@ -665,6 +665,141 @@
       }
     ]
   },
+  "wind_god_chronicles_mountain_of_faith": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/wind_god_chronicles_mountain_of_faith",
+        "stream": true
+      }
+    ]
+  },
+  "a_god_that_misses_people_romantic_fall": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/a_god_that_misses_people_romantic_fall",
+        "stream": true
+      }
+    ]
+  },
+  "akutagawa_ryuunosuke_s_kappa_candid_friend": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/akutagawa_ryuunosuke_s_kappa_candid_friend",
+        "stream": true
+      }
+    ]
+  },
+  "akutagawa_ryuunosuke_s_kappa_candid_friend_2_0": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/akutagawa_ryuunosuke_s_kappa_candid_friend_2_0",
+        "stream": true
+      }
+    ]
+  },
+  "because_princess_inada_is_scolding_me": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/because_princess_inada_is_scolding_me",
+        "stream": true
+      }
+    ]
+  },
+  "cemetery_of_onbashira_grave_of_being": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/cemetery_of_onbashira_grave_of_being",
+        "stream": true
+      }
+    ]
+  },
+  "dark_side_of_fate": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/dark_side_of_fate",
+        "stream": true
+      }
+    ]
+  },
+  "faith_is_for_the_transient_people": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/faith_is_for_the_transient_people",
+        "stream": true
+      }
+    ]
+  },
+  "fall_of_fall_autumnal_waterfall": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/fall_of_fall_autumnal_waterfall",
+        "stream": true
+      }
+    ]
+  },
+  "sealed_gods": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/sealed_gods",
+        "stream": true
+      }
+    ]
+  },
+  "the_gensokyo_the_gods_loved": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/the_gensokyo_the_gods_loved",
+        "stream": true
+      }
+    ]
+  },
+  "the_primal_scene_of_japan_the_girl_saw": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/the_primal_scene_of_japan_the_girl_saw",
+        "stream": true
+      }
+    ]
+  },
+  "the_road_of_the_misfortune_god_dark_road": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/the_road_of_the_misfortune_god_dark_road",
+        "stream": true
+      }
+    ]
+  },
+  "the_youkai_mountain_mysterious_mountain": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/the_youkai_mountain_mysterious_mountain",
+        "stream": true
+      }
+    ]
+  },
+  "youkai_mountain_mysterious_mountain_2_0": {
+    "category": "music",
+    "sounds": [
+      {
+        "name": "bullethell:music/youkai_mountain_mysterious_mountain_2_0",
+        "stream": true
+      }
+    ]
+  },
   "attack_charge": {
     "category": "master",
     "sounds": [

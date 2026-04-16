@@ -101,3 +101,6 @@ NUL
 
 # Others
 /.archive
+*.pdf
+/tools
+/wiki

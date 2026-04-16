@@ -2,6 +2,8 @@ package mc.sayda.bullethell.client.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import mc.sayda.bullethell.network.OpenChallengePacket;
+import mc.sayda.bullethell.render.BossSheetLayout;
+import mc.sayda.bullethell.arena.DifficultyConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -53,15 +55,21 @@ public class ChallengeScreen extends Screen {
         int btnY  = panelY + PANEL_H - btnH - PADDING;
         int totalBtnW = btnW * 2 + 12;
         int btnStartX = panelX + (PANEL_W - totalBtnW) / 2;
+        boolean canAccept = pkt.maxAllowedDifficultyOrdinal >= 0;
 
-        addRenderableWidget(Button.builder(
+        Button acceptBtn = Button.builder(
                 Component.literal("Accept Challenge"),
                 btn -> {
+                    if (!canAccept)
+                        return;
                     onClose();
-                    Minecraft.getInstance().setScreen(new DifficultySelectScreen(pkt.stageId));
+                    Minecraft.getInstance().setScreen(
+                            new DifficultySelectScreen(pkt.stageId, pkt.maxAllowedDifficultyOrdinal));
                 })
                 .bounds(btnStartX, btnY, btnW, btnH)
-                .build());
+                .build();
+        acceptBtn.active = canAccept;
+        addRenderableWidget(acceptBtn);
 
         addRenderableWidget(Button.builder(
                 Component.literal("Decline"),
@@ -82,7 +90,7 @@ public class ChallengeScreen extends Screen {
         gfx.fill(panelX, panelY, panelX + PANEL_W, panelY + PANEL_H, 0xDD000000);
         gfx.renderOutline(panelX, panelY, PANEL_W, PANEL_H, 0xFF555577);
 
-        // NPC portrait — drawn as a sprite from the entity texture
+        // NPC portrait — boss sprite sheet frame 0 (see drawPortrait / textures/bosses/*_boss.png)
         int portX = panelX + PADDING;
         int portY = panelY + PADDING;
         drawPortrait(gfx, portX, portY);
@@ -92,43 +100,62 @@ public class ChallengeScreen extends Screen {
         int nameY  = portY + 4;
         gfx.drawString(font, pkt.npcName, textX, nameY, 0xFFFFDD44, true);
 
-        // Challenge text — word-wrap to fit the remaining panel width
+        // Challenge text - word-wrap to fit the remaining panel width
         int textW = PANEL_W - PORTRAIT_SIZE - PADDING * 3;
         int lineY = nameY + 14;
         for (var line : font.split(Component.literal(pkt.challengeText), textW)) {
             gfx.drawString(font, line, textX, lineY, 0xFFDDDDDD, false);
             lineY += font.lineHeight + 2;
         }
+        String capText = (pkt.maxAllowedDifficultyOrdinal >= 0)
+                ? DifficultyConfig.fromId(pkt.maxAllowedDifficultyOrdinal).name()
+                : "LOCKED";
+        gfx.drawString(font, "Max Difficulty: " + capText, textX, lineY + 2, 0xFF99CCFF, false);
+        if (!pkt.requirementText.isBlank()) {
+            lineY += font.lineHeight + 6;
+            for (var line : font.split(Component.literal(pkt.requirementText), textW)) {
+                gfx.drawString(font, line, textX, lineY, 0xFFCCAAAA, false);
+                lineY += font.lineHeight + 1;
+            }
+        }
 
         super.render(gfx, mx, my, delta);
     }
 
     /**
-     * Draws the boss portrait using the shared boss sprite sheet convention:
-     *   {@code assets/bullethell/textures/bosses/<base>_boss.png}
-     * where {@code <base>} is the NPC id with any trailing {@code _npc} stripped.
-     *
-     * Sheet layout matches the arena renderer: 256×256, 4×4 grid, 64×64 per frame.
-     * Frame 0 (top-left) is used as a static idle portrait.
+     * Draws the boss portrait using {@code assets/bullethell/textures/bosses/<base>_boss.png},
+     * with {@link BossSheetLayout} (Sakuya uses 64×85 cells on a 256×255 sheet).
+     * Frame 0 of the idle row is used as a static portrait, scaled to fit the square slot.
      */
     private void drawPortrait(GuiGraphics gfx, int x, int y) {
         String base = pkt.npcId.endsWith("_npc")
                 ? pkt.npcId.substring(0, pkt.npcId.length() - 4)
                 : pkt.npcId;
+        String bossId = base + "_boss";
+        BossSheetLayout lay = BossSheetLayout.forBoss(bossId);
         ResourceLocation tex = new ResourceLocation("bullethell", "textures/bosses/" + base + "_boss.png");
 
         // Border + background
         gfx.fill(x - 2, y - 2, x + PORTRAIT_SIZE + 2, y + PORTRAIT_SIZE + 2, 0xFF555577);
         gfx.fill(x, y, x + PORTRAIT_SIZE, y + PORTRAIT_SIZE, 0xFF111133);
 
-        // Frame 0, row 0 of the 256×256 sprite sheet scaled to PORTRAIT_SIZE×PORTRAIT_SIZE
+        double scale = Math.min(
+                PORTRAIT_SIZE / (double) lay.cellW,
+                PORTRAIT_SIZE / (double) lay.cellH);
+        int destW = Math.max(1, (int) (lay.cellW * scale));
+        int destH = Math.max(1, (int) (lay.cellH * scale));
+        int dx = x + (PORTRAIT_SIZE - destW) / 2;
+        int dy = y + (PORTRAIT_SIZE - destH) / 2;
+
         try {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            gfx.blit(tex, x, y, PORTRAIT_SIZE, PORTRAIT_SIZE, 0f, 0f, 64, 64, 256, 256);
+            gfx.blit(tex, dx, dy, destW, destH,
+                    lay.uForFrame(0), lay.idleRowV(),
+                    lay.cellW, lay.cellH, lay.texW, lay.texH);
             RenderSystem.disableBlend();
         } catch (Exception ignored) {
-            // Texture missing — background placeholder is already drawn above
+            // Texture missing - background placeholder is already drawn above
         }
     }
 

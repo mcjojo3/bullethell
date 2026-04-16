@@ -1,5 +1,6 @@
 package mc.sayda.bullethell.network;
 
+import mc.sayda.bullethell.arena.BulletPool;
 import net.minecraft.network.FriendlyByteBuf;
 
 /** S → C | dirty enemy-bullet slots since last packet. */
@@ -26,10 +27,10 @@ public class BulletDeltaPacket {
 
     public static BulletDeltaPacket decode(FriendlyByteBuf buf) {
         int n = buf.readVarInt();
-        int[] slots = new int[n]; float[][] data = new float[n][6]; boolean[] active = new boolean[n];
+        int[] slots = new int[n]; float[][] data = new float[n][BulletPool.STRIDE]; boolean[] active = new boolean[n];
         for (int i = 0; i < n; i++) {
             slots[i] = buf.readShort(); active[i] = buf.readBoolean();
-            if (active[i]) for (int j = 0; j < 6; j++) data[i][j] = buf.readFloat();
+            if (active[i]) for (int j = 0; j < BulletPool.STRIDE; j++) data[i][j] = buf.readFloat();
         }
         return new BulletDeltaPacket(slots, data, active);
     }

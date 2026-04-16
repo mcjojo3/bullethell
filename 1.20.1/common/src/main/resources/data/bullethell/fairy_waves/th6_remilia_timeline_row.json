@@ -1,0 +1,10 @@
+{
+  "id": "th6_remilia_timeline_row",
+  "description": "TH06 ecldata6 Timeline0: one pass of ins_0 Sub1/Sub3 + ins_2 Sub2/Sub4 (left -32,128 / -32,192 and right 416,128 / 416,192 in TH coords). Scaled to mod arena 480×640; Sub1/3 use ins_75-style fan families → GREEN_FAIRY RING; Sub2/4 alternate variant.",
+  "enemies": [
+    { "x": 40,  "y": -22, "vx": 0.0, "vy": 3.6, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 0 },
+    { "x": 40,  "y": -30, "vx": 0.0, "vy": 3.6, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 4 },
+    { "x": 440, "y": -22, "vx": 0.0, "vy": 3.6, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 8 },
+    { "x": 440, "y": -30, "vx": 0.0, "vy": 3.6, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 12 }
+  ]
+}

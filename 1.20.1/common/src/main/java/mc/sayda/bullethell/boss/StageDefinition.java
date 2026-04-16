@@ -41,6 +41,12 @@ public class StageDefinition {
     public String bossId = "marisa_boss";
 
     /**
+     * Optional next stage ID for continuous battles/campaign chaining.
+     * If set (non-empty), clearing this stage can immediately start that stage.
+     */
+    public String nextStageId = "";
+
+    /**
      * Ticks to wait after the last wave clears before starting the boss intro
      * dialogue (or boss fight if no intro dialogue is defined).
      * Gives the player a brief breathing moment and cleans the screen.

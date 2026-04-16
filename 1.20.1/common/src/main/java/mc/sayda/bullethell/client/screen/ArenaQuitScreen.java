@@ -15,6 +15,7 @@ public class ArenaQuitScreen extends Screen {
 
     private final Screen parent;
     private int selectedIndex = 0; // 0=No, 1=Invite, 2=Yes
+    private boolean pauseClaimed = true;
 
     public ArenaQuitScreen(Screen parent) {
         super(Component.empty());
@@ -89,12 +90,33 @@ public class ArenaQuitScreen extends Screen {
         } else if (selectedIndex == 1) {
             Minecraft.getInstance().setScreen(new InvitePlayerScreen(this));
         } else if (selectedIndex == 2) {
+            releasePause();
             BHPackets.sendQuitArena();
             Minecraft.getInstance().setScreen(null); // Return to game
         }
     }
 
     private void cancel() {
+        releasePause();
         Minecraft.getInstance().setScreen(parent); // Return to ArenaPlayScreen
+    }
+
+    private void releasePause() {
+        if (!pauseClaimed)
+            return;
+        pauseClaimed = false;
+        BHPackets.sendPauseState(false);
+    }
+
+    @Override
+    public void removed() {
+        // Leaving this screen by other means (e.g. arena ended) should not lock pause.
+        if (pauseClaimed) {
+            var next = Minecraft.getInstance().screen;
+            if (!(next instanceof InvitePlayerScreen) && !(next instanceof ArenaQuitScreen)) {
+                releasePause();
+            }
+        }
+        super.removed();
     }
 }

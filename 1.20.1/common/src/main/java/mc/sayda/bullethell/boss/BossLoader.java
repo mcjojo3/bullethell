@@ -24,10 +24,34 @@ import java.util.Map;
  */
 public final class BossLoader {
 
+    /**
+     * Boss JSON ids shipped with the mod (used for tab-complete and when classpath
+     * directory listing is unavailable).
+     */
+    public static final String[] REGISTERED_IDS = {
+            "cirno_boss", "flandre_boss", "marisa_boss", "remilia_boss", "sakuya_boss", "sanae_boss"
+    };
+
     private static final Gson GSON = new GsonBuilder().create();
     private static final Map<String, BossDefinition> CACHE = new HashMap<>();
 
     private BossLoader() {}
+
+    /** True if {@code data/bullethell/bosses/&lt;id&gt;.json} exists on the classpath (not a fallback). */
+    public static boolean resourceExists(String id) {
+        if (id == null || id.isEmpty())
+            return false;
+        String path = "data/bullethell/bosses/" + id + ".json";
+        InputStream is = BossLoader.class.getClassLoader().getResourceAsStream(path);
+        if (is != null) {
+            try {
+                is.close();
+            } catch (Exception ignored) {
+            }
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Load a boss definition by ID, returning a cached instance if already loaded.

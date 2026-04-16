@@ -26,12 +26,42 @@ public final class StageLoader {
      * All stage IDs available in this build, in display order.
      * Add new IDs here when you create their JSON file.
      */
-    public static final String[] REGISTERED_IDS = { "marisa_stage" };
+    public static final String[] REGISTERED_IDS = { "cirno_stage", "sakuya_stage", "remilia_stage", "marisa_stage", "sanae_stage", "flandre_stage" };
 
     private static final Gson GSON = new GsonBuilder().create();
     private static final Map<String, StageDefinition> CACHE = new HashMap<>();
 
     private StageLoader() {}
+
+    /** True if {@code data/bullethell/stages/&lt;id&gt;.json} exists on the classpath. */
+    public static boolean resourceExists(String id) {
+        if (id == null || id.isEmpty())
+            return false;
+        String path = "data/bullethell/stages/" + id + ".json";
+        InputStream is = StageLoader.class.getClassLoader().getResourceAsStream(path);
+        if (is != null) {
+            try {
+                is.close();
+            } catch (Exception ignored) {
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * In-memory stage with no waves that loads only the given boss — for
+     * {@code /bullethell start &lt;bossId&gt;} when no stage JSON exists.
+     */
+    public static StageDefinition syntheticBossOnly(String bossId) {
+        StageDefinition def = new StageDefinition();
+        def.id = "_boss_" + bossId;
+        def.title = bossId;
+        def.bossId = bossId;
+        def.waves = new java.util.ArrayList<>();
+        def.rules = new RulesetConfig();
+        return def;
+    }
 
     /** Return all registered stages in display order. */
     public static java.util.List<StageDefinition> loadAll() {
@@ -69,6 +99,7 @@ public final class StageLoader {
             if (def.waves   == null) def.waves = new java.util.ArrayList<>();
             if (def.rules   == null) def.rules = new RulesetConfig();
             if (def.bossId  == null) def.bossId = "marisa_boss";
+            if (def.nextStageId == null) def.nextStageId = "";
             // Validate each wave's enemy list
             for (WaveDefinition wave : def.waves) {
                 if (wave.enemies == null) wave.enemies = new java.util.ArrayList<>();

@@ -1,0 +1,8 @@
+{
+  "id": "th6_extra_sub4_center",
+  "description": "Timeline0 ins_0(Sub4,192,-16,500,2) — Sub4 ins_97(10) fairy before Patchouli block; lowered spawn y.",
+  "enemies": [
+    { "x": 200, "y": -18, "vx": 0.0, "vy": 3.45, "type": "RED_FAIRY", "pattern": "AIMED", "delayTicks": 0 },
+    { "x": 280, "y": -18, "vx": 0.0, "vy": 3.45, "type": "RED_FAIRY", "pattern": "AIMED", "delayTicks": 8 }
+  ]
+}

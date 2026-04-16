@@ -1,0 +1,319 @@
+{
+  "id": "flandre_boss",
+  "name": "Flandre Scarlet",
+  "_design_notes": [
+    "TH06 Extra Stage boss (ecldata7 / Stage 7). Spell order: Cranberry Trap → Laevatein → Four of a Kind → Kagome Kagome → Maze of Love → Forbidden Barrage Starbow Break.",
+    "Taboo「フォーオブアカインド」: TH06 uses clone familiars. This build implements logical phase emitters (no sprite) so clone-origin fire can be reproduced from the correct off-screen positions.",
+    "Patchouli midboss (Extra) is not a separate arena boss here; fairy stage follows ecldata7 Timeline0 through Sub8 with a gap where Sub16 would run.",
+    "Nonspells map to ECL drivers Sub32 / Sub35 / Sub38 / Sub47 / Sub49 (ins_70 fans + ins_50 radial bursts), not Remilia Sub20-style laser opens.",
+    "Music: U.N. Owen was her? — track id u_n_owen_was_her. Patterns use existing PatternStep only."
+  ],
+"introDialog": [
+  { "speaker": "BOSS", "text": "I was sooo bored down here… so I found something fun! If you break, it means I found the right spot, okay?", "delayTicks": 170 }
+],
+
+"characterDialogs": {
+  "reimu": [
+    { "speaker": "BOSS", "text": "You've got lots of little shiny threads… which one do I touch to make you go *pop*?", "delayTicks": 160 },
+    { "speaker": "PLAYER", "text": "I'm not here to play your games.", "delayTicks": 130 },
+    { "speaker": "BOSS", "text": "But breaking things is a game! If I touch the right place, something interesting always happens!", "delayTicks": 150 }
+  ],
+  "marisa": [
+    { "speaker": "BOSS", "text": "Wow… you sparkle a lot! If I poke you, will you scatter everywhere?", "delayTicks": 160 },
+    { "speaker": "PLAYER", "text": "Heh, careful, they bite back, ze.", "delayTicks": 130 },
+    { "speaker": "BOSS", "text": "Bite? Heehee… then I just have to find where the bite stops!", "delayTicks": 155 }
+  ],
+  "sakuya": [
+    { "speaker": "BOSS", "text": "Sakuya… you feel like a line stretched too tight. If I pull it just a little..", "delayTicks": 165 },
+    { "speaker": "PLAYER", "text": "If you attempt that, I will stop you immediately.", "delayTicks": 120 },
+    { "speaker": "BOSS", "text": "Heehee… then try. I want to see which of us breaks first.", "delayTicks": 145 }
+  ],
+  "sanae": [
+    { "speaker": "BOSS", "text": "Hmm… you feel weird. Like you're not built the same. Where's your weak spot?", "delayTicks": 160 },
+    { "speaker": "PLAYER", "text": "Whatever you're thinking, it won't work on me.", "delayTicks": 130 },
+    { "speaker": "BOSS", "text": "Heehee… that just means I have to look extra carefully!", "delayTicks": 145 }
+  ],
+  "cirno": [
+    { "speaker": "BOSS", "text": "Oh! You look easy to understand! I bet I can figure you out quickly!", "delayTicks": 165 },
+    { "speaker": "PLAYER", "text": "Hey! I'm the strongest!", "delayTicks": 130 },
+    { "speaker": "BOSS", "text": "Strong? That's fine! Strong things are the most fun when they suddenly stop working!", "delayTicks": 150 }
+  ]
+},
+
+"victoryDialog": "Eh? It stopped already? I didn't even find the fun part yet…",
+"defeatDialog": "Ah… I see it! So that's where everything ends… how pretty…",
+
+"victoryDialogByCharacter": {
+  "reimu": "Huh… I couldn't find anything interesting inside at all…",
+  "marisa": "Aww… it all just faded away. That's boring…",
+  "sakuya": "You kept slipping away… I couldn't catch the ending.",
+  "sanae": "You were strange… but you still ended the same way.",
+  "cirno": "Huh? You just stopped? That was quick!"
+},
+
+"defeatDialogByCharacter": {
+  "reimu": "Oh! There it is! That's the spot!",
+  "marisa": "Whoa… it all came apart like sparks!",
+  "sakuya": "Even time can't hide that point forever, it seems.",
+  "sanae": "So you really did have one…",
+  "cirno": "I found it! I found it first!"
+},
+  "phases": [
+    {
+      "_note": "ECL Sub32 nonspell before Cranberry — ins_70(2,2,64,2) wide fan + ins_50/ins_61 radial bursts (~70f loop), not Remilia-style lasers.",
+      "hp": 1500,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 1",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 128,
+      "music": "u_n_owen_was_her",
+      "attacks": [
+        { "pattern": "DENSE_RING", "cooldown": 16, "scalingProfile": "GEOMETRY", "bulletType": "ORB", "arms": 14, "speed": 2.05, "bulletScale": 1.12, "hitboxScale": 0.5, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "SPREAD", "cooldown": 8, "scalingProfile": "BURST", "bulletType": "STAR", "arms": 7, "speed": 4.35, "spread": 0.12, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 11, "scalingProfile": "PRECISION", "bulletType": "SCARLET", "arms": 5, "speed": 3.65, "spread": 0.17, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 19, "scalingProfile": "GEOMETRY", "bulletType": "GOLD", "arms": 9, "speed": 2.25, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "ECL Taboo Cranberry Trap — red curtain + trap walls.",
+      "hp": 2400,
+      "isSpellCard": true,
+      "spellName": "Taboo \"Cranberry Trap\"",
+      "spellDurationTicks": [1100, 1100, 1100, 1100],
+      "spellBonus": 70000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "RAIN", "cooldown": 5, "scalingProfile": "BURST", "bulletType": "SCARLET", "arms": 11, "speed": 3.45, "spread": 0.1, "rainTop": -16, "rainWidth": 520, "bulletLifetimeTicks": 230 },
+        { "pattern": "RING_OFFSET", "cooldown": 20, "scalingProfile": "BURST", "bulletType": "SCARLET_LARGE", "arms": 12, "speed": 2.35, "bulletScale": 1.4, "hitboxScale": 0.72, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "BOUNCE", "cooldown": 14, "scalingProfile": "PRECISION", "bulletType": "SCARLET", "arms": 5, "speed": 3.25, "spread": 0.14, "bounceCount": 2, "bounceDamping": 0.94, "bulletLifetimeTicks": 250 },
+        { "pattern": "AIMED", "cooldown": 11, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 5, "speed": 3.65, "spread": 0.15, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub35 nonspell before Laevatein — same ins_70(2,2,64,2) family as Sub32; loop ~90f (ins_61 50) → slightly quicker radial cadence than NS1.",
+      "hp": 1550,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 2",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 134,
+      "music": "",
+      "attacks": [
+        { "pattern": "DENSE_RING", "cooldown": 14, "scalingProfile": "GEOMETRY", "bulletType": "ORB", "arms": 15, "speed": 2.1, "bulletScale": 1.1, "hitboxScale": 0.5, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "SPREAD", "cooldown": 7, "scalingProfile": "BURST", "bulletType": "STAR", "arms": 8, "speed": 4.45, "spread": 0.11, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPIRAL", "cooldown": 5, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.8, "bulletType": "GOLD", "arms": 9, "speed": 2.5, "bulletLifetimeTicks": 200 },
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "SCARLET", "arms": 5, "speed": 3.75, "spread": 0.15, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Taboo Laevatein — sword/laser + large shots (LaserPool + volleys).",
+      "hp": 2550,
+      "isSpellCard": true,
+      "spellName": "Taboo \"Laevatein\"",
+      "spellDurationTicks": [1100, 1100, 1100, 1100],
+      "spellBonus": 85000,
+      "movement": "CIRCLE",
+      "moveSpeed": 95,
+      "music": "",
+      "attacks": [
+        { "pattern": "LASER_ROTATING", "cooldown": 30, "bulletType": "LASER_HEAD", "arms": 8, "speed": 0, "laserHalfWidth": 5, "warnTicks": 10, "activeTicks": 18 },
+        { "pattern": "SPREAD", "cooldown": 6, "bulletType": "GOLD", "arms": 6, "speed": 4.85, "bulletScale": 1.2, "hitboxScale": 0.46, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 9, "bulletType": "SCARLET_LARGE", "arms": 4, "speed": 4.35, "spread": 0.12, "bulletScale": 1.45, "hitboxScale": 0.74, "bulletLifetimeTicks": 220 },
+        { "pattern": "LASER_BEAM", "cooldown": 12, "minCooldown": 9, "bulletType": "ORB", "arms": 3, "speed": 4.9, "laserBeamSpread": 0.055, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub38 before Four of a Kind — ins_70(2,2,32,3,4.0f) tighter arc + 32-way feel; still ins_50 bursts (no boss laser web).",
+      "hp": 1650,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 3",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 140,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPREAD", "cooldown": 6, "scalingProfile": "BURST", "bulletType": "ORB", "arms": 8, "speed": 4.2, "spread": 0.14, "bulletScale": 1.15, "hitboxScale": 0.48, "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 17, "bulletType": "SCARLET", "arms": 12, "speed": 2.0, "bulletScale": 1.22, "hitboxScale": 0.44, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "RING_OFFSET", "cooldown": 15, "bulletType": "STAR", "arms": 10, "speed": 2.35, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED", "cooldown": 12, "bulletType": "RICE", "arms": 6, "speed": 3.5, "spread": 0.16, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub39 Taboo Four of a Kind — clone-origin fire (Sub40/41/42) + boss volleys.",
+      "hp": 2600,
+      "isSpellCard": true,
+      "spellName": "Taboo \"Four of a Kind\"",
+      "spellDurationTicks": [1300, 1300, 1300, 1300],
+      "spellBonus": 90000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "emitters": [
+        {
+          "_note": "Sub40 clone: (-32,96) in TH coords → (-40,137) in 480×640 arena",
+          "x": -40,
+          "y": 137,
+          "attacks": [
+            { "pattern": "RING_OFFSET", "cooldown": 20, "bulletType": "ORB", "arms": 8, "speed": 2.05, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+            { "pattern": "SPREAD", "cooldown": 30, "bulletType": "STAR", "arms": 6, "speed": 4.2, "bulletLifetimeTicks": 220 }
+          ]
+        },
+        {
+          "_note": "Sub41 clone: (256,-32) → (320,-46)",
+          "x": 320,
+          "y": -46,
+          "attacks": [
+            { "pattern": "RING_OFFSET", "cooldown": 20, "bulletType": "ORB", "arms": 8, "speed": 2.05, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+            { "pattern": "SPREAD", "cooldown": 30, "bulletType": "GOLD", "arms": 6, "speed": 4.2, "bulletLifetimeTicks": 220 }
+          ]
+        },
+        {
+          "_note": "Sub42 clone: (416,96) → (520,137)",
+          "x": 520,
+          "y": 137,
+          "attacks": [
+            { "pattern": "RING_OFFSET", "cooldown": 20, "bulletType": "ORB", "arms": 8, "speed": 2.05, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+            { "pattern": "SPREAD", "cooldown": 30, "bulletType": "STAR", "arms": 6, "speed": 4.2, "bulletLifetimeTicks": 220 }
+          ]
+        }
+      ],
+      "attacks": [
+        { "pattern": "LASER_BEAM", "cooldown": 40, "minCooldown": 18, "scalingProfile": "GEOMETRY", "bulletType": "ORB", "arms": 6, "speed": 4.4, "laserBeamSpread": 0.06, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 20, "scalingProfile": "GEOMETRY", "bulletType": "ORB", "arms": 10, "speed": 2.15, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "SPREAD", "cooldown": 7, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 6, "speed": 4.7, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub47 before Maze of Love — ins_70(2,6,32,2,2.5f) six-arm layer + same ins_50/ins_61 loop as Sub35/38.",
+      "hp": 1750,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 4",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "CIRCLE",
+      "moveSpeed": 102,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPREAD", "cooldown": 6, "scalingProfile": "GEOMETRY", "bulletType": "ORB", "arms": 10, "speed": 4.05, "spread": 0.1, "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 15, "bulletType": "STAR", "arms": 14, "speed": 2.15, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "SPIRAL", "cooldown": 5, "armsDifficultyWeight": 0.82, "bulletType": "GOLD", "arms": 10, "speed": 2.45, "bulletLifetimeTicks": 200 },
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "SCARLET", "arms": 5, "speed": 3.7, "spread": 0.16, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub44 Taboo Kagome Kagome — edge spawners (Sub45) + boss volleys.",
+      "hp": 2700,
+      "isSpellCard": true,
+      "spellName": "Taboo \"Kagome, Kagome\"",
+      "spellDurationTicks": [1300, 1300, 1300, 1300],
+      "spellBonus": 95000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "emitters": [
+        {
+          "_note": "Sub45 style: top edge (64,0) → (80,0)",
+          "x": 80,
+          "y": 0,
+          "attacks": [
+            { "pattern": "RING", "cooldown": 4, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 9, "speed": 2.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+          ]
+        },
+        {
+          "_note": "Right/center edge (400,256) → (500,366)",
+          "x": 500,
+          "y": 366,
+          "attacks": [
+            { "pattern": "RING", "cooldown": 4, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 9, "speed": 2.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+          ]
+        },
+        {
+          "_note": "Left edge (-16,160) → (-20,229)",
+          "x": -20,
+          "y": 229,
+          "attacks": [
+            { "pattern": "RING", "cooldown": 4, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 9, "speed": 2.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+          ]
+        },
+        {
+          "_note": "Bottom edge (320,464) → (400,663)",
+          "x": 400,
+          "y": 663,
+          "attacks": [
+            { "pattern": "RING", "cooldown": 4, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 9, "speed": 2.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+          ]
+        }
+      ],
+      "attacks": [
+        { "pattern": "RING", "cooldown": 16, "bulletType": "KUNAI", "arms": 14, "speed": 2.35, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "SPIRAL", "cooldown": 6, "bulletType": "SCARLET", "arms": 8, "speed": 2.35, "bulletScale": 1.2, "hitboxScale": 0.46, "bulletLifetimeTicks": 200 },
+        { "pattern": "RING_OFFSET", "cooldown": 13, "bulletType": "STAR", "arms": 12, "speed": 2.35, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED", "cooldown": 12, "bulletType": "SCARLET", "arms": 5, "speed": 3.75, "spread": 0.14, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "ECL Sub49 before Starbow — ins_70(2,6,32,2,3.5f) faster radial than Sub47; still fan/burst vocabulary (not Scarlet Meister-style).",
+      "hp": 1850,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 5",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 148,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPREAD", "cooldown": 5, "scalingProfile": "BURST", "bulletType": "ORB", "arms": 11, "speed": 4.25, "spread": 0.09, "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 14, "bulletType": "SCARLET", "arms": 15, "speed": 2.05, "bulletScale": 1.15, "hitboxScale": 0.48, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "RING_OFFSET", "cooldown": 16, "bulletType": "SCARLET_LARGE", "arms": 9, "speed": 2.2, "bulletScale": 1.32, "hitboxScale": 0.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED", "cooldown": 9, "bulletType": "STAR", "arms": 6, "speed": 3.85, "spread": 0.14, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Taboo Maze of Love — heart / wall pressure (all ranks; difficulty scales via JSON + engine).",
+      "hp": 2850,
+      "isSpellCard": true,
+      "spellName": "Taboo \"Maze of Love\"",
+      "spellDurationTicks": [1200, 1200, 1200, 1200],
+      "spellBonus": 102000,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 90,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPREAD", "cooldown": 5, "bulletType": "SCARLET_MENTOS", "arms": 8, "speed": 4.8, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 15, "scalingProfile": "BURST", "bulletType": "SCARLET", "arms": 13, "speed": 2.25, "bulletScale": 1.18, "hitboxScale": 0.49, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "DENSE_RING", "cooldown": 16, "bulletType": "ORB", "arms": 12, "speed": 2.25, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "AIMED", "cooldown": 11, "bulletType": "SCARLET_LARGE", "arms": 5, "speed": 4.25, "spread": 0.12, "bulletScale": 1.45, "hitboxScale": 0.74, "bulletLifetimeTicks": 220 },
+        { "pattern": "BOUNCE", "cooldown": 13, "bulletType": "SCARLET", "arms": 5, "speed": 3.4, "spread": 0.15, "bounceCount": 2, "bounceDamping": 0.93, "bulletLifetimeTicks": 250 }
+      ]
+    },
+    {
+      "_note": "Forbidden Barrage Starbow Break — rainbow spoke finale (all ranks).",
+      "hp": 3000,
+      "isSpellCard": true,
+      "spellName": "Forbidden Barrage \"Starbow Break\"",
+      "spellDurationTicks": [1400, 1400, 1400, 1400],
+      "spellBonus": 120000,
+      "movement": "CIRCLE",
+      "moveSpeed": 102,
+      "music": "",
+      "attacks": [
+        { "pattern": "LASER_ROTATING", "cooldown": 28, "bulletType": "LASER_HEAD", "arms": 6, "speed": 0, "laserHalfWidth": 6, "warnTicks": 10, "activeTicks": 19 },
+        { "pattern": "SPREAD", "cooldown": 5, "bulletType": "STAR", "arms": 7, "speed": 4.9, "bulletScale": 1.15, "hitboxScale": 0.5, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 5, "bulletType": "GOLD", "arms": 7, "speed": 4.85, "bulletScale": 1.2, "hitboxScale": 0.46, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED_RING", "cooldown": 15, "bulletType": "STAR", "arms": 5, "spread": 0.14, "speed": 3.85, "ringArms": 8, "ringSpeed": 2.0, "ringBulletType": "ORB", "bulletScale": 1.22, "hitboxScale": 0.45, "ringStartAngleRad": -1 },
+        { "pattern": "DENSE_RING", "cooldown": 16, "bulletType": "STAR", "arms": 13, "speed": 2.35, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 }
+      ]
+    }
+  ]
+}

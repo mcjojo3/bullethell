@@ -1,0 +1,8 @@
+{
+  "id": "th6_extra_sub3_192",
+  "description": "Timeline0 ins_0(Sub3,192,-48) — center column Sub3.",
+  "enemies": [
+    { "x": 240, "y": -22, "vx": 0.0, "vy": 3.62, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 0 },
+    { "x": 240, "y": -30, "vx": 0.0, "vy": 3.62, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 5 }
+  ]
+}

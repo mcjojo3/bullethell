@@ -37,6 +37,7 @@ public class ArenaPlayScreen extends Screen {
     public boolean keyPressed(int key, int scanCode, int modifiers) {
         // Always allow ESC to open the quit menu as a fail-safe
         if (key == GLFW.GLFW_KEY_ESCAPE || BHKeyMappings.QUIT.matches(key, scanCode)) {
+            BHPackets.sendPauseState(true);
             Minecraft.getInstance().setScreen(new ArenaQuitScreen(this));
             return true; 
         }

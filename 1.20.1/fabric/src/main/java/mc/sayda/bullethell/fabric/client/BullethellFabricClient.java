@@ -14,5 +14,10 @@ public class BullethellFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         BullethellClient.init();
         EntityRendererRegistry.register(BHEntities.MARISA_NPC.get(), BHNpcRenderer::new);
+        EntityRendererRegistry.register(BHEntities.REMILIA_NPC.get(), BHNpcRenderer::new);
+        EntityRendererRegistry.register(BHEntities.SAKUYA_NPC.get(), BHNpcRenderer::new);
+        EntityRendererRegistry.register(BHEntities.CIRNO_NPC.get(), BHNpcRenderer::new);
+        EntityRendererRegistry.register(BHEntities.SANAE_NPC.get(), BHNpcRenderer::new);
+        EntityRendererRegistry.register(BHEntities.FLANDRE_NPC.get(), BHNpcRenderer::new);
     }
 }

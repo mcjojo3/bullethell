@@ -37,6 +37,24 @@ public class BossDefinition {
      */
     public Map<String, List<DialogLine>> characterDialogs = new HashMap<>();
 
+    /** Optional one-line boss quote shown when the player wins this fight. */
+    public String victoryDialog = "";
+
+    /** Optional one-line boss quote shown when the player loses this fight. */
+    public String defeatDialog = "";
+
+    /**
+     * Character-specific win quote overrides (keyed by player character id).
+     * Used only when the player clears the boss.
+     */
+    public Map<String, String> victoryDialogByCharacter = new HashMap<>();
+
+    /**
+     * Character-specific loss quote overrides (keyed by player character id).
+     * Used only when the player fails the boss.
+     */
+    public Map<String, String> defeatDialogByCharacter = new HashMap<>();
+
     /**
      * Ordered list of phases.  Index 0 is the opening phase.
      * Each phase transitions automatically when its own HP hits zero.

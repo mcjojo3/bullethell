@@ -1,8 +1,10 @@
 package mc.sayda.bullethell.entity;
 
 import mc.sayda.bullethell.arena.BulletHellManager;
+import mc.sayda.bullethell.BossProgression;
 import mc.sayda.bullethell.boss.NpcDefinition;
 import mc.sayda.bullethell.boss.NpcLoader;
+import mc.sayda.bullethell.boss.StageLoader;
 import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.network.OpenChallengePacket;
 import net.minecraft.nbt.CompoundTag;
@@ -64,7 +66,7 @@ public class BHNpc extends PathfinderMob {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        // Use empty string as the initial value — the real ID is applied in the
+        // Use empty string as the initial value - the real ID is applied in the
         // constructor (and restored from NBT by readAdditionalSaveData).
         this.entityData.define(NPC_ID, "");
     }
@@ -108,12 +110,15 @@ public class BHNpc extends PathfinderMob {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!this.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
             if (BulletHellManager.INSTANCE.getArenaForPlayer(serverPlayer.getUUID()) != null) {
-                // Already in an arena — ignore
+                // Already in an arena - ignore
                 return InteractionResult.CONSUME;
             }
             NpcDefinition def = NpcLoader.load(getNpcId());
+            String bossId = StageLoader.load(def.stageId).bossId;
+            int maxOrd = BossProgression.maxAllowedDifficultyOrdinal(serverPlayer, bossId);
+            String req = BossProgression.requirementSummary(bossId);
             BHPackets.sendOpenChallenge(serverPlayer,
-                    new OpenChallengePacket(getNpcId(), def.stageId, def.displayName, def.challengeText));
+                    new OpenChallengePacket(getNpcId(), def.stageId, def.displayName, def.challengeText, maxOrd, req));
         }
         return InteractionResult.sidedSuccess(this.level().isClientSide);
     }

@@ -5,6 +5,7 @@ import mc.sayda.bullethell.Bullethell;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.boss.CharacterDefinition;
 import mc.sayda.bullethell.boss.CharacterLoader;
+import mc.sayda.bullethell.client.CharacterUnlockClientState;
 import mc.sayda.bullethell.entity.BHAttributes;
 import mc.sayda.bullethell.network.BHPackets;
 import net.fabricmc.api.EnvType;
@@ -49,6 +50,7 @@ public class CharacterSelectScreen extends Screen {
     protected void init() {
         super.init();
         mc.sayda.bullethell.client.BHScaleManager.applyIdealScale();
+        ensureSelectedUnlocked();
         rebuildButtons();
     }
 
@@ -64,23 +66,34 @@ public class CharacterSelectScreen extends Screen {
             int bx = cardStartX + i * (CARD_W + CARD_GAP);
             int btnX = bx + (CARD_W - 80) / 2;
             int btnY = cardTopY + PORTRAIT_SIZE + INFO_H + BTN_PAD * 2;
+            boolean unlocked = isUnlocked(idx);
 
-            addRenderableWidget(Button.builder(
+            Button b = Button.builder(
                     Component.literal(i == selectedIndex ? "START" : "SELECT"),
                     btn -> {
+                        if (!isUnlocked(idx))
+                            return;
                         selectedIndex = idx;
                         confirm();
                     })
                     .pos(btnX, btnY)
                     .size(80, BTN_H)
-                    .build());
+                    .build();
+            b.active = unlocked;
+            addRenderableWidget(b);
         }
 
-        // Add a central "Invite Player" button at the bottom
+        int bottomY = height - 40;
+        addRenderableWidget(Button.builder(
+                Component.literal("SHARE LAST RUN"),
+                btn -> BHPackets.sendShareLastRun())
+                .pos(width / 2 - 130, bottomY)
+                .size(120, 20)
+                .build());
         addRenderableWidget(Button.builder(
                 Component.literal("INVITE PLAYER"),
                 btn -> Minecraft.getInstance().setScreen(new InvitePlayerScreen(this)))
-                .pos(width / 2 - 60, height - 40)
+                .pos(width / 2 + 10, bottomY)
                 .size(120, 20)
                 .build());
     }
@@ -107,10 +120,11 @@ public class CharacterSelectScreen extends Screen {
             CharacterDefinition ch = characters.get(i);
             int bx = cardStartX + i * (CARD_W + CARD_GAP);
             boolean sel = (i == selectedIndex);
+            boolean unlocked = isUnlocked(i);
 
             gfx.fill(bx, cardTopY, bx + CARD_W, cardTopY + CARD_H,
                     sel ? 0xFF1C1C36 : 0xFF0D0D20);
-            int brd = sel ? 0xFFFFE600 : 0xFF334466;
+            int brd = unlocked ? (sel ? 0xFFFFE600 : 0xFF334466) : 0xFF444444;
             gfx.hLine(bx, bx + CARD_W - 1, cardTopY, brd);
             gfx.hLine(bx, bx + CARD_W - 1, cardTopY + CARD_H - 1, brd);
             gfx.vLine(bx, cardTopY, cardTopY + CARD_H, brd);
@@ -125,8 +139,10 @@ public class CharacterSelectScreen extends Screen {
 
             int infoY = cardTopY + PORTRAIT_SIZE + BTN_PAD + 5;
             int cx = bx + CARD_W / 2;
-            gfx.drawCenteredString(font, ch.name, cx, infoY, sel ? 0xFFFFDD00 : 0xFFCCCCCC);
-            gfx.drawCenteredString(font, ch.description, cx, infoY + font.lineHeight + 2, 0xFF8888AA);
+            int nameCol = unlocked ? (sel ? 0xFFFFDD00 : 0xFFCCCCCC) : 0xFF777777;
+            gfx.drawCenteredString(font, ch.name, cx, infoY, nameCol);
+            gfx.drawCenteredString(font, ch.description, cx, infoY + font.lineHeight + 2,
+                    unlocked ? 0xFF8888AA : 0xFF555566);
             var pl = Minecraft.getInstance().player;
             int attrL = BHAttributes.extraLivesBonus(pl);
             int attrB = BHAttributes.extraBombsBonus(pl);
@@ -134,11 +150,16 @@ public class CharacterSelectScreen extends Screen {
             int dispBombs = Math.min(9, ch.startingBombs + attrB);
             String stats = "\u2665" + dispLives + "  \u2736" + dispBombs
                     + "  Spd:" + (int) ch.speedNormal;
-            gfx.drawCenteredString(font, stats, cx, infoY + font.lineHeight * 2 + 4, 0xFF7799CC);
+            gfx.drawCenteredString(font, stats, cx, infoY + font.lineHeight * 2 + 4,
+                    unlocked ? 0xFF7799CC : 0xFF555566);
 
-            if (sel) {
+            if (sel && unlocked) {
                 gfx.drawCenteredString(font, "\u25bc", cx,
                         cardTopY + PORTRAIT_SIZE + INFO_H + BTN_PAD - 1, 0xFFFFE600);
+            }
+            if (!unlocked) {
+                gfx.drawCenteredString(font, "LOCKED", cx,
+                        cardTopY + PORTRAIT_SIZE + INFO_H + BTN_PAD - 1, 0xFFAA4444);
             }
         }
 
@@ -154,6 +175,8 @@ public class CharacterSelectScreen extends Screen {
             int bx = cardStartX + i * (CARD_W + CARD_GAP);
             int py = cardTopY + BTN_PAD;
             if (mx >= bx && mx < bx + CARD_W && my >= py && my < py + PORTRAIT_SIZE + INFO_H) {
+                if (!isUnlocked(i))
+                    return true;
                 if (selectedIndex != i) {
                     selectedIndex = i;
                     rebuildButtons();
@@ -185,6 +208,8 @@ public class CharacterSelectScreen extends Screen {
     private void confirm() {
         if (characters.isEmpty())
             return;
+        if (!isUnlocked(selectedIndex))
+            return;
         BHPackets.sendCharSelect(characters.get(selectedIndex).id, difficulty, stageId);
         onClose();
     }
@@ -192,12 +217,12 @@ public class CharacterSelectScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == 263 && selectedIndex > 0) {
-            selectedIndex--;
+            selectedIndex = findPrevUnlocked(selectedIndex);
             rebuildButtons();
             return true;
         }
         if (keyCode == 262 && selectedIndex < characters.size() - 1) {
-            selectedIndex++;
+            selectedIndex = findNextUnlocked(selectedIndex);
             rebuildButtons();
             return true;
         }
@@ -211,5 +236,40 @@ public class CharacterSelectScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    private boolean isUnlocked(int idx) {
+        if (idx < 0 || idx >= characters.size())
+            return false;
+        return CharacterUnlockClientState.INSTANCE.isUnlockedFor(characters.get(idx).id, difficulty);
+    }
+
+    private void ensureSelectedUnlocked() {
+        if (characters.isEmpty())
+            return;
+        if (isUnlocked(selectedIndex))
+            return;
+        for (int i = 0; i < characters.size(); i++) {
+            if (isUnlocked(i)) {
+                selectedIndex = i;
+                return;
+            }
+        }
+    }
+
+    private int findNextUnlocked(int from) {
+        for (int i = from + 1; i < characters.size(); i++) {
+            if (isUnlocked(i))
+                return i;
+        }
+        return from;
+    }
+
+    private int findPrevUnlocked(int from) {
+        for (int i = from - 1; i >= 0; i--) {
+            if (isUnlocked(i))
+                return i;
+        }
+        return from;
     }
 }

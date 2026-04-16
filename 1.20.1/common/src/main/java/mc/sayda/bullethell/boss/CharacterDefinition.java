@@ -54,7 +54,7 @@ public class CharacterDefinition {
     /** Multiplier for passive charge while idle (not shooting). */
     public float chargeRateIdle = 3.0f;
     /**
-     * Extra multiplier while holding X after PoFV startup — scales how fast each
+     * Extra multiplier while holding X after PoFV startup - scales how fast each
      * level fills (see {@link #chargeSpeedFrames}).
      */
     public float chargeRateCharging = 5.0f;

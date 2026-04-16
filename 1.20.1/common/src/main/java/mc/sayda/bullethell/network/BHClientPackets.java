@@ -3,6 +3,7 @@ package mc.sayda.bullethell.network;
 import dev.architectury.networking.NetworkManager;
 import mc.sayda.bullethell.BHControlSettings;
 import mc.sayda.bullethell.client.ClientArenaState;
+import mc.sayda.bullethell.client.CharacterUnlockClientState;
 import mc.sayda.bullethell.network.AllPlayerBulletsSyncPacket;
 import mc.sayda.bullethell.client.screen.JoinCharacterSelectScreen;
 import mc.sayda.bullethell.client.screen.LevelSelectScreen;
@@ -84,6 +85,11 @@ public final class BHClientPackets {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.CONTROL_SCHEME, (buf, ctx) -> {
             ControlSchemePacket pkt = ControlSchemePacket.decode(buf);
             ctx.queue(() -> BHControlSettings.applyFromNetwork(pkt.scheme));
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.CHARACTER_UNLOCKS, (buf, ctx) -> {
+            CharacterUnlockSyncPacket pkt = CharacterUnlockSyncPacket.decode(buf);
+            ctx.queue(() -> CharacterUnlockClientState.INSTANCE.applyFromNetwork(pkt.maxDifficultyByCharacter));
         });
     }
 }

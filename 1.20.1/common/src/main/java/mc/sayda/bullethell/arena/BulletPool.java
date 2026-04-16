@@ -5,30 +5,41 @@ import java.util.Arrays;
 /**
  * Fixed-size struct array for bullet simulation.
  * No entity overhead, no heap allocations per bullet.
- * Layout per slot: [x, y, vx, vy, type, lifetime]
+ * Layout per slot: [x, y, vx, vy, type, lifetime, visScale, hitScale, angVel]
  *
  * Capacity is configurable - use ENEMY_CAPACITY (500) for boss bullets
- * and PLAYER_CAPACITY (64) for player shots.
+ * and PLAYER_CAPACITY for player shots (raised for dense spread patterns
+ * on fairy-heavy stages so spawn() rarely fails when many shots are alive).
  */
 public class BulletPool {
 
     public static final int   ENEMY_CAPACITY  = 500; // boss bullets
-    public static final int   PLAYER_CAPACITY =  64; // player shots
+    public static final int   PLAYER_CAPACITY = 128; // player shots
     /** Legacy alias kept for existing references. */
     public static final int   CAPACITY        = ENEMY_CAPACITY;
 
     public static final float ARENA_W = 480f;
     public static final float ARENA_H = 640f;
 
-    private static final int STRIDE = 6;
+    /** Floats per bullet slot (enemy + player pools share layout). */
+    public static final int STRIDE = 9;
 
     // Slot field offsets
-    public static final int F_X    = 0;
-    public static final int F_Y    = 1;
-    public static final int F_VX   = 2;
-    public static final int F_VY   = 3;
-    public static final int F_TYPE = 4;
-    public static final int F_LIFE = 5;
+    public static final int F_X       = 0;
+    public static final int F_Y       = 1;
+    public static final int F_VX      = 2;
+    public static final int F_VY      = 3;
+    public static final int F_TYPE    = 4;
+    public static final int F_LIFE    = 5;
+    /** Visual radius multiplier vs {@link mc.sayda.bullethell.pattern.BulletType#radius}. */
+    public static final int F_VIS_SCALE = 6;
+    /** Hit radius multiplier vs type base radius (can be &lt; vis for forgiving large orbs). */
+    public static final int F_HIT_SCALE = 7;
+    /**
+     * Angular velocity in radians per tick applied to the velocity vector before integration
+     * (TH-style curved shots). 0 = straight motion.
+     */
+    public static final int F_ANG_VEL = 8;
 
     private final int capacity;
     private final float[]   data;
@@ -54,6 +65,7 @@ public class BulletPool {
         for (int i = 0; i < capacity; i++) {
             if (!active[i]) continue;
             int b = i * STRIDE;
+            applyAngularVelocity(data, b);
             data[b + F_X] += data[b + F_VX];
             data[b + F_Y] += data[b + F_VY];
             data[b + F_LIFE]--;
@@ -73,14 +85,37 @@ public class BulletPool {
         for (int i = 0; i < capacity; i++) {
             if (!active[i]) continue;
             int b = i * STRIDE;
+            applyAngularVelocity(data, b);
             data[b + F_X] += data[b + F_VX];
             data[b + F_Y] += data[b + F_VY];
         }
     }
 
+    private static void applyAngularVelocity(float[] data, int b) {
+        float ang = data[b + F_ANG_VEL];
+        if (ang * ang < 1e-16f)
+            return;
+        float vx = data[b + F_VX];
+        float vy = data[b + F_VY];
+        float c = (float) Math.cos(ang);
+        float s = (float) Math.sin(ang);
+        data[b + F_VX] = vx * c - vy * s;
+        data[b + F_VY] = vx * s + vy * c;
+    }
+
     // ---------------------------------------------------------------- spawn / deactivate
 
     public int spawn(float x, float y, float vx, float vy, int type, int life) {
+        return spawn(x, y, vx, vy, type, life, 1f, 1f, 0f);
+    }
+
+    public int spawn(float x, float y, float vx, float vy, int type, int life,
+                     float visScale, float hitScale) {
+        return spawn(x, y, vx, vy, type, life, visScale, hitScale, 0f);
+    }
+
+    public int spawn(float x, float y, float vx, float vy, int type, int life,
+                     float visScale, float hitScale, float angVelRadPerTick) {
         int slot = nextFreeSlot();
         if (slot == -1) return -1;
         int b = slot * STRIDE;
@@ -90,6 +125,9 @@ public class BulletPool {
         data[b + F_VY]   = vy;
         data[b + F_TYPE] = type;
         data[b + F_LIFE] = life;
+        data[b + F_VIS_SCALE] = visScale > 0.01f ? visScale : 1f;
+        data[b + F_HIT_SCALE] = hitScale > 0.01f ? hitScale : 1f;
+        data[b + F_ANG_VEL] = angVelRadPerTick;
         active[slot] = true;
         dirty[slot]  = true;
         activeCount++;
@@ -115,6 +153,9 @@ public class BulletPool {
     public float   getVx(int slot)   { return data[slot * STRIDE + F_VX]; }
     public float   getVy(int slot)   { return data[slot * STRIDE + F_VY]; }
     public int     getType(int slot) { return (int) data[slot * STRIDE + F_TYPE]; }
+    public float   getVisScale(int slot) { return data[slot * STRIDE + F_VIS_SCALE]; }
+    public float   getHitScale(int slot) { return data[slot * STRIDE + F_HIT_SCALE]; }
+    public float   getAngVel(int slot) { return data[slot * STRIDE + F_ANG_VEL]; }
     public boolean isActive(int slot){ return active[slot]; }
     public int     getActiveCount()  { return activeCount; }
 

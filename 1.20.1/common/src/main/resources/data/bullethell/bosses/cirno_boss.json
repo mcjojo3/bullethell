@@ -1,0 +1,165 @@
+{
+  "id": "cirno_boss",
+  "name": "Cirno",
+  "_design_notes": [
+    "TH06 ecldata2: Sub0–Sub4 eight-lane + ins_77(180f) pacing; Sub5 burst E2→L10; Sub29 Icicle (120f outer loop ins_3); Sub30 Hail; Sub31 Perfect Freeze layered ins_75 + ins_67; Sub32 Diamond ins_75 type5 + ins_121 overlay.",
+    "Timing: 120f loop ≈40 mod ticks; 180f wait ≈60 mod ticks (wiki/time-and-units.md). ICE + ORB/GOLD for freeze/diamond reads.",
+    "Blueprint (PatternStep): bulletLifetimeTicks matches PatternEngine defaults — RING/SPIRAL/DENSE 200, AIMED/SPREAD/LASER_BEAM 220, RAIN 230. AIMED_RING steps omit lifetime so aim uses 220 and ring 200. ringStartAngleRad: -1 = random ring start (RING_OFFSET / AIMED_RING ring), 0 = fixed. bulletAngularVelocity left 0 (straight); spawn offsets unused."
+  ],
+  "introDialog": [
+    { "speaker": "BOSS", "text": "I'm Cirno, the strongest fairy! You made it this far? Heh, now freeze!", "delayTicks": 170 }
+  ],
+  "characterDialogs": {
+    "reimu": [
+      { "speaker": "BOSS", "text": "Hakurei shrine maiden! Perfect timing, I need someone strong to prove I'm the strongest!", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "You picked me for that? Fine. Let's make this quick.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Quick? Good, then don't complain when you freeze even faster!", "delayTicks": 150 }
+    ],
+    "marisa": [
+      { "speaker": "BOSS", "text": "Marisa! No stealing my ice crystals this time!", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "No promises, ze. If it shines, it's mine.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Then I'll bury you in snow before you pocket a single shard!", "delayTicks": 150 }
+    ],
+    "sakuya": [
+      { "speaker": "BOSS", "text": "A mansion maid? Then watch closely, this is high-class freezing!", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "I only came to clear the path. Please stand still for a moment.", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Stand still? I only hold still for Lady Remilia, not for fairies.", "delayTicks": 155 }
+    ],
+    "sanae": [
+      { "speaker": "BOSS", "text": "A wind priestess? Great! Ice plus wind means mega blizzard!", "delayTicks": 160 },
+      { "speaker": "PLAYER", "text": "That sounds dangerous even by Gensokyo standards...", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Dangerous is how you know it's the strongest combo!", "delayTicks": 145 }
+    ],
+    "cirno": [
+      { "speaker": "BOSS", "text": "Huh?! Another me?! Then only one strongest can remain!", "delayTicks": 170 },
+      { "speaker": "PLAYER", "text": "You're right! Winner is strongest fairy forever!", "delayTicks": 130 },
+      { "speaker": "BOSS", "text": "Then I'll beat you fair and square, no take-backs!", "delayTicks": 150 }
+    ]
+  },
+  "victoryDialog": "No way... okay, maybe you're kinda strong too.",
+  "defeatDialog": "See?! I'm the strongest after all!",
+  "victoryDialogByCharacter": {
+    "reimu": "Tch... shrine maiden cheated with experience.",
+    "marisa": "Stop laughing! I only slipped on my own ice.",
+    "sakuya": "Your knives are unfairly accurate... that's not strongest!",
+    "sanae": "Fine, wind beats ice this time.",
+    "cirno": "Whoa... strongest me wins. I can accept that."
+  },
+  "defeatDialogByCharacter": {
+    "reimu": "Even shrine maidens freeze if they stand still!",
+    "marisa": "Too slow, magician! No ice loot for you!",
+    "sakuya": "Try stopping time when your feet are frozen!",
+    "sanae": "No miracle saved you from the strongest!",
+    "cirno": "Haha! I beat myself! That means double strongest!"
+  },
+  "phases": [
+    {
+      "_note": "Nonspell 1 — Sub0–4: eight lanes; ins_77(180f) between volley families → ~56–60t-equivalent pacing on main ring.",
+      "hp": 1100,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 1",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 120,
+      "music": "beloved_tomboyish_girl",
+      "attacks": [
+        { "pattern": "RING_OFFSET", "cooldown": 36, "minCooldown": 30, "scalingProfile": "GEOMETRY", "bulletType": "ICE", "arms": 8, "speed": 2.1, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "SPIRAL", "cooldown": 16, "minCooldown": 14, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.72, "bulletType": "ICE", "arms": 8, "speed": 2.3, "bulletLifetimeTicks": 200 },
+        { "pattern": "AIMED", "cooldown": 20, "scalingProfile": "PRECISION", "bulletType": "ICE", "arms": 5, "speed": 2.95, "spread": 0.13, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Sub29 Icicle Fall: ins_82 ±π/2 columns; ins_3(120f) loop → RAIN + LASER_BEAM cadence ~40t-scale.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 1750,
+      "isSpellCard": true,
+      "spellName": "Ice Sign \"Icicle Fall\"",
+      "spellDurationTicks": [780, 620, 0, 0],
+      "spellBonus": 50000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "RAIN", "cooldown": 14, "minCooldown": 11, "scalingProfile": "BURST", "bulletType": "ICE", "arms": 11, "armsMin": 9, "armsMax": 13, "speed": 3.15, "speedMin": 2.9, "speedMax": 3.4, "spread": 0.055, "spreadMin": 0.035, "spreadMax": 0.08, "rainTop": -14, "rainWidth": 460, "densityScale": 0.92, "bulletLifetimeTicks": 230 },
+        { "pattern": "LASER_BEAM", "cooldown": 10, "minCooldown": 8, "bulletType": "ICE", "arms": 2, "speed": 5.4, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 16, "bulletType": "ICE", "arms": 4, "speed": 3.35, "spread": 0.07, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Sub30 Hailstorm: ins_47 spin + ins_70 hail density.",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 1950,
+      "isSpellCard": true,
+      "spellName": "Hail Sign \"Hailstorm\"",
+      "spellDurationTicks": [0, 0, 420, 220],
+      "spellBonus": 62000,
+      "movement": "CIRCLE",
+      "moveSpeed": 88,
+      "music": "",
+      "attacks": [
+        { "pattern": "RING", "cooldown": 11, "scalingProfile": "GEOMETRY", "bulletType": "ICE", "arms": 14, "armsMin": 12, "armsMax": 17, "speed": 1.95, "speedMin": 1.8, "speedMax": 2.15, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "SPREAD", "cooldown": 7, "scalingProfile": "BURST", "bulletType": "ICE", "arms": 9, "speed": 4.0, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 17, "bulletType": "ICE", "arms": 12, "speed": 1.9, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED_RING", "cooldown": 19, "bulletType": "ICE", "arms": 5, "spread": 0.13, "speed": 2.9, "ringArms": 14, "ringSpeed": 1.5, "ringBulletType": "ORB", "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "Nonspell 2 — Sub5-style burst scaling (E2→L10 single-shot families).",
+      "hp": 1500,
+      "isSpellCard": false,
+      "hpThresholdFraction": 0.20,
+      "spellName": "Nonspell 2",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 140,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 12, "scalingProfile": "PRECISION", "bulletType": "ICE", "arms": 6, "armsMin": 2, "armsMax": 10, "speed": 3.35, "spread": 0.15, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING", "cooldown": 19, "bulletType": "ICE", "arms": 10, "speed": 2.3, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "AIMED_RING", "cooldown": 22, "bulletType": "ICE", "arms": 5, "spread": 0.17, "speed": 3.1, "ringArms": 10, "ringSpeed": 1.6, "ringBulletType": "ORB", "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "Sub31 Perfect Freeze: stacked ins_75 fans (burst volleys) + ins_67 spiral + large ORB wall.",
+      "hp": 2200,
+      "isSpellCard": true,
+      "spellName": "Freeze Sign \"Perfect Freeze\"",
+      "spellDurationTicks": [700, 560, 390, 210],
+      "spellBonus": 70000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPREAD", "burstCount": 3, "burstInterval": 4, "cooldown": 32, "scalingProfile": "BURST", "bulletType": "ICE", "arms": 7, "armsMin": 5, "armsMax": 9, "speed": 3.85, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPIRAL", "cooldown": 9, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.78, "bulletType": "ICE", "arms": 7, "speed": 2.45, "bulletLifetimeTicks": 200 },
+        { "pattern": "DENSE_RING", "cooldown": 15, "scalingProfile": "GEOMETRY", "bulletType": "ORB", "arms": 14, "speed": 1.8, "maxScaledArms": 18, "bulletScale": 1.15, "hitboxScale": 0.45, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "AIMED", "cooldown": 13, "bulletType": "ICE", "arms": 5, "speed": 3.45, "spread": 0.14, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Sub32 Diamond Blizzard: wide ins_75 snow + diamond sparkle (GOLD) mix; Normal+.",
+      "minDifficulty": "NORMAL",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2400,
+      "isSpellCard": true,
+      "spellName": "Snow Sign \"Diamond Blizzard\"",
+      "spellDurationTicks": [660, 520, 360, 190],
+      "spellBonus": 90000,
+      "movement": "CIRCLE",
+      "moveSpeed": 114,
+      "music": "",
+      "attacks": [
+        { "pattern": "SPREAD", "cooldown": 5, "scalingProfile": "BURST", "bulletType": "ICE", "arms": 8, "speed": 4.6, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 5, "scalingProfile": "BURST", "bulletType": "GOLD", "arms": 6, "speed": 4.0, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 10, "bulletType": "ICE", "arms": 6, "speed": 3.7, "spread": 0.17, "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 14, "bulletType": "ICE", "arms": 16, "speed": 2.25, "maxScaledArms": 20, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "AIMED_RING", "cooldown": 17, "bulletType": "ICE", "arms": 5, "spread": 0.18, "speed": 3.1, "ringArms": 12, "ringSpeed": 1.7, "ringBulletType": "GOLD", "ringStartAngleRad": -1 }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.client.screen;
 
 import mc.sayda.bullethell.boss.BossLoader;
+import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.boss.StageDefinition;
 import mc.sayda.bullethell.boss.StageLoader;
 import net.fabricmc.api.EnvType;
@@ -23,12 +24,13 @@ public class LevelSelectScreen extends Screen {
     private static final int BTN_H = 20;
 
     private static final int[] STAGE_COLORS = {
-            0xFF00FFE0, 
-            0xFFFFE600, 
-            0xFFFF88AA, 
-            0xFF88AAFF, 
-            0xFFFF7700, 
-            0xFF88FF88, 
+            0xFF00FFE0,
+            0xFFFFE600,
+            0xFFFF88AA,
+            0xFF88AAFF,
+            0xFFFF7700,
+            0xFF88FF88,
+            0xFFFF4466,
     };
 
     private final List<StageDefinition> stages;
@@ -72,11 +74,17 @@ public class LevelSelectScreen extends Screen {
                     .build());
         }
 
-        // Add a central "Invite Player" button at the bottom
+        int bottomY = height - 35;
+        addRenderableWidget(Button.builder(
+                Component.literal("SHARE LAST RUN"),
+                btn -> BHPackets.sendShareLastRun())
+                .pos(width / 2 - 130, bottomY)
+                .size(120, 20)
+                .build());
         addRenderableWidget(Button.builder(
                 Component.literal("INVITE PLAYER"),
                 btn -> Minecraft.getInstance().setScreen(new InvitePlayerScreen(this)))
-                .pos(width / 2 - 60, height - 35)
+                .pos(width / 2 + 10, bottomY)
                 .size(120, 20)
                 .build());
     }

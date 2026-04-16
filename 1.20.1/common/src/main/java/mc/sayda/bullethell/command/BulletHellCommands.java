@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -8,7 +9,12 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import mc.sayda.bullethell.BHControlScheme;
 import mc.sayda.bullethell.BHControlSettings;
+import mc.sayda.bullethell.BullethellDataIndex;
 import mc.sayda.bullethell.arena.BulletHellManager;
+import mc.sayda.bullethell.arena.DifficultyConfig;
+import mc.sayda.bullethell.boss.BossLoader;
+import mc.sayda.bullethell.boss.StageDefinition;
+import mc.sayda.bullethell.boss.StageLoader;
 import mc.sayda.bullethell.debug.BHDebugMode;
 import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.network.ControlSchemePacket;
@@ -25,7 +31,11 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * /bullethell start - opens difficulty → character screens
+ * /bullethell start — admin (perm 2): same as bare /bullethell (char select), or
+ * {@code /bullethell start &lt;stageOrBossId&gt;} [phase] [character]. Tab-complete lists
+ * stage and boss JSON ids (e.g. {@code sakuya_boss}, {@code remilia_stage}). A boss id
+ * starts a boss-only arena (no fairy waves). Phase: 0 = from beginning; ≥1 = skip to that
+ * boss phase (1-based).
  * /bullethell join &lt;playerName&gt; - join another player's active arena
  * /bullethell stop - end own arena or leave a coop match
  * /bullethell status - print current arena stats to chat
@@ -62,9 +72,24 @@ public final class BulletHellCommands {
                 .requires(src -> src.hasPermission(0)) // any player
                 .executes(ctx -> start(ctx.getSource()))
 
-                // ---- start ----
+                // ---- start (admin: char-select shortcut or direct arena start) ----
                 .then(Commands.literal("start")
-                        .executes(ctx -> start(ctx.getSource())))
+                        .requires(src -> src.hasPermission(2))
+                        .executes(ctx -> start(ctx.getSource()))
+                        .then(Commands.argument("target", StringArgumentType.word())
+                                .suggests(BullethellDataIndex.suggestStartArenaTargets())
+                                .executes(ctx -> startDirect(ctx.getSource(),
+                                        StringArgumentType.getString(ctx, "target"), 0, "reimu"))
+                                .then(Commands.argument("phase", IntegerArgumentType.integer(0, 999))
+                                        .executes(ctx -> startDirect(ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "target"),
+                                                IntegerArgumentType.getInteger(ctx, "phase"), "reimu"))
+                                        .then(Commands.argument("character", StringArgumentType.word())
+                                                .suggests(BullethellDataIndex.suggestCharacters())
+                                                .executes(ctx -> startDirect(ctx.getSource(),
+                                                        StringArgumentType.getString(ctx, "target"),
+                                                        IntegerArgumentType.getInteger(ctx, "phase"),
+                                                        StringArgumentType.getString(ctx, "character")))))))
 
                 // ---- join <playerName> ----
                 .then(Commands.literal("join")
@@ -125,7 +150,7 @@ public final class BulletHellCommands {
                 .then(Commands.literal("controls")
                         .executes(ctx -> controlsGet(ctx.getSource()))
                         .then(Commands.argument("scheme", StringArgumentType.word())
-                                .suggests((c, b) -> SharedSuggestionProvider.suggest(List.of("th19", "th9"), b))
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(BHControlScheme.allIds(), b))
                                 .executes(ctx -> controlsSet(ctx.getSource(),
                                         StringArgumentType.getString(ctx, "scheme")))))
 
@@ -137,7 +162,7 @@ public final class BulletHellCommands {
                             boolean on = BHDebugMode.toggleGodMode(player.getUUID());
                             player.sendSystemMessage(Component.literal(
                                     "[BulletHell] Debug " + (on ? "ON" : "OFF")
-                                            + " — while in arena: max lives/bombs, invuln, bombs cost nothing."));
+                                            + " - while in arena: max lives/bombs, invuln, bombs cost nothing."));
                             return 1;
                         })));
     }
@@ -147,6 +172,47 @@ public final class BulletHellCommands {
     private static int start(CommandSourceStack src) throws CommandSyntaxException {
         ServerPlayer player = src.getPlayerOrException();
         BHPackets.sendOpenCharSelect(player);
+        return 1;
+    }
+
+    /**
+     * @param phase1BasedOrZero 0 = play from wave phase; ≥1 = skip to that boss phase (1-based index)
+     */
+    private static int startDirect(CommandSourceStack src, String target, int phase1BasedOrZero, String characterId)
+            throws CommandSyntaxException {
+        ServerPlayer player = src.getPlayerOrException();
+        if (BulletHellManager.INSTANCE.hasArena(player.getUUID())) {
+            player.sendSystemMessage(Component.literal(
+                    "[BulletHell] Already in an arena. Use /bullethell stop first."));
+            return 0;
+        }
+        StageDefinition stage;
+        if (StageLoader.resourceExists(target)) {
+            stage = StageLoader.load(target);
+        } else if (BossLoader.resourceExists(target)) {
+            stage = StageLoader.syntheticBossOnly(target);
+        } else {
+            player.sendSystemMessage(Component.literal(
+                    "[BulletHell] No stage or boss JSON named \"" + target
+                            + "\" (tab-complete: stage and boss ids under data/bullethell)."));
+            return 0;
+        }
+        return beginResolvedArena(player, stage, characterId, phase1BasedOrZero);
+    }
+
+    private static int beginResolvedArena(ServerPlayer player, StageDefinition stage, String characterId,
+            int phase1BasedOrZero) {
+        if (!BullethellDataIndex.characterIdsSorted().contains(characterId)) {
+            player.sendSystemMessage(Component.literal(
+                    "[BulletHell] Unknown character \"" + characterId + "\"."));
+            return 0;
+        }
+        BHPackets.startArena(player, DifficultyConfig.NORMAL, stage, characterId, phase1BasedOrZero);
+        StringBuilder msg = new StringBuilder("[BulletHell] Started: ").append(stage.id);
+        if (phase1BasedOrZero > 0)
+            msg.append(" at boss phase ").append(phase1BasedOrZero);
+        msg.append(" as ").append(characterId);
+        player.sendSystemMessage(Component.literal(msg.toString()));
         return 1;
     }
 
@@ -177,12 +243,10 @@ public final class BulletHellCommands {
 
     private static int controlsGet(CommandSourceStack src) throws CommandSyntaxException {
         ServerPlayer player = src.getPlayerOrException();
-        BHControlScheme cur = BHControlSettings.serverGetPreference(player.getUUID());
+        BHControlScheme cur = BHControlSettings.serverGetPreference(player);
         String id = cur.id();
         player.sendSystemMessage(Component.literal(
-                "[BulletHell] Saved layout: " + id + " — " + BHControlSettings.describe(cur)));
-        player.sendSystemMessage(Component.literal(
-                "[BulletHell] Change with /bullethell controls th19 or /bullethell controls th9."));
+                "[BulletHell] Current scheme: " + id + " - " + BHControlSettings.describe(cur)));
         return 1;
     }
 
@@ -193,14 +257,14 @@ public final class BulletHellCommands {
             String id = BHControlSettings.serverGetPreferenceId(player.getUUID());
             player.sendSystemMessage(Component.literal(
                     "[BulletHell] Unknown scheme \"" + raw + "\". Current layout: " + id
-                            + ". Valid: th19, th9."));
+                            + ". Valid: " + String.join(", ", BHControlScheme.allIds()) + "."));
             return 0;
         }
         BHControlScheme scheme = parsed.get();
-        BHControlSettings.serverSetPreference(player.getUUID(), scheme);
+        BHControlSettings.serverSetPreference(player, scheme);
         BHPackets.sendControlScheme(player, new ControlSchemePacket(scheme));
         player.sendSystemMessage(Component.literal(
-                "[BulletHell] Control layout set to " + scheme.id() + " — " + BHControlSettings.describe(scheme)));
+                "[BulletHell] Control layout set to " + scheme.id() + " - " + BHControlSettings.describe(scheme)));
         return 1;
     }
 }

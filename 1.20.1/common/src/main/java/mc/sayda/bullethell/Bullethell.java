@@ -14,6 +14,7 @@ public class Bullethell {
 
     public static void init() {
         LOGGER.info("Bullethell (Common) Initializing...");
+        BHGameRules.init();
         BHPackets.register();
         BHCommonEvents.register();
         BHSounds.register();

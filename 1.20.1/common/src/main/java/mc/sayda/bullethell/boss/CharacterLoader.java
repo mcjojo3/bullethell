@@ -25,7 +25,7 @@ public final class CharacterLoader {
      * All character IDs available in this build.
      * Order determines the display order on the select screen.
      */
-    public static final String[] REGISTERED_IDS = { "reimu", "marisa", "sakuya", "sanae" };
+    public static final String[] REGISTERED_IDS = { "reimu", "marisa", "sakuya", "sanae", "cirno" };
 
     private static final Gson GSON = new GsonBuilder().create();
     private static final Map<String, CharacterDefinition> CACHE = new HashMap<>();

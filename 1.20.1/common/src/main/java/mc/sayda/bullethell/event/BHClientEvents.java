@@ -3,6 +3,9 @@ package mc.sayda.bullethell.event;
 import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
+import mc.sayda.bullethell.BHControlScheme;
+import mc.sayda.bullethell.BHControlSettings;
+import mc.sayda.bullethell.arena.PlayerState2D;
 import mc.sayda.bullethell.client.BHKeyMappings;
 import mc.sayda.bullethell.client.BHMusicManager;
 import mc.sayda.bullethell.client.BHScaleManager;
@@ -33,6 +36,10 @@ public class BHClientEvents {
 
     private static boolean prevXDown = false;
     private static boolean prevBombDown = false;
+    /** Z was down last client tick (th9 Z-release cast). */
+    private static boolean prevZDown = false;
+    /** Consecutive ticks Z held while in th9 (tap vs charge split). */
+    private static int th9ZHoldStreak = 0;
 
     public static void register() {
         ClientTickEvent.CLIENT_POST.register(mc -> {
@@ -47,6 +54,10 @@ public class BHClientEvents {
                         BHScaleManager.restoreOriginalScale();
                     }
                 }
+                prevXDown = false;
+                prevBombDown = false;
+                prevZDown = false;
+                th9ZHoldStreak = 0;
                 return;
             }
 
@@ -76,6 +87,8 @@ public class BHClientEvents {
             if (state.spectating) {
                 prevXDown = false;
                 prevBombDown = false;
+                prevZDown = false;
+                th9ZHoldStreak = 0;
                 return;
             }
 
@@ -91,22 +104,46 @@ public class BHClientEvents {
                 dy += 1f;
 
             boolean focused = isDown(BHKeyMappings.FOCUS);
-            boolean shooting = isDown(BHKeyMappings.SHOOT);
-            boolean charging = isDown(BHKeyMappings.SKILL);
-            boolean bombing = isDown(BHKeyMappings.BOMB);
+            boolean zDown = isDown(BHKeyMappings.SHOOT);
+            boolean xDown = isDown(BHKeyMappings.SKILL);
 
-            boolean xReleased = !charging && prevXDown;
-            boolean bombJustPressed = bombing && !prevBombDown;
+            BHControlScheme scheme = BHControlSettings.get();
+            boolean shooting;
+            boolean charging;
+            if (scheme == BHControlScheme.TH9) {
+                // Streak only for "cast on Z release" - do not gate shooting; server PoFV startup
+                // already delays colored charge ~9 ticks, and chargeSpeedFrames sets time to L1.
+                if (zDown) {
+                    th9ZHoldStreak++;
+                } else {
+                    if (prevZDown && th9ZHoldStreak > PlayerState2D.POFV_CHARGE_STARTUP_FRAMES)
+                        BHPackets.sendSkill();
+                    th9ZHoldStreak = 0;
+                }
+                shooting = zDown;
+                charging = zDown;
+            } else {
+                th9ZHoldStreak = 0;
+                shooting = zDown;
+                charging = xDown;
+            }
 
-            prevXDown = charging;
-            prevBombDown = bombing;
+            // th9: C and X both behave like th19 bomb (either edge triggers one bomb packet).
+            boolean bombPressed = scheme == BHControlScheme.TH9
+                    ? (isDown(BHKeyMappings.BOMB) || isDown(BHKeyMappings.SKILL))
+                    : isDown(BHKeyMappings.BOMB);
+            boolean bombJustPressed = bombPressed && !prevBombDown;
+            prevBombDown = bombPressed;
 
-            if (xReleased) {
+            boolean xReleased = !xDown && prevXDown;
+            if (scheme != BHControlScheme.TH9 && xReleased)
                 BHPackets.sendSkill();
-            }
-            if (bombJustPressed) {
+
+            if (bombJustPressed)
                 BHPackets.sendBomb();
-            }
+
+            prevXDown = xDown;
+            prevZDown = zDown;
 
             state.updateAnimation(dx);
 
@@ -121,6 +158,8 @@ public class BHClientEvents {
             BHMusicManager.INSTANCE.stopMusic();
             prevXDown = false;
             prevBombDown = false;
+            prevZDown = false;
+            th9ZHoldStreak = 0;
         });
 
         ClientGuiEvent.RENDER_HUD.register((gfx, partialTick) -> {

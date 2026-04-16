@@ -1,0 +1,8 @@
+{
+  "id": "th6_extra_sub2_256",
+  "description": "Timeline0 ins_0(Sub2,256,-48) — TH x=256 → mod 320.",
+  "enemies": [
+    { "x": 300, "y": -22, "vx": 0.0, "vy": 3.65, "type": "BLUE_FAIRY", "pattern": "RING", "delayTicks": 0 },
+    { "x": 340, "y": -22, "vx": 0.0, "vy": 3.65, "type": "BLUE_FAIRY", "pattern": "RING", "delayTicks": 6 }
+  ]
+}

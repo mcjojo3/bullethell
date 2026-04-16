@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class FairyWaveDefinition {
 
-    /** Unique ID — must match the filename (without .json). */
+    /** Unique ID - must match the filename (without .json). */
     public String id = "";
 
     /** Human-readable note; not used at runtime. */

@@ -21,7 +21,7 @@ public class PlayerBulletSyncPacket {
     public static PlayerBulletSyncPacket fromContextForPlayer(ArenaContext ctx, UUID playerUuid) {
         BulletPool pool = ctx.getBulletPool(playerUuid);
         if (pool == null) pool = ctx.playerBullets;
-        float[][] data = new float[CAP][6]; boolean[] active = new boolean[CAP];
+        float[][] data = new float[CAP][BulletPool.STRIDE]; boolean[] active = new boolean[CAP];
         for (int i = 0; i < CAP; i++) { data[i] = pool.getSlotData(i); active[i] = pool.isActive(i); }
         return new PlayerBulletSyncPacket(data, active);
     }
@@ -34,10 +34,10 @@ public class PlayerBulletSyncPacket {
     }
 
     public static PlayerBulletSyncPacket decode(FriendlyByteBuf buf) {
-        float[][] data = new float[CAP][6]; boolean[] active = new boolean[CAP];
+        float[][] data = new float[CAP][BulletPool.STRIDE]; boolean[] active = new boolean[CAP];
         for (int i = 0; i < CAP; i++) {
             active[i] = buf.readBoolean();
-            if (active[i]) for (int j = 0; j < 6; j++) data[i][j] = buf.readFloat();
+            if (active[i]) for (int j = 0; j < BulletPool.STRIDE; j++) data[i][j] = buf.readFloat();
         }
         return new PlayerBulletSyncPacket(data, active);
     }

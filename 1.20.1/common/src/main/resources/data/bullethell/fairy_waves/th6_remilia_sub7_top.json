@@ -1,0 +1,8 @@
+{
+  "id": "th6_remilia_sub7_top",
+  "description": "TH06 ecldata6 Timeline0: Sub7 top spawns at x=128 and x=256 (TH) → scaled ~160/320 across mod arena width; Sub7 uses ins_45/ins_48 spiral entry — YELLOW_FAIRY SPREAD curtain.",
+  "enemies": [
+    { "x": 160, "y": -24, "vx": 0.0, "vy": 3.6, "type": "YELLOW_FAIRY", "pattern": "SPREAD", "delayTicks": 0 },
+    { "x": 320, "y": -24, "vx": 0.0, "vy": 3.6, "type": "YELLOW_FAIRY", "pattern": "SPREAD", "delayTicks": 6 }
+  ]
+}

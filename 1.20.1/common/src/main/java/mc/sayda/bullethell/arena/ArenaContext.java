@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.arena;
 
 import mc.sayda.bullethell.boss.BossDefinition;
+import mc.sayda.bullethell.boss.BossEmitterDefinition;
 import mc.sayda.bullethell.boss.BossLoader;
 import mc.sayda.bullethell.boss.CharacterDefinition;
 import mc.sayda.bullethell.debug.BHDebugMode;
@@ -13,6 +14,7 @@ import mc.sayda.bullethell.boss.StageDefinition;
 import mc.sayda.bullethell.boss.StageLoader;
 import mc.sayda.bullethell.boss.WaveDefinition;
 import mc.sayda.bullethell.boss.WaveEnemy;
+import mc.sayda.bullethell.config.BullethellConfig;
 import mc.sayda.bullethell.pattern.BulletType;
 import mc.sayda.bullethell.pattern.PatternEngine;
 
@@ -54,6 +56,8 @@ public class ArenaContext {
 
     public final StageDefinition stage;
     public final BossDefinition boss;
+    /** Boss phases filtered by this arena's difficulty (falls back to all phases). */
+    private final List<PhaseDefinition> activeBossPhases;
     public final RulesetConfig rules;
 
     // ---------------------------------------------------------------- subsystems
@@ -83,6 +87,8 @@ public class ArenaContext {
     private final List<ScheduledEnemy> scheduledEnemies = new ArrayList<>();
     /** Index of the next entry in scheduledEnemies that hasn't spawned yet. */
     private int nextScheduledIdx = 0;
+    /** Stage waves that pass {@link #waveAppliesToDifficulty(WaveDefinition)} (for HUD progress). */
+    private int applicableWaveDefinitionCount = 0;
     /**
      * Per-slot attack pattern. Set when an enemy spawns; used by tickEnemyAI()
      * to dispatch the correct firing logic. Sized to EnemyPool.CAPACITY.
@@ -124,11 +130,60 @@ public class ArenaContext {
     private float spiralAngle = 0f;
     private int patternCooldown = 0;
     private int bossTick = 0;
+    /** -1 left, 0 idle, +1 right. Synced to client for Cirno travel frames. */
+    private int bossMoveDir = 0;
     /**
      * bossTick value at the start of the current phase - keeps movement continuous.
      */
     private int phaseStartTick = 0;
     private int attackIndex = 0;
+    /** When &gt; 0, {@link #bossBurstStep} still has volleys left in the current burst. */
+    private int bossBurstVolleysRemaining = 0;
+    /** Step being repeated for burst fire; null when not in a burst chain. */
+    private PatternStep bossBurstStep = null;
+
+    // ---------------------------------------------------------------- phase emitters (Flandre clones/traps)
+    private static final class EmitterState {
+        BossEmitterDefinition def;
+        int attackIndex;
+        int cooldown;
+        int burstVolleysRemaining;
+        PatternStep burstStep;
+    }
+
+    private final ArrayList<EmitterState> activeEmitters = new ArrayList<>();
+
+    private record AttackScalingProfile(
+            float armsWeight,
+            float speedWeight,
+            float cooldownWeight,
+            int minCooldown,
+            float pressureSoftCap,
+            float pressureArmDrop,
+            int pressureCooldownBoost) {
+    }
+
+    private static final AttackScalingProfile SCALE_GEOMETRY = new AttackScalingProfile(
+            0.70f, 0.95f, 0.90f, 2, 0.78f, 0.22f, 2);
+    private static final AttackScalingProfile SCALE_PRECISION = new AttackScalingProfile(
+            0.82f, 1.00f, 0.88f, 3, 0.72f, 0.24f, 3);
+    private static final AttackScalingProfile SCALE_BURST = new AttackScalingProfile(
+            0.72f, 0.92f, 0.78f, 3, 0.67f, 0.33f, 4);
+    private static final AttackScalingProfile SCALE_SPAM = new AttackScalingProfile(
+            0.56f, 0.84f, 0.64f, 5, 0.58f, 0.50f, 7);
+
+    /**
+     * Scarlet Meister scripted cycle: 0 shotgun (fast wide fan), 1 spin CW, 2 spin CCW,
+     * 3 short pause, 4 mirrored shotgun, 5 spin CCW, 6 spin CW, 7 rest.
+     */
+    private int meisterSubPhase = 0;
+    private int meisterTimer = 0;
+    private float meisterStreamAngle = 0f;
+
+    /** Remaining reflections for each enemy-bullet slot (0 = normal bullet). */
+    private final int[] bounceRemaining = new int[BulletPool.ENEMY_CAPACITY];
+    /** Per-slot bounce damping multiplier for BOUNCE bullets. */
+    private final float[] bounceDamping = new float[BulletPool.ENEMY_CAPACITY];
 
     /**
      * Ticks remaining in the inter-phase pause (boss drifts to centre, no attacks).
@@ -195,6 +250,10 @@ public class ArenaContext {
     private final java.util.LinkedHashMap<UUID, PlayerState2D> coopPlayers = new java.util.LinkedHashMap<>();
     private final java.util.LinkedHashMap<UUID, BulletPool> coopBullets = new java.util.LinkedHashMap<>();
     private final java.util.LinkedHashMap<UUID, String> coopCharIds = new java.util.LinkedHashMap<>();
+    /** Participants currently holding the pause menu open. */
+    private final java.util.LinkedHashSet<UUID> pausedParticipants = new java.util.LinkedHashSet<>();
+    /** Resolved each server tick from gamerule + paused participants. */
+    private boolean globallyPaused = false;
 
     /** Add a co-op participant. Called when another player joins the match. */
     public void addCoopPlayer(UUID uuid, mc.sayda.bullethell.boss.CharacterDefinition charDef,
@@ -218,10 +277,29 @@ public class ArenaContext {
         coopPlayers.remove(uuid);
         coopBullets.remove(uuid);
         coopCharIds.remove(uuid);
+        pausedParticipants.remove(uuid);
         dialogScriptByPlayer.remove(uuid);
         dialogIndexByPlayer.remove(uuid);
         dialogTicksLeftByPlayer.remove(uuid);
         dialogReadyByPlayer.remove(uuid);
+    }
+
+    /** Called from C2S pause packet when a participant opens/closes pause menu. */
+    public void setParticipantPaused(UUID uuid, boolean paused) {
+        if (uuid == null || !allParticipants().contains(uuid))
+            return;
+        if (paused)
+            pausedParticipants.add(uuid);
+        else
+            pausedParticipants.remove(uuid);
+    }
+
+    public boolean hasPausedParticipants() {
+        return !pausedParticipants.isEmpty();
+    }
+
+    public void setGloballyPaused(boolean paused) {
+        this.globallyPaused = paused;
     }
 
     /**
@@ -267,9 +345,9 @@ public class ArenaContext {
 
     // ---------------------------------------------------------------- constructors
 
-    /** Start the default stage (stage_1) at NORMAL difficulty with Reimu. */
+    /** Start the default stage at NORMAL difficulty with Reimu. */
     public ArenaContext(UUID playerUuid, DifficultyConfig difficulty) {
-        this(playerUuid, difficulty, "stage_1", "reimu", null);
+        this(playerUuid, difficulty, "marisa_stage", "reimu", null);
     }
 
     /** Start a specific stage with the default character. */
@@ -295,6 +373,15 @@ public class ArenaContext {
      */
     public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, String stageId, String characterId,
             net.minecraft.world.entity.LivingEntity hostAttributes) {
+        this(playerUuid, difficulty, StageLoader.load(stageId), characterId, hostAttributes);
+    }
+
+    /**
+     * Same as {@link #ArenaContext(UUID, DifficultyConfig, String, String, net.minecraft.world.entity.LivingEntity)}
+     * but with a pre-built {@link StageDefinition} (e.g. synthetic boss-only stage from commands).
+     */
+    public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, StageDefinition stageDef, String characterId,
+            net.minecraft.world.entity.LivingEntity hostAttributes) {
         this.playerUuid = playerUuid;
         this.arenaId = ID_GEN.getAndIncrement();
         this.difficulty = difficulty;
@@ -309,8 +396,9 @@ public class ArenaContext {
         this.spellcard = new SpellcardTimer();
 
         // Load stage/rules first so startingLives/Bombs overrides are available
-        this.stage = StageLoader.load(stageId);
+        this.stage = stageDef;
         this.boss = BossLoader.load(stage.bossId);
+        this.activeBossPhases = buildActiveBossPhases();
         this.rules = stage.rules;
         this.dropCycle = parseDropCycle(rules.dropCyclePattern);
         String largePattern = (rules.largeEnemyDropCyclePattern != null
@@ -343,6 +431,36 @@ public class ArenaContext {
         if (scheduledEnemies.isEmpty()) {
             transitionToDialogOrBoss();
         }
+    }
+
+    /**
+     * Skip waves and intro dialog and jump straight to a boss phase (0-based index).
+     * Used by {@code /bullethell start &lt;target&gt; &lt;phase&gt;} (phase is 1-based in the command).
+     */
+    public void debugSkipToBossPhase(int phaseIndex0Based) {
+        int n = activeBossPhases.size();
+        if (n == 0)
+            return;
+        int idx = Math.max(0, Math.min(phaseIndex0Based, n - 1));
+        scheduledEnemies.clear();
+        nextScheduledIdx = 0;
+        waveEndDelayLeft = -1;
+        arenaPhase = ArenaPhase.BOSS;
+        bossIntroVisible = false;
+        bullets.clearAll();
+        lasers.clearAll();
+        enemies.clearAll();
+        bossTick = 0;
+        bossX = BulletPool.ARENA_W / 2f;
+        bossY = 100f;
+        resetAbilityStates();
+        dialogScriptByPlayer.clear();
+        dialogIndexByPlayer.clear();
+        dialogTicksLeftByPlayer.clear();
+        dialogReadyByPlayer.clear();
+        activeDialog = null;
+        startBossPhase(idx);
+        pendingEvents.add(GameEvent.PHASE_CHANGE);
     }
 
     /**
@@ -381,6 +499,8 @@ public class ArenaContext {
     public void tick() {
         if (over)
             return;
+        if (globallyPaused)
+            return;
         stageTick++;
 
         boolean frozen = timeStopTicks > 0;
@@ -394,6 +514,7 @@ public class ArenaContext {
         // 1. World ticking (Frozen if Time Stop active)
         if (!frozen) {
             bullets.tick();
+            tickBouncingEnemyBullets();
             enemies.tick();
             items.tick();
             score.tick();
@@ -535,6 +656,7 @@ public class ArenaContext {
     private static void applyDebugGod(PlayerState2D ps) {
         ps.lives = Math.max(ps.lives, 9);
         ps.bombs = 9;
+        ps.power = PlayerState2D.MAX_POWER;
         ps.invulnTicks = Math.max(ps.invulnTicks, 600);
         ps.deathPendingTicks = 0;
     }
@@ -547,6 +669,11 @@ public class ArenaContext {
     /** Boss pattern cooldown remaining; for debug HUD (0 during waves / dialog). */
     public int getDebugBossPatternCooldown() {
         return patternCooldown;
+    }
+
+    /** Boss horizontal movement direction used for sprite-side travel frames. */
+    public int getBossMoveDir() {
+        return bossMoveDir;
     }
 
     private void tickStage() {
@@ -600,29 +727,18 @@ public class ArenaContext {
     // ================================================================ WAVE PHASE
 
     /**
-     * Compression factor: higher difficulties shrink the gap between waves.
-     * EASY=0.80, NORMAL=1.00, HARD=1.25, LUNATIC=1.55 (boss patterns use separate creep)
-     */
-    private float waveTimingMult() {
-        return switch (difficulty) {
-            case EASY -> 0.80f;
-            case NORMAL -> 1.00f;
-            case HARD -> 1.25f;
-            // Higher = wave spawn ticks shrink more (tighter spacing). Lunatic
-            // stage sections typically run denser than Hard (TH6–TH15 pacing).
-            case LUNATIC -> 1.74f;
-        };
-    }
-
-    /**
      * Pre-expand all stage waves (including waveRef templates) into a flat list
      * sorted by absolute spawn tick. Called once in the constructor.
      * Difficulty timing compression is baked in here so tickWaves() is trivial.
      */
     private void buildScheduledList() {
-        float mult = waveTimingMult();
+        float mult = BullethellConfig.waveTimingMult(difficulty);
         List<ScheduledEnemy> list = new ArrayList<>();
+        applicableWaveDefinitionCount = 0;
         for (WaveDefinition wave : stage.waves) {
+            if (!waveAppliesToDifficulty(wave))
+                continue;
+            applicableWaveDefinitionCount++;
             List<WaveEnemy> waveEnemies;
             if (wave.waveRef != null && !wave.waveRef.isEmpty()) {
                 waveEnemies = FairyWaveLoader.load(wave.waveRef).enemies;
@@ -762,7 +878,7 @@ public class ArenaContext {
                 float dy = by - ey;
                 if (dx * dx + dy * dy <= r2) {
                     pb.deactivate(i);
-                    if (enemies.damage(j, 1))
+                    if (enemies.damage(j, fairyBulletDamage(ps)))
                         killEnemy(j, ps);
                     break;
                 }
@@ -1041,20 +1157,71 @@ public class ArenaContext {
      * clearly above Hard.
      */
     private float bossDensityMult() {
-        float phaseCreep = 1f + Math.min(0.30f, bossPhase * 0.034f);
-        float lunaticExtra = (difficulty == DifficultyConfig.LUNATIC) ? 1.12f : 1f;
+        float cap = BullethellConfig.BOSS_PHASE_DENSITY_CAP.get();
+        float per = BullethellConfig.BOSS_PHASE_DENSITY_PER_PHASE.get();
+        float phaseCreep = 1f + Math.min(cap, bossPhase * per);
+        float lunaticExtra = (difficulty == DifficultyConfig.LUNATIC)
+                ? BullethellConfig.BOSS_LUNATIC_DENSITY_EXTRA.get()
+                : 1f;
         return difficulty.densityMult * phaseCreep * lunaticExtra;
     }
 
     /** Effective bullet speed multiplier for boss patterns (see {@link #bossDensityMult()}). */
     private float bossSpeedMult() {
-        float phaseCreep = 1f + Math.min(0.22f, bossPhase * 0.026f);
-        float lunaticExtra = (difficulty == DifficultyConfig.LUNATIC) ? 1.10f : 1f;
+        float cap = BullethellConfig.BOSS_PHASE_SPEED_CAP.get();
+        float per = BullethellConfig.BOSS_PHASE_SPEED_PER_PHASE.get();
+        float phaseCreep = 1f + Math.min(cap, bossPhase * per);
+        float lunaticExtra = (difficulty == DifficultyConfig.LUNATIC)
+                ? BullethellConfig.BOSS_LUNATIC_SPEED_EXTRA.get()
+                : 1f;
         return difficulty.speedMult * phaseCreep * lunaticExtra;
     }
 
+    private List<PhaseDefinition> buildActiveBossPhases() {
+        if (boss.phases == null || boss.phases.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        List<PhaseDefinition> filtered = new ArrayList<>();
+        for (PhaseDefinition phase : boss.phases) {
+            if (phaseAppliesToDifficulty(phase)) {
+                filtered.add(phase);
+            }
+        }
+        // Safety fallback: keep fights playable even if all gates are misconfigured.
+        return filtered.isEmpty() ? boss.phases : filtered;
+    }
+
+    private boolean phaseAppliesToDifficulty(PhaseDefinition phase) {
+        return difficultyMatchesBounds(phase.minDifficulty, phase.maxDifficulty);
+    }
+
+    private boolean waveAppliesToDifficulty(WaveDefinition wave) {
+        return difficultyMatchesBounds(wave.minDifficulty, wave.maxDifficulty);
+    }
+
+    private boolean difficultyMatchesBounds(String minRaw, String maxRaw) {
+        DifficultyConfig min = parseDifficultyBound(minRaw);
+        DifficultyConfig max = parseDifficultyBound(maxRaw);
+        int cur = difficulty.ordinal();
+        if (min != null && cur < min.ordinal())
+            return false;
+        if (max != null && cur > max.ordinal())
+            return false;
+        return true;
+    }
+
+    private static DifficultyConfig parseDifficultyBound(String raw) {
+        if (raw == null || raw.isBlank())
+            return null;
+        try {
+            return DifficultyConfig.valueOf(raw.trim().toUpperCase());
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+    }
+
     /**
-     * Living player closest to the boss — boss aimed patterns and lasers target this
+     * Living player closest to the boss - boss aimed patterns and lasers target this
      * player so co-op feels like shared pressure instead of always targeting the host.
      */
     private PlayerState2D getBossAimTarget() {
@@ -1088,6 +1255,7 @@ public class ArenaContext {
         // Use ticks relative to this phase's start so movement begins at centre
         // every phase and never jumps when formulas change.
         int lt = bossTick - phaseStartTick;
+        float oldX = bossX;
         switch (phase.movement == null ? "SINE_WAVE" : phase.movement) {
             case "CIRCLE" -> {
                 // Starts at top-centre (sin=0) and orbits - no position jump on entry.
@@ -1099,6 +1267,19 @@ public class ArenaContext {
             default -> // SINE_WAVE: starts at centre (sin 0 = 0)
                 bossX = BulletPool.ARENA_W / 2f + (float) Math.sin(lt * 0.018) * phase.moveSpeed;
         }
+        float dx = bossX - oldX;
+        if (Math.abs(dx) > 0.025f) {
+            bossMoveDir = dx > 0f ? 1 : -1;
+        } else {
+            bossMoveDir = 0;
+        }
+
+        if (isScarletMeisterPhase()) {
+            tickScarletMeister();
+            return;
+        }
+
+        tickPhaseEmitters();
 
         patternCooldown--;
         if (patternCooldown > 0)
@@ -1109,78 +1290,582 @@ public class ArenaContext {
             return;
         }
 
+        // Continue a multi-shot burst (same PatternStep, same rotation slot).
+        if (bossBurstVolleysRemaining > 0 && bossBurstStep != null) {
+            PatternStep bStep = bossBurstStep;
+            executeAttackAt(bStep, bossX + bStep.spawnOffsetX, bossY + bStep.spawnOffsetY);
+            String bPat = bStep.pattern == null ? "" : bStep.pattern.toUpperCase();
+            bossBurstVolleysRemaining--;
+            if (bossBurstVolleysRemaining > 0) {
+                patternCooldown = burstSpacingTicks(bStep);
+            } else {
+                bossBurstStep = null;
+                attackIndex++;
+                patternCooldown = computeAttackCooldown(bStep, bPat);
+            }
+            return;
+        }
+
         PatternStep step = phase.attacks.get(attackIndex % phase.attacks.size());
-        attackIndex++;
-        executeAttack(step);
-        int cd = Math.max(1, (int) (step.cooldown / bossDensityMult()));
-        // LASER_BEAM is a rapid faux-laser burst; on Lunatic bossDensityMult can
-        // shrink cooldown to 1–2 ticks and stack two “spark columns” unreadably.
-        // TH-style Master Spark support fire is one stream at a time with gaps.
+        int volleys = burstVolleyCount(step);
+        executeAttackAt(step, bossX + step.spawnOffsetX, bossY + step.spawnOffsetY);
         String pat = step.pattern == null ? "" : step.pattern.toUpperCase();
-        if ("LASER_BEAM".equals(pat))
-            cd = Math.max(8, cd);
-        patternCooldown = cd;
+        if (volleys > 1) {
+            bossBurstStep = step;
+            bossBurstVolleysRemaining = volleys - 1;
+            patternCooldown = burstSpacingTicks(step);
+        } else {
+            attackIndex++;
+            patternCooldown = computeAttackCooldown(step, pat);
+        }
     }
 
-    private void executeAttack(PatternStep step) {
+    /** Effective shots per burst for this step (min 1). */
+    private static int burstVolleyCount(PatternStep step) {
+        int n = step.burstCount;
+        return n <= 1 ? 1 : n;
+    }
+
+    /** Ticks between shots inside one burst (after the first). */
+    private static int burstSpacingTicks(PatternStep step) {
+        if (step.burstInterval > 0)
+            return Math.max(1, step.burstInterval);
+        return 5;
+    }
+
+    private void tickPhaseEmitters() {
+        if (activeEmitters.isEmpty())
+            return;
+        PlayerState2D aimTarget = getBossAimTarget();
+        for (int i = 0; i < activeEmitters.size(); i++) {
+            EmitterState es = activeEmitters.get(i);
+            if (es == null || es.def == null || es.def.attacks == null || es.def.attacks.isEmpty())
+                continue;
+            if (es.cooldown > 0) {
+                es.cooldown--;
+                continue;
+            }
+
+            // Continue burst for this emitter.
+            if (es.burstVolleysRemaining > 0 && es.burstStep != null) {
+                PatternStep bStep = es.burstStep;
+                executeAttackAt(bStep, es.def.x + bStep.spawnOffsetX, es.def.y + bStep.spawnOffsetY);
+                String pat = bStep.pattern == null ? "" : bStep.pattern.toUpperCase();
+                es.burstVolleysRemaining--;
+                if (es.burstVolleysRemaining > 0) {
+                    es.cooldown = burstSpacingTicks(bStep);
+                } else {
+                    es.burstStep = null;
+                    es.attackIndex++;
+                    es.cooldown = computeAttackCooldown(bStep, pat);
+                }
+                continue;
+            }
+
+            PatternStep step = es.def.attacks.get(es.attackIndex % es.def.attacks.size());
+            int volleys = burstVolleyCount(step);
+            executeAttackAt(step, es.def.x + step.spawnOffsetX, es.def.y + step.spawnOffsetY);
+            String pat = step.pattern == null ? "" : step.pattern.toUpperCase();
+            if (volleys > 1) {
+                es.burstStep = step;
+                es.burstVolleysRemaining = volleys - 1;
+                es.cooldown = burstSpacingTicks(step);
+            } else {
+                es.attackIndex++;
+                es.cooldown = computeAttackCooldown(step, pat);
+            }
+        }
+    }
+
+    private void executeAttackAt(PatternStep step, float originX, float originY) {
+        String patUpper = step.pattern == null ? "RING" : step.pattern.toUpperCase();
+        if ("MEISTER_CYCLE".equals(patUpper))
+            return;
+
         BulletType type = bulletTypeByName(step.bulletType);
         PlayerState2D aimTarget = getBossAimTarget();
         float dens = bossDensityMult();
+        if (step.densityScale > 0.01f)
+            dens *= step.densityScale;
+        AttackScalingProfile profile = resolveScalingProfile(step, patUpper);
+        float pressure = bulletPressure();
+        float densArms = weightedDifficultyMult(dens, resolveArmsWeight(step, profile));
         float spdRatio = bossSpeedMult() / difficulty.speedMult;
-        int scaledArms = Math.max(1, Math.round(step.arms * dens));
-        float effSpeed = step.speed * spdRatio;
-        switch (step.pattern == null ? "RING" : step.pattern.toUpperCase()) {
+        float effSpdRatio = weightedDifficultyMult(spdRatio, resolveSpeedWeight(step, profile));
+        int sampledArms = sampleArms(step);
+        float sampledSpread = sampleSpread(step);
+        float sampledSpeed = sampleSpeed(step);
+        int scaledArms = Math.max(1, Math.round(sampledArms * densArms));
+        scaledArms = applyPressureArms(scaledArms, pressure, step, profile);
+        if (step.maxScaledArms > 0)
+            scaledArms = Math.min(step.maxScaledArms, scaledArms);
+        float effSpeed = sampledSpeed * effSpdRatio;
+        float vis = bulletVis(step);
+        float hit = bulletHit(step);
+        float bx = originX;
+        float by = originY;
+        float angV = step.bulletAngularVelocity;
+        switch (patUpper) {
             case "SPIRAL" -> {
-                PatternEngine.fireSpiral(bullets, bossX, bossY, spiralAngle,
-                        scaledArms, effSpeed, difficulty, type);
+                PatternEngine.fireSpiral(bullets, bx, by, spiralAngle,
+                        scaledArms, effSpeed, difficulty, type, vis, hit,
+                        step.bulletLifetimeTicks, angV);
                 spiralAngle += (float) (Math.PI * 2.0 / scaledArms) * 0.15f;
             }
-            case "AIMED" -> PatternEngine.fireAimed(bullets, bossX, bossY,
-                    aimTarget.x, aimTarget.y, scaledArms, step.spread, effSpeed, difficulty, type);
+            case "AIMED" -> PatternEngine.fireAimed(bullets, bx, by,
+                    aimTarget.x, aimTarget.y, scaledArms, sampledSpread, effSpeed, difficulty, type, vis, hit,
+                    step.bulletLifetimeTicks, angV);
+            case "BOUNCE" -> fireBouncingAimed(step, type, aimTarget, scaledArms, sampledSpread, effSpeed, vis, hit, bx, by);
             case "AIMED_RING" -> {
                 int scaledAimArms = scaledArms;
+                int ringCap = BullethellConfig.BOSS_RING_ARMS_MAX.get();
+                float ringDensCap = BullethellConfig.BOSS_RING_DENSITY_CAP.get();
                 int scaledRingArms = Math.max(6,
-                        Math.min(20, Math.round(step.ringArms * Math.min(dens, 1.35f))));
+                        Math.min(ringCap, Math.round(step.ringArms * Math.min(densArms, ringDensCap))));
+                scaledRingArms = applyPressureArms(scaledRingArms, pressure, step, profile);
                 float ringSp = step.ringSpeed > 0.01f ? step.ringSpeed * spdRatio : effSpeed * 0.52f;
                 BulletType ringType = (step.ringBulletType != null && !step.ringBulletType.isEmpty())
                         ? bulletTypeByName(step.ringBulletType)
                         : BulletType.ORB;
-                float ringStart = random.nextFloat() * (float) (Math.PI * 2.0);
-                PatternEngine.fireAimedWithRing(bullets, bossX, bossY,
+                float ringStart = step.ringStartAngleRad >= 0f
+                        ? step.ringStartAngleRad
+                        : random.nextFloat() * (float) (Math.PI * 2.0);
+                PatternEngine.fireAimedWithRing(bullets, bx, by,
                         aimTarget.x, aimTarget.y,
-                        scaledAimArms, step.spread, effSpeed,
-                        scaledRingArms, ringSp, difficulty, type, ringType, ringStart);
+                        scaledAimArms, sampledSpread, effSpeed,
+                        scaledRingArms, ringSp, difficulty, type, ringType, ringStart,
+                        vis, hit, step.bulletLifetimeTicks, step.bulletLifetimeTicks, angV);
             }
-            case "RING" -> PatternEngine.fireRing(bullets, bossX, bossY,
-                    scaledArms, effSpeed, difficulty, type);
-            case "SPREAD" -> PatternEngine.fireSpread(bullets, bossX, bossY,
-                    scaledArms, effSpeed, difficulty, type);
-            case "DENSE_RING" -> PatternEngine.fireDenseRing(bullets, bossX, bossY,
-                    scaledArms, effSpeed, difficulty, type);
-            case "LASER_BEAM" -> PatternEngine.fireLaserBeam(bullets, bossX, bossY,
-                    aimTarget.x, aimTarget.y, scaledArms, effSpeed, difficulty, type);
+            case "RING" -> {
+                float ringStart = step.ringStartAngleRad >= 0f ? step.ringStartAngleRad : 0f;
+                PatternEngine.fireRing(bullets, bx, by,
+                        scaledArms, effSpeed, difficulty, type, vis, hit,
+                        step.bulletLifetimeTicks, angV, ringStart);
+            }
+            case "RING_OFFSET" -> {
+                float start = step.ringStartAngleRad >= 0f
+                        ? step.ringStartAngleRad
+                        : random.nextFloat() * (float) (Math.PI * 2.0);
+                PatternEngine.fireRingOffset(bullets, bx, by,
+                        scaledArms, effSpeed, difficulty, type, start, vis, hit,
+                        step.bulletLifetimeTicks, angV);
+            }
+            case "SPREAD" -> PatternEngine.fireSpread(bullets, bx, by,
+                    scaledArms, effSpeed, difficulty, type, vis, hit,
+                    step.bulletLifetimeTicks, angV);
+            case "RAIN" -> {
+                float span = (step.rainWidth > 0f) ? Math.min(step.rainWidth, BulletPool.ARENA_W) : BulletPool.ARENA_W;
+                float xStart = (BulletPool.ARENA_W - span) * 0.5f;
+                float baseY = step.rainTop;
+                int rainLife = resolveBulletLifetime(step, PatternEngine.DEFAULT_LIFE_RAIN);
+                for (int i = 0; i < scaledArms; i++) {
+                    float spawnX = xStart + random.nextFloat() * span + step.spawnOffsetX;
+                    float jitter = (random.nextFloat() * 2f - 1f) * sampledSpread;
+                    float ang = (float) (Math.PI * 0.5f) + jitter;
+                    float sp = effSpeed * (0.88f + random.nextFloat() * 0.28f)
+                            * BullethellConfig.GLOBAL_ENEMY_BULLET_SPEED_MULT.get();
+                    float vx = (float) Math.cos(ang) * sp;
+                    float vy = (float) Math.sin(ang) * sp;
+                    bullets.spawn(spawnX, baseY + step.spawnOffsetY, vx, vy, type.getId(), rainLife, vis, hit, angV);
+                }
+            }
+            case "DENSE_RING" -> {
+                float drStart = step.ringStartAngleRad >= 0f ? step.ringStartAngleRad : 0f;
+                PatternEngine.fireDenseRing(bullets, bx, by,
+                        scaledArms, effSpeed, difficulty, type, vis, hit,
+                        step.bulletLifetimeTicks, angV, drStart);
+            }
+            case "LASER_BEAM" -> PatternEngine.fireLaserBeam(bullets, bx, by,
+                    aimTarget.x, aimTarget.y, scaledArms, effSpeed, difficulty, type, vis, hit,
+                    step.bulletLifetimeTicks, angV,
+                    step.laserBeamSpread);
             case "LASER" -> {
-                // Single directional laser aimed at the player's current position (Master
-                // Spark).
-                float angle = (float) Math.atan2(aimTarget.y - bossY, aimTarget.x - bossX);
-                int scaledWarn = Math.max(10, (int) (step.warnTicks / dens));
-                lasers.spawn(bossX, bossY, angle, step.laserHalfWidth,
+                float angle = (float) Math.atan2(aimTarget.y - by, aimTarget.x - bx);
+                float densWarn = weightedDifficultyMult(dens, resolveCooldownWeight(step, profile));
+                int scaledWarn = Math.max(10, (int) (step.warnTicks / densWarn));
+                lasers.spawn(bx, by, angle, step.laserHalfWidth,
                         scaledWarn, step.activeTicks, type.getId(), false);
             }
             case "LASER_ROTATING" -> {
-                // Bidirectional beams radiating in all directions (Non-Directional Laser).
-                // Difficulty scaling: more beams + shorter warning on harder difficulties.
-                // Normal: arms=8, warn=14 | Lunatic: arms=16, warn=7
-                int scaledWarn = Math.max(6, (int) (step.warnTicks / dens));
+                float densWarn = weightedDifficultyMult(dens, resolveCooldownWeight(step, profile));
+                int scaledWarn = Math.max(6, (int) (step.warnTicks / densWarn));
                 float angleStep = (float) (Math.PI * 2.0 / scaledArms);
                 for (int i = 0; i < scaledArms; i++) {
-                    lasers.spawn(bossX, bossY, spiralAngle + angleStep * i,
+                    lasers.spawn(bx, by, spiralAngle + angleStep * i,
                             step.laserHalfWidth, scaledWarn, step.activeTicks, type.getId(), true);
                 }
                 spiralAngle += 0.45f; // ~26° per fire cycle - visible rotation
             }
-            default -> PatternEngine.fireRing(bullets, bossX, bossY,
-                    scaledArms, effSpeed, difficulty, type);
+            default -> {
+                float ringStart = step.ringStartAngleRad >= 0f ? step.ringStartAngleRad : 0f;
+                PatternEngine.fireRing(bullets, bx, by,
+                        scaledArms, effSpeed, difficulty, type, vis, hit,
+                        step.bulletLifetimeTicks, angV, ringStart);
+            }
+        }
+    }
+
+    private static int resolveBulletLifetime(PatternStep step, int def) {
+        if (step == null || step.bulletLifetimeTicks <= 0)
+            return def;
+        return step.bulletLifetimeTicks;
+    }
+
+    private static float bulletVis(PatternStep step) {
+        return step.bulletScale > 0.01f ? step.bulletScale : 1f;
+    }
+
+    private static float bulletHit(PatternStep step) {
+        if (step.hitboxScale > 0.01f)
+            return step.hitboxScale;
+        return bulletVis(step) > 1.25f ? 0.42f : 1f;
+    }
+
+    private float sampleSpeed(PatternStep step) {
+        return sampleFloatRange(step.speed, step.speedMin, step.speedMax, 0.01f);
+    }
+
+    private float sampleSpread(PatternStep step) {
+        return sampleFloatRange(step.spread, step.spreadMin, step.spreadMax, 0f);
+    }
+
+    private int sampleArms(PatternStep step) {
+        if (step.armsMin > 0 && step.armsMax > 0) {
+            int lo = Math.min(step.armsMin, step.armsMax);
+            int hi = Math.max(step.armsMin, step.armsMax);
+            return lo + random.nextInt(hi - lo + 1);
+        }
+        return Math.max(1, step.arms);
+    }
+
+    private float sampleFloatRange(float fallback, float min, float max, float validMin) {
+        boolean hasRange = min >= validMin && max >= validMin;
+        if (!hasRange)
+            return fallback;
+        float lo = Math.min(min, max);
+        float hi = Math.max(min, max);
+        if (hi - lo < 1e-6f)
+            return lo;
+        return lo + random.nextFloat() * (hi - lo);
+    }
+
+    private int computeAttackCooldown(PatternStep step, String patUpper) {
+        AttackScalingProfile profile = resolveScalingProfile(step, patUpper);
+        float dens = bossDensityMult();
+        if (step.densityScale > 0.01f)
+            dens *= step.densityScale;
+        float effectiveDens = weightedDifficultyMult(dens, resolveCooldownWeight(step, profile));
+        int cd = Math.max(1, (int) (step.cooldown / effectiveDens));
+        int minCd = Math.max(profile.minCooldown(), step.minCooldown);
+        // LASER_BEAM is a rapid faux-laser burst; keep stream readability.
+        if ("LASER_BEAM".equals(patUpper))
+            minCd = Math.max(minCd, BullethellConfig.BOSS_LASER_BEAM_MIN_COOLDOWN.get());
+        cd = Math.max(minCd, cd);
+        float pressure = bulletPressure();
+        float soft = resolvePressureSoftCap(step, profile);
+        int maxBoost = resolvePressureCooldownBoost(step, profile);
+        if (maxBoost > 0 && pressure > soft) {
+            float t = (pressure - soft) / Math.max(0.01f, (1f - soft));
+            cd += Math.round(Math.min(1f, t) * maxBoost);
+        }
+        return cd;
+    }
+
+    private AttackScalingProfile resolveScalingProfile(PatternStep step, String patUpper) {
+        String profileName = step.scalingProfile == null ? "" : step.scalingProfile.trim().toUpperCase();
+        if (profileName.isEmpty() || "AUTO".equals(profileName)) {
+            return switch (patUpper) {
+                case "SPIRAL", "RING_OFFSET", "LASER_ROTATING" -> SCALE_GEOMETRY;
+                case "AIMED", "BOUNCE", "LASER" -> SCALE_PRECISION;
+                case "RING" -> SCALE_BURST;
+                case "SPREAD", "RAIN", "DENSE_RING", "AIMED_RING", "LASER_BEAM" -> SCALE_SPAM;
+                default -> SCALE_BURST;
+            };
+        }
+        return switch (profileName) {
+            case "GEOMETRY" -> SCALE_GEOMETRY;
+            case "PRECISION" -> SCALE_PRECISION;
+            case "SPAM" -> SCALE_SPAM;
+            case "BURST" -> SCALE_BURST;
+            default -> SCALE_BURST;
+        };
+    }
+
+    private static float weightedDifficultyMult(float mult, float weight) {
+        float clamped = Math.max(0.10f, Math.min(2.0f, weight));
+        return 1f + (mult - 1f) * clamped;
+    }
+
+    private float bulletPressure() {
+        return Math.min(1f, bullets.getActiveCount() / (float) BulletPool.ENEMY_CAPACITY);
+    }
+
+    private float resolveArmsWeight(PatternStep step, AttackScalingProfile profile) {
+        return step.armsDifficultyWeight > 0.01f ? step.armsDifficultyWeight : profile.armsWeight();
+    }
+
+    private float resolveSpeedWeight(PatternStep step, AttackScalingProfile profile) {
+        return step.speedDifficultyWeight > 0.01f ? step.speedDifficultyWeight : profile.speedWeight();
+    }
+
+    private float resolveCooldownWeight(PatternStep step, AttackScalingProfile profile) {
+        return step.cooldownDifficultyWeight > 0.01f ? step.cooldownDifficultyWeight : profile.cooldownWeight();
+    }
+
+    private float resolvePressureSoftCap(PatternStep step, AttackScalingProfile profile) {
+        float s = step.pressureSoftCap > 0f ? step.pressureSoftCap : profile.pressureSoftCap();
+        return Math.max(0.35f, Math.min(0.95f, s));
+    }
+
+    private float resolvePressureArmDrop(PatternStep step, AttackScalingProfile profile) {
+        float d = step.pressureArmDrop > 0f ? step.pressureArmDrop : profile.pressureArmDrop();
+        return Math.max(0f, Math.min(0.90f, d));
+    }
+
+    private int resolvePressureCooldownBoost(PatternStep step, AttackScalingProfile profile) {
+        return step.pressureCooldownBoost > 0 ? step.pressureCooldownBoost : profile.pressureCooldownBoost();
+    }
+
+    private int applyPressureArms(int arms, float pressure, PatternStep step, AttackScalingProfile profile) {
+        float soft = resolvePressureSoftCap(step, profile);
+        float drop = resolvePressureArmDrop(step, profile);
+        if (drop <= 0f || pressure <= soft)
+            return Math.max(1, arms);
+        float t = Math.min(1f, (pressure - soft) / Math.max(0.01f, (1f - soft)));
+        float factor = 1f - drop * t;
+        return Math.max(1, Math.round(arms * factor));
+    }
+
+    private boolean isScarletMeisterPhase() {
+        PhaseDefinition p = currentBossPhase();
+        if (p.attacks.isEmpty())
+            return false;
+        String pat = p.attacks.get(0).pattern;
+        return pat != null && "MEISTER_CYCLE".equalsIgnoreCase(pat.trim());
+    }
+
+    /** First attack step of Scarlet Meister phase (JSON {@code bulletType} / scales apply to scripted shots). */
+    private PatternStep meisterPatternStep() {
+        PhaseDefinition p = currentBossPhase();
+        if (p == null || p.attacks.isEmpty())
+            return null;
+        return p.attacks.get(0);
+    }
+
+    /**
+     * Scarlet Meister: shotgun opener (fast wide fan), quick CW/CCW spin bursts, brief pause,
+     * mirrored shotgun + reversed spin order, then rest. Boss movement from phase JSON ({@code CIRCLE}).
+     */
+    private void tickScarletMeister() {
+        PlayerState2D aim = getBossAimTarget();
+        float dens = bossDensityMult();
+        float spdRatio = bossSpeedMult() / difficulty.speedMult;
+        float baseSpeed = 3.15f * spdRatio;
+        meisterTimer++;
+
+        float step = 0.102f + 0.045f * (Math.min(2.2f, dens) - 1f);
+        int spinLen = (int) (26 + 8 * Math.min(2.5f, dens));
+        int shotgunLen = (int) (20 + 6 * Math.min(2.5f, dens));
+        int shortPause = (int) (10 + 3 * Math.min(2.5f, dens));
+        int rest = (int) (24 + 6 * Math.min(2.5f, dens));
+
+        switch (meisterSubPhase) {
+            case 0 -> {
+                if (meisterTimer % 2 == 0)
+                    fireMeisterShotgun(aim, baseSpeed, dens, false);
+                if (meisterTimer >= shotgunLen) {
+                    meisterSubPhase = 1;
+                    meisterTimer = 0;
+                    meisterStreamAngle = (float) Math.atan2(aim.y - bossY, aim.x - bossX);
+                }
+            }
+            case 1 -> {
+                meisterStreamAngle -= step;
+                fireMeisterSpinBurst(meisterStreamAngle, baseSpeed, dens);
+                if (meisterTimer >= spinLen) {
+                    meisterSubPhase = 2;
+                    meisterTimer = 0;
+                }
+            }
+            case 2 -> {
+                meisterStreamAngle += step;
+                fireMeisterSpinBurst(meisterStreamAngle, baseSpeed, dens);
+                if (meisterTimer >= spinLen) {
+                    meisterSubPhase = 3;
+                    meisterTimer = 0;
+                }
+            }
+            case 3 -> {
+                if (meisterTimer >= shortPause) {
+                    meisterSubPhase = 4;
+                    meisterTimer = 0;
+                }
+            }
+            case 4 -> {
+                if (meisterTimer % 2 == 0)
+                    fireMeisterShotgun(aim, baseSpeed, dens, true);
+                if (meisterTimer >= shotgunLen) {
+                    meisterSubPhase = 5;
+                    meisterTimer = 0;
+                    meisterStreamAngle = (float) Math.atan2(aim.y - bossY, aim.x - bossX);
+                }
+            }
+            case 5 -> {
+                meisterStreamAngle += step;
+                fireMeisterSpinBurst(meisterStreamAngle, baseSpeed, dens);
+                if (meisterTimer >= spinLen) {
+                    meisterSubPhase = 6;
+                    meisterTimer = 0;
+                }
+            }
+            case 6 -> {
+                meisterStreamAngle -= step;
+                fireMeisterSpinBurst(meisterStreamAngle, baseSpeed, dens);
+                if (meisterTimer >= spinLen) {
+                    meisterSubPhase = 7;
+                    meisterTimer = 0;
+                }
+            }
+            case 7 -> {
+                if (meisterTimer >= rest) {
+                    meisterSubPhase = 0;
+                    meisterTimer = 0;
+                }
+            }
+            default -> {
+                meisterSubPhase = 0;
+                meisterTimer = 0;
+            }
+        }
+    }
+
+    /** Wide fast fan toward aim; {@code mirrorFan} flips left/right spread for the second pass. */
+    private void fireMeisterShotgun(PlayerState2D aim, float baseSpeed, float dens, boolean mirrorFan) {
+        PatternStep step = meisterPatternStep();
+        BulletType mainType = step != null ? bulletTypeByName(step.bulletType) : BulletType.SCARLET_LARGE;
+        if (mainType == BulletType.ORB)
+            mainType = BulletType.SCARLET_LARGE;
+        float vis = step != null ? bulletVis(step) : 1.42f;
+        float hit = step != null ? bulletHit(step) : 0.48f;
+        int lifeMain = resolveBulletLifetime(step, 175);
+        float baseAngle = (float) Math.atan2(aim.y - bossY, aim.x - bossX);
+        int arms = Math.min(11, Math.max(7, (int) (7 + dens * 1.1f)));
+        float spread = 0.52f + 0.06f * Math.min(2.2f, dens);
+        float gm = BullethellConfig.GLOBAL_ENEMY_BULLET_SPEED_MULT.get();
+        float spd = baseSpeed * 1.12f * difficulty.speedMult * gm;
+        float dir = mirrorFan ? -1f : 1f;
+        float mid = (arms - 1) / 2f;
+        for (int i = 0; i < arms; i++) {
+            float ang = baseAngle + dir * (i - mid) * spread;
+            float vx = (float) Math.cos(ang) * spd;
+            float vy = (float) Math.sin(ang) * spd;
+            bullets.spawn(bossX, bossY, vx, vy, mainType.getId(), lifeMain, vis, hit, 0f);
+        }
+        // TH-style mentos trail toward the player (sparse; ECL tail pressure).
+        int mentos = Math.min(6, Math.max(3, (int) (3 + dens * 0.55f)));
+        int lifeM = resolveBulletLifetime(step, 200);
+        float mspd = baseSpeed * 0.95f * difficulty.speedMult * gm;
+        float mspread = 0.11f;
+        float mmid = (mentos - 1) / 2f;
+        for (int m = 0; m < mentos; m++) {
+            float ang = baseAngle + dir * (m - mmid) * mspread;
+            float vx = (float) Math.cos(ang) * mspd;
+            float vy = (float) Math.sin(ang) * mspd;
+            bullets.spawn(bossX, bossY, vx, vy, BulletType.SCARLET_MENTOS.getId(), lifeM, 1f, 0.88f, 0f);
+        }
+    }
+
+    private void fireMeisterSpinBurst(float baseAngle, float baseSpeed, float dens) {
+        PatternStep step = meisterPatternStep();
+        BulletType mainType = step != null ? bulletTypeByName(step.bulletType) : BulletType.SCARLET_LARGE;
+        if (mainType == BulletType.ORB)
+            mainType = BulletType.SCARLET_LARGE;
+        float vis = step != null ? bulletVis(step) : 1.38f;
+        float hit = step != null ? bulletHit(step) : 0.46f;
+        int life = resolveBulletLifetime(step, 200);
+        int arms = Math.min(7, Math.max(3, (int) (3 + dens * 0.9f)));
+        float spread = 0.32f;
+        float gm = BullethellConfig.GLOBAL_ENEMY_BULLET_SPEED_MULT.get();
+        for (int i = 0; i < arms; i++) {
+            float ang = baseAngle + (i - (arms - 1) / 2f) * spread;
+            float vx = (float) Math.cos(ang) * baseSpeed * difficulty.speedMult * gm;
+            float vy = (float) Math.sin(ang) * baseSpeed * difficulty.speedMult * gm;
+            bullets.spawn(bossX, bossY, vx, vy, mainType.getId(), life, vis, hit, 0f);
+        }
+    }
+
+    private void fireBouncingAimed(PatternStep step, BulletType type, PlayerState2D target,
+            int scaledArms, float spread, float effSpeed, float visScale, float hitScale,
+            float bx, float by) {
+        int allowedBounces = Math.max(0, step.bounceCount);
+        float damping = Math.max(0.05f, Math.min(1.0f, step.bounceDamping));
+        float baseAngle = (float) Math.atan2(target.y - by, target.x - bx);
+        float halfSpread = spread * (scaledArms - 1) / 2f;
+        float gm = BullethellConfig.GLOBAL_ENEMY_BULLET_SPEED_MULT.get();
+        int life = resolveBulletLifetime(step, 250);
+        float angV = step.bulletAngularVelocity;
+        for (int i = 0; i < scaledArms; i++) {
+            float angle = baseAngle - halfSpread + spread * i;
+            float vx = (float) Math.cos(angle) * effSpeed * difficulty.speedMult * gm;
+            float vy = (float) Math.sin(angle) * effSpeed * difficulty.speedMult * gm;
+            int slot = bullets.spawn(bx, by, vx, vy, type.getId(), life, visScale, hitScale, angV);
+            if (slot >= 0) {
+                bounceRemaining[slot] = allowedBounces;
+                bounceDamping[slot] = damping;
+            }
+        }
+    }
+
+    private void tickBouncingEnemyBullets() {
+        final float minX = 0f;
+        final float maxX = BulletPool.ARENA_W;
+        final float minY = 0f;
+        final float maxY = BulletPool.ARENA_H;
+        for (int i = 0; i < BulletPool.ENEMY_CAPACITY; i++) {
+            if (!bullets.isActive(i)) {
+                bounceRemaining[i] = 0;
+                continue;
+            }
+            int rem = bounceRemaining[i];
+            if (rem <= 0) {
+                continue;
+            }
+            float x = bullets.getX(i);
+            float y = bullets.getY(i);
+            float vx = bullets.getVx(i);
+            float vy = bullets.getVy(i);
+            boolean hit = false;
+
+            if (x <= minX && vx < 0f) {
+                x = minX;
+                vx = -vx * bounceDamping[i];
+                hit = true;
+            } else if (x >= maxX && vx > 0f) {
+                x = maxX;
+                vx = -vx * bounceDamping[i];
+                hit = true;
+            }
+            if (y <= minY && vy < 0f) {
+                y = minY;
+                vy = -vy * bounceDamping[i];
+                hit = true;
+            } else if (y >= maxY && vy > 0f) {
+                y = maxY;
+                vy = -vy * bounceDamping[i];
+                hit = true;
+            }
+
+            if (!hit) {
+                continue;
+            }
+
+            bullets.setVx(i, vx);
+            bullets.setVy(i, vy);
+            float[] slot = bullets.getSlotData(i);
+            slot[BulletPool.F_X] = x;
+            slot[BulletPool.F_Y] = y;
+            bullets.setSlotData(i, slot, true);
+            bounceRemaining[i] = rem - 1;
         }
     }
 
@@ -1230,6 +1915,35 @@ public class ArenaContext {
         }
     }
 
+    /**
+     * Per-hit damage vs {@link EnemyPool} fairies from a single player shot bullet.
+     * Mirrors {@link #bossBulletDamage}: low tiers fire few shots so each hits harder;
+     * high tiers fire many spread shots so each stays light, keeping fairy clear rate
+     * sane on dense TH-style waves without relying on a tiny bullet pool.
+     * <p>
+     * Rough unfocused DPS to one target (volley every 3 ticks): tier0 ~1.3, tier1 ~2.0,
+     * tier2–4 ~1.7–2.3. Focused (every 5 ticks): ~1.2–1.4.
+     */
+    private int fairyBulletDamage(PlayerState2D ps) {
+        int lv = ps.powerLevel();
+        if (ps.focused) {
+            return switch (lv) {
+                case 0 -> 6;
+                case 1 -> 2;
+                case 2 -> 1;
+                case 3 -> 1;
+                default -> 1;
+            };
+        }
+        return switch (lv) {
+            case 0 -> 4;
+            case 1 -> 2;
+            case 2 -> 1;
+            case 3 -> 1;
+            default -> 1;
+        };
+    }
+
     private void checkBossPhaseTransition() {
         if (phaseTransitionTimer > 0 || pendingNextPhase >= 0)
             return; // already transitioning
@@ -1257,7 +1971,7 @@ public class ArenaContext {
         lasers.clearAll();
 
         int nextPhase = bossPhase + 1;
-        if (nextPhase >= boss.phases.size()) {
+        if (nextPhase >= activeBossPhases.size()) {
             won = true;
             over = true;
             return;
@@ -1292,11 +2006,33 @@ public class ArenaContext {
         bossPhase = phaseIndex;
         attackIndex = 0;
         phaseStartTick = bossTick; // movement formula resets from centre each phase
+        meisterSubPhase = 0;
+        meisterTimer = 0;
+        meisterStreamAngle = 0f;
+        patternCooldown = 0;
+        bossBurstVolleysRemaining = 0;
+        bossBurstStep = null;
         bullets.clearAll();
 
-        PhaseDefinition phase = boss.phases.get(phaseIndex);
+        PhaseDefinition phase = activeBossPhases.get(phaseIndex);
         bossHp = phase.hp;
         bossMaxHp = phase.hp;
+
+        // Reset phase emitters (logical spawners used for faithful ECL ports)
+        activeEmitters.clear();
+        if (phase.emitters != null && !phase.emitters.isEmpty()) {
+            for (BossEmitterDefinition ed : phase.emitters) {
+                if (ed == null || ed.attacks == null || ed.attacks.isEmpty())
+                    continue;
+                EmitterState es = new EmitterState();
+                es.def = ed;
+                es.attackIndex = 0;
+                es.cooldown = 0;
+                es.burstVolleysRemaining = 0;
+                es.burstStep = null;
+                activeEmitters.add(es);
+            }
+        }
 
         if (phase.isSpellCard) {
             int diffIdx = Math.min(difficulty.ordinal(), phase.spellDurationTicks.length - 1);
@@ -1418,24 +2154,25 @@ public class ArenaContext {
         if (!god && ps.invulnTicks > 0)
             return;
 
-        float hr2 = ps.hitRadius * ps.hitRadius;
-        float gr2 = ps.grazeRadius * ps.grazeRadius;
-
         for (int i = 0; i < bullets.getCapacity(); i++) {
             if (!bullets.isActive(i))
                 continue;
             float dx = bullets.getX(i) - ps.x;
             float dy = bullets.getY(i) - ps.y;
             float distSq = dx * dx + dy * dy;
+            BulletType bt = BulletType.fromId(bullets.getType(i));
+            float bulletR = bt.radius * bullets.getHitScale(i) * bt.hitboxCollisionMul;
+            float hitCombined = ps.hitRadius + bulletR;
+            float grazeCombined = ps.grazeRadius + bulletR;
 
-            if (distSq <= hr2) {
+            if (distSq <= hitCombined * hitCombined) {
                 bullets.deactivate(i);
                 if (god)
                     continue;
                 ps.deathPendingTicks = PlayerState2D.DEATH_BOMB_GRACE;
                 ps.personalEvents.add(GameEvent.HIT);
                 return;
-            } else if (distSq <= gr2 && rules.grazeScoringEnabled) {
+            } else if (distSq <= grazeCombined * grazeCombined && rules.grazeScoringEnabled) {
                 ps.graze++;
                 ps.addStoredChargeProgress(20 * 3.0 / 2000.0);
                 score.onGraze();
@@ -1670,7 +2407,7 @@ public class ArenaContext {
 
         switch (cid) {
             case "marisa" -> {
-                // PoFV: Illusion Laser — thin forward laser; stronger levels last longer
+                // PoFV: Illusion Laser - thin forward laser; stronger levels last longer
                 // and hit harder (still one shared beam for networking simplicity).
                 masterSparkOwner = uuid;
                 masterSparkX = ps.x;
@@ -1691,7 +2428,7 @@ public class ArenaContext {
                     fireSakuyaKnifeRing(uuid, ps, 20);
                 } else if (level >= 2) {
                     fireSakuyaJackRipper(uuid, ps, 18, 0.12f);
-                    PatternEngine.fireRing(getBulletPool(uuid), ps.x, ps.y, 14, 3.4f, difficulty, BulletType.KUNAI);
+                    PatternEngine.fireRing(getBulletPool(uuid), ps.x, ps.y, 14, 3.4f, difficulty, BulletType.KNIFE);
                 } else {
                     fireSakuyaJackRipper(uuid, ps, 10, 0.08f);
                 }
@@ -1751,7 +2488,7 @@ public class ArenaContext {
             float ang = base + (i - (count - 1) / 2f) * spread;
             float sp = 11.5f * difficulty.speedMult;
             pb.spawn(ps.x, ps.y, (float) Math.cos(ang) * sp, (float) Math.sin(ang) * sp,
-                    BulletType.KUNAI.getId(), 140);
+                    BulletType.KNIFE.getId(), 140);
         }
     }
 
@@ -1764,7 +2501,7 @@ public class ArenaContext {
             float dist = 22f + random.nextFloat() * 8f;
             float kx = ps.x + (float) Math.cos(ang) * dist;
             float ky = ps.y + (float) Math.sin(ang) * dist;
-            pb.spawn(kx, ky, 0f, -12f, BulletType.KUNAI.getId(), 120);
+            pb.spawn(kx, ky, 0f, -12f, BulletType.KNIFE.getId(), 120);
         }
     }
 
@@ -2052,7 +2789,7 @@ public class ArenaContext {
     // ---------------------------------------------------------------- helpers
 
     private PhaseDefinition currentBossPhase() {
-        return boss.phases.get(Math.min(bossPhase, boss.phases.size() - 1));
+        return activeBossPhases.get(Math.min(bossPhase, activeBossPhases.size() - 1));
     }
 
     // ---------------------------------------------------------------- boss
@@ -2074,8 +2811,8 @@ public class ArenaContext {
      * - Otherwise: empty string.
      */
     public String getDisplaySpellName() {
-        if (pendingNextPhase >= 0 && pendingNextPhase < boss.phases.size()) {
-            PhaseDefinition next = boss.phases.get(pendingNextPhase);
+        if (pendingNextPhase >= 0 && pendingNextPhase < activeBossPhases.size()) {
+            PhaseDefinition next = activeBossPhases.get(pendingNextPhase);
             return next.isSpellCard ? next.spellName : "";
         }
         PhaseDefinition cur = currentBossPhase();
@@ -2142,7 +2879,7 @@ public class ArenaContext {
         for (int i = 0; i < pb.getCapacity(); i++) {
             if (!pb.isActive(i))
                 continue;
-            if (pb.getType(i) == BulletType.KUNAI.getId()) {
+            if (isSakuyaBladeBullet(pb.getType(i))) {
                 // Freeze the knife in place
                 pb.setVx(i, 0);
                 pb.setVy(i, 0);
@@ -2154,17 +2891,22 @@ public class ArenaContext {
     private void resumeFrozenBullets() {
         // Restore Sakuya's knives to their launch speed
         for (int i = 0; i < playerBullets.getCapacity(); i++) {
-            if (playerBullets.isActive(i) && playerBullets.getType(i) == BulletType.KUNAI.getId()) {
+            if (playerBullets.isActive(i) && isSakuyaBladeBullet(playerBullets.getType(i))) {
                 playerBullets.setVy(i, -12); // launch upwards
             }
         }
         for (BulletPool pb : coopBullets.values()) {
             for (int i = 0; i < pb.getCapacity(); i++) {
-                if (pb.isActive(i) && pb.getType(i) == BulletType.KUNAI.getId()) {
+                if (pb.isActive(i) && isSakuyaBladeBullet(pb.getType(i))) {
                     pb.setVy(i, -12);
                 }
             }
         }
+    }
+
+    /** Kunai + knife share the same hit profile; both participate in Sakuya time stop. */
+    private static boolean isSakuyaBladeBullet(int typeId) {
+        return typeId == BulletType.KUNAI.getId() || typeId == BulletType.KNIFE.getId();
     }
 
     private static BulletType bulletTypeByName(String name) {
@@ -2218,8 +2960,8 @@ public class ArenaContext {
      */
 
     public float getCompletionPercentage() {
-        int totalWaves = stage.waves.size();
-        int totalPhases = boss.phases.size();
+        int totalWaves = Math.max(0, applicableWaveDefinitionCount);
+        int totalPhases = activeBossPhases.size();
         int totalSteps = totalWaves + totalPhases;
         if (totalSteps == 0)
             return 100.0f;
@@ -2227,7 +2969,7 @@ public class ArenaContext {
         float stepsDone = 0;
         if (arenaPhase == ArenaPhase.WAVES) {
             stepsDone = scheduledEnemies.isEmpty() ? 0
-                    : (float) nextScheduledIdx / scheduledEnemies.size() * stage.waves.size();
+                    : (float) nextScheduledIdx / scheduledEnemies.size() * totalWaves;
         } else if (arenaPhase == ArenaPhase.DIALOG_INTRO) {
             stepsDone = totalWaves;
         } else if (arenaPhase == ArenaPhase.BOSS) {

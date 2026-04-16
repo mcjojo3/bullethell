@@ -14,7 +14,7 @@ import java.util.Map;
  * Bullet-hell music and SFX registered as {@link SoundEvent}s.
  *
  * Music IDs match {@code assets/bullethell/sounds.json} and boss JSON
- * {@code "music"} fields. Current set is TH06–TH08 (Artifex) plus SFX.
+ * {@code "music"} fields. Current set is TH06–TH10 (Artifex) plus SFX.
  */
 public final class BHSounds {
 
@@ -30,7 +30,7 @@ public final class BHSounds {
     public static final RegistrySupplier<SoundEvent> MASTER_SPARK = reg("master_spark");
 
     /**
-     * Touhou 6–8 themes (Artifex), roughly game order — see {@code sounds.json}.
+     * Touhou themes (Artifex), roughly game order - see {@code sounds.json}.
      */
     private static final String[] MUSIC_TRACK_IDS = {
             "a_dream_more_scarlet_than_red",
@@ -107,6 +107,22 @@ public final class BHSounds {
             "reach_for_the_moon_immortal_smoke_2",
             "voyage_1970",
             "voyage_1970_2021",
+            "wind_god_chronicles_mountain_of_faith",
+            "a_god_that_misses_people_romantic_fall",
+            "akutagawa_ryuunosuke_s_kappa_candid_friend",
+            "akutagawa_ryuunosuke_s_kappa_candid_friend_2_0",
+            "because_princess_inada_is_scolding_me",
+            "cemetery_of_onbashira_grave_of_being",
+            "dark_side_of_fate",
+            "faith_is_for_the_transient_people",
+            "fall_of_fall_autumnal_waterfall",
+            "sealed_gods",
+            "the_gensokyo_the_gods_loved",
+            "the_primal_scene_of_japan_the_girl_saw",
+            "the_road_of_the_misfortune_god_dark_road",
+            "the_youkai_mountain_mysterious_mountain",
+            "youkai_mountain_mysterious_mountain_2_0",
+
     };
 
     static {

@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * Renders {@link BHNpc} entities using the standard player model.
+ * Renders {@link BHNpc} entities using the Alex (slim-arm) player model.
  *
  * The skin texture follows the convention:
  *   {@code assets/bullethell/textures/entities/<npcId stripped of "_npc">.png}
@@ -20,7 +20,8 @@ import net.minecraft.resources.ResourceLocation;
 public class BHNpcRenderer extends HumanoidMobRenderer<BHNpc, PlayerModel<BHNpc>> {
 
     public BHNpcRenderer(EntityRendererProvider.Context ctx) {
-        super(ctx, new PlayerModel<>(ctx.bakeLayer(ModelLayers.PLAYER), false), 0.5f);
+        // Force slim (Alex) geometry instead of classic Steve.
+        super(ctx, new PlayerModel<>(ctx.bakeLayer(ModelLayers.PLAYER_SLIM), true), 0.5f);
     }
 
     @Override
