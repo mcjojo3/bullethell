@@ -9,7 +9,8 @@ import net.minecraft.world.entity.MobCategory;
 
 /**
  * Registers all BulletHell NPC entity types via Architectury DeferredRegister.
- * Add new NPC entries here; spawn in-world via {@code /summon bullethell:<id>}.
+ * Add new NPC entries here; spawn in-world via {@code /summon bullethell:<id>} or the
+ * matching spawn egg in the Bullet Hell NPCs creative tab ({@link mc.sayda.bullethell.item.BHItems}).
  */
 public final class BHEntities {
 

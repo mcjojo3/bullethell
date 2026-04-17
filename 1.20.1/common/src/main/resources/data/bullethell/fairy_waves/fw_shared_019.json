@@ -1,0 +1,38 @@
+{
+  "id": "fw_shared_019",
+  "description": "Bottom-side horizontal pressure.",
+  "enemies": [
+    {
+      "x": -22,
+      "y": 140,
+      "vx": 4.0,
+      "vy": 0.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": -22,
+      "y": 180,
+      "vx": 4.0,
+      "vy": 0.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 8
+    },
+    {
+      "x": 502,
+      "y": 140,
+      "vx": -4.0,
+      "vy": 0.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 16
+    },
+    {
+      "x": 502,
+      "y": 180,
+      "vx": -4.0,
+      "vy": 0.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 24
+    }
+  ]
+}

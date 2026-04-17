@@ -2,22 +2,19 @@
   "id": "cirno_stage",
   "title": "Misty Lake - Ice Fairy Approach",
   "_design_notes": [
-    "Ported from TH06 ecldata2_bullets.txt Timeline0 + Sub0–Sub6.",
-    "Timebase: TH frames ÷3 → mod ticks (see wiki/time-and-units.md). Timeline first ins_4 at +330f → spawnTick ~110.",
-    "Dense Sub0–Sub4 loop (every 6 TH frames) collapsed into waveRef every 28–32 ticks ×8 cycles.",
-    "+240f pause before Sub6 line → ~80 ticks gap after cycle block.",
-    "Sub6 spiral-line fairies → th6_cirno_sub6_spiral_line; then Daiyousei-style LARGE_FAIRY, crossing, walls.",
-    "WaveDefinition: optional minDifficulty / maxDifficulty (EASY…LUNATIC, same as boss phases) skip a wave on other ranks — omit both for all difficulties. TH06 Timeline0 is shared across ranks here; add gates only when ECL forks spawns per rank."
+    "cirno_stage: inline preamble + fairyRush (shared fw_shared_* catalog, random ramp).",
+    "Wider early gaps than legacy waveRef ladder; patterns pool across bosses.",
+    "Prior boss_* templates archived under .archive/fairy_waves/."
   ],
   "stageMusic": "lunate_elf",
   "bossId": "cirno_boss",
   "nextStageId": "sakuya_stage",
   "rules": {
-    "itemDropEveryNthKill": 1,
+    "itemDropEveryNthKill": 3,
     "dropCyclePattern": "POWER,POINT,POWER,POINT,POWER,POINT,POWER,POINT",
-    "largeEnemyDropCyclePattern": "POWER,POINT,POWER,FULL_POWER,POINT,POWER",
-    "bombDropChance": 0.0,
-    "pocFraction": 0.20,
+    "largeEnemyDropCyclePattern": "POWER,POINT,POWER,FULL_POWER,POINT,POWER,POWER,POINT",
+    "scoreExtendEvery": 1500000,
+    "pocFraction": 0.2,
     "pocAutoCollect": true,
     "itemAttractionSpeed": 8.0,
     "deathPowerLoss": 32,
@@ -31,120 +28,54 @@
   },
   "waves": [
     {
-      "_comment": "Preamble (~0–100f TH): light mist before Timeline0 main block.",
+      "_comment": "Preamble: light mist (three spaced blues).",
       "spawnTick": 0,
       "enemies": [
-        { "x": 120, "y": -20, "vx": 0.0, "vy": 3.6, "type": "BLUE_FAIRY", "delayTicks": 0 },
-        { "x": 240, "y": -20, "vx": 0.0, "vy": 3.7, "type": "BLUE_FAIRY", "delayTicks": 15 },
-        { "x": 360, "y": -20, "vx": 0.0, "vy": 3.6, "type": "BLUE_FAIRY", "delayTicks": 30 }
-      ]
-    },
-    {
-      "_comment": "Timeline0 +330f: first Sub0–Sub4 wave (compressed from ins_4 chain).",
-      "spawnTick": 110,
-      "waveRef": "th6_cirno_sub_cycle"
-    },
-    {
-      "_comment": "Repeat Sub-cycle — TH spawns every 6f; here every ~30t ≈ 90f density.",
-      "spawnTick": 142,
-      "waveRef": "th6_cirno_sub_cycle"
-    },
-    {
-      "_comment": "Cycle repeat 3.",
-      "spawnTick": 174,
-      "waveRef": "th6_cirno_sub_cycle"
-    },
-    {
-      "_comment": "Cycle repeat 4.",
-      "spawnTick": 206,
-      "waveRef": "th6_cirno_sub_cycle"
-    },
-    {
-      "_comment": "Cycle repeat 5.",
-      "spawnTick": 238,
-      "waveRef": "th6_cirno_sub_cycle"
-    },
-    {
-      "_comment": "Cycle repeat 6.",
-      "spawnTick": 270,
-      "waveRef": "th6_cirno_sub_cycle"
-    },
-    {
-      "_comment": "Cycle repeat 7.",
-      "spawnTick": 302,
-      "waveRef": "th6_cirno_sub_cycle"
-    },
-    {
-      "_comment": "Cycle repeat 8 — end dense block before +984f break.",
-      "spawnTick": 334,
-      "waveRef": "th6_cirno_sub_cycle"
-    },
-    {
-      "_comment": "+240f (~80t) breather after long timeline block.",
-      "spawnTick": 418,
-      "enemies": [
-        { "x": 240, "y": -18, "vx": 0.0, "vy": 3.5, "type": "YELLOW_FAIRY", "delayTicks": 0 }
-      ]
-    },
-    {
-      "_comment": "Sub6 top spiral-line (ins_0 Sub6 x=32..288) + resume Sub waves per TH timeline.",
-      "spawnTick": 430,
-      "waveRef": "th6_cirno_sub6_spiral_line"
-    },
-    {
-      "_comment": "Interleaved Sub4 + Sub0 (timeline ~1166f region).",
-      "spawnTick": 480,
-      "waveRef": "th6_cirno_sub_cycle"
-    },
-    {
-      "_comment": "Daiyousei-style large anchor (midboss homage).",
-      "spawnTick": 520,
-      "enemies": [
-        { "x": 240, "y": -22, "vx": 0.0, "vy": 2.7, "type": "LARGE_FAIRY", "pattern": "AIMED_RING" },
-        { "x": 150, "y": -20, "vx": 0.15, "vy": 3.6, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 8 },
-        { "x": 330, "y": -20, "vx": -0.15, "vy": 3.6, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 8 },
-        { "x": 90,  "y": -20, "vx": 0.25, "vy": 3.9, "type": "BLUE_FAIRY", "delayTicks": 22 },
-        { "x": 390, "y": -20, "vx": -0.25, "vy": 3.9, "type": "BLUE_FAIRY", "delayTicks": 22 }
-      ]
-    },
-    {
-      "_comment": "Crossing corners + yellow curtains (post-mid).",
-      "spawnTick": 680,
-      "enemies": [
-        { "x": 40,  "y": -24, "vx": 0.75, "vy": 4.0, "angVel": 0.012, "arcTicks": 68, "type": "RED_FAIRY" },
-        { "x": 120, "y": -24, "vx": 0.45, "vy": 3.9, "angVel": 0.010, "arcTicks": 68, "type": "BLUE_FAIRY", "delayTicks": 8 },
-        { "x": 360, "y": -24, "vx": -0.45, "vy": 3.9, "angVel": -0.010, "arcTicks": 68, "type": "BLUE_FAIRY", "delayTicks": 8 },
-        { "x": 440, "y": -24, "vx": -0.75, "vy": 4.0, "angVel": -0.012, "arcTicks": 68, "type": "RED_FAIRY" },
-        { "x": 240, "y": -24, "vx": 0.0,  "vy": 4.1, "type": "YELLOW_FAIRY", "delayTicks": 18 },
-        { "x": 180, "y": -24, "vx": 0.0,  "vy": 4.0, "type": "YELLOW_FAIRY", "delayTicks": 26 },
-        { "x": 300, "y": -24, "vx": 0.0,  "vy": 4.0, "type": "YELLOW_FAIRY", "delayTicks": 26 }
-      ]
-    },
-    {
-      "_comment": "Pre-boss: horizontal lane fill (timeline late section feel).",
-      "spawnTick": 880,
-      "enemies": [
-        { "x": -20, "y": 42,  "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 0 },
-        { "x": -20, "y": 58,  "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 7 },
-        { "x": -20, "y": 74,  "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 14 },
-        { "x": -20, "y": 90,  "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 21 },
-        { "x": -20, "y": 106, "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 28 },
-        { "x": -20, "y": 122, "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 35 },
-        { "x": -20, "y": 138, "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 42 },
-        { "x": -20, "y": 154, "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 49 },
-        { "x": -20, "y": 170, "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 56 },
-        { "x": -20, "y": 186, "vx": 4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 63 },
-        { "x": 500, "y": 42,  "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 95 },
-        { "x": 500, "y": 58,  "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 102 },
-        { "x": 500, "y": 74,  "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 109 },
-        { "x": 500, "y": 90,  "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 116 },
-        { "x": 500, "y": 106, "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 123 },
-        { "x": 500, "y": 122, "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 130 },
-        { "x": 500, "y": 138, "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 137 },
-        { "x": 500, "y": 154, "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 144 },
-        { "x": 500, "y": 170, "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 151 },
-        { "x": 500, "y": 186, "vx": -4.2, "vy": 0.0, "type": "RED_FAIRY", "delayTicks": 158 }
+        {
+          "x": 120,
+          "y": -20,
+          "vx": 0.0,
+          "vy": 3.4,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 0
+        },
+        {
+          "x": 240,
+          "y": -20,
+          "vx": 0.0,
+          "vy": 3.5,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 18
+        },
+        {
+          "x": 360,
+          "y": -20,
+          "vx": 0.0,
+          "vy": 3.4,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 36
+        }
       ]
     }
-  ]
+  ],
+  "fairyRush": {
+    "catalogId": "default",
+    "slotCount": 50,
+    "startTick": 110,
+    "gapTicksStartMin": 72,
+    "gapTicksStartMax": 118,
+    "gapTicksEndMin": 22,
+    "gapTicksEndMax": 42,
+    "gapEasing": "SMOOTHSTEP",
+    "jitterTicks": 16,
+    "intensityStartLo": 0,
+    "intensityStartHi": 2,
+    "intensityEndLo": 4,
+    "intensityEndHi": 10,
+    "breatherEvery": 7,
+    "breatherExtraTicks": 72,
+    "breatherWaveId": "",
+    "shuffleSeed": null,
+    "noRepeatLast": 6
+  }
 }

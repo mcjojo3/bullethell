@@ -10,8 +10,9 @@ package mc.sayda.bullethell.boss;
  * ─────────────────────────────────────────────────────────────────
  * Reference mapping (approximate):
  *
- * TH6 (EoSD) - itemDropEveryNthKill=3, pocAutoCollect=true,
- * deathResetspower=true, grazeScoringEnabled=false
+ * TH6 (EoSD) - itemDropEveryNthKill=3, bombDropChance=1/512, score extends,
+ * large fairies always drop, pocAutoCollect=true, deathResetspower=true,
+ * grazeScoringEnabled=false
  *
  * TH7 (PCB) - itemDropEveryNthKill=1, pocAutoCollect=true,
  * deathResetspower=true, cherrySystemEnabled=true
@@ -28,11 +29,11 @@ public class RulesetConfig {
         // ---------------------------------------------------------------- item drops
 
         /**
-         * How often enemies drop items: 1 = every kill, 3 = every third kill
-         * (TH6 style), etc.
-         * Drop type still follows the {@code dropCyclePattern} sequence.
+         * How often <em>small</em> fairies drop items (1 = PCB/IN-style, 3 = TH6).
+         * When {@link #largeEnemyAlwaysDrops} is true, large fairies still drop every
+         * kill using {@link #largeEnemyDropCyclePattern}.
          */
-        public int itemDropEveryNthKill = 1;
+        public int itemDropEveryNthKill = 3;
 
         /**
          * Deterministic drop cycle for small/normal enemies (fairies).
@@ -50,10 +51,29 @@ public class RulesetConfig {
         public String largeEnemyDropCyclePattern = "POWER,POINT,POWER,FULL_POWER,POINT,POWER,POWER,POINT";
 
         /**
-         * Probability (0–1) that a drop slot is replaced by a bomb item instead.
-         * Classic TH value is 1/512 ≈ 0.00195. Set 0 to disable.
+         * Probability (0–1) that an item drop slot becomes a bomb instead of the
+         * cycled type. Classic value is {@code 1/512}. Set 0 to disable.
          */
-        public float bombDropChance = 0.002f;
+        public float bombDropChance = 1f / 512f;
+
+        /**
+         * When true (default), large fairies always release an item on death, while
+         * {@link #itemDropEveryNthKill} applies only to small fairies — matches how
+         * veterans expect anchors to pay out even with TH6-style sparse small drops.
+         */
+        public boolean largeEnemyAlwaysDrops = true;
+
+        /**
+         * Score milestone for an extra life (TH-style extend). 0 disables. Tuned for
+         * this mod's scoring; raise for stricter survival marathons.
+         */
+        public long scoreExtendEvery = 1_500_000L;
+
+        /**
+         * When {@link #scoreExtendEvery} is positive: if true, each co-op player gains a
+         * life at every extend; if false, only the arena host does (strict solo).
+         */
+        public boolean scoreExtendAwardAllCoopPlayers = false;
 
         // ---------------------------------------------------------------- point of
         // collection

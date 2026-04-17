@@ -1,0 +1,64 @@
+{
+  "id": "fw_shared_017",
+  "description": "Heavy mixed seven \u2014 climax shape.",
+  "enemies": [
+    {
+      "x": 48,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 120,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 3
+    },
+    {
+      "x": 192,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 6
+    },
+    {
+      "x": 264,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 9,
+      "pattern": "RING"
+    },
+    {
+      "x": 336,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 12
+    },
+    {
+      "x": 408,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 15
+    },
+    {
+      "x": 240,
+      "y": -30,
+      "vx": 0.0,
+      "vy": 3.7,
+      "type": "RED_FAIRY",
+      "delayTicks": 18
+    }
+  ]
+}

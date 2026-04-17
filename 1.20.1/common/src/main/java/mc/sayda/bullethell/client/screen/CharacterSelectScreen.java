@@ -5,6 +5,7 @@ import mc.sayda.bullethell.Bullethell;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.boss.CharacterDefinition;
 import mc.sayda.bullethell.boss.CharacterLoader;
+import mc.sayda.bullethell.client.BHSfx;
 import mc.sayda.bullethell.client.CharacterUnlockClientState;
 import mc.sayda.bullethell.entity.BHAttributes;
 import mc.sayda.bullethell.network.BHPackets;
@@ -16,6 +17,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
@@ -32,6 +34,8 @@ public class CharacterSelectScreen extends Screen {
 
     private final DifficultyConfig difficulty;
     private final String stageId;
+    /** Pass-through for ESC → difficulty screen (unlock caps). */
+    private final int maxAllowedDifficultyOrdinal;
     private final List<CharacterDefinition> characters;
 
     private int selectedIndex = 0;
@@ -40,9 +44,14 @@ public class CharacterSelectScreen extends Screen {
     private int cardTopY;
 
     public CharacterSelectScreen(DifficultyConfig difficulty, String stageId) {
+        this(difficulty, stageId, DifficultyConfig.LUNATIC.ordinal());
+    }
+
+    public CharacterSelectScreen(DifficultyConfig difficulty, String stageId, int maxAllowedDifficultyOrdinal) {
         super(Component.literal("Select Character"));
         this.difficulty = difficulty;
         this.stageId = stageId;
+        this.maxAllowedDifficultyOrdinal = maxAllowedDifficultyOrdinal;
         this.characters = CharacterLoader.loadAll();
     }
 
@@ -179,6 +188,7 @@ public class CharacterSelectScreen extends Screen {
                     return true;
                 if (selectedIndex != i) {
                     selectedIndex = i;
+                    BHSfx.playSelect();
                     rebuildButtons();
                 }
                 return true;
@@ -210,19 +220,27 @@ public class CharacterSelectScreen extends Screen {
             return;
         if (!isUnlocked(selectedIndex))
             return;
+        BHSfx.playSelect();
         BHPackets.sendCharSelect(characters.get(selectedIndex).id, difficulty, stageId);
         onClose();
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            BHSfx.playBack();
+            Minecraft.getInstance().setScreen(new DifficultySelectScreen(stageId, maxAllowedDifficultyOrdinal));
+            return true;
+        }
         if (keyCode == 263 && selectedIndex > 0) {
             selectedIndex = findPrevUnlocked(selectedIndex);
+            BHSfx.playSelect();
             rebuildButtons();
             return true;
         }
         if (keyCode == 262 && selectedIndex < characters.size() - 1) {
             selectedIndex = findNextUnlocked(selectedIndex);
+            BHSfx.playSelect();
             rebuildButtons();
             return true;
         }

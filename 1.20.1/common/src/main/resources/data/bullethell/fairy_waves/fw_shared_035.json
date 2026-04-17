@@ -1,0 +1,56 @@
+{
+  "id": "fw_shared_035",
+  "description": "Six-fairy mixed assault.",
+  "enemies": [
+    {
+      "x": 60,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 220,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": 380,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 8
+    },
+    {
+      "x": 60,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 12,
+      "pattern": "RING"
+    },
+    {
+      "x": 220,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 16
+    },
+    {
+      "x": 380,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 20
+    }
+  ]
+}

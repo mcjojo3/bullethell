@@ -1,0 +1,78 @@
+{
+  "id": "fw_shared_061",
+  "description": "Dense bamboo corridor (eight greens).",
+  "enemies": [
+    {
+      "x": 36,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 88,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 2,
+      "pattern": "RING"
+    },
+    {
+      "x": 140,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 4,
+      "pattern": "RING"
+    },
+    {
+      "x": 192,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 6,
+      "pattern": "RING"
+    },
+    {
+      "x": 244,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 8,
+      "pattern": "RING"
+    },
+    {
+      "x": 296,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 10,
+      "pattern": "RING"
+    },
+    {
+      "x": 348,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 12,
+      "pattern": "RING"
+    },
+    {
+      "x": 400,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 14,
+      "pattern": "RING"
+    }
+  ]
+}

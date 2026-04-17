@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_077",
+  "description": "Sub8 right pair.",
+  "enemies": [
+    {
+      "x": 368,
+      "y": -22,
+      "vx": -0.35,
+      "vy": 3.95,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 408,
+      "y": -22,
+      "vx": -0.32,
+      "vy": 3.92,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 3
+    }
+  ]
+}

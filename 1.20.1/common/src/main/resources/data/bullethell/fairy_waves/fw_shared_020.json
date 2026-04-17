@@ -1,0 +1,73 @@
+{
+  "id": "fw_shared_020",
+  "description": "Eight-fairy blizzard curtain.",
+  "enemies": [
+    {
+      "x": 30,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 84,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 2
+    },
+    {
+      "x": 138,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": 192,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 6,
+      "pattern": "RING"
+    },
+    {
+      "x": 246,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 8
+    },
+    {
+      "x": 300,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 354,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 12,
+      "pattern": "RING"
+    },
+    {
+      "x": 408,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 14
+    }
+  ]
+}

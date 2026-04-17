@@ -1,8 +1,0 @@
-{
-  "id": "th6_remilia_sub5_side_lower",
-  "description": "TH06 ecldata6 Timeline0: second Sub5 pair block (~y=144 in TH) — same lateral Sub5 pressure, lower lane.",
-  "enemies": [
-    { "x": -20, "y": 148, "vx": 4.5, "vy": 0.0, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 0 },
-    { "x": 500, "y": 148, "vx": -4.5, "vy": 0.0, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 0 }
-  ]
-}

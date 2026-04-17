@@ -1,0 +1,43 @@
+{
+  "id": "fw_shared_060",
+  "description": "Forest convergence (edges).",
+  "enemies": [
+    {
+      "x": 40,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.4,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": -0.018,
+      "arcTicks": 86
+    },
+    {
+      "x": 440,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.4,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": 0.018,
+      "arcTicks": 86
+    },
+    {
+      "x": -20,
+      "y": 70,
+      "vx": 4.3,
+      "vy": 0.0,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 500,
+      "y": 110,
+      "vx": -4.3,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    }
+  ]
+}

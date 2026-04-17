@@ -21,12 +21,12 @@ package mc.sayda.bullethell.arena;
 public enum EnemyType {
 
     // hp bullets spread bSpd atkIvl score dropType texIdx large hRadius  defaultPattern
-    // BLUE  - 2-shot aimed fan: 1 on Easy, 2 Normal, 3 Hard, 4 Lunatic
-    BLUE_FAIRY  (1,  2, 0.20f, 3.0f, 40, 100, ItemPool.TYPE_POINT, 0, false,  8.0f, EnemyPattern.AIMED),
+    // BLUE  - aimed fan; base 1 so Lunatic stays ~2 shots (TH6-style thin curtains, not walls)
+    BLUE_FAIRY  (1,  1, 0.20f, 3.0f, 52, 100, ItemPool.TYPE_POINT, 0, false,  8.0f, EnemyPattern.AIMED),
     // RED   - 3-shot tight aimed fan: faster + more bullets than blue
     RED_FAIRY   (1,  3, 0.22f, 3.5f, 30, 200, ItemPool.TYPE_POWER, 1, false,  8.0f, EnemyPattern.AIMED),
-    // YELLOW- downward fan, NOT aimed: area-denial curtain (TH8 style)
-    YELLOW_FAIRY(1,  3, 0.28f, 3.2f, 45, 150, ItemPool.TYPE_POINT, 2, false,  8.0f, EnemyPattern.SPREAD),
+    // YELLOW- downward fan, NOT aimed: keep burst count modest at high difficulty
+    YELLOW_FAIRY(1,  2, 0.28f, 3.2f, 56, 150, ItemPool.TYPE_POINT, 2, false,  8.0f, EnemyPattern.SPREAD),
     // GREEN - ring burst with random start angle each burst (TH6 barrier style)
     GREEN_FAIRY (1,  6, 0.0f,  2.8f, 38, 250, ItemPool.TYPE_POWER, 3, false,  8.0f, EnemyPattern.RING),
     // Large fairies: aimed burst + outer ring - dual threat

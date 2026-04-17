@@ -1,4 +1,11 @@
 {
   "attribute.name.bullethell.extra_lives": "Extra Bullet Hell Lives",
-  "attribute.name.bullethell.extra_bombs": "Extra Bullet Hell Bombs"
+  "attribute.name.bullethell.extra_bombs": "Extra Bullet Hell Bombs",
+  "category.bullethell.npc_spawn_eggs": "Bullet Hell NPCs",
+  "item.bullethell.marisa_npc_spawn_egg": "Marisa Spawn Egg",
+  "item.bullethell.remilia_npc_spawn_egg": "Remilia Spawn Egg",
+  "item.bullethell.sakuya_npc_spawn_egg": "Sakuya Spawn Egg",
+  "item.bullethell.cirno_npc_spawn_egg": "Cirno Spawn Egg",
+  "item.bullethell.sanae_npc_spawn_egg": "Sanae Spawn Egg",
+  "item.bullethell.flandre_npc_spawn_egg": "Flandre Spawn Egg"
 }

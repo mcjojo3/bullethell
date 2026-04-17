@@ -1,0 +1,52 @@
+{
+  "id": "fw_shared_044",
+  "description": "Night climax: omni threat.",
+  "enemies": [
+    {
+      "x": 48,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.2,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": -0.017,
+      "arcTicks": 82
+    },
+    {
+      "x": 432,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.2,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": 0.017,
+      "arcTicks": 82
+    },
+    {
+      "x": -22,
+      "y": 90,
+      "vx": 4.1,
+      "vy": 0.0,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 502,
+      "y": 130,
+      "vx": -4.1,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 240,
+      "y": -28,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "LARGE_FAIRY",
+      "delayTicks": 20,
+      "pattern": "AIMED_RING"
+    }
+  ]
+}

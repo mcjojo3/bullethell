@@ -1,8 +1,0 @@
-{
-  "id": "th6_extra_sub2_center",
-  "description": "Timeline0 ins_0(Sub2,192,-48) then (256,-48) — denser Sub2 script; center wave.",
-  "enemies": [
-    { "x": 240, "y": -22, "vx": 0.0, "vy": 3.65, "type": "BLUE_FAIRY", "pattern": "RING", "delayTicks": 0 },
-    { "x": 240, "y": -30, "vx": 0.0, "vy": 3.65, "type": "BLUE_FAIRY", "pattern": "RING", "delayTicks": 8 }
-  ]
-}

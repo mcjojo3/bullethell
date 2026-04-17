@@ -2,21 +2,18 @@
   "id": "sakuya_stage",
   "title": "Clock Tower Hallways",
   "_design_notes": [
-    "TH06 Stage 5–inspired pre-boss flow (see wiki/sakuya-th06-reconstruction.md): side lanes, crossing corners, midboss-homage anchor, mirrored squads, pre-boss climax.",
-    "Stage fairies use default enemy bullet types; Sakuya's silver knives / daggers are boss JSON only (KNIFE vs KUNAI).",
-    "Fairy shots per burst scale with difficulty (EnemyType bulletCount × DifficultyConfig.densityMult; atkInterval compresses on higher diff). Opening uses more BLUE_FAIRY than RED for lighter Easy/Normal reads.",
-    "spawnTick gaps ~135–260t (~6.7–13s) so waves do not stack before the prior section is cleared.",
-    "WaveDefinition: optional minDifficulty / maxDifficulty (EASY…LUNATIC, same as boss phases) skip a wave on other ranks. All waves here are rank-agnostic; add gates when matching per-difficulty ECL spawns."
+    "sakuya_stage: first-wave preamble preserved; remainder replaced by fairyRush shared pool.",
+    "Original hand-authored mid waves archived with prior fairy_waves copy in .archive/fairy_waves/."
   ],
   "stageMusic": "the_maid_and_the_pocket_watch_of_blood",
   "bossId": "sakuya_boss",
   "nextStageId": "remilia_stage",
   "rules": {
-    "itemDropEveryNthKill": 1,
+    "itemDropEveryNthKill": 3,
     "dropCyclePattern": "POWER,POINT,POWER,POINT,POWER,POINT,POWER,POINT",
-    "largeEnemyDropCyclePattern": "POWER,POINT,POWER,FULL_POWER,POINT,POWER",
-    "bombDropChance": 0.0,
-    "pocFraction": 0.20,
+    "largeEnemyDropCyclePattern": "POWER,POINT,POWER,FULL_POWER,POINT,POWER,POWER,POINT",
+    "scoreExtendEvery": 1500000,
+    "pocFraction": 0.2,
     "pocAutoCollect": true,
     "itemAttractionSpeed": 8.0,
     "deathPowerLoss": 32,
@@ -30,83 +27,70 @@
   },
   "waves": [
     {
-      "_comment": "Opening: descending maids — blues outer/inner for fewer shots on Easy (2-count type) vs reds (3-count).",
+      "_comment": "Opening: descending maids \u2014 blues outer/inner for fewer shots on Easy (2-count type) vs reds (3-count).",
       "spawnTick": 0,
       "enemies": [
-        { "x": 70,  "y": -22, "vx": 0.0, "vy": 4.2, "type": "BLUE_FAIRY", "delayTicks": 0 },
-        { "x": 155, "y": -22, "vx": 0.0, "vy": 4.1, "type": "RED_FAIRY", "delayTicks": 8 },
-        { "x": 240, "y": -22, "vx": 0.0, "vy": 4.0, "type": "BLUE_FAIRY", "delayTicks": 16 },
-        { "x": 325, "y": -22, "vx": 0.0, "vy": 4.1, "type": "RED_FAIRY", "delayTicks": 8 },
-        { "x": 410, "y": -22, "vx": 0.0, "vy": 4.2, "type": "BLUE_FAIRY", "delayTicks": 0 }
-      ]
-    },
-    {
-      "_comment": "Knife corridor from left then right: mirrored side entries force lane swaps.",
-      "spawnTick": 135,
-      "enemies": [
-        { "x": -24, "y": 50,  "vx": 4.8, "vy": 0.0, "angVel": 0.018, "arcTicks": 85, "type": "YELLOW_FAIRY" },
-        { "x": -24, "y": 92,  "vx": 4.8, "vy": 0.0, "angVel": 0.018, "arcTicks": 85, "type": "RED_FAIRY", "delayTicks": 8 },
-        { "x": -24, "y": 134, "vx": 4.8, "vy": 0.0, "angVel": 0.018, "arcTicks": 85, "type": "YELLOW_FAIRY", "delayTicks": 16 },
-        { "x": -24, "y": 176, "vx": 4.8, "vy": 0.0, "angVel": 0.018, "arcTicks": 85, "type": "RED_FAIRY", "delayTicks": 24 },
-
-        { "x": 504, "y": 50,  "vx": -4.8, "vy": 0.0, "angVel": -0.018, "arcTicks": 85, "type": "YELLOW_FAIRY", "delayTicks": 34 },
-        { "x": 504, "y": 92,  "vx": -4.8, "vy": 0.0, "angVel": -0.018, "arcTicks": 85, "type": "RED_FAIRY", "delayTicks": 42 },
-        { "x": 504, "y": 134, "vx": -4.8, "vy": 0.0, "angVel": -0.018, "arcTicks": 85, "type": "YELLOW_FAIRY", "delayTicks": 50 },
-        { "x": 504, "y": 176, "vx": -4.8, "vy": 0.0, "angVel": -0.018, "arcTicks": 85, "type": "RED_FAIRY", "delayTicks": 58 }
-      ]
-    },
-    {
-      "_comment": "Crossing aimed lines from upper corners (TH6 Stage 5 crossing-knife feel).",
-      "spawnTick": 320,
-      "enemies": [
-        { "x": 38,  "y": -24, "vx": 1.6,  "vy": 3.8, "angVel": 0.020, "arcTicks": 70, "type": "BLUE_FAIRY" },
-        { "x": 118, "y": -24, "vx": 0.8,  "vy": 4.0, "angVel": 0.014, "arcTicks": 70, "type": "RED_FAIRY", "delayTicks": 10 },
-        { "x": 442, "y": -24, "vx": -1.6, "vy": 3.8, "angVel": -0.020, "arcTicks": 70, "type": "BLUE_FAIRY" },
-        { "x": 362, "y": -24, "vx": -0.8, "vy": 4.0, "angVel": -0.014, "arcTicks": 70, "type": "RED_FAIRY", "delayTicks": 10 },
-        { "x": 240, "y": -26, "vx": 0.0,  "vy": 4.3, "type": "GREEN_FAIRY", "delayTicks": 22 }
-      ]
-    },
-    {
-      "_comment": "Midboss-homage anchor: central heavy plus escorts (dense aimed + ring pressure).",
-      "spawnTick": 520,
-      "enemies": [
-        { "x": 240, "y": -24, "vx": 0.0, "vy": 2.9, "type": "LARGE_RED", "pattern": "AIMED_RING" },
-        { "x": 130, "y": -22, "vx": 0.2, "vy": 3.9, "type": "GREEN_FAIRY", "delayTicks": 10 },
-        { "x": 350, "y": -22, "vx": -0.2, "vy": 3.9, "type": "GREEN_FAIRY", "delayTicks": 10 },
-        { "x": 85,  "y": -22, "vx": 0.3, "vy": 4.2, "type": "RED_FAIRY", "delayTicks": 26 },
-        { "x": 395, "y": -22, "vx": -0.3, "vy": 4.2, "type": "RED_FAIRY", "delayTicks": 26 }
-      ]
-    },
-    {
-      "_comment": "Second-half escalation: mirrored side squads with tighter spacing.",
-      "spawnTick": 780,
-      "enemies": [
-        { "x": -24, "y": 44,  "vx": 4.9, "vy": 0.0, "angVel": 0.020, "arcTicks": 78, "type": "RED_FAIRY" },
-        { "x": -24, "y": 76,  "vx": 4.9, "vy": 0.0, "angVel": 0.020, "arcTicks": 78, "type": "YELLOW_FAIRY", "delayTicks": 8 },
-        { "x": -24, "y": 108, "vx": 4.9, "vy": 0.0, "angVel": 0.020, "arcTicks": 78, "type": "RED_FAIRY", "delayTicks": 16 },
-        { "x": -24, "y": 140, "vx": 4.9, "vy": 0.0, "angVel": 0.020, "arcTicks": 78, "type": "YELLOW_FAIRY", "delayTicks": 24 },
-        { "x": -24, "y": 172, "vx": 4.9, "vy": 0.0, "angVel": 0.020, "arcTicks": 78, "type": "RED_FAIRY", "delayTicks": 32 },
-
-        { "x": 504, "y": 44,  "vx": -4.9, "vy": 0.0, "angVel": -0.020, "arcTicks": 78, "type": "RED_FAIRY", "delayTicks": 42 },
-        { "x": 504, "y": 76,  "vx": -4.9, "vy": 0.0, "angVel": -0.020, "arcTicks": 78, "type": "YELLOW_FAIRY", "delayTicks": 50 },
-        { "x": 504, "y": 108, "vx": -4.9, "vy": 0.0, "angVel": -0.020, "arcTicks": 78, "type": "RED_FAIRY", "delayTicks": 58 },
-        { "x": 504, "y": 140, "vx": -4.9, "vy": 0.0, "angVel": -0.020, "arcTicks": 78, "type": "YELLOW_FAIRY", "delayTicks": 66 },
-        { "x": 504, "y": 172, "vx": -4.9, "vy": 0.0, "angVel": -0.020, "arcTicks": 78, "type": "RED_FAIRY", "delayTicks": 74 }
-      ]
-    },
-    {
-      "_comment": "Pre-boss climax: all-edge convergence plus two large side anchors.",
-      "spawnTick": 1040,
-      "enemies": [
-        { "x": -24, "y": 70, "vx": 3.9, "vy": 0.0, "angVel": 0.018, "arcTicks": 85, "type": "LARGE_GREEN" },
-        { "x": 504, "y": 70, "vx": -3.9, "vy": 0.0, "angVel": -0.018, "arcTicks": 85, "type": "LARGE_YELLOW" },
-
-        { "x": 60,  "y": -22, "vx": 0.0,  "vy": 4.5, "type": "BLUE_FAIRY", "delayTicks": 16 },
-        { "x": 150, "y": -22, "vx": 0.0,  "vy": 4.5, "type": "RED_FAIRY", "delayTicks": 22 },
-        { "x": 240, "y": -22, "vx": 0.0,  "vy": 4.6, "type": "YELLOW_FAIRY", "delayTicks": 28 },
-        { "x": 330, "y": -22, "vx": 0.0,  "vy": 4.5, "type": "RED_FAIRY", "delayTicks": 22 },
-        { "x": 420, "y": -22, "vx": 0.0,  "vy": 4.5, "type": "BLUE_FAIRY", "delayTicks": 16 }
+        {
+          "x": 70,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.2,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 0
+        },
+        {
+          "x": 155,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.1,
+          "type": "RED_FAIRY",
+          "delayTicks": 8
+        },
+        {
+          "x": 240,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.0,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 16
+        },
+        {
+          "x": 325,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.1,
+          "type": "RED_FAIRY",
+          "delayTicks": 8
+        },
+        {
+          "x": 410,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.2,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 0
+        }
       ]
     }
-  ]
+  ],
+  "fairyRush": {
+    "catalogId": "default",
+    "slotCount": 46,
+    "startTick": 150,
+    "gapTicksStartMin": 72,
+    "gapTicksStartMax": 118,
+    "gapTicksEndMin": 22,
+    "gapTicksEndMax": 42,
+    "gapEasing": "SMOOTHSTEP",
+    "jitterTicks": 16,
+    "intensityStartLo": 0,
+    "intensityStartHi": 2,
+    "intensityEndLo": 4,
+    "intensityEndHi": 10,
+    "breatherEvery": 7,
+    "breatherExtraTicks": 72,
+    "breatherWaveId": "",
+    "shuffleSeed": null,
+    "noRepeatLast": 6
+  }
 }

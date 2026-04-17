@@ -1,8 +1,0 @@
-{
-  "id": "th6_extra_sub0_left",
-  "description": "TH06 ecldata7 Timeline0: ins_0(Sub0) at TH x=32,64 y=-48 — library fairies (Sub0 ins_97(0) wiggle column). Scaled x×1.25 → mod 40,80; straight drop approximates ins_46 wiggle.",
-  "enemies": [
-    { "x": 40, "y": -22, "vx": 0.0, "vy": 3.65, "type": "BLUE_FAIRY", "delayTicks": 0 },
-    { "x": 80, "y": -22, "vx": 0.0, "vy": 3.65, "type": "BLUE_FAIRY", "delayTicks": 0 }
-  ]
-}

@@ -10,6 +10,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import mc.sayda.bullethell.BHControlScheme;
 import mc.sayda.bullethell.BHControlSettings;
 import mc.sayda.bullethell.BullethellDataIndex;
+import mc.sayda.bullethell.CharacterUnlocks;
+import mc.sayda.bullethell.boss.CharacterLoader;
 import mc.sayda.bullethell.arena.BulletHellManager;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.boss.BossLoader;
@@ -162,9 +164,25 @@ public final class BulletHellCommands {
                             boolean on = BHDebugMode.toggleGodMode(player.getUUID());
                             player.sendSystemMessage(Component.literal(
                                     "[BulletHell] Debug " + (on ? "ON" : "OFF")
-                                            + " - while in arena: max lives/bombs, invuln, bombs cost nothing."));
+                                            + " - when ON: max lives/bombs, invuln, bombs cost nothing."));
                             return 1;
-                        })));
+                        }))
+
+                // ---- characters unlock/lock <name> (operator) ----
+                .then(Commands.literal("characters")
+                        .requires(src -> src.hasPermission(2))
+                        .then(Commands.literal("unlock")
+                                .then(Commands.argument("character", StringArgumentType.word())
+                                        .suggests((c, b) -> SharedSuggestionProvider.suggest(
+                                                java.util.Arrays.asList(CharacterLoader.REGISTERED_IDS), b))
+                                        .executes(ctx -> charactersSetUnlocked(ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "character"), true))))
+                        .then(Commands.literal("lock")
+                                .then(Commands.argument("character", StringArgumentType.word())
+                                        .suggests((c, b) -> SharedSuggestionProvider.suggest(
+                                                java.util.Arrays.asList(CharacterLoader.REGISTERED_IDS), b))
+                                        .executes(ctx -> charactersSetUnlocked(ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "character"), false))))));
     }
 
     // ---------------------------------------------------------------- helpers
@@ -265,6 +283,24 @@ public final class BulletHellCommands {
         BHPackets.sendControlScheme(player, new ControlSchemePacket(scheme));
         player.sendSystemMessage(Component.literal(
                 "[BulletHell] Control layout set to " + scheme.id() + " - " + BHControlSettings.describe(scheme)));
+        return 1;
+    }
+
+    private static int charactersSetUnlocked(CommandSourceStack src, String characterId, boolean unlock)
+            throws CommandSyntaxException {
+        ServerPlayer player = src.getPlayerOrException();
+        java.util.List<String> ids = java.util.Arrays.asList(CharacterLoader.REGISTERED_IDS);
+        if (!ids.contains(characterId)) {
+            player.sendSystemMessage(Component.literal(
+                    "[BulletHell] Unknown character \"" + characterId + "\". Valid: "
+                            + String.join(", ", ids) + "."));
+            return 0;
+        }
+        CharacterUnlocks.setAdminUnlocked(player, characterId, unlock);
+        BHPackets.sendCharacterUnlocks(player, new mc.sayda.bullethell.network.CharacterUnlockSyncPacket(
+                CharacterUnlocks.snapshot(player)));
+        player.sendSystemMessage(Component.literal(
+                "[BulletHell] " + characterId + (unlock ? " unlocked." : " locked.")));
         return 1;
     }
 }

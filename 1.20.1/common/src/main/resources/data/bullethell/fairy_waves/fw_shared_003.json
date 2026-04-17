@@ -1,0 +1,15 @@
+{
+  "id": "fw_shared_003",
+  "description": "Single green barrier seed.",
+  "enemies": [
+    {
+      "x": 240,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.3,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    }
+  ]
+}

@@ -1,8 +1,0 @@
-{
-  "id": "th6_extra_sub7_side_pair",
-  "description": "Timeline0 Sub7 ins_0/ins_2 at TH (-32,96)/(416,96) — side-entering fairies (scaled x, mid-y).",
-  "enemies": [
-    { "x": -28, "y": 118, "vx": 3.6, "vy": 0.15, "type": "RED_FAIRY", "pattern": "AIMED", "delayTicks": 0 },
-    { "x": 508, "y": 124, "vx": -3.6, "vy": 0.15, "type": "RED_FAIRY", "pattern": "AIMED", "delayTicks": 5 }
-  ]
-}

@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_066",
+  "description": "Paired blues inward (right column).",
+  "enemies": [
+    {
+      "x": 400,
+      "y": -22,
+      "vx": -0.55,
+      "vy": 3.45,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 440,
+      "y": -22,
+      "vx": -0.52,
+      "vy": 3.42,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 2
+    }
+  ]
+}

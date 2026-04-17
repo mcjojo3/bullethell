@@ -2,8 +2,13 @@
   "id": "sanae_boss",
   "name": "Sanae Kochiya",
   "_design_notes": [
-    "Mountain of Faith (TH10) Stage 5 roster from Touhou Wiki / sanae_spellcards.pdf: midboss Esoterica \"Gray Thaumaturgy\", then Miracle \"Daytime Guest Stars\", Sea Opening \"The Day the Sea Split\", Preparation \"Star Ritual to Call the Godly Winds\", Miracle \"God's Wind\".",
-    "Nonspells between spellcards follow Touhou pacing; patterns use existing PatternStep types (LASER_ROTATING pentagram = 5 spokes)."
+    "Primary reference: https://touhou.fandom.com/wiki/Mountain_of_Faith:_Stage_5_Spell_Cards (TH10 Stage 5 spell cards, comments, difficulty splits).",
+    "Midboss Esoterica: E/N «Gray Thaumaturgy»; H «Forgotten Ritual»; L «Secretly Inherited Art of Danmaku».",
+    "Boss Wonder: E/N «Daytime Guest Stars»; H «Night with Bright Guest Stars»; L «Night with Overly Bright Guest Stars» (客星 = guest stars / comets etc.).",
+    "Sea Opening: E/N «The Day the Sea Split» (Exodus Red Sea); H/L «Moses's Miracle». Wiki: lasers frame a canal for the duel; knives are aimed (not laser-bullet spam as main threat).",
+    "Preparation: E/N «Star Ritual to Call the Godly Winds» (Three Kingdoms / borrowing wind); H/L «Takeminakata Invocation».",
+    "Finale Miracle: E/N «God's Wind» (kamikaze typhoons); H/L «Great Miracle: Yasaka's Divine Wind».",
+    "Engine shorthand: Sea Opening uses LASER_ROTATING arms=2 (bidirectional spokes = moving “canal” sectors) + AIMED KNIFE bursts; not LASER_BEAM curtains. PENTAGRAM / DENSE_RING / RAIN for star & wind spells."
   ],
   "introDialog": [
     {
@@ -57,8 +62,8 @@
   },
   "phases": [
     {
-      "_note": "Nonspell 1 — mountain green/blue pressure + light rings.",
-      "hp": 1400,
+      "_note": "Nonspell 1",
+      "hp": 1280,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
       "spellName": "Nonspell 1",
@@ -68,147 +73,294 @@
       "moveSpeed": 118,
       "music": "faith_is_for_the_transient_people",
       "attacks": [
-        { "pattern": "AIMED", "cooldown": 12, "scalingProfile": "PRECISION", "bulletType": "RICE", "arms": 6, "speed": 3.5, "spread": 0.20 },
-        { "pattern": "RING_OFFSET", "cooldown": 19, "scalingProfile": "GEOMETRY", "bulletType": "BUBBLE", "arms": 11, "speed": 2.2 },
-        { "pattern": "AIMED_RING", "cooldown": 18, "bulletType": "STAR", "arms": 5, "spread": 0.18, "speed": 3.4, "ringArms": 10, "ringSpeed": 1.65, "ringBulletType": "RICE" }
+        { "pattern": "AIMED", "cooldown": 12, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "RICE", "arms": 6, "maxScaledArms": 10, "speed": 3.45, "spread": 0.18, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 20, "minCooldown": 16, "scalingProfile": "GEOMETRY", "bulletType": "BUBBLE", "arms": 11, "maxScaledArms": 15, "speed": 2.05, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED_RING", "cooldown": 19, "minCooldown": 15, "bulletType": "STAR", "arms": 5, "spread": 0.17, "speed": 3.25, "ringArms": 10, "ringSpeed": 1.58, "ringBulletType": "RICE", "bulletLifetimeTicks": 220 }
       ]
     },
     {
-      "_note": "Midboss spell card — Esoterica \"Gray Thaumaturgy\" (muted orb/lattice feel).",
-      "hp": 1950,
+      "_note": "E/N midboss — Esoterica «Gray Thaumaturgy»: wiki — stars multiply then bloom to scattered bullets (blue/red feel via STAR then ORB/RICE).",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 1980,
       "isSpellCard": true,
       "spellName": "Esoterica \"Gray Thaumaturgy\"",
-      "spellDurationTicks": [740, 600, 460, 240],
-      "spellBonus": 52000,
+      "spellDurationTicks": [780, 620, 480, 250],
+      "spellBonus": 54000,
+      "movement": "CIRCLE",
+      "moveSpeed": 78,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 14, "minCooldown": 11, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 2, "speed": 3.5, "spread": 0.22, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 12, "minCooldown": 9, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 6, "speed": 3.35, "spread": 0.12, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 10, "minCooldown": 8, "scalingProfile": "SPAM", "bulletType": "ORB", "arms": 7, "maxScaledArms": 11, "speed": 3.1, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 16, "minCooldown": 13, "scalingProfile": "BURST", "bulletType": "RICE", "arms": 14, "maxScaledArms": 18, "speed": 2.1, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "PENTAGRAM", "cooldown": 28, "minCooldown": 24, "scalingProfile": "GEOMETRY", "pentagramPoints": 5, "bulletType": "NEEDLE", "ringBulletType": "ORB", "arms": 5, "speed": 2.0, "bulletLifetimeTicks": 200 }
+      ]
+    },
+    {
+      "_note": "Hard midboss — Esoterica «Forgotten Ritual» (TH10 spell 60).",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "HARD",
+      "hp": 2050,
+      "isSpellCard": true,
+      "spellName": "Esoterica \"Forgotten Ritual\"",
+      "spellDurationTicks": [760, 600, 440, 220],
+      "spellBonus": 56000,
       "movement": "CIRCLE",
       "moveSpeed": 82,
       "music": "",
       "attacks": [
-        { "pattern": "SPIRAL", "cooldown": 6, "minCooldown": 5, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.72, "bulletType": "ORB", "arms": 7, "speed": 2.45, "bulletScale": 1.1, "hitboxScale": 0.52 },
-        { "pattern": "RING_OFFSET", "cooldown": 17, "scalingProfile": "BURST", "bulletType": "NEEDLE", "arms": 13, "speed": 2.35 },
-        { "pattern": "DENSE_RING", "cooldown": 20, "bulletType": "ORB", "arms": 11, "speed": 2.05, "bulletScale": 1.25, "hitboxScale": 0.42, "maxScaledArms": 14 },
-        { "pattern": "AIMED", "cooldown": 11, "scalingProfile": "PRECISION", "bulletType": "RICE", "arms": 5, "speed": 3.7, "spread": 0.16 }
+        { "pattern": "AIMED", "cooldown": 11, "minCooldown": 8, "bulletType": "STAR", "arms": 8, "speed": 3.55, "spread": 0.14, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED_RING", "cooldown": 15, "minCooldown": 12, "bulletType": "STAR", "arms": 5, "spread": 0.16, "speed": 3.2, "ringArms": 12, "ringSpeed": 1.75, "ringBulletType": "ORB", "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 18, "minCooldown": 15, "bulletType": "NEEDLE", "arms": 12, "maxScaledArms": 16, "speed": 2.15, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "SPIRAL", "cooldown": 7, "minCooldown": 6, "scalingProfile": "GEOMETRY", "bulletType": "RICE", "arms": 7, "speed": 2.4, "maxScaledArms": 9, "bulletLifetimeTicks": 200 }
       ]
     },
     {
-      "_note": "Nonspell 2 — tighter aimed + bubble offset.",
-      "hp": 1500,
+      "_note": "Lunatic midboss — Esoterica «Secretly Inherited Art of Danmaku» (TH10 spell 61).",
+      "minDifficulty": "LUNATIC",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2150,
+      "isSpellCard": true,
+      "spellName": "Esoterica \"Secretly Inherited Art of Danmaku\"",
+      "spellDurationTicks": [740, 580, 420, 200],
+      "spellBonus": 58000,
+      "movement": "CIRCLE",
+      "moveSpeed": 86,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 7, "bulletType": "STAR", "arms": 9, "maxScaledArms": 12, "speed": 3.65, "spread": 0.12, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED_RING", "cooldown": 14, "minCooldown": 11, "bulletType": "STAR", "arms": 6, "spread": 0.14, "speed": 3.3, "ringArms": 14, "ringSpeed": 1.82, "ringBulletType": "ORB", "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 17, "minCooldown": 14, "bulletType": "NEEDLE", "arms": 13, "maxScaledArms": 18, "speed": 2.2, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "SPIRAL", "cooldown": 6, "minCooldown": 5, "scalingProfile": "GEOMETRY", "bulletType": "RICE", "arms": 8, "speed": 2.45, "maxScaledArms": 10, "bulletLifetimeTicks": 200 }
+      ]
+    },
+    {
+      "_note": "Nonspell 2",
+      "hp": 1420,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
       "spellName": "Nonspell 2",
       "spellDurationTicks": [0, 0, 0, 0],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 132,
+      "moveSpeed": 128,
       "music": "",
       "attacks": [
-        { "pattern": "AIMED", "cooldown": 10, "bulletType": "STAR", "arms": 6, "speed": 3.65, "spread": 0.18 },
-        { "pattern": "AIMED_RING", "cooldown": 17, "bulletType": "GOLD", "arms": 5, "spread": 0.20, "speed": 3.3, "ringArms": 11, "ringSpeed": 1.7, "ringBulletType": "RICE" },
-        { "pattern": "RING", "cooldown": 22, "bulletType": "BUBBLE", "arms": 12, "speed": 1.85 }
+        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 7, "bulletType": "STAR", "arms": 6, "maxScaledArms": 10, "speed": 3.55, "spread": 0.17, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED_RING", "cooldown": 17, "minCooldown": 14, "bulletType": "GOLD", "arms": 5, "spread": 0.19, "speed": 3.15, "ringArms": 11, "ringSpeed": 1.62, "ringBulletType": "RICE", "bulletLifetimeTicks": 220 },
+        { "pattern": "RING", "cooldown": 23, "minCooldown": 19, "bulletType": "BUBBLE", "arms": 12, "maxScaledArms": 16, "speed": 1.88, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 }
       ]
     },
     {
-      "_note": "Miracle \"Daytime Guest Stars\" — bright comet streams + star rings.",
-      "hp": 2100,
+      "_note": "E/N — Wonder «Daytime Guest Stars»: stars radiate; guest stars = comets/novae (wiki).",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 2180,
       "isSpellCard": true,
-      "spellName": "Miracle \"Daytime Guest Stars\"",
-      "spellDurationTicks": [780, 620, 480, 250],
-      "spellBonus": 62000,
+      "spellName": "Wonder \"Daytime Guest Stars\"",
+      "spellDurationTicks": [800, 640, 500, 260],
+      "spellBonus": 64000,
       "movement": "STATIC",
       "moveSpeed": 0,
       "music": "",
       "attacks": [
-        { "pattern": "AIMED", "cooldown": 9, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 7, "speed": 3.9, "spread": 0.14 },
-        { "pattern": "SPREAD", "cooldown": 7, "bulletType": "STAR", "arms": 6, "speed": 4.6 },
-        { "pattern": "AIMED_RING", "cooldown": 15, "bulletType": "GOLD", "arms": 5, "spread": 0.16, "speed": 3.6, "ringArms": 14, "ringSpeed": 1.8, "ringBulletType": "STAR" },
-        { "pattern": "RING_OFFSET", "cooldown": 18, "bulletType": "ORB", "arms": 12, "speed": 2.15, "bulletScale": 1.2, "hitboxScale": 0.48 }
+        { "pattern": "AIMED", "cooldown": 9, "minCooldown": 6, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 7, "maxScaledArms": 11, "speed": 3.75, "spread": 0.12, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 8, "minCooldown": 6, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 6, "maxScaledArms": 9, "speed": 4.35, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED_RING", "cooldown": 16, "minCooldown": 13, "bulletType": "GOLD", "arms": 5, "spread": 0.14, "speed": 3.45, "ringArms": 14, "ringSpeed": 1.72, "ringBulletType": "STAR", "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 19, "minCooldown": 16, "scalingProfile": "GEOMETRY", "bulletType": "ORB", "arms": 11, "maxScaledArms": 14, "speed": 2.05, "bulletScale": 1.15, "hitboxScale": 0.48, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
       ]
     },
     {
-      "_note": "Nonspell 3 — crossing rice + spiral lane checks.",
-      "hp": 1650,
+      "_note": "Hard — Wonder «Night with Bright Guest Stars» (TH10 spell 64).",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "HARD",
+      "hp": 2240,
+      "isSpellCard": true,
+      "spellName": "Wonder \"Night with Bright Guest Stars\"",
+      "spellDurationTicks": [780, 620, 470, 240],
+      "spellBonus": 66000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED_RING", "cooldown": 14, "minCooldown": 11, "bulletType": "GOLD", "arms": 6, "spread": 0.12, "speed": 3.55, "ringArms": 16, "ringSpeed": 1.82, "ringBulletType": "STAR", "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 7, "minCooldown": 5, "bulletType": "STAR", "arms": 7, "maxScaledArms": 11, "speed": 4.5, "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 17, "minCooldown": 14, "bulletType": "ORB", "arms": 13, "maxScaledArms": 17, "speed": 2.0, "bulletScale": 1.1, "hitboxScale": 0.5, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED", "cooldown": 8, "minCooldown": 6, "bulletType": "GOLD", "arms": 8, "maxScaledArms": 12, "speed": 3.9, "spread": 0.10, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Lunatic — Wonder «Night with Overly Bright Guest Stars» (TH10 spell 65).",
+      "minDifficulty": "LUNATIC",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2320,
+      "isSpellCard": true,
+      "spellName": "Wonder \"Night with Overly Bright Guest Stars\"",
+      "spellDurationTicks": [760, 600, 450, 230],
+      "spellBonus": 68000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "AIMED_RING", "cooldown": 13, "minCooldown": 10, "bulletType": "GOLD", "arms": 6, "spread": 0.11, "speed": 3.65, "ringArms": 17, "ringSpeed": 1.88, "ringBulletType": "STAR", "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 6, "minCooldown": 5, "bulletType": "STAR", "arms": 8, "maxScaledArms": 12, "speed": 4.65, "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 16, "minCooldown": 13, "bulletType": "ORB", "arms": 14, "maxScaledArms": 18, "speed": 2.05, "bulletScale": 1.12, "hitboxScale": 0.48, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED", "cooldown": 7, "minCooldown": 5, "bulletType": "GOLD", "arms": 9, "maxScaledArms": 13, "speed": 4.0, "spread": 0.09, "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Nonspell 3",
+      "hp": 1580,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
       "spellName": "Nonspell 3",
       "spellDurationTicks": [0, 0, 0, 0],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 138,
+      "moveSpeed": 134,
       "music": "",
       "attacks": [
-        { "pattern": "SPIRAL", "cooldown": 7, "bulletType": "RICE", "arms": 6, "speed": 2.5 },
-        { "pattern": "AIMED", "cooldown": 11, "bulletType": "BUBBLE", "arms": 5, "speed": 3.5, "spread": 0.22 },
-        { "pattern": "RING", "cooldown": 20, "bulletType": "STAR", "arms": 11, "speed": 2.0 }
+        { "pattern": "SPIRAL", "cooldown": 8, "minCooldown": 6, "scalingProfile": "GEOMETRY", "bulletType": "RICE", "arms": 6, "speed": 2.45, "bulletLifetimeTicks": 200, "maxScaledArms": 9 },
+        { "pattern": "AIMED", "cooldown": 11, "minCooldown": 8, "bulletType": "BUBBLE", "arms": 5, "speed": 3.4, "spread": 0.20, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING", "cooldown": 21, "minCooldown": 17, "bulletType": "STAR", "arms": 11, "maxScaledArms": 15, "speed": 1.95, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 }
       ]
     },
     {
-      "_note": "Sea Opening \"The Day the Sea Split\" — wide beams + curtain pressure (split-lane read).",
-      "hp": 2300,
+      "_note": "E/N — Sea Opening «The Day the Sea Split». Wiki: lasers create a canal; knives aimed — not laser-bullet curtains. LASER_ROTATING arms=2 = rotating opposing spokes (moving safe sectors); AIMED KNIFE + bursts = knives.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 2360,
       "isSpellCard": true,
       "spellName": "Sea Opening \"The Day the Sea Split\"",
-      "spellDurationTicks": [760, 600, 450, 230],
-      "spellBonus": 72000,
+      "spellDurationTicks": [820, 650, 480, 240],
+      "spellBonus": 74000,
       "movement": "STATIC",
       "moveSpeed": 0,
       "music": "",
       "attacks": [
-        { "pattern": "LASER_BEAM", "cooldown": 10, "bulletType": "SPARK", "arms": 3, "speed": 6.2 },
-        { "pattern": "LASER", "cooldown": 95, "bulletType": "SPARK", "arms": 1, "speed": 0, "laserHalfWidth": 52, "warnTicks": 40, "activeTicks": 58 },
-        { "pattern": "AIMED", "cooldown": 12, "bulletType": "GOLD", "arms": 6, "speed": 3.4, "spread": 0.20 },
-        { "pattern": "LASER_BEAM", "cooldown": 11, "bulletType": "SPARK", "arms": 4, "speed": 5.8 },
-        { "pattern": "RING_OFFSET", "cooldown": 21, "bulletType": "BUBBLE", "arms": 13, "speed": 2.1 }
+        { "pattern": "LASER_ROTATING", "cooldown": 72, "minCooldown": 62, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 2, "speed": 0, "laserHalfWidth": 44, "warnTicks": 36, "activeTicks": 50, "laserRotateAdvanceRad": 0.07 },
+        { "pattern": "AIMED", "cooldown": 11, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 5, "speed": 3.5, "spread": 0.14, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "burstCount": 2, "burstInterval": 9, "cooldown": 26, "minCooldown": 22, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 4, "speed": 3.65, "spread": 0.12, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 20, "minCooldown": 17, "bulletType": "BUBBLE", "arms": 13, "maxScaledArms": 17, "speed": 1.95, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED_RING", "cooldown": 18, "minCooldown": 15, "bulletType": "KNIFE", "arms": 4, "spread": 0.15, "speed": 3.2, "ringArms": 10, "ringSpeed": 1.55, "ringBulletType": "RICE", "bulletLifetimeTicks": 220 }
       ]
     },
     {
-      "_note": "Nonspell 4 — pre-ritual harassment.",
-      "hp": 1750,
+      "_note": "H/L — Sea Opening «Moses's Miracle» (Red Sea); wiki: miracle splits danmaku sea — heavier knife + ring waves, same canal lasers.",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2440,
+      "isSpellCard": true,
+      "spellName": "Sea Opening \"Moses's Miracle\"",
+      "spellDurationTicks": [800, 630, 460, 230],
+      "spellBonus": 76000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "LASER_ROTATING", "cooldown": 64, "minCooldown": 56, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 2, "speed": 0, "laserHalfWidth": 48, "warnTicks": 34, "activeTicks": 48, "laserRotateAdvanceRad": 0.09 },
+        { "pattern": "AIMED", "burstCount": 2, "burstInterval": 8, "cooldown": 22, "minCooldown": 18, "bulletType": "KNIFE", "arms": 5, "speed": 3.75, "spread": 0.11, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 7, "bulletType": "KNIFE", "arms": 7, "maxScaledArms": 11, "speed": 3.55, "spread": 0.13, "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 19, "minCooldown": 16, "bulletType": "BUBBLE", "arms": 13, "maxScaledArms": 17, "speed": 2.05, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED_RING", "cooldown": 16, "minCooldown": 13, "bulletType": "KUNAI", "arms": 5, "spread": 0.14, "speed": 3.1, "ringArms": 12, "ringSpeed": 1.68, "ringBulletType": "RICE", "bulletLifetimeTicks": 220 }
+      ]
+    },
+    {
+      "_note": "Nonspell 4",
+      "hp": 1680,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
       "spellName": "Nonspell 4",
       "spellDurationTicks": [0, 0, 0, 0],
       "spellBonus": 0,
       "movement": "CIRCLE",
-      "moveSpeed": 88,
+      "moveSpeed": 84,
       "music": "",
       "attacks": [
-        { "pattern": "AIMED", "cooldown": 10, "bulletType": "STAR", "arms": 7, "speed": 3.55, "spread": 0.17 },
-        { "pattern": "AIMED_RING", "cooldown": 16, "bulletType": "RICE", "arms": 5, "spread": 0.22, "speed": 3.2, "ringArms": 10, "ringSpeed": 1.75, "ringBulletType": "BUBBLE" },
-        { "pattern": "DENSE_RING", "cooldown": 19, "bulletType": "GOLD", "arms": 12, "speed": 2.2, "maxScaledArms": 15 }
+        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 7, "bulletType": "STAR", "arms": 7, "maxScaledArms": 11, "speed": 3.45, "spread": 0.16, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED_RING", "cooldown": 17, "minCooldown": 14, "bulletType": "RICE", "arms": 5, "spread": 0.20, "speed": 3.05, "ringArms": 10, "ringSpeed": 1.68, "ringBulletType": "BUBBLE", "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 20, "minCooldown": 17, "bulletType": "GOLD", "arms": 11, "maxScaledArms": 15, "speed": 2.1, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 }
       ]
     },
     {
-      "_note": "Preparation \"Star Ritual to Call the Godly Winds\" — pentagram laser spokes + orb lane.",
-      "hp": 2450,
+      "_note": "E/N — Preparation «Star Ritual to Call the Godly Winds»: wiki — stars fall and split into walls; Zhuge Liang / borrowing wind.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 2520,
       "isSpellCard": true,
       "spellName": "Preparation \"Star Ritual to Call the Godly Winds\"",
-      "spellDurationTicks": [800, 640, 490, 260],
-      "spellBonus": 85000,
+      "spellDurationTicks": [840, 680, 520, 270],
+      "spellBonus": 88000,
       "movement": "STATIC",
       "moveSpeed": 0,
       "music": "",
       "attacks": [
-        { "pattern": "LASER_ROTATING", "cooldown": 32, "bulletType": "LASER_HEAD", "arms": 5, "speed": 0, "laserHalfWidth": 6, "warnTicks": 12, "activeTicks": 22 },
-        { "pattern": "AIMED_RING", "cooldown": 14, "bulletType": "GOLD", "arms": 5, "spread": 0.15, "speed": 3.5, "ringArms": 11, "ringSpeed": 1.95, "ringBulletType": "STAR" },
-        { "pattern": "RING_OFFSET", "cooldown": 17, "bulletType": "ORB", "arms": 12, "speed": 2.25, "bulletScale": 1.2, "hitboxScale": 0.45 },
-        { "pattern": "SPREAD", "cooldown": 8, "bulletType": "RICE", "arms": 5, "speed": 4.5 }
+        { "pattern": "SPREAD", "cooldown": 9, "minCooldown": 7, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 6, "maxScaledArms": 9, "speed": 4.0, "bulletLifetimeTicks": 220 },
+        { "pattern": "DENSE_RING", "cooldown": 18, "minCooldown": 15, "bulletType": "STAR", "arms": 11, "maxScaledArms": 15, "speed": 2.1, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "LASER_ROTATING", "cooldown": 38, "minCooldown": 32, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 5, "speed": 0, "laserHalfWidth": 9, "warnTicks": 14, "activeTicks": 24, "laserRotateAdvanceRad": 0.38 },
+        { "pattern": "PENTAGRAM", "cooldown": 24, "minCooldown": 20, "scalingProfile": "GEOMETRY", "pentagramPoints": 5, "bulletType": "STAR", "ringBulletType": "GOLD", "arms": 5, "speed": 2.2, "bulletLifetimeTicks": 200 },
+        { "pattern": "AIMED_RING", "cooldown": 15, "minCooldown": 12, "bulletType": "GOLD", "arms": 5, "spread": 0.14, "speed": 3.35, "ringArms": 12, "ringSpeed": 1.88, "ringBulletType": "RICE", "bulletLifetimeTicks": 220 }
       ]
     },
     {
-      "_note": "Miracle \"God's Wind\" — finale: spirals, bounce bursts, dense curtains.",
-      "hp": 2800,
+      "_note": "H/L — Preparation «Takeminakata Invocation» (wind/agriculture god; Kanako parallel).",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 2600,
+      "isSpellCard": true,
+      "spellName": "Preparation \"Takeminakata Invocation\"",
+      "spellDurationTicks": [820, 660, 500, 260],
+      "spellBonus": 90000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        { "pattern": "RAIN", "cooldown": 11, "minCooldown": 9, "scalingProfile": "SPAM", "bulletType": "RICE", "arms": 10, "maxScaledArms": 14, "speed": 2.75, "spread": 0.05, "rainTop": -12, "rainWidth": 0, "bulletLifetimeTicks": 230 },
+        { "pattern": "LASER_ROTATING", "cooldown": 34, "minCooldown": 28, "bulletType": "LASER_HEAD", "arms": 5, "speed": 0, "laserHalfWidth": 10, "warnTicks": 12, "activeTicks": 22, "laserRotateAdvanceRad": 0.42 },
+        { "pattern": "PENTAGRAM", "cooldown": 22, "minCooldown": 18, "pentagramPoints": 5, "bulletType": "GOLD", "ringBulletType": "STAR", "arms": 5, "speed": 2.35, "bulletLifetimeTicks": 200 },
+        { "pattern": "DENSE_RING", "cooldown": 16, "minCooldown": 13, "bulletType": "ORB", "arms": 13, "maxScaledArms": 17, "speed": 2.15, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "E/N — Miracle «God's Wind»: wiki — curving wall of wind; room to maneuver shrinks.",
+      "minDifficulty": "EASY",
+      "maxDifficulty": "NORMAL",
+      "hp": 2880,
       "isSpellCard": true,
       "spellName": "Miracle \"God's Wind\"",
-      "spellDurationTicks": [760, 580, 420, 210],
-      "spellBonus": 100000,
+      "spellDurationTicks": [800, 620, 450, 220],
+      "spellBonus": 102000,
+      "movement": "CIRCLE",
+      "moveSpeed": 90,
+      "music": "",
+      "attacks": [
+        { "pattern": "RAIN", "cooldown": 10, "minCooldown": 8, "scalingProfile": "SPAM", "bulletType": "RICE", "arms": 9, "maxScaledArms": 14, "speed": 2.85, "spread": 0.06, "rainTop": -14, "rainWidth": 0, "bulletLifetimeTicks": 230 },
+        { "pattern": "SPIRAL", "cooldown": 7, "minCooldown": 5, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.75, "bulletType": "RICE", "arms": 7, "speed": 2.35, "maxScaledArms": 10, "bulletAngularVelocity": 0.0012, "bulletLifetimeTicks": 200 },
+        { "pattern": "BOUNCE", "burstCount": 2, "burstInterval": 7, "cooldown": 44, "minCooldown": 38, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 5, "speed": 3.05, "spread": 0.11, "bounceCount": 2, "bounceDamping": 0.93, "bulletLifetimeTicks": 250 },
+        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 7, "bulletType": "GOLD", "arms": 7, "maxScaledArms": 11, "speed": 3.7, "spread": 0.16, "bulletLifetimeTicks": 220 },
+        { "pattern": "RING_OFFSET", "cooldown": 16, "minCooldown": 13, "scalingProfile": "GEOMETRY", "bulletType": "BUBBLE", "arms": 14, "maxScaledArms": 18, "speed": 2.2, "bulletAngularVelocity": 0.0008, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+      ]
+    },
+    {
+      "_note": "H/L — Great Miracle «Yasaka's Divine Wind» (typhoon / Takeminakata–Yasaka link).",
+      "minDifficulty": "HARD",
+      "maxDifficulty": "LUNATIC",
+      "hp": 3000,
+      "isSpellCard": true,
+      "spellName": "Great Miracle \"Yasaka's Divine Wind\"",
+      "spellDurationTicks": [780, 600, 430, 210],
+      "spellBonus": 105000,
       "movement": "CIRCLE",
       "moveSpeed": 94,
       "music": "",
       "attacks": [
-        { "pattern": "SPIRAL", "cooldown": 5, "minCooldown": 4, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.78, "bulletType": "RICE", "arms": 8, "speed": 2.45, "maxScaledArms": 11 },
-        { "pattern": "BOUNCE", "burstCount": 2, "burstInterval": 7, "cooldown": 42, "minCooldown": 36, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 5, "speed": 3.1, "spread": 0.12, "bounceCount": 2, "bounceDamping": 0.94 },
-        { "pattern": "AIMED", "cooldown": 9, "bulletType": "GOLD", "arms": 7, "speed": 3.85, "spread": 0.18 },
-        { "pattern": "LASER_BEAM", "cooldown": 11, "bulletType": "SPARK", "arms": 4, "speed": 6.4 },
-        { "pattern": "DENSE_RING", "cooldown": 16, "bulletType": "BUBBLE", "arms": 13, "speed": 2.35, "maxScaledArms": 16 }
+        { "pattern": "RAIN", "cooldown": 9, "minCooldown": 7, "scalingProfile": "SPAM", "bulletType": "RICE", "arms": 11, "maxScaledArms": 16, "speed": 2.95, "spread": 0.05, "rainTop": -14, "rainWidth": 0, "bulletLifetimeTicks": 230 },
+        { "pattern": "SPIRAL", "cooldown": 6, "minCooldown": 4, "scalingProfile": "GEOMETRY", "bulletType": "RICE", "arms": 8, "speed": 2.45, "maxScaledArms": 11, "bulletAngularVelocity": 0.0018, "bulletLifetimeTicks": 200 },
+        { "pattern": "DENSE_RING", "cooldown": 15, "minCooldown": 12, "bulletType": "BUBBLE", "arms": 13, "maxScaledArms": 17, "speed": 2.3, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "BOUNCE", "burstCount": 2, "burstInterval": 6, "cooldown": 40, "minCooldown": 34, "bulletType": "STAR", "arms": 6, "speed": 3.2, "spread": 0.10, "bounceCount": 2, "bounceDamping": 0.92, "bulletLifetimeTicks": 250 },
+        { "pattern": "AIMED_RING", "cooldown": 14, "minCooldown": 11, "bulletType": "GOLD", "arms": 5, "spread": 0.13, "speed": 3.5, "ringArms": 14, "ringSpeed": 1.9, "ringBulletType": "RICE", "bulletLifetimeTicks": 220 }
       ]
     }
   ]

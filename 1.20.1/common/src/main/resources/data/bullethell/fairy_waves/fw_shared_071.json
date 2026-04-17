@@ -1,0 +1,30 @@
+{
+  "id": "fw_shared_071",
+  "description": "Sub2 wide 256.",
+  "enemies": [
+    {
+      "x": 112,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.85,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 368,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.85,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 240,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 3.7,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 8
+    }
+  ]
+}

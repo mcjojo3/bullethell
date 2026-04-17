@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_032",
+  "description": "Lower side pair (descending ladder echo).",
+  "enemies": [
+    {
+      "x": 48,
+      "y": -20,
+      "vx": 0.45,
+      "vy": 3.7,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 432,
+      "y": -20,
+      "vx": -0.45,
+      "vy": 3.7,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    }
+  ]
+}

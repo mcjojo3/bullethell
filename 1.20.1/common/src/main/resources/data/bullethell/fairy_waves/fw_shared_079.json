@@ -1,0 +1,54 @@
+{
+  "id": "fw_shared_079",
+  "description": "Yellow ladder (halved density vs TH).",
+  "enemies": [
+    {
+      "x": 120,
+      "y": -22,
+      "vx": 0.25,
+      "vy": 3.85,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 360,
+      "y": -22,
+      "vx": -0.25,
+      "vy": 3.85,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 6
+    },
+    {
+      "x": 120,
+      "y": -22,
+      "vx": 0.25,
+      "vy": 3.85,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 12
+    },
+    {
+      "x": 360,
+      "y": -22,
+      "vx": -0.25,
+      "vy": 3.85,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 18
+    },
+    {
+      "x": 120,
+      "y": -22,
+      "vx": 0.25,
+      "vy": 3.85,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 24
+    },
+    {
+      "x": 360,
+      "y": -22,
+      "vx": -0.25,
+      "vy": 3.85,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 30
+    }
+  ]
+}

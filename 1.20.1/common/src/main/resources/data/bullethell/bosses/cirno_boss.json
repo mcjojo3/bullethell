@@ -3,7 +3,7 @@
   "name": "Cirno",
   "_design_notes": [
     "TH06 ecldata2: Sub0–Sub4 eight-lane + ins_77(180f) pacing; Sub5 burst E2→L10; Sub29 Icicle (120f outer loop ins_3); Sub30 Hail; Sub31 Perfect Freeze layered ins_75 + ins_67; Sub32 Diamond ins_75 type5 + ins_121 overlay.",
-    "Timing: 120f loop ≈40 mod ticks; 180f wait ≈60 mod ticks (wiki/time-and-units.md). ICE + ORB/GOLD for freeze/diamond reads.",
+    "Timing: 120f loop ≈40 mod ticks; 180f wait ≈60 mod ticks (wiki/time-and-units.md). ICE + ORB/GOLD for freeze/diamond reads (generic ORB + gold stars).",
     "Blueprint (PatternStep): bulletLifetimeTicks matches PatternEngine defaults — RING/SPIRAL/DENSE 200, AIMED/SPREAD/LASER_BEAM 220, RAIN 230. AIMED_RING steps omit lifetime so aim uses 220 and ring 200. ringStartAngleRad: -1 = random ring start (RING_OFFSET / AIMED_RING ring), 0 = fixed. bulletAngularVelocity left 0 (straight); spawn offsets unused."
   ],
   "introDialog": [

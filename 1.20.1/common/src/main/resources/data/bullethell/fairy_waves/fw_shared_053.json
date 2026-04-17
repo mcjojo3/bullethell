@@ -1,0 +1,51 @@
+{
+  "id": "fw_shared_053",
+  "description": "Green ceiling canopy.",
+  "enemies": [
+    {
+      "x": 80,
+      "y": -30,
+      "vx": 0.12,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 160,
+      "y": -30,
+      "vx": 0.12,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 4,
+      "pattern": "RING"
+    },
+    {
+      "x": 240,
+      "y": -30,
+      "vx": 0.12,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 8,
+      "pattern": "RING"
+    },
+    {
+      "x": 320,
+      "y": -30,
+      "vx": 0.12,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 12,
+      "pattern": "RING"
+    },
+    {
+      "x": 400,
+      "y": -30,
+      "vx": 0.12,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 16,
+      "pattern": "RING"
+    }
+  ]
+}

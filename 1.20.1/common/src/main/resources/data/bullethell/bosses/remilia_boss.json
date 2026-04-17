@@ -94,7 +94,7 @@
       "music": "",
       "attacks": [
         { "pattern": "LASER_ROTATING", "cooldown": 34, "bulletType": "LASER_HEAD", "arms": 6, "speed": 0, "laserHalfWidth": 6, "warnTicks": 12, "activeTicks": 22 },
-        { "pattern": "AIMED_RING", "cooldown": 13, "bulletType": "STAR", "arms": 5, "spread": 0.14, "speed": 3.8, "ringArms": 10, "ringSpeed": 2.05, "ringBulletType": "ORB", "bulletScale": 1.22, "hitboxScale": 0.45, "ringStartAngleRad": -1 },
+        { "pattern": "AIMED_RING", "cooldown": 13, "bulletType": "STAR", "arms": 5, "spread": 0.14, "speed": 3.8, "ringArms": 10, "ringSpeed": 2.05, "ringBulletType": "CRIMSON_ORB", "bulletScale": 1.22, "hitboxScale": 0.45, "ringStartAngleRad": -1 },
         { "pattern": "RING_OFFSET", "cooldown": 18, "bulletType": "SCARLET", "arms": 12, "speed": 2.05, "bulletScale": 1.36, "hitboxScale": 0.4, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
         { "pattern": "SPREAD", "cooldown": 7, "bulletType": "STAR", "arms": 5, "speed": 4.8, "bulletLifetimeTicks": 220 }
       ]
@@ -115,7 +115,7 @@
         { "pattern": "LASER_ROTATING", "cooldown": 28, "bulletType": "LASER_HEAD", "arms": 10, "speed": 0, "laserHalfWidth": 6, "warnTicks": 10, "activeTicks": 20 },
         { "pattern": "SPREAD", "cooldown": 6, "bulletType": "GOLD", "arms": 6, "speed": 4.95, "bulletScale": 1.28, "hitboxScale": 0.44, "bulletLifetimeTicks": 220 },
         { "pattern": "SPREAD", "cooldown": 6, "bulletType": "STAR", "arms": 6, "speed": 5.15, "bulletScale": 1.18, "hitboxScale": 0.48, "bulletLifetimeTicks": 220 },
-        { "pattern": "DENSE_RING", "cooldown": 16, "bulletType": "ORB", "arms": 12, "speed": 2.25, "maxScaledArms": 15, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 }
+        { "pattern": "DENSE_RING", "cooldown": 16, "bulletType": "CRIMSON_ORB", "arms": 12, "speed": 2.25, "maxScaledArms": 15, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 }
       ]
     },
     {
@@ -131,7 +131,7 @@
       "music": "",
       "attacks": [
         { "pattern": "LASER_BEAM", "cooldown": 22, "minCooldown": 17, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 3, "speed": 4.2, "laserBeamSpread": 0.06, "bulletLifetimeTicks": 220 },
-        { "pattern": "SPIRAL", "cooldown": 5, "minCooldown": 4, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.8, "bulletType": "ORB", "arms": 8, "speed": 2.45, "maxScaledArms": 11, "bulletLifetimeTicks": 200 },
+        { "pattern": "SPIRAL", "cooldown": 5, "minCooldown": 4, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.8, "bulletType": "CRIMSON_ORB", "arms": 8, "speed": 2.45, "maxScaledArms": 11, "bulletLifetimeTicks": 200 },
         { "pattern": "AIMED", "cooldown": 12, "scalingProfile": "PRECISION", "bulletType": "SCARLET_LARGE", "arms": 4, "speed": 3.65, "spread": 0.14, "bulletScale": 1.35, "hitboxScale": 0.55, "bulletLifetimeTicks": 220 },
         { "pattern": "RING_OFFSET", "cooldown": 16, "scalingProfile": "BURST", "bulletType": "STAR", "arms": 12, "speed": 2.35, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
       ]
@@ -150,9 +150,9 @@
       "music": "",
       "attacks": [
         { "pattern": "RAIN", "cooldown": 5, "bulletType": "SCARLET", "arms": 12, "armsMin": 10, "armsMax": 13, "speed": 3.5, "speedMin": 3.25, "speedMax": 3.7, "spread": 0.12, "spreadMin": 0.08, "spreadMax": 0.14, "rainTop": -14, "rainWidth": 560, "densityScale": 0.88, "bulletLifetimeTicks": 230 },
-        { "pattern": "RAIN", "cooldown": 9, "bulletType": "ORB", "arms": 8, "speed": 2.85, "spread": 0.08, "rainTop": -18, "rainWidth": 480, "bulletLifetimeTicks": 230 },
+        { "pattern": "RAIN", "cooldown": 9, "bulletType": "CRIMSON_ORB", "arms": 8, "speed": 2.85, "spread": 0.08, "rainTop": -18, "rainWidth": 480, "bulletLifetimeTicks": 230 },
         { "pattern": "DENSE_RING", "cooldown": 18, "bulletType": "SCARLET", "arms": 12, "speed": 2.05, "bulletScale": 1.85, "hitboxScale": 0.36, "maxScaledArms": 14, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
-        { "pattern": "AIMED", "cooldown": 11, "bulletType": "ORB", "arms": 5, "speed": 3.55, "spread": 0.17, "bulletLifetimeTicks": 220 }
+        { "pattern": "AIMED", "cooldown": 11, "bulletType": "CRIMSON_ORB", "arms": 5, "speed": 3.55, "spread": 0.17, "bulletLifetimeTicks": 220 }
       ]
     },
     {
@@ -189,7 +189,7 @@
         { "pattern": "LASER_BEAM", "cooldown": 21, "minCooldown": 16, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 3, "speed": 4.25, "laserBeamSpread": 0.06, "bulletLifetimeTicks": 220 },
         { "pattern": "SPIRAL", "cooldown": 5, "minCooldown": 4, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.84, "bulletType": "SCARLET", "arms": 9, "speed": 2.55, "bulletScale": 1.28, "hitboxScale": 0.44, "maxScaledArms": 12, "bulletLifetimeTicks": 200 },
         { "pattern": "RING_OFFSET", "cooldown": 14, "scalingProfile": "BURST", "bulletType": "SCARLET", "arms": 12, "speed": 2.45, "bulletScale": 1.2, "hitboxScale": 0.48, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
-        { "pattern": "AIMED_RING", "cooldown": 17, "minCooldown": 8, "scalingProfile": "SPAM", "pressureSoftCap": 0.62, "pressureArmDrop": 0.42, "pressureCooldownBoost": 5, "bulletType": "RICE", "arms": 4, "spread": 0.18, "speed": 3.35, "ringArms": 8, "ringSpeed": 1.75, "ringBulletType": "ORB", "ringStartAngleRad": -1 }
+        { "pattern": "AIMED_RING", "cooldown": 17, "minCooldown": 8, "scalingProfile": "SPAM", "pressureSoftCap": 0.62, "pressureArmDrop": 0.42, "pressureCooldownBoost": 5, "bulletType": "RICE", "arms": 4, "spread": 0.18, "speed": 3.35, "ringArms": 8, "ringSpeed": 1.75, "ringBulletType": "CRIMSON_ORB", "ringStartAngleRad": -1 }
       ]
     },
     {
@@ -243,7 +243,7 @@
       "music": "",
       "attacks": [
         { "pattern": "LASER_BEAM", "cooldown": 18, "minCooldown": 14, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 4, "speed": 4.5, "laserBeamSpread": 0.06, "bulletLifetimeTicks": 220 },
-        { "pattern": "SPIRAL", "cooldown": 4, "minCooldown": 3, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.86, "bulletType": "ORB", "arms": 10, "speed": 2.6, "maxScaledArms": 13, "bulletLifetimeTicks": 200 },
+        { "pattern": "SPIRAL", "cooldown": 4, "minCooldown": 3, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.86, "bulletType": "CRIMSON_ORB", "arms": 10, "speed": 2.6, "maxScaledArms": 13, "bulletLifetimeTicks": 200 },
         { "pattern": "AIMED", "cooldown": 9, "scalingProfile": "PRECISION", "bulletType": "SCARLET", "arms": 6, "speed": 4.0, "spread": 0.15, "bulletScale": 1.2, "hitboxScale": 0.48, "bulletLifetimeTicks": 220 },
         { "pattern": "RING_OFFSET", "cooldown": 13, "scalingProfile": "BURST", "bulletType": "STAR", "arms": 13, "speed": 2.45, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
       ]

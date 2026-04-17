@@ -9,8 +9,9 @@ public class PlayerState2D {
     // Default constants (used when no character definition overrides them)
     public static final float HIT_RADIUS = 3f;
     public static final float GRAZE_RADIUS = 12f;
-    public static final float SPEED_NORMAL = 10f;
-    public static final float SPEED_FOCUSED = 4.5f;
+    /** Arena units per tick at 20 tps; tuned from TH06 px/frame (Reimu 4/2 @ 60fps) × ~3.25. */
+    public static final float SPEED_NORMAL = 13f;
+    public static final float SPEED_FOCUSED = 6.5f;
 
     // Per-instance values set from CharacterDefinition at arena start
     public float hitRadius;
@@ -115,8 +116,13 @@ public class PlayerState2D {
 
     public static final int MAX_POWER = 128;
 
-    public static final int SHOT_COOLDOWN_NORMAL = 3;
-    public static final int SHOT_COOLDOWN_FOCUSED = 5;
+    /**
+     * Volley interval when unfocused (ticks at arena rate). Low values ≈ TH-style mash/hold
+     * stream; override per character via {@code shotCooldownNormal} in character JSON.
+     */
+    public static final int SHOT_COOLDOWN_NORMAL = 2;
+    /** Volley interval when focused; slightly slower than unfocused. */
+    public static final int SHOT_COOLDOWN_FOCUSED = 3;
 
     /**
      * Returns discrete power tier (0–4):

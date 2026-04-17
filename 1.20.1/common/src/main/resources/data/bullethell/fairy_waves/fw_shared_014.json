@@ -1,0 +1,40 @@
+{
+  "id": "fw_shared_014",
+  "description": "Green ring stack + yellow curtains.",
+  "enemies": [
+    {
+      "x": 120,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 120,
+      "y": -34,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 5,
+      "pattern": "RING"
+    },
+    {
+      "x": 300,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 180,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 18
+    }
+  ]
+}

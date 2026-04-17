@@ -1,0 +1,28 @@
+{
+  "id": "fw_shared_016",
+  "description": "Angled greens from sides with ring pattern.",
+  "enemies": [
+    {
+      "x": 32,
+      "y": -24,
+      "vx": 0.25,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING",
+      "angVel": 0.008,
+      "arcTicks": 72
+    },
+    {
+      "x": 448,
+      "y": -24,
+      "vx": -0.25,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING",
+      "angVel": -0.008,
+      "arcTicks": 72
+    }
+  ]
+}

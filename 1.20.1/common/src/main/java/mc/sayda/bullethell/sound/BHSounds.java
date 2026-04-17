@@ -29,6 +29,25 @@ public final class BHSounds {
 
     public static final RegistrySupplier<SoundEvent> MASTER_SPARK = reg("master_spark");
 
+    public static final RegistrySupplier<SoundEvent> BACK = reg("back");
+
+    public static final RegistrySupplier<SoundEvent> DEATH = reg("death");
+
+    public static final RegistrySupplier<SoundEvent> KILL = reg("kill");
+
+    public static final RegistrySupplier<SoundEvent> ONE_UP = reg("one_up");
+
+    /** Point items and small P power pieces (not bomb / full power / 1-up). */
+    public static final RegistrySupplier<SoundEvent> PICK_UP = reg("pick_up");
+
+    public static final RegistrySupplier<SoundEvent> POWER_UP = reg("power_up");
+
+    public static final RegistrySupplier<SoundEvent> POWER_UP_ALT = reg("power_up_alt");
+
+    public static final RegistrySupplier<SoundEvent> SELECT = reg("select");
+
+    public static final RegistrySupplier<SoundEvent> SHOOT = reg("shoot");
+
     /**
      * Touhou themes (Artifex), roughly game order - see {@code sounds.json}.
      */

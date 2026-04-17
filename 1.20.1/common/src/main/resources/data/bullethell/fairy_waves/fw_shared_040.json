@@ -1,0 +1,40 @@
+{
+  "id": "fw_shared_040",
+  "description": "Pincer large + top blues.",
+  "enemies": [
+    {
+      "x": 80,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 2.8,
+      "type": "LARGE_YELLOW",
+      "delayTicks": 0,
+      "pattern": "STREAM"
+    },
+    {
+      "x": 400,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 2.8,
+      "type": "LARGE_YELLOW",
+      "delayTicks": 6,
+      "pattern": "STREAM"
+    },
+    {
+      "x": 160,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 14
+    },
+    {
+      "x": 320,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 14
+    }
+  ]
+}

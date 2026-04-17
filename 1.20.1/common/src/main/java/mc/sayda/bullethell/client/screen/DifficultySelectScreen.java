@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.client.screen;
 
 import mc.sayda.bullethell.arena.DifficultyConfig;
+import mc.sayda.bullethell.client.BHSfx;
 import mc.sayda.bullethell.network.BHPackets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -9,6 +10,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 @Environment(EnvType.CLIENT)
 public class DifficultySelectScreen extends Screen {
@@ -159,9 +161,13 @@ public class DifficultySelectScreen extends Screen {
         int n = DIFFS.length;
         for (int i = 0; i < n; i++) {
             int bx = cardStartX + i * (CARD_W + CARD_GAP);
-            if (mx >= bx && mx < bx + CARD_W
+                if (mx >= bx && mx < bx + CARD_W
                     && my >= cardTopY && my < cardTopY + CARD_H - BTN_H - 6) {
-                if (selectedIndex != i) { selectedIndex = i; rebuildButtons(); }
+                if (selectedIndex != i) {
+                    selectedIndex = i;
+                    BHSfx.playSelect();
+                    rebuildButtons();
+                }
                 return true;
             }
         }
@@ -171,14 +177,33 @@ public class DifficultySelectScreen extends Screen {
     private void confirm() {
         if (!isAllowed(selectedIndex))
             return;
-        Minecraft.getInstance().setScreen(new CharacterSelectScreen(DIFFS[selectedIndex], stageId));
+        BHSfx.playSelect();
+        Minecraft.getInstance().setScreen(new CharacterSelectScreen(DIFFS[selectedIndex], stageId, maxAllowedDifficultyOrdinal));
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 263 && selectedIndex > 0)                   { selectedIndex--; rebuildButtons(); return true; }
-        if (keyCode == 262 && selectedIndex < DIFFS.length - 1)    { selectedIndex++; rebuildButtons(); return true; }
-        if (keyCode == 257 || keyCode == 335)                      { confirm(); return true; }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            BHSfx.playBack();
+            Minecraft.getInstance().setScreen(new LevelSelectScreen());
+            return true;
+        }
+        if (keyCode == 263 && selectedIndex > 0) {
+            selectedIndex--;
+            BHSfx.playSelect();
+            rebuildButtons();
+            return true;
+        }
+        if (keyCode == 262 && selectedIndex < DIFFS.length - 1) {
+            selectedIndex++;
+            BHSfx.playSelect();
+            rebuildButtons();
+            return true;
+        }
+        if (keyCode == 257 || keyCode == 335) {
+            confirm();
+            return true;
+        }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 

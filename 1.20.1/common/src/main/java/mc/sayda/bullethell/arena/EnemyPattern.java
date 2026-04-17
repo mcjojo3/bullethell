@@ -5,8 +5,7 @@ package mc.sayda.bullethell.arena;
  *
  * Touhou difficulty scaling notes (research):
  *   Bullet count and speed scale via DifficultyConfig.densityMult / speedMult.
- *   These values calibrate cleanly: BLUE_FAIRY(bulletCount=2) gives 1 bullet on
- *   Easy, 2 on Normal, 3 on Hard, 4 on Lunatic via round(2 * densityMult).
+ *   BLUE_FAIRY uses bulletCount=1; Lunatic still reaches ~2 via densityMult, capped in AIMED AI.
  *   Fire interval also scales: Normal=40 ticks (2 s), Lunatic=20 ticks (1 s).
  *
  * Pattern notes (per Touhou game conventions TH6-TH14):

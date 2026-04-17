@@ -62,6 +62,13 @@ public class StageDefinition {
     public List<WaveDefinition> waves = new ArrayList<>();
 
     /**
+     * Optional procedural fairy-rush segment: random picks from
+     * {@code fairy_waves/catalog.json} with ramped intensity and spacing. When
+     * non-null, preamble waves should be inline only (no {@code waveRef} rows).
+     */
+    public FairyRushDefinition fairyRush = null;
+
+    /**
      * Gameplay rules for this stage.  Controls drop patterns, PoC behaviour,
      * scoring, death penalty, etc.  All fields have sensible defaults - only
      * override what you want to change.

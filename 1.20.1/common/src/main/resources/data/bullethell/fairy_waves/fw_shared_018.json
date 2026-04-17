@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_018",
+  "description": "Dual large fairies crossing.",
+  "enemies": [
+    {
+      "x": -20,
+      "y": 80,
+      "vx": 3.2,
+      "vy": 0.0,
+      "type": "LARGE_GREEN",
+      "delayTicks": 0
+    },
+    {
+      "x": 500,
+      "y": 80,
+      "vx": -3.2,
+      "vy": 0.0,
+      "type": "LARGE_YELLOW",
+      "delayTicks": 12
+    }
+  ]
+}

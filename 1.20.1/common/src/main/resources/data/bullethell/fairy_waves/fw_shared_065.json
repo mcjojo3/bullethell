@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_065",
+  "description": "Extra basement: paired blues inward (left column).",
+  "enemies": [
+    {
+      "x": 40,
+      "y": -22,
+      "vx": 0.55,
+      "vy": 3.45,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 80,
+      "y": -22,
+      "vx": 0.52,
+      "vy": 3.42,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 2
+    }
+  ]
+}

@@ -11,7 +11,12 @@ public enum GameEvent {
     ITEM_PICKUP,    // item collected
     SPELL_CAPTURED, // spellcard cleared without dying/bombing
     SPELL_FAILED,   // spellcard timer expired or player died during spell
-    SKILL_USED;     // character special ability activated (non-bomb)
+    SKILL_USED,     // character special ability activated (non-bomb)
+    ENEMY_KILL,     // fairy / wave enemy destroyed (SFX for all clients)
+    ITEM_POWER_UP,  // full power or bomb item collected (distinct power-up SFX)
+    ITEM_ONE_UP,    // 1-up item collected
+    ITEM_PICK_UP,   // point item or small P power chip
+    SCORE_EXTEND;   // extra life from score milestone (append last — stable packet ids)
 
     private static final GameEvent[] VALUES = values();
     public static GameEvent fromId(int id) {

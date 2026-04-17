@@ -1,0 +1,86 @@
+{
+  "id": "fw_shared_046",
+  "description": "Final scarlet rush (ten small).",
+  "enemies": [
+    {
+      "x": 28,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 76,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 2
+    },
+    {
+      "x": 124,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": 172,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "RED_FAIRY",
+      "delayTicks": 6
+    },
+    {
+      "x": 220,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 8
+    },
+    {
+      "x": 268,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 316,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "RED_FAIRY",
+      "delayTicks": 12
+    },
+    {
+      "x": 364,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 14
+    },
+    {
+      "x": 412,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 16
+    },
+    {
+      "x": 460,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "RED_FAIRY",
+      "delayTicks": 18
+    }
+  ]
+}

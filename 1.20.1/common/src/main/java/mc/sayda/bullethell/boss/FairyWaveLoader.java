@@ -36,7 +36,11 @@ public final class FairyWaveLoader {
     }
 
     public static void invalidate(String id) { CACHE.remove(id); }
-    public static void invalidateAll()        { CACHE.clear(); }
+
+    public static void invalidateAll() {
+        CACHE.clear();
+        FairyWaveCatalogLoader.invalidate();
+    }
 
     // ---------------------------------------------------------------- internal
 

@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_030",
+  "description": "Side pair pressure (Sub5 echo).",
+  "enemies": [
+    {
+      "x": 32,
+      "y": -22,
+      "vx": 0.55,
+      "vy": 3.8,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 448,
+      "y": -22,
+      "vx": -0.55,
+      "vy": 3.8,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    }
+  ]
+}

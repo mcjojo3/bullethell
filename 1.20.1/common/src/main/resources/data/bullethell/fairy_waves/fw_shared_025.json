@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_025",
+  "description": "SDM approach: sparse red drops.",
+  "enemies": [
+    {
+      "x": 160,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 320,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    }
+  ]
+}

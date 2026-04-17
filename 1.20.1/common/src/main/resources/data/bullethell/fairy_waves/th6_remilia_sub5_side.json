@@ -1,8 +1,0 @@
-{
-  "id": "th6_remilia_sub5_side",
-  "description": "TH06 ecldata6 Timeline0: one Sub5 pair (ins_2 Sub5 at x=416 and ins_0 Sub5 at x=-32, same y). Sub5 uses ins_69 ring spiral burst — GREEN_FAIRY + RING from side lanes.",
-  "enemies": [
-    { "x": -20, "y": 108, "vx": 4.4, "vy": 0.0, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 0 },
-    { "x": 500, "y": 108, "vx": -4.4, "vy": 0.0, "type": "GREEN_FAIRY", "pattern": "RING", "delayTicks": 0 }
-  ]
-}

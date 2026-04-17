@@ -3,6 +3,7 @@ package mc.sayda.bullethell.network;
 import dev.architectury.networking.NetworkManager;
 import mc.sayda.bullethell.BHControlSettings;
 import mc.sayda.bullethell.client.ClientArenaState;
+import mc.sayda.bullethell.network.ArenaEndPacket;
 import mc.sayda.bullethell.client.CharacterUnlockClientState;
 import mc.sayda.bullethell.network.AllPlayerBulletsSyncPacket;
 import mc.sayda.bullethell.client.screen.JoinCharacterSelectScreen;
@@ -90,6 +91,14 @@ public final class BHClientPackets {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.CHARACTER_UNLOCKS, (buf, ctx) -> {
             CharacterUnlockSyncPacket pkt = CharacterUnlockSyncPacket.decode(buf);
             ctx.queue(() -> CharacterUnlockClientState.INSTANCE.applyFromNetwork(pkt.maxDifficultyByCharacter));
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.ARENA_END, (buf, ctx) -> {
+            ArenaEndPacket pkt = ArenaEndPacket.decode(buf);
+            ctx.queue(() -> {
+                mc.sayda.bullethell.client.ClientArenaState.INSTANCE.pendingEndOverlay = true;
+                Minecraft.getInstance().setScreen(new mc.sayda.bullethell.client.screen.ArenaEndScreen(pkt));
+            });
         });
     }
 }

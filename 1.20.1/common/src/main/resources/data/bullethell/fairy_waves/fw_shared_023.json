@@ -1,0 +1,78 @@
+{
+  "id": "fw_shared_023",
+  "description": "Lunatic-density blue wall (nine).",
+  "enemies": [
+    {
+      "x": 32,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 84,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 2
+    },
+    {
+      "x": 136,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": 188,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 6
+    },
+    {
+      "x": 240,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 8
+    },
+    {
+      "x": 292,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 344,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 12
+    },
+    {
+      "x": 396,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 14
+    },
+    {
+      "x": 448,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 16
+    }
+  ]
+}

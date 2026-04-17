@@ -800,19 +800,91 @@
       }
     ]
   },
-  "attack_charge": {
+  "back": {
     "category": "master",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/back"
+      }
+    ]
+  },
+  "select": {
+    "category": "master",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/select"
+      }
+    ]
+  },
+  "death": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/death"
+      }
+    ]
+  },
+  "master_spark": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/master_spark"
+      }
+    ]
+  },
+  "one_up": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/one_up"
+      }
+    ]
+  },
+  "pick_up": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/pick_up"
+      }
+    ]
+  },
+  "power_up": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/power_up"
+      }
+    ]
+  },
+  "power_up_alt": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/power_up_alt"
+      }
+    ]
+  },
+  "shoot": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "bullethell:sfx/shoot"
+      }
+    ]
+  },
+  "attack_charge": {
+    "category": "hostile",
     "sounds": [
       {
         "name": "bullethell:sfx/attack_charge"
       }
     ]
   },
-  "master_spark": {
-    "category": "master",
+  "kill": {
+    "category": "hostile",
     "sounds": [
       {
-        "name": "bullethell:sfx/master_spark"
+        "name": "bullethell:sfx/kill"
       }
     ]
   }

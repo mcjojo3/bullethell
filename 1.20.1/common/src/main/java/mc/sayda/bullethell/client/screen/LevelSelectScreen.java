@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.client.screen;
 
 import mc.sayda.bullethell.boss.BossLoader;
+import mc.sayda.bullethell.client.BHSfx;
 import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.boss.StageDefinition;
 import mc.sayda.bullethell.boss.StageLoader;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
@@ -157,6 +159,7 @@ public class LevelSelectScreen extends Screen {
                     && my >= cardTopY && my < cardTopY + CARD_H - BTN_H - 6) {
                 if (selectedIndex != i) {
                     selectedIndex = i;
+                    BHSfx.playSelect();
                     rebuildButtons();
                 }
                 return true;
@@ -168,19 +171,27 @@ public class LevelSelectScreen extends Screen {
     private void confirm() {
         if (stages.isEmpty())
             return;
+        BHSfx.playSelect();
         Minecraft.getInstance().setScreen(
                 new DifficultySelectScreen(stages.get(selectedIndex).id));
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            BHSfx.playBack();
+            Minecraft.getInstance().setScreen(null);
+            return true;
+        }
         if (keyCode == 263 && selectedIndex > 0) {
             selectedIndex--;
+            BHSfx.playSelect();
             rebuildButtons();
             return true;
         }
         if (keyCode == 262 && selectedIndex < stages.size() - 1) {
             selectedIndex++;
+            BHSfx.playSelect();
             rebuildButtons();
             return true;
         }

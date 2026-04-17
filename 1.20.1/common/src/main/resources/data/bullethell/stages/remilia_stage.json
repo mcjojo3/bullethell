@@ -2,19 +2,17 @@
   "id": "remilia_stage",
   "title": "Scarlet Devil Keep - Final Approach",
   "_design_notes": [
-    "Ported from TH06 ecldata6_bullets.txt timeline Timeline0 + Sub0–Sub7 (see wiki/remilia-th06-reconstruction.md). Timebase: TH frames × (20/60) → mod spawnTick.",
-    "TH06 order: dense Sub1–Sub4 grid → Sub0 top burst → Sub5/Sub7 side/top pressure → Sub8 Sakuya midboss. Campaign: sakuya_stage boss replaces Sub8–Sub14; this stage is Timeline0 through Sub7 only (compressed).",
-    "WaveDefinition: optional minDifficulty / maxDifficulty (EASY…LUNATIC); all waves here rank-agnostic."
+    "remilia_stage: preamble + fairyRush shared catalog (random ramp, procedural spacing)."
   ],
   "stageMusic": "the_young_descendant_of_tepes",
   "bossId": "remilia_boss",
   "nextStageId": "",
   "rules": {
-    "itemDropEveryNthKill": 1,
+    "itemDropEveryNthKill": 3,
     "dropCyclePattern": "POWER,POINT,POWER,POINT,POWER,POINT,POWER,POINT",
-    "largeEnemyDropCyclePattern": "POWER,POINT,POWER,FULL_POWER,POINT,POWER",
-    "bombDropChance": 0.0,
-    "pocFraction": 0.20,
+    "largeEnemyDropCyclePattern": "POWER,POINT,POWER,FULL_POWER,POINT,POWER,POWER,POINT",
+    "scoreExtendEvery": 1500000,
+    "pocFraction": 0.2,
     "pocAutoCollect": true,
     "itemAttractionSpeed": 8.0,
     "deathPowerLoss": 32,
@@ -28,107 +26,54 @@
   },
   "waves": [
     {
-      "_comment": "Preamble (~0–40f): light top entries before Timeline0 main block.",
+      "_comment": "Preamble: gentle top line.",
       "spawnTick": 0,
       "enemies": [
-        { "x": 120, "y": -22, "vx": 0.0, "vy": 3.9, "type": "BLUE_FAIRY", "delayTicks": 0 },
-        { "x": 240, "y": -22, "vx": 0.0, "vy": 4.0, "type": "BLUE_FAIRY", "delayTicks": 12 },
-        { "x": 360, "y": -22, "vx": 0.0, "vy": 3.9, "type": "BLUE_FAIRY", "delayTicks": 24 }
-      ]
-    },
-    {
-      "_comment": "Timeline0 +440f: first Sub1–Sub4 row — ~spawnTick 147 (440÷3).",
-      "spawnTick": 147,
-      "waveRef": "th6_remilia_timeline_row"
-    },
-    {
-      "_comment": "Grid repeat — TH every 8f ≈ 2.7t; compressed to 32t (~96f) per row ×7.",
-      "spawnTick": 179,
-      "waveRef": "th6_remilia_timeline_row"
-    },
-    {
-      "_comment": "Grid repeat 3.",
-      "spawnTick": 211,
-      "waveRef": "th6_remilia_timeline_row"
-    },
-    {
-      "_comment": "Grid repeat 4.",
-      "spawnTick": 243,
-      "waveRef": "th6_remilia_timeline_row"
-    },
-    {
-      "_comment": "Grid repeat 5.",
-      "spawnTick": 275,
-      "waveRef": "th6_remilia_timeline_row"
-    },
-    {
-      "_comment": "Grid repeat 6.",
-      "spawnTick": 307,
-      "waveRef": "th6_remilia_timeline_row"
-    },
-    {
-      "_comment": "Grid repeat 7.",
-      "spawnTick": 339,
-      "waveRef": "th6_remilia_timeline_row"
-    },
-    {
-      "_comment": "Grid repeat 8 — end dense block before Sub0 burst (~+1274f).",
-      "spawnTick": 371,
-      "waveRef": "th6_remilia_timeline_row"
-    },
-    {
-      "_comment": "+80f breather after long grid block.",
-      "spawnTick": 398,
-      "enemies": [
-        { "x": 240, "y": -20, "vx": 0.0, "vy": 3.5, "type": "YELLOW_FAIRY", "delayTicks": 0 }
-      ]
-    },
-    {
-      "_comment": "~+1274f: Sub0 ×4 top (ins_0 Sub0, 160, -48) — staggered center drops.",
-      "spawnTick": 425,
-      "enemies": [
-        { "x": 200, "y": -26, "vx": 0.0, "vy": 4.2, "type": "YELLOW_FAIRY", "delayTicks": 0 },
-        { "x": 200, "y": -26, "vx": 0.0, "vy": 4.2, "type": "YELLOW_FAIRY", "delayTicks": 10 },
-        { "x": 200, "y": -26, "vx": 0.0, "vy": 4.2, "type": "YELLOW_FAIRY", "delayTicks": 20 },
-        { "x": 200, "y": -26, "vx": 0.0, "vy": 4.2, "type": "YELLOW_FAIRY", "delayTicks": 30 }
-      ]
-    },
-    {
-      "_comment": "~+1544f: first Sub5 side pair.",
-      "spawnTick": 515,
-      "waveRef": "th6_remilia_sub5_side"
-    },
-    {
-      "_comment": "~+1664f: Sub7 top lane pair.",
-      "spawnTick": 555,
-      "waveRef": "th6_remilia_sub7_top"
-    },
-    {
-      "_comment": "~+1784f: Sub5 second height block.",
-      "spawnTick": 595,
-      "waveRef": "th6_remilia_sub5_side_lower"
-    },
-    {
-      "_comment": "Late Sub5 ladder feel (~+2084f region): alternating side pressure + top escorts.",
-      "spawnTick": 665,
-      "enemies": [
-        { "x": -24, "y": 100, "vx": 4.6, "vy": 0.0, "type": "RED_FAIRY", "pattern": "AIMED", "delayTicks": 0 },
-        { "x": 504, "y": 100, "vx": -4.6, "vy": 0.0, "type": "RED_FAIRY", "pattern": "AIMED", "delayTicks": 8 },
-        { "x": 120, "y": -22, "vx": 0.0, "vy": 4.1, "type": "BLUE_FAIRY", "delayTicks": 12 },
-        { "x": 360, "y": -22, "vx": 0.0, "vy": 4.1, "type": "BLUE_FAIRY", "delayTicks": 12 }
-      ]
-    },
-    {
-      "_comment": "Final approach before boss: crossing corners + large anchors (TH climax before Sub8).",
-      "spawnTick": 780,
-      "enemies": [
-        { "x": 40,  "y": -24, "vx": 1.5,  "vy": 3.9, "angVel": 0.018, "arcTicks": 72, "type": "RED_FAIRY" },
-        { "x": 118, "y": -24, "vx": 0.8,  "vy": 4.0, "angVel": 0.014, "arcTicks": 72, "type": "BLUE_FAIRY", "delayTicks": 10 },
-        { "x": 440, "y": -24, "vx": -1.5, "vy": 3.9, "angVel": -0.018, "arcTicks": 72, "type": "RED_FAIRY" },
-        { "x": 362, "y": -24, "vx": -0.8, "vy": 4.0, "angVel": -0.014, "arcTicks": 72, "type": "BLUE_FAIRY", "delayTicks": 10 },
-        { "x": -24, "y": 72, "vx": 3.9, "vy": 0.0, "angVel": 0.018, "arcTicks": 84, "type": "LARGE_GREEN" },
-        { "x": 504, "y": 72, "vx": -3.9, "vy": 0.0, "angVel": -0.018, "arcTicks": 84, "type": "LARGE_YELLOW" }
+        {
+          "x": 120,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 3.8,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 0
+        },
+        {
+          "x": 240,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 3.9,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 12
+        },
+        {
+          "x": 360,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 3.8,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 24
+        }
       ]
     }
-  ]
+  ],
+  "fairyRush": {
+    "catalogId": "default",
+    "slotCount": 48,
+    "startTick": 135,
+    "gapTicksStartMin": 72,
+    "gapTicksStartMax": 118,
+    "gapTicksEndMin": 22,
+    "gapTicksEndMax": 42,
+    "gapEasing": "SMOOTHSTEP",
+    "jitterTicks": 16,
+    "intensityStartLo": 0,
+    "intensityStartHi": 2,
+    "intensityEndLo": 4,
+    "intensityEndHi": 10,
+    "breatherEvery": 7,
+    "breatherExtraTicks": 72,
+    "breatherWaveId": "",
+    "shuffleSeed": null,
+    "noRepeatLast": 6
+  }
 }

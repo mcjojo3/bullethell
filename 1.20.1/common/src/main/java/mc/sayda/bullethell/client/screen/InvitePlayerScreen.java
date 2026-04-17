@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.client.screen;
 
 import com.mojang.authlib.GameProfile;
+import mc.sayda.bullethell.client.BHSfx;
 import mc.sayda.bullethell.network.BHPackets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -140,6 +141,7 @@ public class InvitePlayerScreen extends Screen {
     private void confirm() {
         if (players.isEmpty()) return;
         PlayerInfo target = players.get(selectedIndex);
+        BHSfx.playSelect();
         BHPackets.sendInvitePlayer(target.getProfile().getId());
         onClose();
     }
@@ -152,6 +154,7 @@ public class InvitePlayerScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == 256) { // ESC
+            BHSfx.playBack();
             onClose();
             return true;
         }
@@ -159,11 +162,13 @@ public class InvitePlayerScreen extends Screen {
         
         if (keyCode == 263 && selectedIndex > 0) {
             selectedIndex--;
+            BHSfx.playSelect();
             rebuildButtons();
             return true;
         }
         if (keyCode == 262 && selectedIndex < players.size() - 1) {
             selectedIndex++;
+            BHSfx.playSelect();
             rebuildButtons();
             return true;
         }

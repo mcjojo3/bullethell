@@ -164,10 +164,10 @@ public final class BossProgression {
         if (req == null || req.isEmpty())
             return "";
         return switch (bossId) {
-            case "sakuya_boss" -> "Defeat Cirno first.";
+            case "sakuya_boss" -> "Defeat Cirno first. Lowest clear difficulty is your cap.";
             case "remilia_boss" -> "Defeat both Cirno and Sakuya first. Lowest clear difficulty is your cap.";
-            case "flandre_boss" -> "Clear Remilia (Stage 6) on any difficulty first.";
-            default -> "Defeat prerequisite bosses first.";
+            case "flandre_boss" -> "Defeat Remilia first. Lowest clear difficulty is your cap.";
+            default -> "Defeat prerequisite bosses first. Lowest clear difficulty is your cap.";
         };
     }
 

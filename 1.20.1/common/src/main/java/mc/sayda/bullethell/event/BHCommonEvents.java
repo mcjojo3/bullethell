@@ -4,8 +4,9 @@ import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.event.events.common.TickEvent;
 import mc.sayda.bullethell.BHGameRules;
-import mc.sayda.bullethell.BossRushMode;
 import mc.sayda.bullethell.BossProgression;
+import mc.sayda.bullethell.BossRushMode;
+import mc.sayda.bullethell.CharacterUnlocks;
 import mc.sayda.bullethell.arena.ArenaContext;
 import mc.sayda.bullethell.arena.ArenaEndShareSnapshot;
 import mc.sayda.bullethell.arena.BulletHellManager;
@@ -63,6 +64,9 @@ public class BHCommonEvents {
                 if (ctx.isOver()) {
                     if (ctx.isWon()) {
                         String bossId = (ctx.boss != null) ? ctx.boss.id : "";
+                        // Derive character id from boss id: "<charId>_boss" → "<charId>"
+                        String charReward = (bossId != null && bossId.endsWith("_boss"))
+                                ? bossId.substring(0, bossId.length() - 5) : "";
                         for (UUID pid : ctx.allParticipants()) {
                             ServerPlayer p = server.getPlayerList().getPlayer(pid);
                             if (p == null || bossId == null || bossId.isBlank())
@@ -71,6 +75,18 @@ public class BHCommonEvents {
                             if (improved) {
                                 p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                                         "[BulletHell] Recorded clear: " + bossId + " (" + ctx.difficulty.name() + ")."));
+                            }
+                            // Notify if this clear unlocked a playable character
+                            if (!charReward.isBlank()) {
+                                boolean charUnlocked = CharacterUnlocks.grantThroughDifficulty(p, charReward, ctx.difficulty);
+                                if (charUnlocked) {
+                                    String charName = charReward.substring(0, 1).toUpperCase() + charReward.substring(1);
+                                    p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                                            "[BulletHell] " + charName + " is now playable on " + ctx.difficulty.name() + " and below!"));
+                                }
+                                // Always sync unlock state after a win so character select reflects it
+                                BHPackets.sendCharacterUnlocks(p, new mc.sayda.bullethell.network.CharacterUnlockSyncPacket(
+                                        CharacterUnlocks.snapshot(p)));
                             }
                         }
                     }
@@ -81,10 +97,11 @@ public class BHCommonEvents {
                     }
                     for (UUID pid : ctx.allParticipants()) {
                         ServerPlayer p = server.getPlayerList().getPlayer(pid);
-                        if (p != null) {
-                            BHPackets.sendToPlayer(p, ArenaStatePacket.stopped());
-                            sendEndStats(p, ctx);
-                        }
+                        if (p == null) continue;
+                        // Record snapshot + send end overlay BEFORE stopped() so
+                        // the client can open ArenaEndScreen before the arena clears
+                        sendEndStats(p, ctx);
+                        BHPackets.sendToPlayer(p, ArenaStatePacket.stopped());
                     }
                     toRemove.add(uuid);
                     continue;
@@ -267,7 +284,7 @@ public class BHCommonEvents {
         }
 
         // Shared run score/stats carry over through chained stages.
-        nextCtx.score.addScore(carryScore);
+        nextCtx.score.importCarriedScore(carryScore, nextCtx.rules.scoreExtendEvery);
         for (var e : carry.entrySet()) {
             var ps = nextCtx.getPlayerState(e.getKey());
             if (ps == null)
@@ -328,7 +345,35 @@ public class BHCommonEvents {
     private static void sendEndStats(ServerPlayer player, ArenaContext ctx) {
         ArenaEndShareSnapshot snap = ArenaEndShareSnapshot.capture(player, ctx);
         LastArenaShareState.record(player.getUUID(), snap);
-        for (var line : snap.buildLines())
-            player.sendSystemMessage(line);
+
+        // Build ArenaEndPacket for the client-side overlay
+        java.util.UUID pid = player.getUUID();
+        mc.sayda.bullethell.arena.PlayerState2D ps = ctx.getPlayerState(pid);
+        if (ps == null) ps = ctx.player;
+        String bossId    = ctx.boss != null ? ctx.boss.id   : "";
+        String bossName  = ctx.boss != null ? ctx.boss.name : "";
+        String charId    = ctx.getCharacterId(pid);
+        String charName  = mc.sayda.bullethell.boss.CharacterLoader.load(charId).name;
+        String stageId   = ctx.stage != null ? ctx.stage.id : "";
+        // Resolve boss quote (victory or defeat)
+        String bossDialog;
+        if (ctx.isWon()) {
+            String perChar = ctx.boss != null
+                    ? ctx.boss.victoryDialogByCharacter.getOrDefault(charId, "") : "";
+            bossDialog = !perChar.isBlank() ? perChar
+                    : (ctx.boss != null ? ctx.boss.victoryDialog : "");
+        } else {
+            String perChar = ctx.boss != null
+                    ? ctx.boss.defeatDialogByCharacter.getOrDefault(charId, "") : "";
+            bossDialog = !perChar.isBlank() ? perChar
+                    : (ctx.boss != null ? ctx.boss.defeatDialog : "");
+        }
+
+        BHPackets.sendArenaEnd(player, new mc.sayda.bullethell.network.ArenaEndPacket(
+                ctx.isWon(), bossName, bossId, charId, charName, bossDialog,
+                ctx.score.getScore(), ps.lives, ps.bombs, ps.graze,
+                ctx.getSpellsCaptured(), ctx.getSpellsAttempted(),
+                (float) ctx.getCompletionPercentage(),
+                stageId, ctx.difficulty.name()));
     }
 }

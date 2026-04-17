@@ -1,0 +1,78 @@
+{
+  "id": "fw_shared_082",
+  "description": "Extra climax: nine-fairy riot.",
+  "enemies": [
+    {
+      "x": 28,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 80,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 2
+    },
+    {
+      "x": 132,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": 184,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 6
+    },
+    {
+      "x": 236,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "RED_FAIRY",
+      "delayTicks": 8
+    },
+    {
+      "x": 288,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 340,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 12
+    },
+    {
+      "x": 392,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 14
+    },
+    {
+      "x": 444,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "RED_FAIRY",
+      "delayTicks": 16
+    }
+  ]
+}

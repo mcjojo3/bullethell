@@ -11,16 +11,19 @@ import mc.sayda.bullethell.network.BulletDeltaPacket;
 import mc.sayda.bullethell.network.BulletFullSyncPacket;
 import mc.sayda.bullethell.network.CoopPlayersSyncPacket;
 import mc.sayda.bullethell.network.EnemySyncPacket;
+import mc.sayda.bullethell.arena.GameEvent;
 import mc.sayda.bullethell.network.GameEventPacket;
 import mc.sayda.bullethell.network.ItemSyncPacket;
 import mc.sayda.bullethell.network.LaserSyncPacket;
 import mc.sayda.bullethell.network.PlayerBulletSyncPacket;
+import mc.sayda.bullethell.sound.BHSounds;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 
 import mc.sayda.bullethell.network.CoopPlayersSyncPacket.Entry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,8 +81,17 @@ public class ClientArenaState {
      */
     public final Map<Integer, BulletPool> allPlayerBullets = new HashMap<>();
 
+    /** For local-player shoot SFX: detect slots that became active since last sync. */
+    private final boolean[] prevLocalPlayerBulletsActive = new boolean[BulletPool.PLAYER_CAPACITY];
+
     /** True when this player is dead but watching the coop partner's run. */
     public boolean spectating = false;
+
+    /**
+     * Set just before ArenaEndScreen opens so that the stopped() packet does not
+     * immediately reset state. ArenaEndScreen.removed() clears this and calls reset().
+     */
+    public boolean pendingEndOverlay = false;
 
     /** Operator {@code /bullethell debug} god-mode (from server). */
     public boolean debugGodMode = false;
@@ -157,13 +169,11 @@ public class ClientArenaState {
             String dialogSpeaker, String dialogText, int dialogLineIndex, int dialogReadyCount, int dialogTotalCount,
             boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount) {
 
-        active = pktActive;
-        spectating = pktSpectating;
-        this.debugGodMode = debugGodMode;
-        this.debugArenaTick = debugArenaTick;
-        this.debugPatternCooldown = debugPatternCooldown;
-        this.debugEnemyBulletCount = debugEnemyBulletCount;
-        if (!active) {
+        if (!pktActive) {
+            // ArenaEndScreen sets this flag before opening so the renderer keeps drawing
+            // the frozen arena behind the overlay. Let removed() handle cleanup.
+            if (pendingEndOverlay) return;
+            active = false;
             BHScaleManager.restoreOriginalScale();
             reset();
             net.minecraft.client.gui.screens.Screen currentScreen = Minecraft.getInstance().screen;
@@ -173,6 +183,12 @@ public class ClientArenaState {
             }
             return;
         }
+        active = true;
+        spectating = pktSpectating;
+        this.debugGodMode = debugGodMode;
+        this.debugArenaTick = debugArenaTick;
+        this.debugPatternCooldown = debugPatternCooldown;
+        this.debugEnemyBulletCount = debugEnemyBulletCount;
 
         net.minecraft.client.gui.screens.Screen currentScreen = Minecraft.getInstance().screen;
         if (!(currentScreen instanceof mc.sayda.bullethell.client.screen.ArenaPlayScreen) &&
@@ -311,10 +327,34 @@ public class ClientArenaState {
                 for (int i = 0; i < BulletPool.PLAYER_CAPACITY; i++)
                     playerBullets.setSlotData(i, pb.data()[i], pb.active()[i]);
         }
+        if (active) {
+            BulletPool local = allPlayerBullets.get(playerIndex);
+            if (local != null) {
+                boolean anyNew = false;
+                for (int i = 0; i < BulletPool.PLAYER_CAPACITY; i++) {
+                    boolean now = local.isActive(i);
+                    if (now && !prevLocalPlayerBulletsActive[i])
+                        anyNew = true;
+                    prevLocalPlayerBulletsActive[i] = now;
+                }
+                if (anyNew)
+                    BHSfx.play(BHSounds.SHOOT::get);
+            }
+        }
     }
 
     public void applyGameEvent(GameEventPacket pkt) {
-        ScreenFXQueue.INSTANCE.push(pkt.event);
+        GameEvent ev = pkt.event;
+        switch (ev) {
+            case HIT -> BHSfx.play(BHSounds.DEATH::get);
+            case ENEMY_KILL -> BHSfx.play(BHSounds.KILL::get);
+            case ITEM_PICK_UP -> BHSfx.play(BHSounds.PICK_UP::get);
+            case ITEM_POWER_UP -> BHSfx.play(BHSounds.POWER_UP::get);
+            case ITEM_ONE_UP, SCORE_EXTEND -> BHSfx.play(BHSounds.ONE_UP::get);
+            default -> {
+            }
+        }
+        ScreenFXQueue.INSTANCE.push(ev);
     }
 
     // ---------------------------------------------------------------- animation
@@ -370,6 +410,7 @@ public class ClientArenaState {
     public void reset() {
         active = false;
         spectating = false;
+        pendingEndOverlay = false;
         debugGodMode = false;
         debugArenaTick = 0;
         debugPatternCooldown = 0;
@@ -406,6 +447,7 @@ public class ClientArenaState {
         enemies.clearAll();
         lasers.clearAll();
         coopPlayers.clear();
+        Arrays.fill(prevLocalPlayerBulletsActive, false);
         ScreenFXQueue.INSTANCE.reset();
     }
 }

@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.client.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import mc.sayda.bullethell.client.BHSfx;
 import mc.sayda.bullethell.network.BHPackets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -69,15 +70,18 @@ public class ArenaQuitScreen extends Screen {
         if (key == GLFW.GLFW_KEY_UP) {
             selectedIndex--;
             if (selectedIndex < 0) selectedIndex = 2;
+            BHSfx.playSelect();
             return true;
         } else if (key == GLFW.GLFW_KEY_DOWN) {
             selectedIndex++;
             if (selectedIndex > 2) selectedIndex = 0;
+            BHSfx.playSelect();
             return true;
         } else if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER || key == GLFW.GLFW_KEY_Z) {
             confirm();
             return true;
         } else if (key == GLFW.GLFW_KEY_ESCAPE) {
+            BHSfx.playBack();
             cancel();
             return true;
         }
@@ -86,10 +90,13 @@ public class ArenaQuitScreen extends Screen {
 
     private void confirm() {
         if (selectedIndex == 0) {
+            BHSfx.playBack();
             cancel();
         } else if (selectedIndex == 1) {
+            BHSfx.playSelect();
             Minecraft.getInstance().setScreen(new InvitePlayerScreen(this));
         } else if (selectedIndex == 2) {
+            BHSfx.playSelect();
             releasePause();
             BHPackets.sendQuitArena();
             Minecraft.getInstance().setScreen(null); // Return to game

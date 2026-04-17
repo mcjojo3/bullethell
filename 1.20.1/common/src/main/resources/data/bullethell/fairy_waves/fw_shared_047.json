@@ -1,0 +1,46 @@
+{
+  "id": "fw_shared_047",
+  "description": "Bamboo opening: five reds wide.",
+  "enemies": [
+    {
+      "x": 60,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 150,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 240,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 20
+    },
+    {
+      "x": 330,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 30
+    },
+    {
+      "x": 420,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 40
+    }
+  ]
+}

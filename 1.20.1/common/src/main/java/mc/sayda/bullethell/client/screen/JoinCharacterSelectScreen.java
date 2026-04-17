@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.client.screen;
 
 import mc.sayda.bullethell.entity.BHAttributes;
+import mc.sayda.bullethell.client.BHSfx;
 import mc.sayda.bullethell.client.CharacterUnlockClientState;
 import mc.sayda.bullethell.boss.CharacterDefinition;
 import mc.sayda.bullethell.boss.CharacterLoader;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.UUID;
@@ -155,7 +157,11 @@ public class JoinCharacterSelectScreen extends Screen {
             if (mx >= bx && mx < bx + CARD_W && my >= py && my < py + PORTRAIT_SIZE + INFO_H) {
                 if (!isUnlocked(i))
                     return true;
-                if (selectedIndex != i) { selectedIndex = i; rebuildButtons(); }
+                if (selectedIndex != i) {
+                    selectedIndex = i;
+                    BHSfx.playSelect();
+                    rebuildButtons();
+                }
                 return true;
             }
         }
@@ -165,15 +171,34 @@ public class JoinCharacterSelectScreen extends Screen {
     private void confirm() {
         if (characters.isEmpty()) return;
         if (!isUnlocked(selectedIndex)) return;
+        BHSfx.playSelect();
         BHPackets.sendJoinMatch(hostUuid, characters.get(selectedIndex).id);
         onClose();
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 263 && selectedIndex > 0)                       { selectedIndex = findPrevUnlocked(selectedIndex); rebuildButtons(); return true; }
-        if (keyCode == 262 && selectedIndex < characters.size() - 1)   { selectedIndex = findNextUnlocked(selectedIndex); rebuildButtons(); return true; }
-        if (keyCode == 257 || keyCode == 335)                          { confirm(); return true; }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            BHSfx.playBack();
+            Minecraft.getInstance().setScreen(null);
+            return true;
+        }
+        if (keyCode == 263 && selectedIndex > 0) {
+            selectedIndex = findPrevUnlocked(selectedIndex);
+            BHSfx.playSelect();
+            rebuildButtons();
+            return true;
+        }
+        if (keyCode == 262 && selectedIndex < characters.size() - 1) {
+            selectedIndex = findNextUnlocked(selectedIndex);
+            BHSfx.playSelect();
+            rebuildButtons();
+            return true;
+        }
+        if (keyCode == 257 || keyCode == 335) {
+            confirm();
+            return true;
+        }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 

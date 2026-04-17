@@ -1,8 +1,0 @@
-{
-  "id": "th6_extra_sub8_right_pair",
-  "description": "Timeline0 Sub8 ins_2 column (TH 320,352 → mod 400,440).",
-  "enemies": [
-    { "x": 400, "y": -22, "vx": 0.0, "vy": 3.78, "type": "BLUE_FAIRY", "delayTicks": 0 },
-    { "x": 440, "y": -22, "vx": 0.0, "vy": 3.78, "type": "BLUE_FAIRY", "delayTicks": 5 }
-  ]
-}

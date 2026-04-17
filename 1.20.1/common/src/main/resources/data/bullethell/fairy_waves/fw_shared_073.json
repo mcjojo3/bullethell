@@ -1,0 +1,31 @@
+{
+  "id": "fw_shared_073",
+  "description": "Sub4 center heavy.",
+  "enemies": [
+    {
+      "x": 160,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 320,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 240,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "LARGE_FAIRY",
+      "delayTicks": 10,
+      "pattern": "AIMED_RING"
+    }
+  ]
+}

@@ -3,7 +3,8 @@ package mc.sayda.bullethell.pattern;
 /** Bullet visual type. id == ordinal - safe to store in BulletPool float array. */
 public enum BulletType {
 
-    ORB        (0xFFFF4444, 4f, 1f),  // red
+    /** Generic large orb ({@code orb.png}); neutral / light tint — default for bosses and patterns. */
+    ORB        (0xFFFFFFFF, 4f, 1f),
     /** Blue star / curtain shots; hitbox smaller than drawn star footprint. */
     STAR       (0xFF44AAFF, 4f, 0.76f),
     /** Yellow fairy rice stream; forgiving hitbox vs thin sprite. */
@@ -11,7 +12,8 @@ public enum BulletType {
     LASER_HEAD (0xFFFF44FF, 6f, 1f),  // magenta
     BUBBLE     (0xFF44FFAA, 5f, 1f),  // teal
     PLAYER_SHOT(0xFF88FF44, 3f, 1f),  // green - player-fired bullets
-    GOLD       (0xFFFFDD00, 4f, 1f),  // golden yellow - Marisa star bullets
+    /** Marisa / player 4-point stars ({@code star_4.png}); tight hitbox vs wide sprite. */
+    GOLD       (0xFFFFDD00, 4f, 0.42f),
     SPARK      (0xFFFFFF88, 8f, 1f),  // bright white-yellow - Master Spark / Final Spark
     HOMING_ORB (0xFFFF88FF, 6f, 1f),  // magenta/purple - Reimu's homing orbs
     /** Sakuya knives; slightly forgiving vs blade sprite. */
@@ -36,7 +38,16 @@ public enum BulletType {
      * Sakuya-style throwing knives; {@code knife.png}. Same collision and tuning as
      * {@link #KUNAI}; tinted red in the renderer (TH-style) while {@link #KUNAI} stays cool-toned.
      */
-    KNIFE      (0xFFFF5058, 4f, 0.82f);
+    KNIFE      (0xFFFF5058, 4f, 0.82f),
+    /**
+     * Reimu homing amulets ({@code ofuda.png}). Tint is not applied in the renderer.
+     */
+    AMULET     (0xFFFFDDFF, 4f, 1f),
+    /**
+     * Crimson large orb ({@code orb.png}); classic red preset for Scarlet-themed patterns
+     * (e.g. Remilia) when {@link #ORB} is too neutral.
+     */
+    CRIMSON_ORB(0xFFFF4444, 4f, 1f);
 
     public final int   color;
     public final float radius;

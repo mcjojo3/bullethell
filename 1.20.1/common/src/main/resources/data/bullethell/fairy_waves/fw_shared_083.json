@@ -1,0 +1,43 @@
+{
+  "id": "fw_shared_083",
+  "description": "Omni convergence (basement).",
+  "enemies": [
+    {
+      "x": 48,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.3,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": -0.019,
+      "arcTicks": 88
+    },
+    {
+      "x": 432,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.3,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": 0.019,
+      "arcTicks": 88
+    },
+    {
+      "x": -22,
+      "y": 80,
+      "vx": 4.2,
+      "vy": 0.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 502,
+      "y": 120,
+      "vx": -4.2,
+      "vy": 0.0,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "id": "fw_shared_015",
+  "description": "Full-width blue rainfall (six).",
+  "enemies": [
+    {
+      "x": 40,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 116,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": 192,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 8
+    },
+    {
+      "x": 268,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 344,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": 420,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 8
+    }
+  ]
+}

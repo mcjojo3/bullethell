@@ -1,0 +1,31 @@
+{
+  "id": "fw_shared_055",
+  "description": "Pincer: red stream + yellow curtain.",
+  "enemies": [
+    {
+      "x": 32,
+      "y": -22,
+      "vx": 0.5,
+      "vy": 3.9,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 448,
+      "y": -22,
+      "vx": -0.5,
+      "vy": 3.9,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 240,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 10,
+      "pattern": "RING"
+    }
+  ]
+}

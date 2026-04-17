@@ -1,0 +1,46 @@
+{
+  "id": "fw_shared_063",
+  "description": "Triple large + small escorts.",
+  "enemies": [
+    {
+      "x": 80,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 2.5,
+      "type": "LARGE_RED",
+      "delayTicks": 0
+    },
+    {
+      "x": 240,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 2.5,
+      "type": "LARGE_GREEN",
+      "delayTicks": 6
+    },
+    {
+      "x": 400,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 2.5,
+      "type": "LARGE_YELLOW",
+      "delayTicks": 12
+    },
+    {
+      "x": 160,
+      "y": -18,
+      "vx": 0.0,
+      "vy": 4.2,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 20
+    },
+    {
+      "x": 320,
+      "y": -18,
+      "vx": 0.0,
+      "vy": 4.2,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 20
+    }
+  ]
+}

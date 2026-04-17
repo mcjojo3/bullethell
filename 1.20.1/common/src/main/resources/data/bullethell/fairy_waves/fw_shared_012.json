@@ -1,0 +1,31 @@
+{
+  "id": "fw_shared_012",
+  "description": "Large anchor + blue escorts (Daiyousei homage).",
+  "enemies": [
+    {
+      "x": 240,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 2.7,
+      "type": "LARGE_FAIRY",
+      "delayTicks": 0,
+      "pattern": "AIMED_RING"
+    },
+    {
+      "x": 140,
+      "y": -20,
+      "vx": 0.2,
+      "vy": 3.6,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 340,
+      "y": -20,
+      "vx": -0.2,
+      "vy": 3.6,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 10
+    }
+  ]
+}

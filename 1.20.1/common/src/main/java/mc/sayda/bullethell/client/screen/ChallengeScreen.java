@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.client.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import mc.sayda.bullethell.client.BHSfx;
 import mc.sayda.bullethell.network.OpenChallengePacket;
 import mc.sayda.bullethell.render.BossSheetLayout;
 import mc.sayda.bullethell.arena.DifficultyConfig;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.lwjgl.glfw.GLFW;
 
 /**
  * Challenge dialog shown when a player right-clicks a {@link mc.sayda.bullethell.entity.BHNpc}.
@@ -73,9 +75,22 @@ public class ChallengeScreen extends Screen {
 
         addRenderableWidget(Button.builder(
                 Component.literal("Decline"),
-                btn -> onClose())
+                btn -> {
+                    BHSfx.playBack();
+                    onClose();
+                })
                 .bounds(btnStartX + btnW + 12, btnY, btnW, btnH)
                 .build());
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            BHSfx.playBack();
+            onClose();
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override

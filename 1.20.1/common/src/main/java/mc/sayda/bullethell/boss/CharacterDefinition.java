@@ -42,11 +42,15 @@ public class CharacterDefinition {
      */
     public float pickupRadius = 20.0f;
 
-    /** Movement speed (arena units / tick) when not focused. */
-    public float speedNormal = 10.0f;
+    /**
+     * Movement speed (arena units / tick at 20 tps). Baseline matches TH06 Reimu
+     * (4.0 / 2.0 px/frame @ 60fps) scaled into arena space; see
+     * {@code wiki/player-shots-and-references.md} (movement section).
+     */
+    public float speedNormal = 13.0f;
 
     /** Movement speed (arena units / tick) while holding focus (Shift). */
-    public float speedFocused = 4.5f;
+    public float speedFocused = 6.5f;
 
     // TH19-style controls (Z shoot, X charge): passive build when X is not held.
     /** Multiplier for passive charge while shooting (smaller = slower). */
@@ -83,4 +87,24 @@ public class CharacterDefinition {
      * Keep to ≤40 characters so it fits without wrapping.
      */
     public String description = "Balanced - small hitbox";
+
+    /**
+     * Player shot layout id (see {@link mc.sayda.bullethell.arena.PlayerShotPatterns}
+     * and wiki/player-shots-and-references.md).
+     * Examples: {@code generic}, {@code th06_reimu_homing}, {@code th06_marisa_missile},
+     * {@code sakuya_knife}, {@code cirno_ice}, {@code sanae_wide}.
+     */
+    public String shotStyle = "generic";
+
+    /**
+     * Volley interval in ticks when unfocused; {@code 0} = use
+     * {@link PlayerState2D#SHOT_COOLDOWN_NORMAL}.
+     */
+    public int shotCooldownNormal = 0;
+
+    /**
+     * Volley interval in ticks when focused; {@code 0} = use
+     * {@link PlayerState2D#SHOT_COOLDOWN_FOCUSED}.
+     */
+    public int shotCooldownFocused = 0;
 }

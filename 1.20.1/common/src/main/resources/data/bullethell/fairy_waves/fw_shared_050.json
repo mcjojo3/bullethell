@@ -1,0 +1,26 @@
+{
+  "id": "fw_shared_050",
+  "description": "Crossing aimed blues (IN-style).",
+  "enemies": [
+    {
+      "x": 40,
+      "y": -24,
+      "vx": 0.65,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": 0.013,
+      "arcTicks": 72
+    },
+    {
+      "x": 440,
+      "y": -24,
+      "vx": -0.65,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": -0.013,
+      "arcTicks": 72
+    }
+  ]
+}

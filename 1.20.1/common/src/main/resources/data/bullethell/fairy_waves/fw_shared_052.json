@@ -1,0 +1,24 @@
+{
+  "id": "fw_shared_052",
+  "description": "Green ring sides.",
+  "enemies": [
+    {
+      "x": 48,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 432,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 6,
+      "pattern": "RING"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_008",
+  "description": "Ice pincer reds with inward drift.",
+  "enemies": [
+    {
+      "x": 60,
+      "y": -24,
+      "vx": 0.35,
+      "vy": 3.8,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 420,
+      "y": -24,
+      "vx": -0.35,
+      "vy": 3.8,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    }
+  ]
+}

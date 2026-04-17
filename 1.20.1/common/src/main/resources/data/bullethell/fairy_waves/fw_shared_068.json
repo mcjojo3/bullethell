@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_068",
+  "description": "Sub1 side flares.",
+  "enemies": [
+    {
+      "x": 80,
+      "y": -24,
+      "vx": 0.3,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 400,
+      "y": -24,
+      "vx": -0.3,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    }
+  ]
+}

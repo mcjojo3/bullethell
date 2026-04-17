@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_001",
+  "description": "Misty Lake opening: two wide blues, gentle fall.",
+  "enemies": [
+    {
+      "x": 100,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.2,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 380,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.2,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    }
+  ]
+}

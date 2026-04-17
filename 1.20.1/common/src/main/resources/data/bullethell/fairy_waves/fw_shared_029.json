@@ -1,0 +1,38 @@
+{
+  "id": "fw_shared_029",
+  "description": "Yellow center stack.",
+  "enemies": [
+    {
+      "x": 200,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 200,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 200,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 20
+    },
+    {
+      "x": 200,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 30
+    }
+  ]
+}

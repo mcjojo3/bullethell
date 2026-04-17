@@ -1,16 +1,18 @@
 {
   "id": "sanae_stage",
-  "title": "Youkai Mountain — Moriya Approach",
-  "_design_notes": "TH10 Mountain of Faith Stage 5 inspired approach: mountain-fairy curtains, crossing green/blue lanes, side sweeps, a mid-section anchor, then denser convergence before Sanae (see sanae_spellcards.pdf / Touhou Wiki MoF Stage 5).",
+  "title": "Youkai Mountain \u2014 Moriya Approach",
+  "_design_notes": [
+    "sanae_stage: first-wave preamble preserved; remainder replaced by fairyRush shared pool."
+  ],
   "stageMusic": "the_youkai_mountain_mysterious_mountain",
   "bossId": "sanae_boss",
   "nextStageId": "",
   "rules": {
-    "itemDropEveryNthKill": 1,
+    "itemDropEveryNthKill": 3,
     "dropCyclePattern": "POWER,POINT,POWER,POINT,POWER,POINT,POWER,POINT",
-    "largeEnemyDropCyclePattern": "POWER,POINT,POWER,FULL_POWER,POINT,POWER",
-    "bombDropChance": 0.0,
-    "pocFraction": 0.20,
+    "largeEnemyDropCyclePattern": "POWER,POINT,POWER,FULL_POWER,POINT,POWER,POWER,POINT",
+    "scoreExtendEvery": 1500000,
+    "pocFraction": 0.2,
     "pocAutoCollect": true,
     "itemAttractionSpeed": 8.0,
     "deathPowerLoss": 32,
@@ -27,73 +29,65 @@
       "_comment": "MoF5 opening: staggered descent from the ridgeline (faith-green + kappa-blue mix).",
       "spawnTick": 0,
       "enemies": [
-        { "x": 72,  "y": -22, "vx": 0.0, "vy": 3.9, "type": "GREEN_FAIRY" },
-        { "x": 156, "y": -22, "vx": 0.0, "vy": 4.0, "type": "BLUE_FAIRY", "delayTicks": 8 },
-        { "x": 240, "y": -22, "vx": 0.0, "vy": 4.1, "type": "GREEN_FAIRY", "delayTicks": 16 },
-        { "x": 324, "y": -22, "vx": 0.0, "vy": 4.0, "type": "BLUE_FAIRY", "delayTicks": 8 },
-        { "x": 408, "y": -22, "vx": 0.0, "vy": 3.9, "type": "GREEN_FAIRY" }
-      ]
-    },
-    {
-      "_comment": "Riverside sweep: mirrored side entries (mountain path pinch).",
-      "spawnTick": 140,
-      "enemies": [
-        { "x": -24, "y": 52,  "vx": 4.4, "vy": 0.0, "angVel": 0.016, "arcTicks": 88, "type": "BLUE_FAIRY" },
-        { "x": -24, "y": 96,  "vx": 4.4, "vy": 0.0, "angVel": 0.016, "arcTicks": 88, "type": "GREEN_FAIRY", "delayTicks": 10 },
-        { "x": -24, "y": 140, "vx": 4.4, "vy": 0.0, "angVel": 0.016, "arcTicks": 88, "type": "BLUE_FAIRY", "delayTicks": 20 },
-        { "x": 504, "y": 52,  "vx": -4.4, "vy": 0.0, "angVel": -0.016, "arcTicks": 88, "type": "GREEN_FAIRY", "delayTicks": 30 },
-        { "x": 504, "y": 96,  "vx": -4.4, "vy": 0.0, "angVel": -0.016, "arcTicks": 88, "type": "BLUE_FAIRY", "delayTicks": 40 },
-        { "x": 504, "y": 140, "vx": -4.4, "vy": 0.0, "angVel": -0.016, "arcTicks": 88, "type": "GREEN_FAIRY", "delayTicks": 50 }
-      ]
-    },
-    {
-      "_comment": "Crossing lanes from upper corners (wind + river convergence).",
-      "spawnTick": 340,
-      "enemies": [
-        { "x": 40,  "y": -24, "vx": 1.5, "vy": 3.7, "angVel": 0.018, "arcTicks": 72, "type": "GREEN_FAIRY" },
-        { "x": 120, "y": -24, "vx": 0.7, "vy": 3.9, "angVel": 0.012, "arcTicks": 72, "type": "BLUE_FAIRY", "delayTicks": 10 },
-        { "x": 440, "y": -24, "vx": -1.5, "vy": 3.7, "angVel": -0.018, "arcTicks": 72, "type": "GREEN_FAIRY" },
-        { "x": 360, "y": -24, "vx": -0.7, "vy": 3.9, "angVel": -0.012, "arcTicks": 72, "type": "BLUE_FAIRY", "delayTicks": 10 },
-        { "x": 240, "y": -26, "vx": 0.0, "vy": 4.2, "type": "YELLOW_FAIRY", "delayTicks": 22 }
-      ]
-    },
-    {
-      "_comment": "Mid-section anchor: large green plus escorts (midboss-homage density bump).",
-      "spawnTick": 540,
-      "enemies": [
-        { "x": 240, "y": -24, "vx": 0.0, "vy": 2.8, "type": "LARGE_GREEN", "pattern": "AIMED_RING" },
-        { "x": 125, "y": -22, "vx": 0.15, "vy": 3.8, "type": "BLUE_FAIRY", "delayTicks": 12 },
-        { "x": 355, "y": -22, "vx": -0.15, "vy": 3.8, "type": "BLUE_FAIRY", "delayTicks": 12 },
-        { "x": 90,  "y": -22, "vx": 0.25, "vy": 4.0, "type": "GREEN_FAIRY", "delayTicks": 28 },
-        { "x": 390, "y": -22, "vx": -0.25, "vy": 4.0, "type": "GREEN_FAIRY", "delayTicks": 28 }
-      ]
-    },
-    {
-      "_comment": "Second-half: tighter mirrored sweeps.",
-      "spawnTick": 780,
-      "enemies": [
-        { "x": -24, "y": 46,  "vx": 4.7, "vy": 0.0, "angVel": 0.019, "arcTicks": 80, "type": "BLUE_FAIRY" },
-        { "x": -24, "y": 80,  "vx": 4.7, "vy": 0.0, "angVel": 0.019, "arcTicks": 80, "type": "GREEN_FAIRY", "delayTicks": 8 },
-        { "x": -24, "y": 114, "vx": 4.7, "vy": 0.0, "angVel": 0.019, "arcTicks": 80, "type": "BLUE_FAIRY", "delayTicks": 16 },
-        { "x": -24, "y": 148, "vx": 4.7, "vy": 0.0, "angVel": 0.019, "arcTicks": 80, "type": "GREEN_FAIRY", "delayTicks": 24 },
-        { "x": 504, "y": 46,  "vx": -4.7, "vy": 0.0, "angVel": -0.019, "arcTicks": 80, "type": "GREEN_FAIRY", "delayTicks": 34 },
-        { "x": 504, "y": 80,  "vx": -4.7, "vy": 0.0, "angVel": -0.019, "arcTicks": 80, "type": "BLUE_FAIRY", "delayTicks": 42 },
-        { "x": 504, "y": 114, "vx": -4.7, "vy": 0.0, "angVel": -0.019, "arcTicks": 80, "type": "GREEN_FAIRY", "delayTicks": 50 },
-        { "x": 504, "y": 148, "vx": -4.7, "vy": 0.0, "angVel": -0.019, "arcTicks": 80, "type": "BLUE_FAIRY", "delayTicks": 58 }
-      ]
-    },
-    {
-      "_comment": "Pre-boss: edge convergence + top rain (shrine steps feel).",
-      "spawnTick": 1010,
-      "enemies": [
-        { "x": -24, "y": 72, "vx": 3.8, "vy": 0.0, "angVel": 0.017, "arcTicks": 86, "type": "LARGE_FAIRY" },
-        { "x": 504, "y": 72, "vx": -3.8, "vy": 0.0, "angVel": -0.017, "arcTicks": 86, "type": "LARGE_GREEN" },
-        { "x": 70,  "y": -22, "vx": 0.0, "vy": 4.4, "type": "GREEN_FAIRY", "delayTicks": 14 },
-        { "x": 170, "y": -22, "vx": 0.0, "vy": 4.4, "type": "BLUE_FAIRY", "delayTicks": 22 },
-        { "x": 240, "y": -22, "vx": 0.0, "vy": 4.5, "type": "YELLOW_FAIRY", "delayTicks": 28 },
-        { "x": 310, "y": -22, "vx": 0.0, "vy": 4.4, "type": "BLUE_FAIRY", "delayTicks": 22 },
-        { "x": 410, "y": -22, "vx": 0.0, "vy": 4.4, "type": "GREEN_FAIRY", "delayTicks": 14 }
+        {
+          "x": 72,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 3.9,
+          "type": "GREEN_FAIRY"
+        },
+        {
+          "x": 156,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.0,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 8
+        },
+        {
+          "x": 240,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.1,
+          "type": "GREEN_FAIRY",
+          "delayTicks": 16
+        },
+        {
+          "x": 324,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.0,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 8
+        },
+        {
+          "x": 408,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 3.9,
+          "type": "GREEN_FAIRY"
+        }
       ]
     }
-  ]
+  ],
+  "fairyRush": {
+    "catalogId": "default",
+    "slotCount": 44,
+    "startTick": 155,
+    "gapTicksStartMin": 72,
+    "gapTicksStartMax": 118,
+    "gapTicksEndMin": 22,
+    "gapTicksEndMax": 42,
+    "gapEasing": "SMOOTHSTEP",
+    "jitterTicks": 16,
+    "intensityStartLo": 0,
+    "intensityStartHi": 2,
+    "intensityEndLo": 4,
+    "intensityEndHi": 10,
+    "breatherEvery": 7,
+    "breatherExtraTicks": 72,
+    "breatherWaveId": "",
+    "shuffleSeed": null,
+    "noRepeatLast": 6
+  }
 }

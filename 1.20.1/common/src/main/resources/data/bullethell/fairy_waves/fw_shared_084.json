@@ -1,0 +1,46 @@
+{
+  "id": "fw_shared_084",
+  "description": "Final column burst (left).",
+  "enemies": [
+    {
+      "x": 56,
+      "y": -22,
+      "vx": 0.38,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 100,
+      "y": -22,
+      "vx": 0.38,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 3
+    },
+    {
+      "x": 144,
+      "y": -22,
+      "vx": 0.38,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 6
+    },
+    {
+      "x": 188,
+      "y": -22,
+      "vx": 0.38,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 9
+    },
+    {
+      "x": 232,
+      "y": -22,
+      "vx": 0.38,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 12
+    }
+  ]
+}

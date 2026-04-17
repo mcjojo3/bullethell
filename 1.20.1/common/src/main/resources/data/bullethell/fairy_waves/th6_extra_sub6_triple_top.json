@@ -1,9 +1,0 @@
-{
-  "id": "th6_extra_sub6_triple_top",
-  "description": "Timeline0 after midboss gap: ins_0(Sub6,64), ins_2(Sub6,320), ins_0(Sub6,192) — TH x scaled ×1.25.",
-  "enemies": [
-    { "x": 80, "y": -22, "vx": 0.0, "vy": 3.7, "type": "BLUE_FAIRY", "delayTicks": 0 },
-    { "x": 400, "y": -22, "vx": 0.0, "vy": 3.7, "type": "BLUE_FAIRY", "delayTicks": 4 },
-    { "x": 240, "y": -22, "vx": 0.0, "vy": 3.75, "type": "BLUE_FAIRY", "delayTicks": 8 }
-  ]
-}

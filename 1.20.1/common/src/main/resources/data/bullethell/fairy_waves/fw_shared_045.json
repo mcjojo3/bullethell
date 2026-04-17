@@ -1,0 +1,87 @@
+{
+  "id": "fw_shared_045",
+  "description": "Nine greens staggered barrier lattice.",
+  "enemies": [
+    {
+      "x": 40,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 240,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 2,
+      "pattern": "RING"
+    },
+    {
+      "x": 440,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 4,
+      "pattern": "RING"
+    },
+    {
+      "x": 40,
+      "y": -33,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 6,
+      "pattern": "RING"
+    },
+    {
+      "x": 240,
+      "y": -33,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 8,
+      "pattern": "RING"
+    },
+    {
+      "x": 440,
+      "y": -33,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 10,
+      "pattern": "RING"
+    },
+    {
+      "x": 40,
+      "y": -40,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 12,
+      "pattern": "RING"
+    },
+    {
+      "x": 240,
+      "y": -40,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 14,
+      "pattern": "RING"
+    },
+    {
+      "x": 440,
+      "y": -40,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 16,
+      "pattern": "RING"
+    }
+  ]
+}

@@ -331,4 +331,32 @@ public final class PatternEngine {
         fireAimed(pool, bx, by, tx, ty, count, s, speed, diff, type, visScale, hitScale,
                 lifetimeTicks, angVelRadPerTick);
     }
+
+    /**
+     * Two concentric regular N-gons offset by half a step (MoF / Sanae "star ritual" lattice).
+     * Outer ring uses {@code outerType}; inner uses {@code innerType}.
+     */
+    public static void firePentagramDouble(BulletPool pool, float bx, float by,
+            int points, float speed, DifficultyConfig diff,
+            BulletType outerType, BulletType innerType,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick, float ringStartRad) {
+        int n = points >= 3 ? Math.min(12, points) : 5;
+        int life = lifeOrDefault(lifetimeTicks, DEFAULT_LIFE_RING);
+        float step = (float) (Math.PI * 2.0 / n);
+        float halfStep = step * 0.5f;
+        float sp = speed * enemySpeed(diff);
+        for (int i = 0; i < n; i++) {
+            float angle = ringStartRad + step * i;
+            float vx = (float) Math.cos(angle) * sp;
+            float vy = (float) Math.sin(angle) * sp;
+            pool.spawn(bx, by, vx, vy, outerType.getId(), life, visScale, hitScale, angVelRadPerTick);
+        }
+        for (int i = 0; i < n; i++) {
+            float angle = ringStartRad + halfStep + step * i;
+            float vx = (float) Math.cos(angle) * sp;
+            float vy = (float) Math.sin(angle) * sp;
+            pool.spawn(bx, by, vx, vy, innerType.getId(), life, visScale, hitScale, angVelRadPerTick);
+        }
+    }
 }

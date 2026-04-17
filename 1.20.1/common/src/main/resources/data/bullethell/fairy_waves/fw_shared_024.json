@@ -1,0 +1,60 @@
+{
+  "id": "fw_shared_024",
+  "description": "Green ring lattice (six barriers).",
+  "enemies": [
+    {
+      "x": 48,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 192,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 3,
+      "pattern": "RING"
+    },
+    {
+      "x": 336,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 6,
+      "pattern": "RING"
+    },
+    {
+      "x": 48,
+      "y": -34,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 9,
+      "pattern": "RING"
+    },
+    {
+      "x": 192,
+      "y": -34,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 12,
+      "pattern": "RING"
+    },
+    {
+      "x": 336,
+      "y": -34,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 15,
+      "pattern": "RING"
+    }
+  ]
+}

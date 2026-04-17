@@ -1,0 +1,31 @@
+{
+  "id": "fw_shared_036",
+  "description": "Horizontal flanking reds (mid screen).",
+  "enemies": [
+    {
+      "x": -20,
+      "y": 110,
+      "vx": 4.2,
+      "vy": 0.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 500,
+      "y": 110,
+      "vx": -4.2,
+      "vy": 0.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 12
+    },
+    {
+      "x": 240,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 6,
+      "pattern": "RING"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "fw_shared_056",
+  "description": "Large yellow anchor + knives echo.",
+  "enemies": [
+    {
+      "x": 240,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 2.8,
+      "type": "LARGE_YELLOW",
+      "delayTicks": 0,
+      "pattern": "STREAM"
+    },
+    {
+      "x": 140,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 12
+    },
+    {
+      "x": 340,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 12
+    }
+  ]
+}

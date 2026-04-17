@@ -1,0 +1,34 @@
+{
+  "id": "fw_shared_010",
+  "description": "Crossing blues + center yellow.",
+  "enemies": [
+    {
+      "x": 100,
+      "y": -24,
+      "vx": 0.4,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": 0.01,
+      "arcTicks": 56
+    },
+    {
+      "x": 380,
+      "y": -24,
+      "vx": -0.4,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": -0.01,
+      "arcTicks": 56
+    },
+    {
+      "x": 240,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 14
+    }
+  ]
+}

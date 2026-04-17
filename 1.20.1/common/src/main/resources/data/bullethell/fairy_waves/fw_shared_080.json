@@ -1,0 +1,62 @@
+{
+  "id": "fw_shared_080",
+  "description": "Inward blue wall.",
+  "enemies": [
+    {
+      "x": 32,
+      "y": -22,
+      "vx": 0.15,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 90,
+      "y": -22,
+      "vx": 0.16,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 2
+    },
+    {
+      "x": 148,
+      "y": -22,
+      "vx": 0.16999999999999998,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": 206,
+      "y": -22,
+      "vx": 0.18,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 6
+    },
+    {
+      "x": 264,
+      "y": -22,
+      "vx": 0.19,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 8
+    },
+    {
+      "x": 322,
+      "y": -22,
+      "vx": 0.2,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 380,
+      "y": -22,
+      "vx": 0.21,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 12
+    }
+  ]
+}

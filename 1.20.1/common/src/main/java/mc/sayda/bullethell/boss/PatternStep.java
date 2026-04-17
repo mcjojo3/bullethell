@@ -23,7 +23,8 @@ public class PatternStep {
     /**
      * Pattern type to fire.
      * Valid values: SPIRAL, AIMED, AIMED_RING, RING, RING_OFFSET, SPREAD, DENSE_RING, LASER_BEAM,
-     * LASER, LASER_ROTATING, RAIN, BOUNCE, MEISTER_CYCLE (Remilia Scarlet Meister - scripted in {@code ArenaContext})
+     * LASER, LASER_ROTATING, PENTAGRAM (two offset N-gon rings; TH MoF-style star lattice),
+     * RAIN, BOUNCE, MEISTER_CYCLE (Remilia Scarlet Meister - scripted in {@code ArenaContext})
      */
     public String pattern = "RING";
 
@@ -47,8 +48,8 @@ public class PatternStep {
 
     /**
      * Bullet visual type name (matches {@code BulletType} enum, case-insensitive).
-     * Valid values: ORB, STAR, RICE, LASER_HEAD, BUBBLE, GOLD, SPARK, HOMING_ORB, KUNAI, KNIFE,
-     * NEEDLE, SCARLET, SCARLET_LARGE, SCARLET_MENTOS, ICE
+     * Valid values: ORB, CRIMSON_ORB, STAR, RICE, LASER_HEAD, BUBBLE, GOLD, SPARK, HOMING_ORB, KUNAI, KNIFE,
+     * NEEDLE, SCARLET, SCARLET_LARGE, SCARLET_MENTOS, ICE, AMULET
      */
     public String bulletType = "ORB";
 
@@ -191,6 +192,18 @@ public class PatternStep {
 
     /** Ticks the beam is active (dealing damage). Default 60 (~3 s at 20 tps). */
     public int activeTicks = 60;
+
+    /**
+     * Radians to advance {@code spiralAngle} after each {@code LASER_ROTATING} volley.
+     * 0 = engine default (~0.45 rad). Used for TH MoF-style rotating pentagram spokes.
+     */
+    public float laserRotateAdvanceRad = 0f;
+
+    /**
+     * Vertices for {@code PENTAGRAM} (e.g. 5 for pentagram lattice). 0 or &lt;3 = 5.
+     * Inner ring uses {@link #ringBulletType} when set, else duplicates outer type.
+     */
+    public int pentagramPoints = 0;
 
     /**
      * Bullet lifetime in mod ticks. 0 = pattern default ({@code AIMED}≈220, {@code RING}≈200,

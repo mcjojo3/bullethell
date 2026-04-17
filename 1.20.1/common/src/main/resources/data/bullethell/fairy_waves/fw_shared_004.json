@@ -1,0 +1,24 @@
+{
+  "id": "fw_shared_004",
+  "description": "Dual ring columns framing the lane.",
+  "enemies": [
+    {
+      "x": 80,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.4,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 400,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.4,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 6,
+      "pattern": "RING"
+    }
+  ]
+}

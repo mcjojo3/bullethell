@@ -1,0 +1,30 @@
+{
+  "id": "fw_shared_002",
+  "description": "Staggered triple drip from left third.",
+  "enemies": [
+    {
+      "x": 72,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.4,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 168,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 264,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.4,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 20
+    }
+  ]
+}

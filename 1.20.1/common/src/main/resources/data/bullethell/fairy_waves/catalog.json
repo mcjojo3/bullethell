@@ -1,0 +1,678 @@
+{
+  "sets": {
+    "default": [
+      {
+        "id": "fw_shared_001",
+        "intensity": 0,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_002",
+        "intensity": 2,
+        "weight": 1.0,
+        "durationHintTicks": 110,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_003",
+        "intensity": 4,
+        "weight": 1.0,
+        "durationHintTicks": 62,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_004",
+        "intensity": 9,
+        "weight": 1.0,
+        "durationHintTicks": 82,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_005",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 134,
+        "minDifficulty": "HARD",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_006",
+        "intensity": 2,
+        "weight": 1.0,
+        "durationHintTicks": 106,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_007",
+        "intensity": 0,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_008",
+        "intensity": 2,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_009",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 112,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_010",
+        "intensity": 1,
+        "weight": 1.0,
+        "durationHintTicks": 104,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_011",
+        "intensity": 5,
+        "weight": 1.0,
+        "durationHintTicks": 114,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_012",
+        "intensity": 6,
+        "weight": 1.0,
+        "durationHintTicks": 100,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_013",
+        "intensity": 7,
+        "weight": 1.0,
+        "durationHintTicks": 181,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_014",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 122,
+        "minDifficulty": "HARD",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_015",
+        "intensity": 4,
+        "weight": 1.0,
+        "durationHintTicks": 140,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_016",
+        "intensity": 8,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_017",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 164,
+        "minDifficulty": "HARD",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_018",
+        "intensity": 9,
+        "weight": 1.0,
+        "durationHintTicks": 88,
+        "minDifficulty": "HARD",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_019",
+        "intensity": 7,
+        "weight": 1.0,
+        "durationHintTicks": 128,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_020",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 174,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_021",
+        "intensity": 6,
+        "weight": 1.0,
+        "durationHintTicks": 104,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_022",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 140,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_023",
+        "intensity": 8,
+        "weight": 1.0,
+        "durationHintTicks": 190,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_024",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 147,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_025",
+        "intensity": 2,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_026",
+        "intensity": 4,
+        "weight": 1.0,
+        "durationHintTicks": 142,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_027",
+        "intensity": 9,
+        "weight": 1.0,
+        "durationHintTicks": 82,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_028",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 116,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_029",
+        "intensity": 3,
+        "weight": 1.0,
+        "durationHintTicks": 134,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_030",
+        "intensity": 2,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_031",
+        "intensity": 1,
+        "weight": 1.0,
+        "durationHintTicks": 84,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_032",
+        "intensity": 0,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_033",
+        "intensity": 3,
+        "weight": 1.0,
+        "durationHintTicks": 84,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_034",
+        "intensity": 2,
+        "weight": 1.0,
+        "durationHintTicks": 102,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_035",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 152,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_036",
+        "intensity": 8,
+        "weight": 1.0,
+        "durationHintTicks": 102,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_037",
+        "intensity": 8,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_038",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 132,
+        "minDifficulty": "HARD",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_039",
+        "intensity": 7,
+        "weight": 1.0,
+        "durationHintTicks": 174,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_040",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 118,
+        "minDifficulty": "HARD",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_041",
+        "intensity": 7,
+        "weight": 1.0,
+        "durationHintTicks": 100,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_042",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 144,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_043",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 164,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_044",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 138,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_045",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 190,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_046",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 206,
+        "minDifficulty": "HARD",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_047",
+        "intensity": 9,
+        "weight": 1.0,
+        "durationHintTicks": 158,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_048",
+        "intensity": 5,
+        "weight": 1.0,
+        "durationHintTicks": 157,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_049",
+        "intensity": 5,
+        "weight": 1.0,
+        "durationHintTicks": 157,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_050",
+        "intensity": 0,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_051",
+        "intensity": 5,
+        "weight": 1.0,
+        "durationHintTicks": 157,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_052",
+        "intensity": 9,
+        "weight": 1.0,
+        "durationHintTicks": 82,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_053",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 134,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_054",
+        "intensity": 3,
+        "weight": 1.0,
+        "durationHintTicks": 84,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_055",
+        "intensity": 6,
+        "weight": 1.0,
+        "durationHintTicks": 100,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_056",
+        "intensity": 6,
+        "weight": 1.0,
+        "durationHintTicks": 102,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_057",
+        "intensity": 8,
+        "weight": 1.0,
+        "durationHintTicks": 116,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_058",
+        "intensity": 9,
+        "weight": 1.0,
+        "durationHintTicks": 84,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_059",
+        "intensity": 9,
+        "weight": 1.0,
+        "durationHintTicks": 224,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_060",
+        "intensity": 6,
+        "weight": 1.0,
+        "durationHintTicks": 104,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_061",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 174,
+        "minDifficulty": "HARD",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_062",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 164,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_063",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 138,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_064",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 190,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_065",
+        "intensity": 1,
+        "weight": 1.0,
+        "durationHintTicks": 78,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_066",
+        "intensity": 1,
+        "weight": 1.0,
+        "durationHintTicks": 78,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_067",
+        "intensity": 3,
+        "weight": 1.0,
+        "durationHintTicks": 102,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_068",
+        "intensity": 0,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_069",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 100,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_070",
+        "intensity": 3,
+        "weight": 1.0,
+        "durationHintTicks": 82,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_071",
+        "intensity": 1,
+        "weight": 1.0,
+        "durationHintTicks": 98,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_072",
+        "intensity": 8,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_073",
+        "intensity": 5,
+        "weight": 1.0,
+        "durationHintTicks": 100,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_074",
+        "intensity": 5,
+        "weight": 1.0,
+        "durationHintTicks": 98,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_075",
+        "intensity": 0,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_076",
+        "intensity": 1,
+        "weight": 1.0,
+        "durationHintTicks": 79,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_077",
+        "intensity": 1,
+        "weight": 1.0,
+        "durationHintTicks": 79,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_078",
+        "intensity": 7,
+        "weight": 1.0,
+        "durationHintTicks": 120,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_079",
+        "intensity": 5,
+        "weight": 1.0,
+        "durationHintTicks": 162,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_080",
+        "intensity": 6,
+        "weight": 1.0,
+        "durationHintTicks": 158,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_081",
+        "intensity": 8,
+        "weight": 1.0,
+        "durationHintTicks": 76,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_082",
+        "intensity": 10,
+        "weight": 1.0,
+        "durationHintTicks": 190,
+        "minDifficulty": "HARD",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_083",
+        "intensity": 7,
+        "weight": 1.0,
+        "durationHintTicks": 104,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      },
+      {
+        "id": "fw_shared_084",
+        "intensity": 4,
+        "weight": 1.0,
+        "durationHintTicks": 130,
+        "minDifficulty": "",
+        "maxDifficulty": ""
+      }
+    ]
+  }
+}

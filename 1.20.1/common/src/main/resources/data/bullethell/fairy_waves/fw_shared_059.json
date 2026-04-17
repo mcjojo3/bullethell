@@ -1,0 +1,86 @@
+{
+  "id": "fw_shared_059",
+  "description": "Dual yellow curtains (deep lane).",
+  "enemies": [
+    {
+      "x": -22,
+      "y": 60,
+      "vx": 3.9,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": -22,
+      "y": 88,
+      "vx": 3.9,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": -22,
+      "y": 116,
+      "vx": 3.9,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 8
+    },
+    {
+      "x": -22,
+      "y": 144,
+      "vx": 3.9,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 12
+    },
+    {
+      "x": -22,
+      "y": 172,
+      "vx": 3.9,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 16
+    },
+    {
+      "x": 502,
+      "y": 70,
+      "vx": -3.9,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 20
+    },
+    {
+      "x": 502,
+      "y": 98,
+      "vx": -3.9,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 24
+    },
+    {
+      "x": 502,
+      "y": 126,
+      "vx": -3.9,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 28
+    },
+    {
+      "x": 502,
+      "y": 154,
+      "vx": -3.9,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 32
+    },
+    {
+      "x": 502,
+      "y": 182,
+      "vx": -3.9,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 36
+    }
+  ]
+}

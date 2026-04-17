@@ -1,0 +1,30 @@
+{
+  "id": "fw_shared_074",
+  "description": "Sub6 triple top.",
+  "enemies": [
+    {
+      "x": 160,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 240,
+      "y": -30,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": 320,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 8
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_070",
+  "description": "Sub3 offset 128.",
+  "enemies": [
+    {
+      "x": 128,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 352,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "RED_FAIRY",
+      "delayTicks": 6
+    }
+  ]
+}

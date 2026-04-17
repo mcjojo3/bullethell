@@ -1,0 +1,42 @@
+{
+  "id": "fw_shared_028",
+  "description": "Timeline-style quad greens (corners).",
+  "enemies": [
+    {
+      "x": 40,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 40,
+      "y": -30,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 4,
+      "pattern": "RING"
+    },
+    {
+      "x": 440,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 8,
+      "pattern": "RING"
+    },
+    {
+      "x": 440,
+      "y": -30,
+      "vx": 0.0,
+      "vy": 3.6,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 12,
+      "pattern": "RING"
+    }
+  ]
+}

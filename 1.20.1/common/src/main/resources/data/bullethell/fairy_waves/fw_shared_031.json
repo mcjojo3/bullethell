@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_031",
+  "description": "Top lane doubles.",
+  "enemies": [
+    {
+      "x": 160,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 320,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 8
+    }
+  ]
+}

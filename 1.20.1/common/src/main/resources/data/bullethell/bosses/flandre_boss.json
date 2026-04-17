@@ -2,11 +2,18 @@
   "id": "flandre_boss",
   "name": "Flandre Scarlet",
   "_design_notes": [
+    "ECL mapping: wiki/flandre-th06-reconstruction.md — dump ecldata7_bullets.txt; summarize with tools/th06-ecl-dump (chunk ids like ecldata7_bullets.txt#sub:Sub33).",
     "TH06 Extra Stage boss (ecldata7 / Stage 7). Spell order: Cranberry Trap → Laevatein → Four of a Kind → Kagome Kagome → Maze of Love → Forbidden Barrage Starbow Break.",
     "Taboo「フォーオブアカインド」: TH06 uses clone familiars. This build implements logical phase emitters (no sprite) so clone-origin fire can be reproduced from the correct off-screen positions.",
     "Patchouli midboss (Extra) is not a separate arena boss here; fairy stage follows ecldata7 Timeline0 through Sub8 with a gap where Sub16 would run.",
     "Nonspells map to ECL drivers Sub32 / Sub35 / Sub38 / Sub47 / Sub49 (ins_70 fans + ins_50 radial bursts), not Remilia Sub20-style laser opens.",
     "Music: U.N. Owen was her? — track id u_n_owen_was_her. Patterns use existing PatternStep only."
+  ],
+  "_validation_matrix": [
+    "EASY/NORMAL: Cranberry reads as top rain + slow large scarlet walls + occasional bounces; Laevatein readable laser sweep + chunky volleys; Four of a Kind clearly three off-center pressure corners (not three identical timers); Kagome edges fire at different cadences; Maze emphasizes hearts + ring squeeze distinct from Cranberry rain; Starbow multicolor spokes + rotating lasers without unreadable overlap.",
+    "HARD/LUNATIC: Same spell identities with higher density — clone emitters stay phase-offset (staggered cooldowns / arms) so Lunatic is not 'same JSON, more HP'; nonspells scale arms/cooldown via existing difficulty sampling without converging to one generic fan.",
+    "Emitters: positions follow TH-scaled coords in phase _note; attack stacks intentionally differ per emitter so ins_95 clone subs are not one copied block.",
+    "Regression: boss phases remain network-safe (no new packet shapes); emitter bullets use same pool rules as boss-origin patterns."
   ],
 "introDialog": [
   { "speaker": "BOSS", "text": "I was sooo bored down here… so I found something fun! If you break, it means I found the right spot, okay?", "delayTicks": 170 }
@@ -60,7 +67,7 @@
 },
   "phases": [
     {
-      "_note": "ECL Sub32 nonspell before Cranberry — ins_70(2,2,64,2) wide fan + ins_50/ins_61 radial bursts (~70f loop), not Remilia-style lasers.",
+      "_note": "ECL Sub32 nonspell before Cranberry — ins_70(2,2,64,2) wide fan + ins_50/ins_61 radial bursts (~70f loop), not Remilia-style lasers. Chunk: ecldata7_bullets.txt#sub:Sub32",
       "hp": 1500,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
@@ -78,7 +85,7 @@
       ]
     },
     {
-      "_note": "ECL Taboo Cranberry Trap — red curtain + trap walls.",
+      "_note": "ECL Taboo Cranberry Trap — red curtain + trap walls. Locate exact driver sub via tools/th06-ecl-dump index.md (ins_93 spell name → spell_driver row). Emphasis: RAIN + BOUNCE reads; keep Maze phase more ring/mentos-forward for contrast.",
       "hp": 2400,
       "isSpellCard": true,
       "spellName": "Taboo \"Cranberry Trap\"",
@@ -95,7 +102,7 @@
       ]
     },
     {
-      "_note": "ECL Sub35 nonspell before Laevatein — same ins_70(2,2,64,2) family as Sub32; loop ~90f (ins_61 50) → slightly quicker radial cadence than NS1.",
+      "_note": "ECL Sub35 nonspell before Laevatein — same ins_70(2,2,64,2) family as Sub32; loop ~90f (ins_61 50) → slightly quicker radial cadence than NS1. Chunk: ecldata7_bullets.txt#sub:Sub35",
       "hp": 1550,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
@@ -113,7 +120,7 @@
       ]
     },
     {
-      "_note": "Taboo Laevatein — sword/laser + large shots (LaserPool + volleys).",
+      "_note": "Taboo Laevatein — sword/laser + large shots (LaserPool + volleys). Driver sub id from tool index (spell row). Distinct from Cranberry: more LASER_ROTATING / LASER_BEAM weight, less ceiling RAIN.",
       "hp": 2550,
       "isSpellCard": true,
       "spellName": "Taboo \"Laevatein\"",
@@ -130,7 +137,7 @@
       ]
     },
     {
-      "_note": "ECL Sub38 before Four of a Kind — ins_70(2,2,32,3,4.0f) tighter arc + 32-way feel; still ins_50 bursts (no boss laser web).",
+      "_note": "ECL Sub38 before Four of a Kind — ins_70(2,2,32,3,4.0f) tighter arc + 32-way feel; still ins_50 bursts (no boss laser web). Chunk: ecldata7_bullets.txt#sub:Sub38",
       "hp": 1650,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
@@ -148,7 +155,7 @@
       ]
     },
     {
-      "_note": "ECL Sub39 Taboo Four of a Kind — clone-origin fire (Sub40/41/42) + boss volleys.",
+      "_note": "ECL Sub39 Taboo Four of a Kind — clone-origin fire (Sub40/41/42) + boss volleys. Chunks: ecldata7_bullets.txt#sub:Sub39 (+ Sub40–42 via ins_95 in tool). Emitters below are intentionally not identical: TH06 uses separate subs per clone; mod staggers ring vs spread cadence and bullet families per corner.",
       "hp": 2600,
       "isSpellCard": true,
       "spellName": "Taboo \"Four of a Kind\"",
@@ -159,30 +166,30 @@
       "music": "",
       "emitters": [
         {
-          "_note": "Sub40 clone: (-32,96) in TH coords → (-40,137) in 480×640 arena",
+          "_note": "Sub40 clone (-32,96) TH → (-40,137): left-corner pressure — faster offset rings, slower aimed spread.",
           "x": -40,
           "y": 137,
           "attacks": [
-            { "pattern": "RING_OFFSET", "cooldown": 20, "bulletType": "ORB", "arms": 8, "speed": 2.05, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
-            { "pattern": "SPREAD", "cooldown": 30, "bulletType": "STAR", "arms": 6, "speed": 4.2, "bulletLifetimeTicks": 220 }
+            { "pattern": "RING_OFFSET", "cooldown": 17, "scalingProfile": "GEOMETRY", "bulletType": "ORB", "arms": 9, "speed": 2.12, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+            { "pattern": "SPREAD", "cooldown": 34, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 5, "speed": 4.05, "spread": 0.11, "bulletLifetimeTicks": 220 }
           ]
         },
         {
-          "_note": "Sub41 clone: (256,-32) → (320,-46)",
+          "_note": "Sub41 clone (256,-32) → (320,-46): top anchor — wider ring wall, quicker gold volleys (vertical entry read).",
           "x": 320,
           "y": -46,
           "attacks": [
-            { "pattern": "RING_OFFSET", "cooldown": 20, "bulletType": "ORB", "arms": 8, "speed": 2.05, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
-            { "pattern": "SPREAD", "cooldown": 30, "bulletType": "GOLD", "arms": 6, "speed": 4.2, "bulletLifetimeTicks": 220 }
+            { "pattern": "RING_OFFSET", "cooldown": 23, "scalingProfile": "BURST", "bulletType": "GOLD", "arms": 10, "speed": 1.98, "bulletScale": 1.12, "hitboxScale": 0.5, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+            { "pattern": "SPREAD", "cooldown": 22, "bulletType": "GOLD", "arms": 7, "speed": 4.55, "spread": 0.09, "bulletLifetimeTicks": 220 }
           ]
         },
         {
-          "_note": "Sub42 clone: (416,96) → (520,137)",
+          "_note": "Sub42 clone (416,96) → (520,137): mirror-right — medium rings + rice spread for lane texture vs Sub40 STAR.",
           "x": 520,
           "y": 137,
           "attacks": [
-            { "pattern": "RING_OFFSET", "cooldown": 20, "bulletType": "ORB", "arms": 8, "speed": 2.05, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
-            { "pattern": "SPREAD", "cooldown": 30, "bulletType": "STAR", "arms": 6, "speed": 4.2, "bulletLifetimeTicks": 220 }
+            { "pattern": "RING_OFFSET", "cooldown": 19, "bulletType": "ORB", "arms": 8, "speed": 2.08, "bulletLifetimeTicks": 200, "ringStartAngleRad": 1.05 },
+            { "pattern": "SPREAD", "cooldown": 28, "bulletType": "RICE", "arms": 8, "speed": 3.95, "spread": 0.13, "bulletLifetimeTicks": 220 }
           ]
         }
       ],
@@ -193,7 +200,7 @@
       ]
     },
     {
-      "_note": "ECL Sub47 before Maze of Love — ins_70(2,6,32,2,2.5f) six-arm layer + same ins_50/ins_61 loop as Sub35/38.",
+      "_note": "ECL Sub47 before Maze of Love — ins_70(2,6,32,2,2.5f) six-arm layer + same ins_50/ins_61 loop as Sub35/38. Chunk: ecldata7_bullets.txt#sub:Sub47",
       "hp": 1750,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
@@ -211,7 +218,7 @@
       ]
     },
     {
-      "_note": "ECL Sub44 Taboo Kagome Kagome — edge spawners (Sub45) + boss volleys.",
+      "_note": "ECL Sub44 Taboo Kagome Kagome — edge spawners (Sub45) + boss volleys. Chunks: ecldata7_bullets.txt#sub:Sub44, #sub:Sub45. Emitters: four edges use different cadence/arms so the spell is not four copy-paste RINGs.",
       "hp": 2700,
       "isSpellCard": true,
       "spellName": "Taboo \"Kagome, Kagome\"",
@@ -222,35 +229,35 @@
       "music": "",
       "emitters": [
         {
-          "_note": "Sub45 style: top edge (64,0) → (80,0)",
+          "_note": "Sub45 top (64,0) TH → (80,0): dense downward star ring.",
           "x": 80,
           "y": 0,
           "attacks": [
-            { "pattern": "RING", "cooldown": 4, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 9, "speed": 2.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+            { "pattern": "RING", "cooldown": 4, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 10, "speed": 2.72, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 }
           ]
         },
         {
-          "_note": "Right/center edge (400,256) → (500,366)",
+          "_note": "Sub45 right (400,256) → (500,366): faster ORB wall, inward read.",
           "x": 500,
           "y": 366,
           "attacks": [
-            { "pattern": "RING", "cooldown": 4, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 9, "speed": 2.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+            { "pattern": "RING", "cooldown": 5, "scalingProfile": "BURST", "bulletType": "ORB", "arms": 8, "speed": 2.82, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
           ]
         },
         {
-          "_note": "Left edge (-16,160) → (-20,229)",
+          "_note": "Sub45 left (-16,160) → (-20,229): slower wide ring — space for player to hug margin.",
           "x": -20,
           "y": 229,
           "attacks": [
-            { "pattern": "RING", "cooldown": 4, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 9, "speed": 2.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+            { "pattern": "RING", "cooldown": 6, "scalingProfile": "GEOMETRY", "bulletType": "STAR", "arms": 8, "speed": 2.58, "bulletLifetimeTicks": 200, "ringStartAngleRad": 1.1 }
           ]
         },
         {
-          "_note": "Bottom edge (320,464) → (400,663)",
+          "_note": "Sub45 bottom (320,464) → (400,663): fastest spam lane — floor pressure.",
           "x": 400,
           "y": 663,
           "attacks": [
-            { "pattern": "RING", "cooldown": 4, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 9, "speed": 2.7, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+            { "pattern": "RING", "cooldown": 3, "scalingProfile": "SPAM", "bulletType": "STAR", "arms": 11, "speed": 2.48, "bulletLifetimeTicks": 195, "ringStartAngleRad": -1 }
           ]
         }
       ],
@@ -262,7 +269,7 @@
       ]
     },
     {
-      "_note": "ECL Sub49 before Starbow — ins_70(2,6,32,2,3.5f) faster radial than Sub47; still fan/burst vocabulary (not Scarlet Meister-style).",
+      "_note": "ECL Sub49 before Starbow — ins_70(2,6,32,2,3.5f) faster radial than Sub47; still fan/burst vocabulary (not Scarlet Meister-style). Chunk: ecldata7_bullets.txt#sub:Sub49",
       "hp": 1850,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
@@ -280,7 +287,7 @@
       ]
     },
     {
-      "_note": "Taboo Maze of Love — heart / wall pressure (all ranks; difficulty scales via JSON + engine).",
+      "_note": "Taboo Maze of Love — heart / wall pressure. Distinct from Cranberry: higher SCARLET_MENTOS + RING_OFFSET weight, less RAIN; reads as squeeze maze not ceiling curtain.",
       "hp": 2850,
       "isSpellCard": true,
       "spellName": "Taboo \"Maze of Love\"",
@@ -310,7 +317,7 @@
       "attacks": [
         { "pattern": "LASER_ROTATING", "cooldown": 28, "bulletType": "LASER_HEAD", "arms": 6, "speed": 0, "laserHalfWidth": 6, "warnTicks": 10, "activeTicks": 19 },
         { "pattern": "SPREAD", "cooldown": 5, "bulletType": "STAR", "arms": 7, "speed": 4.9, "bulletScale": 1.15, "hitboxScale": 0.5, "bulletLifetimeTicks": 220 },
-        { "pattern": "SPREAD", "cooldown": 5, "bulletType": "GOLD", "arms": 7, "speed": 4.85, "bulletScale": 1.2, "hitboxScale": 0.46, "bulletLifetimeTicks": 220 },
+        { "pattern": "SPREAD", "cooldown": 6, "bulletType": "NEEDLE", "arms": 9, "speed": 5.05, "spread": 0.08, "bulletScale": 1.08, "hitboxScale": 0.46, "bulletLifetimeTicks": 210 },
         { "pattern": "AIMED_RING", "cooldown": 15, "bulletType": "STAR", "arms": 5, "spread": 0.14, "speed": 3.85, "ringArms": 8, "ringSpeed": 2.0, "ringBulletType": "ORB", "bulletScale": 1.22, "hitboxScale": 0.45, "ringStartAngleRad": -1 },
         { "pattern": "DENSE_RING", "cooldown": 16, "bulletType": "STAR", "arms": 13, "speed": 2.35, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 }
       ]

@@ -1,0 +1,39 @@
+{
+  "id": "fw_shared_057",
+  "description": "Mixed cross top (four colors).",
+  "enemies": [
+    {
+      "x": 100,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 180,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 4
+    },
+    {
+      "x": 300,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 8,
+      "pattern": "RING"
+    },
+    {
+      "x": 380,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.1,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 12
+    }
+  ]
+}

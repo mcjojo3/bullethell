@@ -1,15 +1,17 @@
 {
   "id": "marisa_stage",
   "title": "Bamboo Forest of the Full Moon",
-  "_design_notes": "Pre-boss fairy script loosely follows Touhou 8 Imperishable Night Stage 4: dense bamboo-corridor side entries, yellow non-aimed curtains, crossing aimed blues, green ring walls from sides and top, mid-wave large anchor, then escalation before Marisa.",
+  "_design_notes": [
+    "marisa_stage: preamble + fairyRush shared catalog (IN-inspired pool)."
+  ],
   "stageMusic": "retribution_for_the_eternal_night_imperishable_night",
   "bossId": "marisa_boss",
   "rules": {
-    "itemDropEveryNthKill": 1,
+    "itemDropEveryNthKill": 3,
     "dropCyclePattern": "POWER,POINT,POWER,POWER,POINT,POWER,POINT,POWER,POINT,POWER",
     "largeEnemyDropCyclePattern": "POWER,POINT,POWER,FULL_POWER,POINT,POWER,POWER,POINT",
-    "bombDropChance": 0.0,
-    "pocFraction": 0.20,
+    "scoreExtendEvery": 1500000,
+    "pocFraction": 0.2,
     "pocAutoCollect": true,
     "itemAttractionSpeed": 8.0,
     "deathPowerLoss": 32,
@@ -23,97 +25,48 @@
   },
   "waves": [
     {
-      "_comment": "IN4 opening: aggressive star fairies (red) rain from top in stagger - similar to early IN stage-4 top spawns before side pressure ramps.",
+      "_comment": "Forest hush: two greens.",
       "spawnTick": 0,
-      "waveRef": "five_top_reds"
-    },
-    {
-      "_comment": "IN4 bamboo corridor: yellow curtain from the left (non-aimed SPREAD); classic TH8 side-hazard introduction.",
-      "spawnTick": 145,
-      "waveRef": "left_sweep_yellow"
-    },
-    {
-      "_comment": "Mirror curtain from the right - IN4 loves bilateral symmetry.",
-      "spawnTick": 285,
-      "waveRef": "right_sweep_yellow"
-    },
-    {
-      "_comment": "IN4-style crossing streams: blues arc from both upper corners so aimed fans cross mid-screen.",
-      "spawnTick": 420,
-      "waveRef": "in4_crossing_aimed_blues"
-    },
-    {
-      "_comment": "Staggered top blues (waterfall aimed) - sustained density after the crossing wave.",
-      "spawnTick": 555,
-      "waveRef": "staggered_blues_top"
-    },
-    {
-      "_comment": "Ring walls from both screen edges (green) - IN barrier-fairy behaviour.",
-      "spawnTick": 700,
-      "waveRef": "green_ring_sides"
-    },
-    {
-      "_comment": "IN4 ‘canopy': greens drop from the top with drift so rings stack vertically.",
-      "spawnTick": 850,
-      "waveRef": "in4_green_ceiling"
-    },
-    {
-      "_comment": "Side-approach aimed pressure: reds arc from the left (trackable fans while moving).",
-      "spawnTick": 985,
-      "waveRef": "left_sweep_red"
-    },
-    {
-      "_comment": "Mixed crossfire: aimed reds one side, yellow curtains the other - core IN4 reading.",
-      "spawnTick": 1120,
-      "waveRef": "pincer_red_yellow"
-    },
-    {
-      "_comment": "Large anchor (STREAM) + escorts - mid-section anchor fairy like IN's heavier wave pieces.",
-      "spawnTick": 1260,
-      "waveRef": "large_yellow_center"
-    },
-    {
-      "_comment": "Mixed top-down cross: multiple bullet types at once (IN4 escalation).",
-      "spawnTick": 1420,
-      "waveRef": "mixed_cross_top"
-    },
-    {
-      "_comment": "Green ring sweep from the right - rotating walls from a moving source.",
-      "spawnTick": 1575,
-      "waveRef": "right_sweep_green"
-    },
-    {
-      "_comment": "Double yellow curtain only - deep bamboo-lane lane pressure before the convergence gauntlet.",
-      "spawnTick": 1735,
-      "waveRef": "in4_dual_curtain_yellow"
-    },
-    {
-      "_comment": "Pre-boss omnidirectional convergence: fairies from all edges (original gauntlet layout).",
-      "spawnTick": 1895,
       "enemies": [
-        { "x":  40, "y": -20, "vx": 0.0,  "vy":  4.5, "angVel": -0.018, "arcTicks": 87, "type": "BLUE_FAIRY" },
-        { "x": 440, "y": -20, "vx": 0.0,  "vy":  4.5, "angVel":  0.018, "arcTicks": 87, "type": "BLUE_FAIRY" },
-        { "x": 160, "y": -20, "vx": 0.0,  "vy":  4.5, "angVel": -0.018, "arcTicks": 87, "type": "RED_FAIRY"  },
-        { "x": 320, "y": -20, "vx": 0.0,  "vy":  4.5, "angVel":  0.018, "arcTicks": 87, "type": "RED_FAIRY"  },
-        { "x": -20, "y":  60, "vx":  4.5, "vy":  0.0, "angVel":  0.018, "arcTicks": 87, "type": "GREEN_FAIRY" },
-        { "x": -20, "y": 110, "vx":  4.5, "vy":  0.0, "angVel":  0.018, "arcTicks": 87, "type": "GREEN_FAIRY" },
-        { "x": 500, "y":  60, "vx": -4.5, "vy":  0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" },
-        { "x": 500, "y": 110, "vx": -4.5, "vy":  0.0, "angVel": -0.018, "arcTicks": 87, "type": "YELLOW_FAIRY" }
-      ]
-    },
-    {
-      "_comment": "Final fairy gauntlet: dual large anchors + small escorts (pre-boss climax).",
-      "spawnTick": 2065,
-      "enemies": [
-        { "x": -20,  "y":  70, "vx":  3.8, "vy": 0.0, "angVel":  0.018, "arcTicks": 87, "type": "LARGE_RED"   },
-        { "x": 500,  "y":  70, "vx": -3.8, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "LARGE_GREEN" },
-        { "x":  60,  "y": -20, "vx": 0.0,  "vy": 4.5, "angVel": -0.018, "arcTicks": 87, "type": "BLUE_FAIRY", "delayTicks": 20 },
-        { "x": 160,  "y": -20, "vx": 0.0,  "vy": 4.5, "angVel": -0.018, "arcTicks": 87, "type": "RED_FAIRY",  "delayTicks": 30 },
-        { "x": 240,  "y": -20, "vx": 0.0,  "vy": 4.5, "angVel":  0.0,   "arcTicks":  0, "type": "YELLOW_FAIRY", "delayTicks": 20 },
-        { "x": 320,  "y": -20, "vx": 0.0,  "vy": 4.5, "angVel":  0.018, "arcTicks": 87, "type": "RED_FAIRY",  "delayTicks": 30 },
-        { "x": 420,  "y": -20, "vx": 0.0,  "vy": 4.5, "angVel":  0.018, "arcTicks": 87, "type": "BLUE_FAIRY", "delayTicks": 20 },
-        { "x": 500,  "y": 140, "vx": -4.5, "vy": 0.0, "angVel": -0.018, "arcTicks": 87, "type": "GREEN_FAIRY", "delayTicks": 40 }
+        {
+          "x": 180,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 3.6,
+          "type": "GREEN_FAIRY",
+          "delayTicks": 0,
+          "pattern": "RING"
+        },
+        {
+          "x": 300,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 3.6,
+          "type": "GREEN_FAIRY",
+          "delayTicks": 10,
+          "pattern": "RING"
+        }
       ]
     }
-  ]
+  ],
+  "fairyRush": {
+    "catalogId": "default",
+    "slotCount": 46,
+    "startTick": 125,
+    "gapTicksStartMin": 72,
+    "gapTicksStartMax": 118,
+    "gapTicksEndMin": 22,
+    "gapTicksEndMax": 42,
+    "gapEasing": "SMOOTHSTEP",
+    "jitterTicks": 16,
+    "intensityStartLo": 0,
+    "intensityStartHi": 2,
+    "intensityEndLo": 4,
+    "intensityEndHi": 10,
+    "breatherEvery": 7,
+    "breatherExtraTicks": 72,
+    "breatherWaveId": "",
+    "shuffleSeed": null,
+    "noRepeatLast": 6
+  }
 }

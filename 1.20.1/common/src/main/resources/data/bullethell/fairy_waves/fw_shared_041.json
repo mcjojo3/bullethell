@@ -1,0 +1,35 @@
+{
+  "id": "fw_shared_041",
+  "description": "Spiral peels from both tops.",
+  "enemies": [
+    {
+      "x": 64,
+      "y": -24,
+      "vx": 0.5,
+      "vy": 3.9,
+      "type": "RED_FAIRY",
+      "delayTicks": 0,
+      "angVel": 0.018,
+      "arcTicks": 76
+    },
+    {
+      "x": 416,
+      "y": -24,
+      "vx": -0.5,
+      "vy": 3.9,
+      "type": "RED_FAIRY",
+      "delayTicks": 0,
+      "angVel": -0.018,
+      "arcTicks": 76
+    },
+    {
+      "x": 240,
+      "y": -26,
+      "vx": 0.0,
+      "vy": 3.8,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 10,
+      "pattern": "RING"
+    }
+  ]
+}

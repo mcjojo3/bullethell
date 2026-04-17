@@ -1,0 +1,28 @@
+{
+  "id": "fw_shared_058",
+  "description": "Green sweep right.",
+  "enemies": [
+    {
+      "x": 444,
+      "y": -24,
+      "vx": -0.55,
+      "vy": 3.7,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING",
+      "angVel": -0.014,
+      "arcTicks": 76
+    },
+    {
+      "x": 380,
+      "y": -24,
+      "vx": -0.35,
+      "vy": 3.7,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 8,
+      "pattern": "RING",
+      "angVel": -0.011,
+      "arcTicks": 76
+    }
+  ]
+}

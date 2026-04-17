@@ -1,0 +1,34 @@
+{
+  "id": "fw_shared_034",
+  "description": "Crossing aimed blues + rim reds.",
+  "enemies": [
+    {
+      "x": 40,
+      "y": -24,
+      "vx": 0.7,
+      "vy": 3.8,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": 0.012,
+      "arcTicks": 68
+    },
+    {
+      "x": 440,
+      "y": -24,
+      "vx": -0.7,
+      "vy": 3.8,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": -0.012,
+      "arcTicks": 68
+    },
+    {
+      "x": 240,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 12
+    }
+  ]
+}

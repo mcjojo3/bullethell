@@ -1,0 +1,26 @@
+{
+  "id": "fw_shared_037",
+  "description": "Large scarlet anchors crossing.",
+  "enemies": [
+    {
+      "x": -24,
+      "y": 72,
+      "vx": 3.6,
+      "vy": 0.0,
+      "type": "LARGE_RED",
+      "delayTicks": 0,
+      "angVel": 0.016,
+      "arcTicks": 84
+    },
+    {
+      "x": 504,
+      "y": 72,
+      "vx": -3.6,
+      "vy": 0.0,
+      "type": "LARGE_GREEN",
+      "delayTicks": 0,
+      "angVel": -0.016,
+      "arcTicks": 84
+    }
+  ]
+}

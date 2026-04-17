@@ -1,0 +1,24 @@
+{
+  "id": "fw_shared_072",
+  "description": "Sub3 offset 192.",
+  "enemies": [
+    {
+      "x": 192,
+      "y": -22,
+      "vx": 0.15,
+      "vy": 3.9,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 288,
+      "y": -22,
+      "vx": -0.15,
+      "vy": 3.9,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    }
+  ]
+}

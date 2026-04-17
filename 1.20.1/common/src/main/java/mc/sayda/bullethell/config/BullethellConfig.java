@@ -14,10 +14,10 @@ public final class BullethellConfig {
     }
 
     /** Wave spawn compression: higher = shorter gaps between fairy-wave spawns (see {@link mc.sayda.bullethell.arena.ArenaContext#buildScheduledList}). */
-    public static final float DEF_WAVE_TIMING_EASY = 1.0f;
-    public static final float DEF_WAVE_TIMING_NORMAL = 1.25f;
-    public static final float DEF_WAVE_TIMING_HARD = 1.5f;
-    public static final float DEF_WAVE_TIMING_LUNATIC = 1.75f;
+    public static final float DEF_WAVE_TIMING_EASY = 1.5f;
+    public static final float DEF_WAVE_TIMING_NORMAL = 2.0f;
+    public static final float DEF_WAVE_TIMING_HARD = 2.5f;
+    public static final float DEF_WAVE_TIMING_LUNATIC = 3.0f;
 
     public static Supplier<Float> WAVE_TIMING_EASY = () -> DEF_WAVE_TIMING_EASY;
     public static Supplier<Float> WAVE_TIMING_NORMAL = () -> DEF_WAVE_TIMING_NORMAL;

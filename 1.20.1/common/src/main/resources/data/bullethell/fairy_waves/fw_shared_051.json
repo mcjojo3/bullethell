@@ -1,0 +1,54 @@
+{
+  "id": "fw_shared_051",
+  "description": "Staggered top blues waterfall.",
+  "enemies": [
+    {
+      "x": 60,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 132,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 5
+    },
+    {
+      "x": 204,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 276,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 15
+    },
+    {
+      "x": 348,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 20
+    },
+    {
+      "x": 420,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 25
+    }
+  ]
+}

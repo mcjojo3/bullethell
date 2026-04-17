@@ -1,0 +1,54 @@
+{
+  "id": "fw_shared_049",
+  "description": "Yellow curtain from right.",
+  "enemies": [
+    {
+      "x": 500,
+      "y": 50,
+      "vx": -3.6,
+      "vy": 0.12,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 500,
+      "y": 84,
+      "vx": -3.6,
+      "vy": 0.12,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 5
+    },
+    {
+      "x": 500,
+      "y": 118,
+      "vx": -3.6,
+      "vy": 0.12,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 500,
+      "y": 152,
+      "vx": -3.6,
+      "vy": 0.12,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 15
+    },
+    {
+      "x": 500,
+      "y": 186,
+      "vx": -3.6,
+      "vy": 0.12,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 20
+    },
+    {
+      "x": 500,
+      "y": 220,
+      "vx": -3.6,
+      "vy": 0.12,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 25
+    }
+  ]
+}

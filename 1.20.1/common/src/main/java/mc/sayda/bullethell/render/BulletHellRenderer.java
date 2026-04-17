@@ -59,6 +59,9 @@ public class BulletHellRenderer {
      */
     private static final int INDICATOR_H = 28;
 
+    /** Must match {@link mc.sayda.bullethell.arena.ArenaContext} boss hurtbox radius for debug draw. */
+    private static final float DEBUG_BOSS_HIT_RADIUS = 24f;
+
     // ---- Bullet textures (16x16 recommended) ------------------------------------
     // Place PNGs at: assets/bullethell/textures/bullets/<name>.png
     private static final ResourceLocation BULLET_FALLBACK_TEXTURE =
@@ -76,6 +79,7 @@ public class BulletHellRenderer {
         BULLET_TEXTURES.put(BulletType.GOLD, new ResourceLocation(Bullethell.MODID, "textures/bullets/star_4.png"));
         BULLET_TEXTURES.put(BulletType.SPARK, new ResourceLocation(Bullethell.MODID, "textures/bullets/star_12.png"));
         BULLET_TEXTURES.put(BulletType.HOMING_ORB, new ResourceLocation(Bullethell.MODID, "textures/bullets/orb.png"));
+        BULLET_TEXTURES.put(BulletType.PLAYER_SHOT, new ResourceLocation(Bullethell.MODID, "textures/bullets/orb.png"));
         BULLET_TEXTURES.put(BulletType.KUNAI, new ResourceLocation(Bullethell.MODID, "textures/bullets/kunai.png"));
         BULLET_TEXTURES.put(BulletType.NEEDLE, new ResourceLocation(Bullethell.MODID, "textures/bullets/needle.png"));
         BULLET_TEXTURES.put(BulletType.SCARLET, new ResourceLocation(Bullethell.MODID, "textures/bullets/orb.png"));
@@ -83,15 +87,18 @@ public class BulletHellRenderer {
         BULLET_TEXTURES.put(BulletType.SCARLET_MENTOS, new ResourceLocation(Bullethell.MODID, "textures/bullets/pill.png"));
         BULLET_TEXTURES.put(BulletType.ICE, new ResourceLocation(Bullethell.MODID, "textures/bullets/icicle.png"));
         BULLET_TEXTURES.put(BulletType.KNIFE, new ResourceLocation(Bullethell.MODID, "textures/bullets/knife.png"));
+        BULLET_TEXTURES.put(BulletType.AMULET, new ResourceLocation(Bullethell.MODID, "textures/bullets/ofuda.png"));
+        BULLET_TEXTURES.put(BulletType.CRIMSON_ORB, new ResourceLocation(Bullethell.MODID, "textures/bullets/orb.png"));
 
         BULLET_TEXTURE_SCALES.put(BulletType.ORB, 2.80f);
         BULLET_TEXTURE_SCALES.put(BulletType.STAR, 2.80f);
         BULLET_TEXTURE_SCALES.put(BulletType.RICE, 3.10f);
         BULLET_TEXTURE_SCALES.put(BulletType.LASER_HEAD, 2.95f);
         BULLET_TEXTURE_SCALES.put(BulletType.BUBBLE, 2.90f);
-        BULLET_TEXTURE_SCALES.put(BulletType.GOLD, 2.90f);
+        BULLET_TEXTURE_SCALES.put(BulletType.GOLD, 3.15f);
         BULLET_TEXTURE_SCALES.put(BulletType.SPARK, 3.20f);
         BULLET_TEXTURE_SCALES.put(BulletType.HOMING_ORB, 2.90f);
+        BULLET_TEXTURE_SCALES.put(BulletType.PLAYER_SHOT, 2.65f);
         // Kunai: slightly smaller on-screen than knife so TH6-style small daggers read correctly vs silver knives.
         BULLET_TEXTURE_SCALES.put(BulletType.KUNAI, 4.25f);
         BULLET_TEXTURE_SCALES.put(BulletType.NEEDLE, 4.20f);
@@ -102,6 +109,8 @@ public class BulletHellRenderer {
         BULLET_TEXTURE_SCALES.put(BulletType.ICE, 4.80f);
         // Knife matches prior kunai full scale (kunai shrunk above).
         BULLET_TEXTURE_SCALES.put(BulletType.KNIFE, 4.80f);
+        BULLET_TEXTURE_SCALES.put(BulletType.AMULET, 3.15f);
+        BULLET_TEXTURE_SCALES.put(BulletType.CRIMSON_ORB, 2.80f);
 
         for (BulletType type : BulletType.values())
             BULLET_TEXTURE_SOURCE_SIZES.put(type, 16);
@@ -116,6 +125,8 @@ public class BulletHellRenderer {
         BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.SCARLET_MENTOS, 45f); // front points bottom-right
         BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.ICE, 135f); // align with kunai-style directional blade in source art
         BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.KNIFE, 135f);
+        // ofuda.png: vertical strip; “down” in texture = forward (matches atan2 where +y is down on screen).
+        BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.AMULET, 90f);
     }
 
     // ---- Character / player textures -------------------------------------------
@@ -235,8 +246,8 @@ public class BulletHellRenderer {
             renderItem(gfx, type, six, siy, sz);
         }
 
-        // ---- 4. Player sprite + optional hitbox (shift-only) ----
-        boolean showHitbox = isDown(mc.sayda.bullethell.client.BHKeyMappings.FOCUS);
+        // ---- 4. Player sprite + optional hitbox (focus / vanilla Shift–sneak) ----
+        boolean showHitbox = shouldShowArenaHitboxOverlay();
         if (!state.spectating) {
             int px = ox + (int) (state.player.x * sx);
             int py = oy + (int) (state.player.y * sy);
@@ -303,7 +314,7 @@ public class BulletHellRenderer {
         }
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
-        // ---- 7. All Player bullets - partial-tick extrapolation ----
+        // ---- 7. All Player bullets - partial-tick extrapolation (typed textures like enemy bullets)
         for (mc.sayda.bullethell.arena.BulletPool pool : state.allPlayerBullets.values()) {
             for (int i = 0; i < mc.sayda.bullethell.arena.BulletPool.PLAYER_CAPACITY; i++) {
                 if (!pool.isActive(i))
@@ -312,12 +323,19 @@ public class BulletHellRenderer {
                 float by = pool.getY(i) + pool.getVy(i) * partialTick;
                 if (outOfArena(bx, by))
                     continue;
+                BulletType type = BulletType.fromId(pool.getType(i));
                 int sbx = ox + (int) (bx * sx);
                 int sby = oy + (int) (by * sy);
-                int r = Math.max(1, (int) (3 * (sx + sy) * 0.5f));
-                gfx.fill(sbx - r, sby - r, sbx + r, sby + r, BulletType.PLAYER_SHOT.color);
+                float vis = pool.getVisScale(i);
+                int r = Math.max(1, (int) (type.radius * vis * (sx + sy) * 0.5f));
+                float vx = pool.getVx(i);
+                float vy = pool.getVy(i);
+                renderBullet(gfx, type, sbx, sby, r, vx, vy);
             }
         }
+        // Must reset after player bullets: blitTintedBullet sets shader color per type
+        // (e.g. Cirno ice, Sakuya knives); leaving the last tint affects boss/HUD/FX.
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
         // ---- 8. Boss (visible during boss phase and during dialog intro animation)
         // ----
@@ -448,6 +466,18 @@ public class BulletHellRenderer {
         renderDebugHitboxOverlay(gfx, state, ox, oy, sx, sy, partialTick, showHitbox);
     }
 
+    /**
+     * True while focus is held or vanilla Shift is down (sneak). Custom {@link BHKeyMappings#FOCUS}
+     * uses Left Shift; when the KeyMapping does not see the key, {@link net.minecraft.client.player.LocalPlayer#isShiftKeyDown}
+     * still matches sneaking so debug hitboxes work.
+     */
+    private static boolean shouldShowArenaHitboxOverlay() {
+        if (isDown(mc.sayda.bullethell.client.BHKeyMappings.FOCUS))
+            return true;
+        Minecraft mc = Minecraft.getInstance();
+        return mc.player != null && mc.player.isShiftKeyDown();
+    }
+
     private static void drawDiamond(GuiGraphics gfx, int x, int y, int radius, int color) {
         for (int i = -radius; i <= radius; i++) {
             int w = radius - Math.abs(i);
@@ -456,9 +486,8 @@ public class BulletHellRenderer {
     }
 
     /**
-     * Debug-mode overlay: enemy bullet + laser collision shapes (matches server math).
-     * Only drawn while the focus key ({@link mc.sayda.bullethell.client.BHKeyMappings#FOCUS})
-     * is held so you can toggle vs normal debug HUD and compare projectiles visually.
+     * Debug-mode overlay: player, boss, enemy bullets, player bullets, and laser collision shapes
+     * (matches server math). Shown while focus or Shift (sneak) is held.
      */
     private static void renderDebugHitboxOverlay(GuiGraphics gfx, ClientArenaState state,
             int ox, int oy, float sx, float sy, float partialTick, boolean focusHeld) {
@@ -481,6 +510,14 @@ public class BulletHellRenderer {
             drawFilledCircleWithOutline(gfx, px, py, pr, 0xAA00FFFF, 0xFF00FFFF);
         }
 
+        // Boss hurtbox (matches server BOSS_HIT_RADIUS + player bullet check)
+        if (state.bossMaxHp > 0 || state.bossIntroVisible) {
+            int bx = ox + (int) (state.bossX * sx);
+            int byb = oy + (int) (state.bossY * sy);
+            int bossR = Math.max(1, Math.round(DEBUG_BOSS_HIT_RADIUS * (sx + sy) * 0.5f));
+            drawFilledCircleWithOutline(gfx, bx, byb, bossR, 0xAAFFAA00, 0xFFFFCC44);
+        }
+
         // Enemy bullet hitboxes (server uses type.radius * hitScale)
         for (int i = 0; i < BulletPool.ENEMY_CAPACITY; i++) {
             if (!state.bullets.isActive(i))
@@ -495,6 +532,24 @@ public class BulletHellRenderer {
             int sbx = ox + (int) (bx * sx);
             int sby = oy + (int) (by * sy);
             drawFilledCircleWithOutline(gfx, sbx, sby, br, 0xAAFF5050, 0xFFFF8080);
+        }
+
+        // Player bullet hitboxes (all co-op pools)
+        for (mc.sayda.bullethell.arena.BulletPool pool : state.allPlayerBullets.values()) {
+            for (int i = 0; i < mc.sayda.bullethell.arena.BulletPool.PLAYER_CAPACITY; i++) {
+                if (!pool.isActive(i))
+                    continue;
+                float bx = pool.getX(i) + pool.getVx(i) * partialTick;
+                float by = pool.getY(i) + pool.getVy(i) * partialTick;
+                if (outOfArena(bx, by))
+                    continue;
+                BulletType bt = BulletType.fromId(pool.getType(i));
+                float bulletR = bt.radius * pool.getHitScale(i) * bt.hitboxCollisionMul;
+                int br = Math.max(1, Math.round(bulletR * (sx + sy) * 0.5f));
+                int sbx = ox + (int) (bx * sx);
+                int sby = oy + (int) (by * sy);
+                drawFilledCircleWithOutline(gfx, sbx, sby, br, 0xAA44FF88, 0xFF66FFAA);
+            }
         }
 
         // Laser firing hitboxes (filled beam cross-section)
@@ -760,90 +815,117 @@ public class BulletHellRenderer {
      * BOSS speaker → gold border + gold name
      * PLAYER speaker → cyan border + cyan name
      */
-    private static void renderDialog(GuiGraphics gfx, ClientArenaState state,
-            int ox, int oy, int dw, int dh) {
-        Font font = Minecraft.getInstance().font;
-        int lh = font.lineHeight; // typically 9
-        boolean waitingForOthers = state.dialogReadyCount < state.dialogTotalCount && state.dialogSpeaker.isEmpty();
-
-        // Box geometry - tall enough for 3 text lines + speaker name row + portrait
-        int portSz = lh * 3 + 6; // portrait cell size (~33 px at lh=9)
+    /**
+     * Shared dialog-box renderer used by both the in-game pre-boss intro and the
+     * post-arena end overlay. Positions the box in arena space.
+     *
+     * @param ox          arena display rect left edge
+     * @param oy          arena display rect top edge
+     * @param dw          arena display width
+     * @param speakerName name shown in the header row
+     * @param portraitId  bossId or characterId for the portrait on the right
+     * @param bodyText    dialog body (word-wrapped to 3 lines)
+     * @param hint        key-hint line rendered below the box
+     * @param slideInTick ticks elapsed in this dialog phase (drives ease-in)
+     * @param isBoss      true = gold border + boss portrait; false = cyan + character portrait
+     */
+    private static void renderDialogBox(GuiGraphics gfx, Font font,
+            int ox, int oy, int dw,
+            String speakerName, String portraitId, String bodyText, String hint,
+            int slideInTick, boolean isBoss) {
+        int lh = font.lineHeight;
+        int portSz = lh * 3 + 6;
         int padX = 6;
         int boxW = (int) (dw * 0.90f);
         int textLines = 3;
-        int boxH = lh + 8 // speaker name row
-                + textLines * (lh + 2) + 8; // text body + padding (~63 px at lh=9)
+        int boxH = lh + 8 + textLines * (lh + 2) + 8;
         int boxX = ox + (dw - boxW) / 2;
 
-        // Ease-out slide-in from above the arena
-        float t = Math.min(1f, state.dialogSlideInTick / 20f);
-        float ease = 1f - (1f - t) * (1f - t); // quadratic ease-out
+        float t = Math.min(1f, slideInTick / 20f);
+        float ease = 1f - (1f - t) * (1f - t);
         int slideEnd = oy + 4;
         int boxY = (int) ((oy - boxH - 8) * (1f - ease) + slideEnd * ease);
 
-        boolean isBoss = "BOSS".equalsIgnoreCase(state.dialogSpeaker);
         int borderCol = isBoss ? 0xFFFFDD44 : 0xFF44FFEE;
-        int nameCol = isBoss ? 0xFFFFDD44 : 0xFF44FFEE;
-        String speaker = waitingForOthers
-                ? "Ready"
-                : (isBoss ? state.bossName
-                        : Objects.requireNonNull(mc.sayda.bullethell.boss.CharacterLoader.load(state.characterId)).name);
-        if (speaker == null || speaker.isEmpty())
-            speaker = Objects.requireNonNullElse(state.dialogSpeaker, "Unknown");
+        int nameCol   = isBoss ? 0xFFFFDD44 : 0xFF44FFEE;
 
-        // ---- Background ----
+        // Background
         gfx.fill(boxX, boxY, boxX + boxW, boxY + boxH, 0xEE000018);
-        // Subtle inner gradient tint on the speaker-name row
-        gfx.fill(boxX + 1, boxY + 1, boxX + boxW - 1, boxY + lh + 6, 0x33000000 | (borderCol & 0x00FFFFFF));
+        gfx.fill(boxX + 1, boxY + 1, boxX + boxW - 1, boxY + lh + 6,
+                0x33000000 | (borderCol & 0x00FFFFFF));
 
-        // ---- Border ----
+        // Border
         gfx.hLine(boxX, boxX + boxW - 1, boxY, borderCol);
         gfx.hLine(boxX, boxX + boxW - 1, boxY + boxH - 1, borderCol);
         gfx.vLine(boxX, boxY, boxY + boxH, borderCol);
         gfx.vLine(boxX + boxW - 1, boxY, boxY + boxH, borderCol);
-        // Accent line under speaker name
         gfx.hLine(boxX + 1, boxX + boxW - 2, boxY + lh + 5, (0x55 << 24) | (borderCol & 0x00FFFFFF));
 
-        // ---- Speaker name (top-left) ----
-        gfx.drawString(font, speaker, boxX + padX, boxY + 3, nameCol, false);
+        // Speaker name
+        gfx.drawString(font, speakerName, boxX + padX, boxY + 3, nameCol, false);
 
-        // ---- Portrait (right side of name row, or left of text body) ----
+        // Portrait (right side)
         int portX = boxX + boxW - portSz - padX;
         int portY = boxY + lh + 8;
         int portHalf = portSz / 2;
-        if (isBoss && !state.bossId.isEmpty()) {
-            // Use the boss sprite sheet (idle frame 0)
-            renderBossSprite(gfx, state.bossId, portX + portHalf, portY + portHalf, portHalf);
+        if (isBoss) {
+            drawBossPortrait(gfx, portraitId, portX + portHalf, portY + portHalf, portHalf);
         } else {
-            renderCharacterSprite(gfx, state.characterId, portX + portHalf, portY + portHalf, portHalf);
+            drawCharacterPortrait(gfx, portraitId, portX + portHalf, portY + portHalf, portHalf);
         }
 
-        // ---- Dialog text (left of portrait, word-wrapped to 2 lines) ----
+        // Dialog text
         int textX = boxX + padX;
         int textY = boxY + lh + 9;
         int textW = boxW - portSz - padX * 3;
-        String bodyText = waitingForOthers
-                ? "Waiting for other players... " + state.dialogReadyCount + "/" + state.dialogTotalCount
-                : Objects.requireNonNullElse(state.dialogText, "");
-        List<FormattedCharSequence> lines = font
-                .split(Component.literal(bodyText), textW);
+        List<FormattedCharSequence> lines = font.split(Component.literal(bodyText), textW);
         for (int i = 0; i < Math.min(lines.size(), textLines); i++) {
             gfx.drawString(font, lines.get(i), textX, textY + i * (lh + 2), 0xFFEEEEEE, false);
         }
 
-        // ---- Footer inside box: ▼ blink indicator ----
-        boolean blink = (state.dialogSlideInTick / 10) % 2 == 0;
-        if (blink) {
+        // ▼ blink indicator
+        if ((slideInTick / 10) % 2 == 0) {
             gfx.drawString(font, "\u25BC", boxX + boxW - font.width("\u25BC") - padX,
                     boxY + boxH - lh - 3, (0x99 << 24) | 0xFFFFFF, false);
         }
 
-        // ---- Key hint below the box (won't clip with dialog text) ----
+        // Key hint below the box
+        gfx.drawString(font, hint, boxX + padX, boxY + boxH + 3, (0x55 << 24) | 0xFFFFFF, false);
+    }
+
+    private static void renderDialog(GuiGraphics gfx, ClientArenaState state,
+            int ox, int oy, int dw, int dh) {
+        Font font = Minecraft.getInstance().font;
+        boolean waitingForOthers = state.dialogReadyCount < state.dialogTotalCount
+                && state.dialogSpeaker.isEmpty();
+        boolean isBoss = "BOSS".equalsIgnoreCase(state.dialogSpeaker);
+
+        String speakerName;
+        String portraitId;
+        if (waitingForOthers) {
+            speakerName = "Ready";
+            portraitId = state.characterId;
+        } else if (isBoss) {
+            speakerName = state.bossName.isEmpty()
+                    ? Objects.requireNonNullElse(state.dialogSpeaker, "???") : state.bossName;
+            portraitId = state.bossId;
+        } else {
+            mc.sayda.bullethell.boss.CharacterDefinition cd =
+                    mc.sayda.bullethell.boss.CharacterLoader.load(state.characterId);
+            speakerName = (cd != null && !cd.name.isEmpty()) ? cd.name
+                    : Objects.requireNonNullElse(state.dialogSpeaker, "???");
+            portraitId = state.characterId;
+        }
+
+        String bodyText = waitingForOthers
+                ? "Waiting for other players... " + state.dialogReadyCount + "/" + state.dialogTotalCount
+                : Objects.requireNonNullElse(state.dialogText, "");
         String hint = waitingForOthers
                 ? "Ready: " + state.dialogReadyCount + "/" + state.dialogTotalCount
                 : "[Z] Next  [Ctrl] Skip";
-        gfx.drawString(font, hint, boxX + padX, boxY + boxH + 3,
-                (0x55 << 24) | 0xFFFFFF, false);
+
+        renderDialogBox(gfx, font, ox, oy, dw, speakerName, portraitId, bodyText, hint,
+                state.dialogSlideInTick, isBoss);
     }
 
     // ---------------------------------------------------------------- Spell card
@@ -978,6 +1060,69 @@ public class BulletHellRenderer {
      * Most bosses use a 256×256 sheet (64×64 cells). Sakuya uses 256×255 with 64×85 cells
      * ({@link BossSheetLayout}). Destination size preserves cell aspect ratio.
      */
+    /**
+     * Public accessor: renders a boss portrait at idle frame 0.
+     * Safe to call outside an active arena (e.g. from ArenaEndScreen).
+     */
+    public static void drawBossPortrait(GuiGraphics gfx, String bossId, int cx, int cy, int halfSz) {
+        if (bossId == null || bossId.isEmpty()) return;
+        BossSheetLayout lay = BossSheetLayout.forBoss(bossId);
+        float u = lay.uForFrame(0);
+        float v = lay.idleRowV();
+        ResourceLocation tex = bossTex(bossId);
+        int destW = halfSz * 2;
+        int destH = lay.destHeightForWidth(destW);
+        try {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            gfx.blit(Objects.requireNonNull(tex), cx - destW / 2, cy - destH / 2, destW, destH,
+                    u, v, lay.cellW, lay.cellH, lay.texW, lay.texH);
+            RenderSystem.disableBlend();
+        } catch (Exception e) {
+            gfx.fill(cx - halfSz, cy - halfSz, cx + halfSz, cy + halfSz, 0xFFFF44FF);
+        }
+    }
+
+    /**
+     * Public accessor: renders a character portrait at idle frame 0.
+     * Safe to call outside an active arena (e.g. from ArenaEndScreen).
+     */
+    public static void drawCharacterPortrait(GuiGraphics gfx, String characterId, int cx, int cy, int halfSz) {
+        ResourceLocation tex = charTex(characterId);
+        int dstW = halfSz * 2;
+        int dstH = (int) (dstW * 47f / 32f);
+        try {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            gfx.blit(Objects.requireNonNull(tex), cx - halfSz, cy - dstH / 2, dstW, dstH, 0f, 0f, 32, 47, 256, 296);
+            RenderSystem.disableBlend();
+        } catch (Exception e) {
+            gfx.fill(cx - halfSz, cy - halfSz, cx + halfSz, cy + halfSz, 0xCCFFFFFF);
+        }
+    }
+
+    /**
+     * Renders the end-of-arena dialog box over the frozen arena.
+     * Delegates to the shared {@link #renderDialogBox} core so the style is identical
+     * to the in-game pre-boss intro dialog. Called by ArenaEndScreen.
+     */
+    public static void drawEndDialogBox(GuiGraphics gfx, int screenW, int screenH,
+            String speakerName, String portraitId, String dialogText,
+            int slideInTick, boolean isBoss) {
+        Font font = Minecraft.getInstance().font;
+        int dispH = screenH - INDICATOR_H;
+        int dispW = (int) (dispH * BulletPool.ARENA_W / BulletPool.ARENA_H);
+        if (dispW > screenW) {
+            dispW = screenW;
+            dispH = (int) (screenW * BulletPool.ARENA_H / BulletPool.ARENA_W);
+        }
+        int ox = (screenW - dispW) / 2;
+        int oy = (screenH - INDICATOR_H - dispH) / 2;
+        renderDialogBox(gfx, font, ox, oy, dispW,
+                speakerName, portraitId, dialogText, "[Z] Continue  [Ctrl] Skip",
+                slideInTick, isBoss);
+    }
+
     private static void renderBossSprite(GuiGraphics gfx, String bossId,
             int cx, int cy, int halfSz) {
         if (bossId == null || bossId.isEmpty()) {
@@ -1207,13 +1352,14 @@ public class BulletHellRenderer {
     /**
      * Renders a single enemy bullet.
      *
-     * All types use the bullet texture + {@link BulletType#color} tint (ARGB alpha
-     * respected). No axis-aligned {@code gfx.fill} halos — those read as solid
+     * Most types use the bullet texture + {@link BulletType#color} tint (ARGB alpha
+     * respected); {@link BulletType#AMULET} is drawn untinted (ofuda art). No axis-aligned
+     * {@code gfx.fill} halos — those read as solid
      * “boxes” around stars/orbs and fight PNG transparency.
      *
      * <p>Call only between {@link RenderSystem#enableBlend()} and a final
      * {@link RenderSystem#setShaderColor(float, float, float, float)} reset — see
-     * the enemy bullet loop in {@link #render}.
+     * the enemy and player bullet loops in {@link #render}.
      */
     private static void renderBullet(GuiGraphics gfx, BulletType type, int cx, int cy, int r, float vx, float vy) {
         int texR = Math.max(1, Math.round(r * bulletTextureScale(type)));
@@ -1250,11 +1396,16 @@ public class BulletHellRenderer {
     private static void blitTintedBullet(GuiGraphics gfx, BulletType type, int cx, int cy, int r, int argb, float rotDeg) {
         ResourceLocation texture = bulletTexture(type);
         int srcSize = bulletTextureSourceSize(type);
-        float a = ((argb >>> 24) & 0xFF) / 255f;
-        float cr = ((argb >>> 16) & 0xFF) / 255f;
-        float cg = ((argb >>> 8) & 0xFF) / 255f;
-        float cb = (argb & 0xFF) / 255f;
-        RenderSystem.setShaderColor(cr, cg, cb, a);
+        // Reimu player amulets: full art color from PNG (no type tint).
+        if (type == BulletType.AMULET) {
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        } else {
+            float a = ((argb >>> 24) & 0xFF) / 255f;
+            float cr = ((argb >>> 16) & 0xFF) / 255f;
+            float cg = ((argb >>> 8) & 0xFF) / 255f;
+            float cb = (argb & 0xFF) / 255f;
+            RenderSystem.setShaderColor(cr, cg, cb, a);
+        }
         if (rotDeg * rotDeg < 1e-4f) {
             gfx.blit(texture, cx - r, cy - r, r * 2, r * 2, 0, 0, srcSize, srcSize, srcSize, srcSize);
         } else {

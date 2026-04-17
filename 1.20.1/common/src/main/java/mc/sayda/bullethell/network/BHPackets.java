@@ -55,6 +55,8 @@ public final class BHPackets {
     public static final ResourceLocation OPEN_CHALLENGE    = id("open_challenge");
     public static final ResourceLocation CONTROL_SCHEME    = id("control_scheme");
     public static final ResourceLocation CHARACTER_UNLOCKS = id("character_unlocks");
+    /** S → C | arena ended; carry stats + boss quote for the end overlay. */
+    public static final ResourceLocation ARENA_END         = id("arena_end");
 
     // C → S
     public static final ResourceLocation PLAYER_POS        = id("player_pos");
@@ -67,6 +69,8 @@ public final class BHPackets {
     public static final ResourceLocation JOIN_MATCH        = id("join_match");
     public static final ResourceLocation INVITE_PLAYER     = id("invite_player");
     public static final ResourceLocation SHARE_LAST_RUN    = id("share_last_run");
+    /** C → S | player requests a retry of the last arena. */
+    public static final ResourceLocation RETRY_ARENA       = id("retry_arena");
 
     private static ResourceLocation id(String path) {
         return new ResourceLocation(Bullethell.MODID, path);
@@ -246,6 +250,22 @@ public final class BHPackets {
             });
         });
 
+        // C2S: retry arena — restart with same stage/difficulty/character
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, RETRY_ARENA, (buf, ctx) -> {
+            RetryArenaPacket pkt = RetryArenaPacket.decode(buf);
+            ctx.queue(() -> {
+                ServerPlayer player = (ServerPlayer) ctx.getPlayer();
+                if (player == null) return;
+                if (BulletHellManager.INSTANCE.hasArena(player.getUUID())) return;
+                DifficultyConfig diff;
+                try { diff = DifficultyConfig.valueOf(pkt.difficulty); }
+                catch (Exception e) { diff = DifficultyConfig.NORMAL; }
+                if (!pkt.stageId.isBlank() && !pkt.characterId.isBlank()) {
+                    startArena(player, diff, pkt.stageId, pkt.characterId);
+                }
+            });
+        });
+
         // C2S: broadcast last arena end stats (same chat format) to all online players
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, SHARE_LAST_RUN, (buf, ctx) -> {
             ShareLastRunPacket.decode(buf);
@@ -338,6 +358,12 @@ public final class BHPackets {
         NetworkManager.sendToPlayer(player, CHARACTER_UNLOCKS, b);
     }
 
+    public static void sendArenaEnd(ServerPlayer player, ArenaEndPacket pkt) {
+        FriendlyByteBuf b = buf();
+        pkt.encode(b);
+        NetworkManager.sendToPlayer(player, ARENA_END, b);
+    }
+
     // ---------------------------------------------------------------- Client → Server helpers
 
     @Environment(EnvType.CLIENT)
@@ -393,6 +419,13 @@ public final class BHPackets {
         FriendlyByteBuf b = buf();
         new InvitePlayerPacket(targetUuid).encode(b);
         NetworkManager.sendToServer(INVITE_PLAYER, b);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void sendRetryArena(RetryArenaPacket pkt) {
+        FriendlyByteBuf b = buf();
+        pkt.encode(b);
+        NetworkManager.sendToServer(RETRY_ARENA, b);
     }
 
     @Environment(EnvType.CLIENT)

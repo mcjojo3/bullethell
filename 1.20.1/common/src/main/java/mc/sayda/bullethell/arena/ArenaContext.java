@@ -4,8 +4,13 @@ import mc.sayda.bullethell.boss.BossDefinition;
 import mc.sayda.bullethell.boss.BossEmitterDefinition;
 import mc.sayda.bullethell.boss.BossLoader;
 import mc.sayda.bullethell.boss.CharacterDefinition;
+import mc.sayda.bullethell.boss.CharacterLoader;
 import mc.sayda.bullethell.debug.BHDebugMode;
 import mc.sayda.bullethell.entity.BHAttributes;
+import mc.sayda.bullethell.boss.FairyRushDefinition;
+import mc.sayda.bullethell.boss.FairyWaveCatalog;
+import mc.sayda.bullethell.boss.FairyWaveCatalogEntry;
+import mc.sayda.bullethell.boss.FairyWaveCatalogLoader;
 import mc.sayda.bullethell.boss.FairyWaveLoader;
 import mc.sayda.bullethell.boss.PatternStep;
 import mc.sayda.bullethell.boss.PhaseDefinition;
@@ -18,8 +23,10 @@ import mc.sayda.bullethell.config.BullethellConfig;
 import mc.sayda.bullethell.pattern.BulletType;
 import mc.sayda.bullethell.pattern.PatternEngine;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
@@ -97,8 +104,10 @@ public class ArenaContext {
 
     /** Absolute tick counter from arena start (drives wave spawning). */
     private int stageTick = 0;
-    /** Kill counter for drop-every-Nth-kill rule. */
-    private int killCounter = 0;
+    /** Small-fairy kills only when large fairies use the classic always-drop rule. */
+    private int smallEnemyKillCounter = 0;
+    /** Shared kill counter when large enemies also follow every-Nth drops. */
+    private int combinedDropKillCounter = 0;
     /**
      * Countdown ticks between last wave clearing and boss intro / BOSS phase.
      * -1 = delay not yet triggered (waves not yet clear).
@@ -406,6 +415,7 @@ public class ArenaContext {
                         ? rules.largeEnemyDropCyclePattern
                         : rules.dropCyclePattern;
         this.largeDropCycle = parseDropCycle(largePattern);
+        this.score.configureExtendsEvery(rules.scoreExtendEvery);
 
         // Apply character-specific stats; stage rules can override lives/bombs
         mc.sayda.bullethell.boss.CharacterDefinition charDef = mc.sayda.bullethell.boss.CharacterLoader
@@ -480,6 +490,35 @@ public class ArenaContext {
             net.minecraft.world.entity.LivingEntity player) {
         int base = (rules.startingBombs >= 0) ? rules.startingBombs : charDef.startingBombs;
         return Math.min(9, base + BHAttributes.extraBombsBonus(player));
+    }
+
+    private void addArenaScore(long pts) {
+        applyScoreExtends(score.addScore(pts));
+    }
+
+    /** TH-style score extends: +1 life per milestone (sound via {@link GameEvent#SCORE_EXTEND}). */
+    private void applyScoreExtends(int extendsGranted) {
+        if (extendsGranted <= 0) {
+            return;
+        }
+        if (rules.scoreExtendAwardAllCoopPlayers) {
+            for (PlayerState2D ps : getAllPlayerStates()) {
+                if (ps.lives < 0) {
+                    continue;
+                }
+                ps.lives += extendsGranted;
+                for (int i = 0; i < extendsGranted; i++) {
+                    ps.personalEvents.add(GameEvent.SCORE_EXTEND);
+                }
+            }
+        } else {
+            if (player.lives >= 0) {
+                player.lives += extendsGranted;
+                for (int i = 0; i < extendsGranted; i++) {
+                    player.personalEvents.add(GameEvent.SCORE_EXTEND);
+                }
+            }
+        }
     }
 
     // ---------------------------------------------------------------- inner types
@@ -586,7 +625,7 @@ public class ArenaContext {
         }
 
         // 5. Player Actions (Shots, Gauge, Skill Follow-ups)
-        tickPlayerShots(player, playerBullets);
+        tickPlayerShots(playerUuid, player, playerBullets);
         if (!frozen)
             tickSkillGauge(player);
 
@@ -597,7 +636,7 @@ public class ArenaContext {
             if (!frozen)
                 tickSkillGauge(cPs);
             if (cPb != null && cPs.lives >= 0) {
-                tickPlayerShots(cPs, cPb);
+                tickPlayerShots(cUuid, cPs, cPb);
             }
         }
 
@@ -735,9 +774,16 @@ public class ArenaContext {
         float mult = BullethellConfig.waveTimingMult(difficulty);
         List<ScheduledEnemy> list = new ArrayList<>();
         applicableWaveDefinitionCount = 0;
+        boolean procedural = stage.fairyRush != null;
+
         for (WaveDefinition wave : stage.waves) {
             if (!waveAppliesToDifficulty(wave))
                 continue;
+            if (procedural && wave.waveRef != null && !wave.waveRef.isEmpty()) {
+                System.err.println("[BulletHell] Stage " + stage.id
+                        + ": ignoring waveRef while fairyRush is active: " + wave.waveRef);
+                continue;
+            }
             applicableWaveDefinitionCount++;
             List<WaveEnemy> waveEnemies;
             if (wave.waveRef != null && !wave.waveRef.isEmpty()) {
@@ -750,8 +796,266 @@ public class ArenaContext {
                 list.add(new ScheduledEnemy(baseSpawnTick + we.delayTicks, we));
             }
         }
+
+        if (procedural) {
+            applicableWaveDefinitionCount += Math.max(0, stage.fairyRush.slotCount);
+            appendProceduralFairyRush(list, mult, stage.fairyRush);
+        }
+
         list.sort(Comparator.comparingInt(e -> e.spawnTick));
         scheduledEnemies.addAll(list);
+    }
+
+    /**
+     * Shifts the procedural catalog intensity band so higher difficulties pull
+     * heavier patterns earlier; Easy stays milder. (Spawn gaps already scale via
+     * {@link BullethellConfig#waveTimingMult}.)
+     */
+    private int fairyRushIntensityBias() {
+        return switch (difficulty) {
+            case EASY -> -1;
+            case NORMAL -> 0;
+            case HARD -> 1;
+            case LUNATIC -> 2;
+        };
+    }
+
+    /**
+     * Extra breathing room between wave starts on Easy; much tighter on Hard/Lunatic
+     * so prior fairies can still be on-screen when the next wave drops (overlap
+     * pressure without stacking everything frame-one).
+     */
+    private float fairyRushGapBreathingScale() {
+        return switch (difficulty) {
+            case EASY -> 1.02f;
+            case NORMAL -> 0.88f;
+            case HARD -> 0.58f;
+            case LUNATIC -> 0.28f;
+        };
+    }
+
+    /**
+     * How long we wait (designer ticks) for a wave to "clear" before adding the
+     * inter-wave gap. Lower on high difficulty so the schedule doesn't assume the
+     * player wipes waves instantly.
+     */
+    private float fairyRushDurationHintScale() {
+        return switch (difficulty) {
+            case EASY -> 1.0f;
+            case NORMAL -> 0.90f;
+            case HARD -> 0.72f;
+            case LUNATIC -> 0.46f;
+        };
+    }
+
+    private static int scaleDesignerTicks(int ticks, float scale, int floor) {
+        int v = Math.round(ticks * scale);
+        return Math.max(floor, v);
+    }
+
+    private void appendProceduralFairyRush(List<ScheduledEnemy> list, float mult, FairyRushDefinition rush) {
+        FairyWaveCatalog cat = FairyWaveCatalogLoader.load();
+        List<FairyWaveCatalogEntry> pool = cat.entriesForSet(rush.catalogId);
+        if (pool.isEmpty()) {
+            System.err.println("[BulletHell] fairyRush: empty catalog set '" + rush.catalogId + "' for stage "
+                    + stage.id);
+            return;
+        }
+
+        java.util.Random pickRandom = rush.shuffleSeed != null
+                ? new java.util.Random(seed ^ rush.shuffleSeed.longValue())
+                : random;
+
+        int nSlots = Math.max(0, rush.slotCount);
+        int cursor = (int) (rush.startTick / mult);
+        Deque<String> recent = new ArrayDeque<>();
+
+        for (int slot = 0; slot < nSlots; slot++) {
+            float progress = nSlots <= 1 ? 1f : (slot / (float) (nSlots - 1));
+
+            if (rush.breatherEvery > 0 && slot > 0 && slot % rush.breatherEvery == 0) {
+                List<WaveEnemy> breath = breatherEnemies(rush);
+                int waveStart = cursor;
+                for (WaveEnemy we : breath) {
+                    list.add(new ScheduledEnemy(waveStart + we.delayTicks, we));
+                }
+                int maxDelay = maxEnemyDelayTicks(breath);
+                int hintDesigner = maxDelay + 12 + Math.max(0, rush.breatherExtraTicks);
+                hintDesigner = scaleDesignerTicks(hintDesigner, fairyRushDurationHintScale(), 18);
+                int gapDesigner = pickGapDesigner(rush, progress, pickRandom);
+                gapDesigner = scaleDesignerTicks(gapDesigner, fairyRushGapBreathingScale(), 4);
+                cursor = waveStart + (int) (hintDesigner / mult) + (int) (gapDesigner / mult);
+                continue;
+            }
+
+            int iLo = lerpInt(rush.intensityStartLo, rush.intensityEndLo, progress, rush.gapEasing);
+            int iHi = lerpInt(rush.intensityStartHi, rush.intensityEndHi, progress, rush.gapEasing);
+            if (iLo > iHi) {
+                int t = iLo;
+                iLo = iHi;
+                iHi = t;
+            }
+            // Shift catalog intensity window by difficulty (wave timing alone does not change which patterns spawn).
+            int ib = fairyRushIntensityBias();
+            iLo = Math.max(0, Math.min(10, iLo + ib));
+            iHi = Math.max(0, Math.min(10, iHi + ib));
+            if (iLo > iHi) {
+                int t = iLo;
+                iLo = iHi;
+                iHi = t;
+            }
+
+            FairyWaveCatalogEntry entry = pickCatalogEntry(pool, iLo, iHi, pickRandom, recent, rush.noRepeatLast);
+            if (entry == null)
+                continue;
+
+            List<WaveEnemy> enemies = FairyWaveLoader.load(entry.id).enemies;
+            if (enemies == null || enemies.isEmpty())
+                continue;
+
+            int waveStart = cursor;
+            for (WaveEnemy we : enemies) {
+                list.add(new ScheduledEnemy(waveStart + we.delayTicks, we));
+            }
+
+            pushRecent(recent, entry.id, rush.noRepeatLast);
+
+            int hintDesigner = entry.durationHintTicks > 0
+                    ? entry.durationHintTicks
+                    : defaultDurationHintTicks(enemies);
+            hintDesigner = scaleDesignerTicks(hintDesigner, fairyRushDurationHintScale(), 20);
+            int gapDesigner = pickGapDesigner(rush, progress, pickRandom);
+            gapDesigner = scaleDesignerTicks(gapDesigner, fairyRushGapBreathingScale(), 4);
+            cursor = waveStart + (int) (hintDesigner / mult) + (int) (gapDesigner / mult);
+        }
+    }
+
+    private static List<WaveEnemy> breatherEnemies(FairyRushDefinition rush) {
+        if (rush.breatherWaveId != null && !rush.breatherWaveId.isBlank()) {
+            List<WaveEnemy> from = FairyWaveLoader.load(rush.breatherWaveId).enemies;
+            if (from != null && !from.isEmpty()) {
+                return from;
+            }
+        }
+        WaveEnemy w = new WaveEnemy();
+        w.x = 240f;
+        w.y = -20f;
+        w.vx = 0f;
+        w.vy = 3.2f;
+        w.type = "YELLOW_FAIRY";
+        return List.of(w);
+    }
+
+    private static int maxEnemyDelayTicks(List<WaveEnemy> enemies) {
+        int m = 0;
+        for (WaveEnemy we : enemies) {
+            m = Math.max(m, we.delayTicks);
+        }
+        return m;
+    }
+
+    private static int defaultDurationHintTicks(List<WaveEnemy> enemies) {
+        return maxEnemyDelayTicks(enemies) + 22 + enemies.size() * 6;
+    }
+
+    private static float rushEase(float p, String easingRaw) {
+        float pClamped = Math.max(0f, Math.min(1f, p));
+        if (easingRaw != null && easingRaw.equalsIgnoreCase("LINEAR")) {
+            return pClamped;
+        }
+        return pClamped * pClamped * (3f - 2f * pClamped);
+    }
+
+    private static int lerpInt(int a, int b, float progress, String easingRaw) {
+        float t = rushEase(progress, easingRaw);
+        return Math.round(a + (b - a) * t);
+    }
+
+    private static int pickGapDesigner(FairyRushDefinition rush, float progress, java.util.Random pr) {
+        float t = rushEase(progress, rush.gapEasing);
+        float gmin = rush.gapTicksStartMin + (rush.gapTicksEndMin - rush.gapTicksStartMin) * t;
+        float gmax = rush.gapTicksStartMax + (rush.gapTicksEndMax - rush.gapTicksStartMax) * t;
+        int lo = Math.round(Math.min(gmin, gmax));
+        int hi = Math.round(Math.max(gmin, gmax));
+        if (hi < lo) {
+            int x = lo;
+            lo = hi;
+            hi = x;
+        }
+        int jitter = Math.max(0, rush.jitterTicks);
+        int base = lo + (jitter > 0 ? pr.nextInt(hi - lo + 1 + 2 * jitter) - jitter : pr.nextInt(hi - lo + 1));
+        return Math.max(4, base);
+    }
+
+    private boolean catalogEntryApplies(FairyWaveCatalogEntry e) {
+        return difficultyMatchesBounds(e.minDifficulty, e.maxDifficulty);
+    }
+
+    /** Effective pick weight (catalog row × mild bias toward intense patterns on Hard+). */
+    private float catalogPickWeight(FairyWaveCatalogEntry e) {
+        float w = Math.max(0.001f, e.weight);
+        if (difficulty.ordinal() >= DifficultyConfig.HARD.ordinal() && e.intensity >= 5) {
+            w *= 1f + 0.08f * (difficulty.ordinal() - DifficultyConfig.HARD.ordinal() + 1);
+        }
+        return w;
+    }
+
+    private FairyWaveCatalogEntry pickCatalogEntry(List<FairyWaveCatalogEntry> pool, int iLo, int iHi,
+            java.util.Random pr, Deque<String> recent, int noRepeatLast) {
+        int widen = 0;
+        while (widen <= 12) {
+            int lo = iLo - widen;
+            int hi = iHi + widen;
+            List<FairyWaveCatalogEntry> candidates = new ArrayList<>();
+            float weightSum = 0f;
+            for (FairyWaveCatalogEntry e : pool) {
+                if (!catalogEntryApplies(e))
+                    continue;
+                if (e.intensity < lo || e.intensity > hi)
+                    continue;
+                if (noRepeatLast > 0 && recent.contains(e.id))
+                    continue;
+                candidates.add(e);
+                weightSum += catalogPickWeight(e);
+            }
+            if (!candidates.isEmpty() && weightSum > 0f) {
+                float r = pr.nextFloat() * weightSum;
+                for (FairyWaveCatalogEntry e : candidates) {
+                    r -= catalogPickWeight(e);
+                    if (r <= 0f)
+                        return e;
+                }
+                return candidates.get(candidates.size() - 1);
+            }
+            widen++;
+        }
+        // Fallback: ignore no-repeat only
+        List<FairyWaveCatalogEntry> candidates = new ArrayList<>();
+        float weightSum = 0f;
+        for (FairyWaveCatalogEntry e : pool) {
+            if (!catalogEntryApplies(e))
+                continue;
+            candidates.add(e);
+            weightSum += catalogPickWeight(e);
+        }
+        if (candidates.isEmpty() || weightSum <= 0f)
+            return null;
+        float r = pr.nextFloat() * weightSum;
+        for (FairyWaveCatalogEntry e : candidates) {
+            r -= catalogPickWeight(e);
+            if (r <= 0f)
+                return e;
+        }
+        return candidates.get(candidates.size() - 1);
+    }
+
+    private static void pushRecent(Deque<String> recent, String id, int noRepeatLast) {
+        if (noRepeatLast <= 0)
+            return;
+        recent.addLast(id);
+        while (recent.size() > noRepeatLast) {
+            recent.removeFirst();
+        }
     }
 
     private void tickWaves() {
@@ -811,14 +1115,17 @@ public class ArenaContext {
                 if (pat == null) pat = type.defaultPattern;
 
                 switch (pat) {
-                    case AIMED:
-                        // Aimed fan toward player (TH-standard small fairy)
+                    case AIMED: {
+                        // Cap small-fairy aimed fans; Lunatic allows one extra way over Hard.
+                        int aimedCap = (difficulty == DifficultyConfig.LUNATIC) ? 4 : 3;
+                        int aimed = Math.min(scaledCount, aimedCap);
                         PatternEngine.fireAimed(bullets, ex, ey,
                                 player.x, player.y,
-                                scaledCount, type.bulletSpread,
+                                aimed, type.bulletSpread,
                                 type.bulletSpeed, difficulty, BulletType.RICE);
                         enemies.setAtkCooldown(i, scaledInterval);
                         break;
+                    }
                     case RING: {
                         // Uniform ring, random start angle each burst (TH6 barrier style)
                         float ringStart = random.nextFloat() * (float) (Math.PI * 2);
@@ -839,13 +1146,15 @@ public class ArenaContext {
                         enemies.setAtkCooldown(i, scaledInterval);
                         break;
                     }
-                    case SPREAD:
-                        // Fixed downward fan, not aimed (TH8 curtain style)
+                    case SPREAD: {
+                        int spreadCap = (difficulty == DifficultyConfig.LUNATIC) ? 5 : 4;
+                        int spread = Math.min(scaledCount, spreadCap);
                         PatternEngine.fireSpread(bullets, ex, ey,
-                                scaledCount, type.bulletSpeed,
+                                spread, type.bulletSpeed,
                                 difficulty, BulletType.STAR);
                         enemies.setAtkCooldown(i, scaledInterval);
                         break;
+                    }
                     case STREAM:
                         // Rapid single bullet - danger from rate, not spread
                         PatternEngine.fireAimed(bullets, ex, ey,
@@ -867,16 +1176,19 @@ public class ArenaContext {
                 continue;
             float bx = pb.getX(i);
             float by = pb.getY(i);
+            BulletType bt = BulletType.fromId(pb.getType(i));
+            float bulletR = bt.radius * pb.getHitScale(i) * bt.hitboxCollisionMul;
             for (int j = 0; j < EnemyPool.CAPACITY; j++) {
                 if (!enemies.isActive(j))
                     continue;
                 float ex = enemies.getX(j);
                 float ey = enemies.getY(j);
                 EnemyType type = EnemyType.fromId(enemies.getType(j));
-                float r2 = (type.hitRadius + 3f) * (type.hitRadius + 3f);
+                float enemyR = type.hitRadius + 3f;
+                float combined = enemyR + bulletR;
                 float dx = bx - ex;
                 float dy = by - ey;
-                if (dx * dx + dy * dy <= r2) {
+                if (dx * dx + dy * dy <= combined * combined) {
                     pb.deactivate(i);
                     if (enemies.damage(j, fairyBulletDamage(ps)))
                         killEnemy(j, ps);
@@ -897,8 +1209,9 @@ public class ArenaContext {
         EnemyType type = EnemyType.fromId(enemies.getType(slot));
         enemies.deactivate(slot);
 
-        score.addScore(type.scoreValue);
-        killCounter++;
+        addArenaScore(type.scoreValue);
+
+        pendingEvents.add(GameEvent.ENEMY_KILL);
 
         ps.addStoredChargeProgress(30 * 3.0 / 2000.0);
 
@@ -909,23 +1222,36 @@ public class ArenaContext {
                     difficulty, BulletType.RICE);
         }
 
-        // Item drop - every Nth kill per ruleset
-        // Large enemies use their own drop table (may include FULL_POWER).
-        // Small fairies use the regular cycle (POWER + POINT only, TH-accurate).
-        if (rules.itemDropEveryNthKill <= 1 || (killCounter % rules.itemDropEveryNthKill == 0)) {
-            if (rules.bombDropChance > 0 && random.nextFloat() < rules.bombDropChance) {
-                return items.spawn(ex, ey, ItemPool.TYPE_BOMB);
-            } else if (type.large) {
-                int dropType = largeDropCycle[largeDropCycleIdx % largeDropCycle.length];
-                largeDropCycleIdx++;
-                return items.spawn(ex, ey, dropType);
-            } else {
-                int dropType = dropCycle[dropCycleIdx % dropCycle.length];
-                dropCycleIdx++;
-                return items.spawn(ex, ey, dropType);
-            }
+        // Item drops: TH6-style every-Nth small kill; large anchors always pay out
+        // by default so rhythm is not stolen by mid-wave heavies.
+        int n = rules.itemDropEveryNthKill < 1 ? 1 : rules.itemDropEveryNthKill;
+        boolean dropThisKill;
+        if (type.large && rules.largeEnemyAlwaysDrops) {
+            dropThisKill = true;
+        } else if (rules.largeEnemyAlwaysDrops) {
+            smallEnemyKillCounter++;
+            dropThisKill = (smallEnemyKillCounter % n == 0);
+        } else {
+            combinedDropKillCounter++;
+            dropThisKill = (combinedDropKillCounter % n == 0);
         }
-        return -1;
+
+        if (!dropThisKill) {
+            return -1;
+        }
+
+        // Rare bomb substitutes for the scheduled drop; does not advance P/Point cycles.
+        if (rules.bombDropChance > 0f && random.nextFloat() < rules.bombDropChance) {
+            return items.spawn(ex, ey, ItemPool.TYPE_BOMB);
+        }
+        if (type.large) {
+            int dropType = largeDropCycle[largeDropCycleIdx % largeDropCycle.length];
+            largeDropCycleIdx++;
+            return items.spawn(ex, ey, dropType);
+        }
+        int dropType = dropCycle[dropCycleIdx % dropCycle.length];
+        dropCycleIdx++;
+        return items.spawn(ex, ey, dropType);
     }
 
     /** Transition to BOSS phase once all waves have spawned and cleared. */
@@ -1494,7 +1820,20 @@ public class ArenaContext {
                     lasers.spawn(bx, by, spiralAngle + angleStep * i,
                             step.laserHalfWidth, scaledWarn, step.activeTicks, type.getId(), true);
                 }
-                spiralAngle += 0.45f; // ~26° per fire cycle - visible rotation
+                float advance = step.laserRotateAdvanceRad > 1e-4f ? step.laserRotateAdvanceRad : 0.45f;
+                spiralAngle += advance;
+            }
+            case "PENTAGRAM" -> {
+                int pts = step.pentagramPoints >= 3 ? Math.min(12, step.pentagramPoints) : 5;
+                BulletType inner = (step.ringBulletType != null && !step.ringBulletType.isEmpty())
+                        ? bulletTypeByName(step.ringBulletType)
+                        : type;
+                float start = step.ringStartAngleRad >= 0f
+                        ? step.ringStartAngleRad
+                        : spiralAngle;
+                PatternEngine.firePentagramDouble(bullets, bx, by, pts, effSpeed, difficulty,
+                        type, inner, vis, hit, step.bulletLifetimeTicks, angV, start);
+                spiralAngle += (float) (Math.PI / pts);
             }
             default -> {
                 float ringStart = step.ringStartAngleRad >= 0f ? step.ringStartAngleRad : 0f;
@@ -1575,7 +1914,7 @@ public class ArenaContext {
         String profileName = step.scalingProfile == null ? "" : step.scalingProfile.trim().toUpperCase();
         if (profileName.isEmpty() || "AUTO".equals(profileName)) {
             return switch (patUpper) {
-                case "SPIRAL", "RING_OFFSET", "LASER_ROTATING" -> SCALE_GEOMETRY;
+                case "SPIRAL", "RING_OFFSET", "LASER_ROTATING", "PENTAGRAM" -> SCALE_GEOMETRY;
                 case "AIMED", "BOUNCE", "LASER" -> SCALE_PRECISION;
                 case "RING" -> SCALE_BURST;
                 case "SPREAD", "RAIN", "DENSE_RING", "AIMED_RING", "LASER_BEAM" -> SCALE_SPAM;
@@ -1877,12 +2216,17 @@ public class ArenaContext {
         for (int i = 0; i < pb.getCapacity(); i++) {
             if (!pb.isActive(i))
                 continue;
-            float dx = pb.getX(i) - bossX;
-            float dy = pb.getY(i) - bossY;
-            if (dx * dx + dy * dy <= BOSS_HIT_RADIUS * BOSS_HIT_RADIUS) {
+            float bx = pb.getX(i);
+            float by = pb.getY(i);
+            BulletType bt = BulletType.fromId(pb.getType(i));
+            float bulletR = bt.radius * pb.getHitScale(i) * bt.hitboxCollisionMul;
+            float combined = BOSS_HIT_RADIUS + bulletR;
+            float dx = bx - bossX;
+            float dy = by - bossY;
+            if (dx * dx + dy * dy <= combined * combined) {
                 pb.deactivate(i);
                 bossHp = Math.max(0, bossHp - damage);
-                score.addScore(damage * 8L);
+                addArenaScore(damage * 8L);
                 checkBossPhaseTransition();
             }
         }
@@ -1900,17 +2244,17 @@ public class ArenaContext {
             return switch (lv) {
                 case 0 -> 12;
                 case 1 -> 7;
-                case 2 -> 5;
-                case 3 -> 4;
-                default -> 4; // tier 4
+                case 2 -> 4;
+                case 3 -> 3;
+                default -> 3; // tier 4
             };
         } else {
             return switch (lv) {
                 case 0 -> 8;
                 case 1 -> 5;
-                case 2 -> 3;
-                case 3 -> 2;
-                default -> 2; // tier 4
+                case 2 -> 2;
+                case 3 -> 1;
+                default -> 1; // tier 4
             };
         }
     }
@@ -1921,8 +2265,9 @@ public class ArenaContext {
      * high tiers fire many spread shots so each stays light, keeping fairy clear rate
      * sane on dense TH-style waves without relying on a tiny bullet pool.
      * <p>
-     * Rough unfocused DPS to one target (volley every 3 ticks): tier0 ~1.3, tier1 ~2.0,
-     * tier2–4 ~1.7–2.3. Focused (every 5 ticks): ~1.2–1.4.
+     * Rough unfocused DPS to one target (volley every {@link PlayerState2D#SHOT_COOLDOWN_NORMAL} ticks).
+     * High tiers use light per-hit damage but many bullets; tier 3–4 get +1 vs fairies so
+     * longer cooldown + slightly trimmed volleys still clear dense waves.
      */
     private int fairyBulletDamage(PlayerState2D ps) {
         int lv = ps.powerLevel();
@@ -1931,16 +2276,16 @@ public class ArenaContext {
                 case 0 -> 6;
                 case 1 -> 2;
                 case 2 -> 1;
-                case 3 -> 1;
-                default -> 1;
+                case 3 -> 2;
+                default -> 2; // tier 4
             };
         }
         return switch (lv) {
             case 0 -> 4;
             case 1 -> 2;
             case 2 -> 1;
-            case 3 -> 1;
-            default -> 1;
+            case 3 -> 2;
+            default -> 2; // tier 4
         };
     }
 
@@ -1962,8 +2307,9 @@ public class ArenaContext {
             if (captured)
                 spellsCaptured++;
         }
-        if (captured)
-            score.onSpellCapture(spellcard.getBonusValue());
+        if (captured) {
+            applyScoreExtends(score.onSpellCapture(spellcard.getBonusValue()));
+        }
         pendingEvents.add(spellResult);
         pendingEvents.add(GameEvent.PHASE_CHANGE);
         dropBossPhaseItems(wasSpellCard, captured);
@@ -2045,7 +2391,7 @@ public class ArenaContext {
     // ================================================================ SHARED
     // SYSTEMS
 
-    private void tickPlayerShots(PlayerState2D ps, BulletPool pb) {
+    private void tickPlayerShots(UUID uuid, PlayerState2D ps, BulletPool pb) {
         if (!ps.shooting) {
             ps.shotCooldown = 0;
             return;
@@ -2055,96 +2401,12 @@ public class ArenaContext {
             return;
         }
 
-        ps.shotCooldown = ps.focused
-                ? PlayerState2D.SHOT_COOLDOWN_FOCUSED
-                : PlayerState2D.SHOT_COOLDOWN_NORMAL;
+        CharacterDefinition cd = CharacterLoader.load(getCharacterId(uuid));
+        int cdN = cd.shotCooldownNormal > 0 ? cd.shotCooldownNormal : PlayerState2D.SHOT_COOLDOWN_NORMAL;
+        int cdF = cd.shotCooldownFocused > 0 ? cd.shotCooldownFocused : PlayerState2D.SHOT_COOLDOWN_FOCUSED;
+        ps.shotCooldown = ps.focused ? cdF : cdN;
 
-        int t = BulletType.PLAYER_SHOT.getId();
-        float px = ps.x;
-        float py = ps.y - 4;
-        int lv = ps.powerLevel();
-
-        if (ps.focused) {
-            fireFocusedShot(px, py, t, lv, pb);
-        } else {
-            fireNormalShot(px, py, t, lv, pb);
-        }
-    }
-
-    // Normal spread shot - spawns into the caller's bullet pool
-    private void fireNormalShot(float px, float py, int t, int lv, BulletPool pb) {
-        switch (lv) {
-            case 0 ->
-                pb.spawn(px, py, 0f, -16f, t, 55);
-            case 1 -> {
-                pb.spawn(px, py, 0f, -16f, t, 55);
-                pb.spawn(px - 8, py, -1.6f, -16f, t, 55);
-                pb.spawn(px + 8, py, 1.6f, -16f, t, 55);
-            }
-            case 2 -> {
-                pb.spawn(px, py, 0f, -16f, t, 55);
-                pb.spawn(px - 10, py, -2.0f, -16f, t, 55);
-                pb.spawn(px + 10, py, 2.0f, -16f, t, 55);
-                pb.spawn(px - 22, py, -4.4f, -14f, t, 55);
-                pb.spawn(px + 22, py, 4.4f, -14f, t, 55);
-            }
-            case 3 -> {
-                pb.spawn(px, py, 0f, -16f, t, 55);
-                pb.spawn(px - 10, py, -2.0f, -16f, t, 55);
-                pb.spawn(px + 10, py, 2.0f, -16f, t, 55);
-                pb.spawn(px - 22, py, -4.4f, -14f, t, 55);
-                pb.spawn(px + 22, py, 4.4f, -14f, t, 55);
-                pb.spawn(px - 34, py, -7.6f, -10f, t, 55);
-                pb.spawn(px + 34, py, 7.6f, -10f, t, 55);
-            }
-            default -> {
-                pb.spawn(px, py, 0f, -16f, t, 55);
-                pb.spawn(px - 10, py, -2.0f, -16f, t, 55);
-                pb.spawn(px + 10, py, 2.0f, -16f, t, 55);
-                pb.spawn(px - 22, py, -4.4f, -14f, t, 55);
-                pb.spawn(px + 22, py, 4.4f, -14f, t, 55);
-                pb.spawn(px - 34, py, -8.0f, -12f, t, 55);
-                pb.spawn(px + 34, py, 8.0f, -12f, t, 55);
-            }
-        }
-    }
-
-    // Focused shot - spawns into the caller's bullet pool
-    private void fireFocusedShot(float px, float py, int t, int lv, BulletPool pb) {
-        switch (lv) {
-            case 0 ->
-                pb.spawn(px, py, 0f, -20f, t, 45);
-            case 1 -> {
-                pb.spawn(px, py, 0f, -20f, t, 45);
-                pb.spawn(px - 5, py, 0f, -18f, t, 45);
-                pb.spawn(px + 5, py, 0f, -18f, t, 45);
-            }
-            case 2 -> {
-                pb.spawn(px, py, 0f, -20f, t, 45);
-                pb.spawn(px - 5, py, 0f, -20f, t, 45);
-                pb.spawn(px + 5, py, 0f, -20f, t, 45);
-                pb.spawn(px - 13, py, 0f, -18f, t, 45);
-                pb.spawn(px + 13, py, 0f, -18f, t, 45);
-            }
-            case 3 -> {
-                pb.spawn(px, py, 0f, -20f, t, 45);
-                pb.spawn(px - 5, py, 0f, -20f, t, 45);
-                pb.spawn(px + 5, py, 0f, -20f, t, 45);
-                pb.spawn(px - 13, py, 0f, -18f, t, 45);
-                pb.spawn(px + 13, py, 0f, -18f, t, 45);
-                pb.spawn(px - 22, py, 0f, -18f, t, 45);
-                pb.spawn(px + 22, py, 0f, -18f, t, 45);
-            }
-            default -> {
-                pb.spawn(px, py, 0f, -20f, t, 45);
-                pb.spawn(px - 5, py, 0f, -20f, t, 45);
-                pb.spawn(px + 5, py, 0f, -20f, t, 45);
-                pb.spawn(px - 13, py, 0f, -18f, t, 45);
-                pb.spawn(px + 13, py, 0f, -18f, t, 45);
-                pb.spawn(px - 22, py, 0f, -20f, t, 45);
-                pb.spawn(px + 22, py, 0f, -20f, t, 45);
-            }
-        }
+        PlayerShotPatterns.fire(ps, pb, cd);
     }
 
     private void checkEnemyBulletsVsPlayer(UUID uuid, PlayerState2D ps) {
@@ -2175,7 +2437,7 @@ public class ArenaContext {
             } else if (distSq <= grazeCombined * grazeCombined && rules.grazeScoringEnabled) {
                 ps.graze++;
                 ps.addStoredChargeProgress(20 * 3.0 / 2000.0);
-                score.onGraze();
+                applyScoreExtends(score.onGraze());
                 ps.personalEvents.add(GameEvent.GRAZE);
                 if (ps.graze % 50 == 0)
                     ps.personalEvents.add(GameEvent.GRAZE_CHAIN);
@@ -2209,7 +2471,7 @@ public class ArenaContext {
                 if (god)
                     continue;
                 ps.deathPendingTicks = PlayerState2D.DEATH_BOMB_GRACE;
-                pendingEvents.add(GameEvent.HIT);
+                ps.personalEvents.add(GameEvent.HIT);
                 return;
             }
 
@@ -2333,29 +2595,39 @@ public class ArenaContext {
         items.deactivate(i);
 
         switch (type) {
-            case ItemPool.TYPE_POINT -> score.addScore(pointItemScoreAtHeight(itemY));
+            case ItemPool.TYPE_POINT -> {
+                addArenaScore(pointItemScoreAtHeight(itemY));
+                ps.personalEvents.add(GameEvent.ITEM_PICK_UP);
+            }
             case ItemPool.TYPE_POWER -> {
                 if (ps.power >= PlayerState2D.MAX_POWER) {
                     // Item stays TYPE_POWER in the world for co-op; max-power
                     // collector gets point value instead of a wasted pickup.
-                    score.addScore(pointItemScoreAtHeight(itemY));
+                    addArenaScore(pointItemScoreAtHeight(itemY));
                 } else {
-                    score.onPowerItemPickup();
+                    applyScoreExtends(score.onPowerItemPickup());
                     ps.power = Math.min(PlayerState2D.MAX_POWER, ps.power + 4);
                 }
+                ps.personalEvents.add(GameEvent.ITEM_PICK_UP);
             }
             case ItemPool.TYPE_FULL_POWER -> {
                 if (ps.power >= PlayerState2D.MAX_POWER) {
-                    score.addScore(pointItemScoreAtHeight(itemY));
+                    addArenaScore(pointItemScoreAtHeight(itemY));
                 } else {
-                    score.onPowerItemPickup();
+                    applyScoreExtends(score.onPowerItemPickup());
                     ps.power = PlayerState2D.MAX_POWER;
                 }
+                ps.personalEvents.add(GameEvent.ITEM_POWER_UP);
             }
-            case ItemPool.TYPE_ONE_UP -> ps.lives++;
-            case ItemPool.TYPE_BOMB -> ps.bombs = Math.min(ps.bombs + 1, 9);
+            case ItemPool.TYPE_ONE_UP -> {
+                ps.lives++;
+                ps.personalEvents.add(GameEvent.ITEM_ONE_UP);
+            }
+            case ItemPool.TYPE_BOMB -> {
+                ps.bombs = Math.min(ps.bombs + 1, 9);
+                ps.personalEvents.add(GameEvent.ITEM_POWER_UP);
+            }
         }
-        pendingEvents.add(GameEvent.ITEM_PICKUP);
     }
 
     /** Same height→score mapping as a {@link ItemPool#TYPE_POINT} pickup. */
@@ -2856,6 +3128,7 @@ public class ArenaContext {
                 case "POINT" -> ItemPool.TYPE_POINT;
                 case "FULL_POWER" -> ItemPool.TYPE_FULL_POWER;
                 case "ONE_UP" -> ItemPool.TYPE_ONE_UP;
+                case "BOMB" -> ItemPool.TYPE_BOMB;
                 default -> ItemPool.TYPE_POINT;
             };
         }

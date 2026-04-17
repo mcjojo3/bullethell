@@ -1,0 +1,38 @@
+{
+  "id": "fw_shared_011",
+  "description": "Horizontal lane scrum (mid-height entry).",
+  "enemies": [
+    {
+      "x": -18,
+      "y": 96,
+      "vx": 3.8,
+      "vy": 0.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 498,
+      "y": 96,
+      "vx": -3.8,
+      "vy": 0.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 10
+    },
+    {
+      "x": 120,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 6
+    },
+    {
+      "x": 360,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 6
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "fw_shared_009",
+  "description": "Dense barrier row \u2014 four greens.",
+  "enemies": [
+    {
+      "x": 80,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 160,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 4,
+      "pattern": "RING"
+    },
+    {
+      "x": 320,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 4,
+      "pattern": "RING"
+    },
+    {
+      "x": 400,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 3.5,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 8,
+      "pattern": "RING"
+    }
+  ]
+}

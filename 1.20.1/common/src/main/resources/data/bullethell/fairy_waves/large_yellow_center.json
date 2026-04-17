@@ -1,9 +1,0 @@
-{
-  "id": "large_yellow_center",
-  "description": "Single LARGE_YELLOW fairy dropping from the top centre - STREAM pattern (rapid single-shot harassment). Acts as a mid-wave anchor. Flanked by 2 blue escorts that spawn with a delay.",
-  "enemies": [
-    { "x": 240, "y": -30, "vx": 0.0, "vy": 2.8, "type": "LARGE_YELLOW", "delayTicks": 0 },
-    { "x": 160, "y": -20, "vx": 0.0, "vy": 3.5, "type": "BLUE_FAIRY", "delayTicks": 25 },
-    { "x": 320, "y": -20, "vx": 0.0, "vy": 3.5, "type": "BLUE_FAIRY", "delayTicks": 25 }
-  ]
-}

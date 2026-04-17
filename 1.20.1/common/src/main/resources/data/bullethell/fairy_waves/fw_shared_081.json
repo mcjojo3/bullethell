@@ -1,0 +1,26 @@
+{
+  "id": "fw_shared_081",
+  "description": "Dual large crossing basement.",
+  "enemies": [
+    {
+      "x": -24,
+      "y": 100,
+      "vx": 3.8,
+      "vy": 0.0,
+      "type": "LARGE_RED",
+      "delayTicks": 0,
+      "angVel": 0.02,
+      "arcTicks": 80
+    },
+    {
+      "x": 504,
+      "y": 100,
+      "vx": -3.8,
+      "vy": 0.0,
+      "type": "LARGE_YELLOW",
+      "delayTicks": 0,
+      "angVel": -0.02,
+      "arcTicks": 80
+    }
+  ]
+}

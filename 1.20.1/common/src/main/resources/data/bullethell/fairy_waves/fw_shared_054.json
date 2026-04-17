@@ -1,0 +1,26 @@
+{
+  "id": "fw_shared_054",
+  "description": "Red sweep left (aimed arc).",
+  "enemies": [
+    {
+      "x": 36,
+      "y": -24,
+      "vx": 0.55,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 0,
+      "angVel": 0.015,
+      "arcTicks": 74
+    },
+    {
+      "x": 100,
+      "y": -24,
+      "vx": 0.35,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 8,
+      "angVel": 0.012,
+      "arcTicks": 74
+    }
+  ]
+}

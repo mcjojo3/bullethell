@@ -1,0 +1,46 @@
+{
+  "id": "fw_shared_042",
+  "description": "Keep gauntlet: triple large + escorts.",
+  "enemies": [
+    {
+      "x": 120,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 2.6,
+      "type": "LARGE_RED",
+      "delayTicks": 0
+    },
+    {
+      "x": 360,
+      "y": -24,
+      "vx": 0.0,
+      "vy": 2.6,
+      "type": "LARGE_GREEN",
+      "delayTicks": 8
+    },
+    {
+      "x": 60,
+      "y": -20,
+      "vx": 0.25,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 18
+    },
+    {
+      "x": 420,
+      "y": -20,
+      "vx": -0.25,
+      "vy": 4.0,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 18
+    },
+    {
+      "x": 240,
+      "y": -18,
+      "vx": 0.0,
+      "vy": 3.9,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 26
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "id": "fw_shared_007",
+  "description": "Peeling arcs from upper corners.",
+  "enemies": [
+    {
+      "x": 36,
+      "y": -24,
+      "vx": 0.55,
+      "vy": 3.5,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": 0.012,
+      "arcTicks": 64
+    },
+    {
+      "x": 444,
+      "y": -24,
+      "vx": -0.55,
+      "vy": 3.5,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": -0.012,
+      "arcTicks": 64
+    }
+  ]
+}

@@ -174,6 +174,7 @@ public class BHClientEvents {
                screen instanceof mc.sayda.bullethell.client.screen.CharacterSelectScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.ArenaPlayScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.ArenaQuitScreen ||
+               screen instanceof mc.sayda.bullethell.client.screen.ArenaEndScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.InvitePlayerScreen;
     }
 }

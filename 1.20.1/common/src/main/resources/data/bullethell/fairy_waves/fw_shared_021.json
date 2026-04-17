@@ -1,0 +1,43 @@
+{
+  "id": "fw_shared_021",
+  "description": "Omni-edge convergence (pre-boss feel).",
+  "enemies": [
+    {
+      "x": 40,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.2,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": -0.016,
+      "arcTicks": 80
+    },
+    {
+      "x": 440,
+      "y": -20,
+      "vx": 0.0,
+      "vy": 4.2,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0,
+      "angVel": 0.016,
+      "arcTicks": 80
+    },
+    {
+      "x": -20,
+      "y": 100,
+      "vx": 4.0,
+      "vy": 0.0,
+      "type": "GREEN_FAIRY",
+      "delayTicks": 0,
+      "pattern": "RING"
+    },
+    {
+      "x": 500,
+      "y": 100,
+      "vx": -4.0,
+      "vy": 0.0,
+      "type": "YELLOW_FAIRY",
+      "delayTicks": 0
+    }
+  ]
+}

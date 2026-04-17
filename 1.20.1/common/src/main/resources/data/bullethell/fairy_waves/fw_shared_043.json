@@ -1,0 +1,62 @@
+{
+  "id": "fw_shared_043",
+  "description": "Full-width red ladder (seven).",
+  "enemies": [
+    {
+      "x": 32,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 90,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 3
+    },
+    {
+      "x": 148,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 6
+    },
+    {
+      "x": 206,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 9
+    },
+    {
+      "x": 264,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 12
+    },
+    {
+      "x": 322,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 15
+    },
+    {
+      "x": 380,
+      "y": -22,
+      "vx": 0.0,
+      "vy": 4.0,
+      "type": "RED_FAIRY",
+      "delayTicks": 18
+    }
+  ]
+}

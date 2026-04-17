@@ -1,0 +1,22 @@
+{
+  "id": "fw_shared_075",
+  "description": "Sub7 side pair.",
+  "enemies": [
+    {
+      "x": 48,
+      "y": -22,
+      "vx": 0.5,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    },
+    {
+      "x": 432,
+      "y": -22,
+      "vx": -0.5,
+      "vy": 3.9,
+      "type": "BLUE_FAIRY",
+      "delayTicks": 0
+    }
+  ]
+}
