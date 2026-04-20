@@ -221,7 +221,13 @@ public class CharacterSelectScreen extends Screen {
         if (!isUnlocked(selectedIndex))
             return;
         BHSfx.playSelect();
-        BHPackets.sendCharSelect(characters.get(selectedIndex).id, difficulty, stageId);
+        CharacterDefinition ch = characters.get(selectedIndex);
+        if (ch.shotTypeOptionCount() >= 2) {
+            Minecraft.getInstance().setScreen(ShotTypeSelectScreen.forSolo(difficulty, stageId,
+                    maxAllowedDifficultyOrdinal, ch.id));
+            return;
+        }
+        BHPackets.sendCharSelect(ch.id, difficulty, stageId, 0);
         onClose();
     }
 

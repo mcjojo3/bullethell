@@ -76,6 +76,15 @@ public final class BHEntities {
                             .clientTrackingRange(10)
                             .updateInterval(3)
                             .build("flandre_npc"));
+    public static final RegistrySupplier<EntityType<BHNpc>> REISEN_NPC =
+            ENTITY_TYPES.register("reisen_npc",
+                    () -> EntityType.Builder.<BHNpc>of(
+                                    (type, level) -> new BHNpc(type, level, "reisen_npc"),
+                                    MobCategory.MISC)
+                            .sized(0.6f, 1.95f)
+                            .clientTrackingRange(10)
+                            .updateInterval(3)
+                            .build("reisen_npc"));
     public static void register() {
         ENTITY_TYPES.register();
     }

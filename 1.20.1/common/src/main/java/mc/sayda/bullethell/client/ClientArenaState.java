@@ -12,6 +12,7 @@ import mc.sayda.bullethell.network.BulletFullSyncPacket;
 import mc.sayda.bullethell.network.CoopPlayersSyncPacket;
 import mc.sayda.bullethell.network.EnemySyncPacket;
 import mc.sayda.bullethell.arena.GameEvent;
+import mc.sayda.bullethell.network.AttackActivationSfxPacket;
 import mc.sayda.bullethell.network.GameEventPacket;
 import mc.sayda.bullethell.network.ItemSyncPacket;
 import mc.sayda.bullethell.network.LaserSyncPacket;
@@ -48,8 +49,15 @@ public class ClientArenaState {
     public final EnemyPool enemies = new EnemyPool();
     public final PlayerState2D player = new PlayerState2D();
     public final LaserPool lasers = new LaserPool();
+    /** Last input direction sent to server - used for sub-tick position extrapolation. */
+    public float inputDx = 0f, inputDy = 0f;
+    public boolean inputFocused = false;
+    /** Client-predicted player position - updated every tick with current input, reconciled against server. */
+    public float predX = 0f, predY = 0f;
 
     public float bossX, bossY;
+    /** Previous packet's boss position - used for sub-tick velocity extrapolation. */
+    public float prevBossX = 0f, prevBossY = 0f;
     public int bossHp, bossMaxHp, bossPhase;
 
     // PoFV: gray stock (skillGauge) + colored hold (holdChargeGauge); chargeLevel = floor(stock).
@@ -65,6 +73,8 @@ public class ClientArenaState {
     public java.util.UUID abilityOwner = new java.util.UUID(0, 0);
 
     public long score;
+    /** Sum of all players' scores in co-op (equals {@link #score} when solo). */
+    public long combinedScore;
     public int spellTimerTicks, spellTimerTotal;
     public int power;
     public int playerIndex = 1;
@@ -93,11 +103,36 @@ public class ClientArenaState {
      */
     public boolean pendingEndOverlay = false;
 
-    /** Operator {@code /bullethell debug} god-mode (from server). */
+    /** {@link mc.sayda.bullethell.debug.BHDebugMode} god-mode (from server; test mode turns this on). */
     public boolean debugGodMode = false;
     public int debugArenaTick = 0;
     public int debugPatternCooldown = 0;
     public int debugEnemyBulletCount = 0;
+
+    // ---- test mode overlay (/bullethell test) ----
+    public boolean testMode = false;
+    public boolean testHitboxVisible = false;
+    public int testPage = 0; // 0=BOSS, 1=STAGE, 2=WAVE, 3=CHAR
+    // per-page ID lists
+    public java.util.List<String> testBossIds  = new java.util.ArrayList<>();
+    public java.util.List<String> testStageIds = new java.util.ArrayList<>();
+    public java.util.List<String> testWaveIds  = new java.util.ArrayList<>();
+    public java.util.List<String> testCharIds  = new java.util.ArrayList<>();
+    // current selection per page
+    public String testCurrentBossId   = "";
+    public String testCurrentStageId  = "";
+    public String testCurrentWaveId   = "";
+    public String testCurrentCharId   = "reimu";
+    public int testCurrentDifficulty  = 1; // DifficultyConfig.NORMAL ordinal
+    // scroll + selected index per page
+    public int testScrollOffset       = 0; // BOSS
+    public int testSelectedIdx        = 0;
+    public int testStageScrollOffset  = 0;
+    public int testStageSelectedIdx   = 0;
+    public int testWaveScrollOffset   = 0;
+    public int testWaveSelectedIdx    = 0;
+    public int testCharScrollOffset   = 0;
+    public int testCharSelectedIdx    = 0;
 
     /**
      * Track ID for the current phase's music (empty = no music).
@@ -113,6 +148,10 @@ public class ClientArenaState {
      * Boss id for the current fight (e.g. "marisa_boss").
      */
     public String bossId = "";
+    /** Synced from server during {@code PENTAGRAM_RITUAL}; -1 = inactive. */
+    public int pentagramRitualTick = -1;
+    /** When outline stacking finished; -1 until then. */
+    public int pentagramStackCompleteTick = -1;
     /**
      * True during the pre-boss dialog intro so the boss sprite renders before the
      * fight starts.
@@ -121,6 +160,8 @@ public class ClientArenaState {
 
     // --- boss sprite animation ---
     public int bossAnimCounter = 0;
+    /** Client-only: advances while {@link #active}; drives fairy sprite sheet frames during waves (not gated on boss). */
+    public int arenaAnimTick = 0;
     /** -1 left, 0 idle, +1 right (server-authoritative). */
     public int bossMoveDir = 0;
 
@@ -163,10 +204,11 @@ public class ClientArenaState {
             int lives, int bombs, int graze, int power, int pIdx,
             float bossX, float bossY, int bossHp, int bossMaxHp, int bossPhase, int bossMoveDir,
             int skillGauge, int chargeLevel, int holdChargeGauge, int abilityType, int abilityTicks, float abilityX, float abilityY, java.util.UUID abilityOwner,
-            long score, int spellTimerTicks, int spellTimerTotal,
+            long score, long combinedScore, int spellTimerTicks, int spellTimerTotal,
             String musicTrackId, String spellName, boolean activeSpellCard, boolean declaring,
             String characterId, String bossId, String bossName, boolean bossIntroVisible,
             String dialogSpeaker, String dialogText, int dialogLineIndex, int dialogReadyCount, int dialogTotalCount,
+            int pentagramRitualTick, int pentagramStackCompleteTick,
             boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount) {
 
         if (!pktActive) {
@@ -201,12 +243,23 @@ public class ClientArenaState {
 
         this.player.x = playerX;
         this.player.y = playerY;
+        // Reconcile client prediction against server authority.
+        // Snap on first packet or large teleport; gently blend small corrections.
+        float pdx = playerX - predX, pdy = playerY - predY;
+        float dist = (float) Math.sqrt(pdx * pdx + pdy * pdy);
+        if (dist > 32f || (predX == 0f && predY == 0f)) {
+            predX = playerX; predY = playerY;
+        } else if (dist > 0.5f) {
+            predX += pdx * 0.4f; predY += pdy * 0.4f;
+        }
         this.player.lives = lives;
         this.player.bombs = bombs;
         this.player.graze = graze;
         this.power = power;
         this.playerIndex = pIdx;
         this.bossMoveDir = bossMoveDir;
+        this.prevBossX = this.bossX;
+        this.prevBossY = this.bossY;
         this.bossX = bossX;
         this.bossY = bossY;
         this.bossHp = bossHp;
@@ -221,6 +274,7 @@ public class ClientArenaState {
         this.abilityY = abilityY;
         this.abilityOwner = abilityOwner;
         this.score = score;
+        this.combinedScore = combinedScore;
         this.spellTimerTicks = spellTimerTicks;
         this.spellTimerTotal = spellTimerTotal;
         if (!musicTrackId.isEmpty())
@@ -244,6 +298,8 @@ public class ClientArenaState {
         this.dialogText = dialogText;
         this.dialogReadyCount = dialogReadyCount;
         this.dialogTotalCount = dialogTotalCount;
+        this.pentagramRitualTick = pentagramRitualTick;
+        this.pentagramStackCompleteTick = pentagramStackCompleteTick;
     }
 
     public void applyPlayerBulletSync(float[][] allSlotData, boolean[] allActive) {
@@ -280,10 +336,11 @@ public class ClientArenaState {
                 pkt.lives, pkt.bombs, pkt.graze, pkt.power, pkt.playerIndex,
                 pkt.bossX, pkt.bossY, pkt.bossHp, pkt.bossMaxHp, pkt.bossPhase, pkt.bossMoveDir,
                 pkt.skillGauge, pkt.chargeLevel, pkt.holdChargeGauge, pkt.abilityType, pkt.abilityTicks, pkt.abilityX, pkt.abilityY, pkt.abilityOwner,
-                pkt.score, pkt.spellTimerTicks, pkt.spellTimerTotal,
+                pkt.score, pkt.combinedScore, pkt.spellTimerTicks, pkt.spellTimerTotal,
                 pkt.musicTrackId, pkt.spellName, pkt.activeSpellCard, pkt.declaring,
                 pkt.characterId, pkt.bossId, pkt.bossName, pkt.bossIntroVisible,
                 pkt.dialogSpeaker, pkt.dialogText, pkt.dialogLineIndex, pkt.dialogReadyCount, pkt.dialogTotalCount,
+                pkt.pentagramRitualTick, pkt.pentagramStackCompleteTick,
                 pkt.debugGodMode, pkt.debugArenaTick, pkt.debugPatternCooldown, pkt.debugEnemyBulletCount);
     }
 
@@ -357,6 +414,10 @@ public class ClientArenaState {
         ScreenFXQueue.INSTANCE.push(ev);
     }
 
+    public void applyAttackActivationSfx(AttackActivationSfxPacket pkt) {
+        BHSfx.play(BHSounds.resolveForActivationSfx(pkt.soundId));
+    }
+
     // ---------------------------------------------------------------- animation
 
     /**
@@ -415,6 +476,7 @@ public class ClientArenaState {
         debugArenaTick = 0;
         debugPatternCooldown = 0;
         debugEnemyBulletCount = 0;
+        power = 0;
         skillGauge = 0;
         chargeLevel = 0;
         holdChargeGauge = 0;
@@ -426,6 +488,8 @@ public class ClientArenaState {
         currentMusicTrackId = "";
         characterId = "reimu";
         bossId = "";
+        pentagramRitualTick = -1;
+        pentagramStackCompleteTick = -1;
         bossName = "";
         bossIntroVisible = false;
         dialogSpeaker = "";
@@ -439,7 +503,27 @@ public class ClientArenaState {
         animIdleFrame = 0;
         animIdleTick = 0;
         bossAnimCounter = 0;
+        arenaAnimTick = 0;
         bossMoveDir = 0;
+        bossX = 0f; bossY = 0f;
+        prevBossX = 0f; prevBossY = 0f;
+        inputDx = 0f; inputDy = 0f; inputFocused = false;
+        predX = 0f; predY = 0f;
+        testMode = false;
+        testPage = 0;
+        testBossIds.clear();
+        testStageIds.clear();
+        testWaveIds.clear();
+        testCharIds.clear();
+        testCurrentBossId  = "";
+        testCurrentStageId = "";
+        testCurrentWaveId  = "";
+        testCurrentCharId  = "reimu";
+        testCurrentDifficulty = 1;
+        testScrollOffset      = 0; testSelectedIdx      = 0;
+        testStageScrollOffset = 0; testStageSelectedIdx = 0;
+        testWaveScrollOffset  = 0; testWaveSelectedIdx  = 0;
+        testCharScrollOffset  = 0; testCharSelectedIdx  = 0;
         bullets.clearAll();
         playerBullets.clearAll();
         allPlayerBullets.clear();

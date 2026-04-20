@@ -3,6 +3,7 @@ package mc.sayda.bullethell.sound;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import mc.sayda.bullethell.Bullethell;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -51,34 +52,30 @@ public final class BHSounds {
     /**
      * Touhou themes (Artifex), roughly game order - see {@code sounds.json}.
      */
+    /** Touhou music track ids (boss JSON / jukebox); order is display order. */
     private static final String[] MUSIC_TRACK_IDS = {
             "a_dream_more_scarlet_than_red",
             "a_soul_as_scarlet_as_a_ground_cherry",
             "apparitions_stalk_the_night",
             "the_young_descendant_of_tepes",
             "beloved_tomboyish_girl",
-            "beloved_tomboyish_girl_2",
             "lunate_elf",
             "shanghai_scarlet_teahouse_chinese_tea",
             "voile_the_magic_library",
             "locked_girl_the_girls_sealed_room",
             "lunar_clock_luna_dial",
-            "lunar_clock_luna_dial_2",
             "the_maid_and_the_pocket_watch_of_blood",
             "the_centennial_festival_for_magical_girls",
             "an_eternity_more_transient_than_scarlet",
             "shanghai_alice_of_meiji_17",
             "septette_for_the_dead_princess",
-            "septette_for_the_dead_princess_2",
             "u_n_owen_was_her",
-            "u_n_owen_was_her_2",
             "scarlet_tower_eastern_dream",
             "ghostly_dream_snow_or_cherry_petal",
             "eastern_ghostly_dream_ancient_temple",
             "crystallized_silver",
             "the_fantastic_tales_from_tohno",
             "diao_ye_zong_withered_leaf",
-            "diao_ye_zong_withered_leaf_2",
             "doll_judgement_the_girl_who_played_with_peoples_shapes",
             "the_doll_maker_of_bucuresti",
             "the_capital_city_of_flowers_in_the_sky",
@@ -98,38 +95,26 @@ public final class BHSounds {
             "illusionary_night_ghostly_eyes",
             "song_of_the_night_sparrow_night_bird",
             "wriggling_autumn_moon_mooned_insect",
-            "wriggling_autumn_moon_mooned_insect_2",
             "eastern_youkai_beauty",
             "plain_asia",
-            "plain_asia_2",
             "retribution_for_the_eternal_night_imperishable_night",
             "maidens_capriccio_dream_battle",
             "love_coloured_master_spark",
-            "love_coloured_master_spark_2",
             "cinderella_cage_kagome_kagome",
             "lunatic_eyes_invisible_full_moon_remade",
-            "lunatic_eyes_invisible_full_moon_2023",
             "voyage_1969",
-            "voyage_1969_2",
             "extend_ash_person_of_hourai",
-            "extend_ash_person_of_hourai_2",
             "gensokyo_millennium_history_of_the_moon",
-            "gensokyo_millennium_history_of_the_moon_2",
             "flight_of_the_bamboo_cutter_lunatic_princess",
-            "flight_of_the_bamboo_cutter_lunatic_princess_2",
             "deaf_to_all_but_the_song",
             "evening_primrose",
             "eternal_dream_mystical_maple",
             "nostalgic_blood_of_the_east_old_world",
-            "nostalgic_blood_of_the_east_old_world_2",
             "reach_for_the_moon_immortal_smoke",
-            "reach_for_the_moon_immortal_smoke_2",
             "voyage_1970",
-            "voyage_1970_2021",
             "wind_god_chronicles_mountain_of_faith",
             "a_god_that_misses_people_romantic_fall",
             "akutagawa_ryuunosuke_s_kappa_candid_friend",
-            "akutagawa_ryuunosuke_s_kappa_candid_friend_2_0",
             "because_princess_inada_is_scolding_me",
             "cemetery_of_onbashira_grave_of_being",
             "dark_side_of_fate",
@@ -140,7 +125,6 @@ public final class BHSounds {
             "the_primal_scene_of_japan_the_girl_saw",
             "the_road_of_the_misfortune_god_dark_road",
             "the_youkai_mountain_mysterious_mountain",
-            "youkai_mountain_mysterious_mountain_2_0",
 
     };
 
@@ -150,6 +134,11 @@ public final class BHSounds {
     }
 
     private BHSounds() {
+    }
+
+    /** All registered music track ids (same order as the internal music list). */
+    public static String[] getMusicTrackIds() {
+        return MUSIC_TRACK_IDS.clone();
     }
 
     private static RegistrySupplier<SoundEvent> reg(String id) {
@@ -172,6 +161,28 @@ public final class BHSounds {
             return null;
         RegistrySupplier<SoundEvent> obj = BY_ID.get(id);
         return (obj != null && obj.isPresent()) ? obj.get() : null;
+    }
+
+    /**
+     * Resolve a sound for one-shot UI/gameplay playback from boss JSON {@code activationSound}:
+     * first {@link #get(String)} (mod-registered ids), then {@link BuiltInRegistries#SOUND_EVENT}
+     * for {@code namespace:path} or default namespace {@link Bullethell#MODID}.
+     */
+    public static SoundEvent resolveForActivationSfx(String raw) {
+        if (raw == null)
+            return null;
+        String s = raw.trim();
+        if (s.isEmpty())
+            return null;
+        SoundEvent fromMod = get(s);
+        if (fromMod != null)
+            return fromMod;
+        ResourceLocation loc = ResourceLocation.tryParse(s);
+        if (loc == null && !s.contains(":"))
+            loc = new ResourceLocation(Bullethell.MODID, s);
+        if (loc == null)
+            return null;
+        return BuiltInRegistries.SOUND_EVENT.get(loc);
     }
 
     public static void register() {

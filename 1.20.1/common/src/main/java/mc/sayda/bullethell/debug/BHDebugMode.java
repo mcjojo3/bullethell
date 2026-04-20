@@ -5,8 +5,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Operator-only bullet-hell debug helpers (see {@code /bullethell debug}).
- * Per-player so co-op partners are unaffected unless they also toggle debug.
+ * Per-player god-mode for test-mode sessions: max lives/bombs, hit invulnerability, free bombs.
+ * This should be enabled only while a player is actively in a test-mode arena.
  */
 public final class BHDebugMode {
 
@@ -26,6 +26,15 @@ public final class BHDebugMode {
         if (!GOD_MODE.add(uuid))
             GOD_MODE.remove(uuid);
         return GOD_MODE.contains(uuid);
+    }
+
+    public static void setGodMode(UUID uuid, boolean enabled) {
+        if (uuid == null)
+            return;
+        if (enabled)
+            GOD_MODE.add(uuid);
+        else
+            GOD_MODE.remove(uuid);
     }
 
     public static void clear(UUID uuid) {

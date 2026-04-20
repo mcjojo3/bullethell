@@ -25,10 +25,11 @@ public final class ArenaEndShareSnapshot {
     private final int captured;
     private final int attempted;
     private final double completionPercent;
+    private final String shotLabel;
 
     private ArenaEndShareSnapshot(boolean won, String bossName, String endBossLine, String charName,
             long score, int lives, int bombs, int graze, int captured, int attempted,
-            double completionPercent) {
+            double completionPercent, String shotLabel) {
         this.won = won;
         this.bossName = bossName != null ? bossName : "";
         this.endBossLine = endBossLine != null ? endBossLine : "";
@@ -40,6 +41,7 @@ public final class ArenaEndShareSnapshot {
         this.captured = captured;
         this.attempted = attempted;
         this.completionPercent = completionPercent;
+        this.shotLabel = shotLabel != null ? shotLabel : "";
     }
 
     public static ArenaEndShareSnapshot capture(ServerPlayer player, ArenaContext ctx) {
@@ -47,8 +49,11 @@ public final class ArenaEndShareSnapshot {
         PlayerState2D ps = ctx.getPlayerState(pid);
         if (ps == null)
             ps = ctx.player;
-        long score = ctx.score.getScore();
-        String charName = CharacterLoader.load(ctx.getCharacterId(pid)).name;
+        long score = ctx.getScore(pid);
+        String charId = ctx.getCharacterId(pid);
+        mc.sayda.bullethell.boss.CharacterDefinition cdef = CharacterLoader.load(charId);
+        String charName = cdef.name;
+        String shotLabel = cdef.shotTypeLabel(ctx.getShotTypeOrdinal(pid));
         String bossName = (ctx.boss != null) ? ctx.boss.name : "";
         String endBossLine = resolveEndBossDialog(ctx, pid);
         return new ArenaEndShareSnapshot(
@@ -62,7 +67,8 @@ public final class ArenaEndShareSnapshot {
                 ps.graze,
                 ctx.getSpellsCaptured(),
                 ctx.getSpellsAttempted(),
-                ctx.getCompletionPercentage());
+                ctx.getCompletionPercentage(),
+                shotLabel);
     }
 
     private static String resolveEndBossDialog(ArenaContext ctx, UUID playerUuid) {
@@ -88,6 +94,9 @@ public final class ArenaEndShareSnapshot {
         if (won) {
             out.add(Component.literal("§6§l╔══════ STAGE CLEAR ══════╗"));
             out.add(Component.literal("§e  Character: §f" + charName));
+            if (!shotLabel.isBlank()) {
+                out.add(Component.literal("§e  Shot: §f" + shotLabel));
+            }
             out.add(Component.literal("§e  Score: §f" + String.format("%,d", score)));
             out.add(Component.literal("§e  Lives: §f" + lives + "  §eBombs: §f" + bombs));
             out.add(Component.literal("§e  Graze: §f" + graze));
@@ -97,6 +106,9 @@ public final class ArenaEndShareSnapshot {
         } else {
             out.add(Component.literal("§c§l╔════════ GAME OVER ════════╗"));
             out.add(Component.literal("§e  Character: §f" + charName));
+            if (!shotLabel.isBlank()) {
+                out.add(Component.literal("§e  Shot: §f" + shotLabel));
+            }
             out.add(Component.literal("§e  Score: §f" + String.format("%,d", score)));
             out.add(Component.literal("§e  Graze: §f" + graze));
             out.add(Component.literal("§e  Spells: §f" + captured + " / " + attempted + " captured"));

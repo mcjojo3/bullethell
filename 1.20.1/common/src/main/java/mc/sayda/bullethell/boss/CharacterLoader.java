@@ -2,12 +2,18 @@ package mc.sayda.bullethell.boss;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import mc.sayda.bullethell.config.BullethellConfig;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +60,53 @@ public final class CharacterLoader {
         CACHE.clear();
     }
 
+    // ---------------------------------------------------------------- dev-path support (test mode)
+
+    public static CharacterDefinition loadFromDevPath(String id) {
+        String devPath = BullethellConfig.TEST_DEV_PATH.get();
+        if (devPath == null || devPath.isBlank()) return null;
+        Path file = Paths.get(devPath, "characters", id + ".json");
+        if (!Files.exists(file)) return null;
+        try (java.io.Reader r = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+            CharacterDefinition def = GSON.fromJson(r, CharacterDefinition.class);
+            if (def == null) return null;
+            if (def.id == null) def.id = id;
+            resolveShotOptions(def);
+            return def;
+        } catch (Exception e) {
+            System.err.println("[BulletHell/Test] Failed to parse dev character: " + id + " - " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static CharacterDefinition loadWithDevPath(String id) {
+        String devPath = BullethellConfig.TEST_DEV_PATH.get();
+        if (devPath != null && !devPath.isBlank()) {
+            CharacterDefinition dev = loadFromDevPath(id);
+            if (dev != null) { CACHE.put(id, dev); return dev; }
+        }
+        return load(id);
+    }
+
+    public static List<String> allCharIds() {
+        LinkedHashSet<String> ids = new LinkedHashSet<>();
+        String devPath = BullethellConfig.TEST_DEV_PATH.get();
+        if (devPath != null && !devPath.isBlank()) {
+            Path dir = Paths.get(devPath, "characters");
+            if (Files.isDirectory(dir)) {
+                try {
+                    Files.list(dir)
+                        .filter(p -> p.getFileName().toString().endsWith(".json"))
+                        .map(p -> p.getFileName().toString().replace(".json", ""))
+                        .sorted()
+                        .forEach(ids::add);
+                } catch (Exception ignored) {}
+            }
+        }
+        Arrays.stream(REGISTERED_IDS).forEach(ids::add);
+        return new ArrayList<>(ids);
+    }
+
     // ---------------------------------------------------------------- internal
 
     private static CharacterDefinition readFromClasspath(String id) {
@@ -73,6 +126,7 @@ public final class CharacterLoader {
             }
             if (def.id == null)
                 def.id = id;
+            resolveShotOptions(def);
             return def;
         } catch (Exception e) {
             System.err.println("[BulletHell] Failed to parse character: " + path + " - " + e.getMessage());
@@ -80,11 +134,22 @@ public final class CharacterLoader {
         }
     }
 
+    /**
+     * If {@link CharacterDefinition#shotOptions} is null or empty after parsing the character JSON,
+     * fills it from {@link HardcodedPlayerShots} (green spread tiers).
+     */
+    private static void resolveShotOptions(CharacterDefinition def) {
+        if (def.shotOptions != null && !def.shotOptions.isEmpty())
+            return;
+        def.shotOptions = HardcodedPlayerShots.genericCopy();
+    }
+
     private static CharacterDefinition fallback(String id) {
         CharacterDefinition def = new CharacterDefinition();
         def.id = id;
         def.name = "??? (" + id + ")";
         def.description = "Missing character data";
+        resolveShotOptions(def);
         return def;
     }
 }

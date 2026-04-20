@@ -1,7 +1,7 @@
 package mc.sayda.bullethell.boss;
 
 /**
- * One row in {@code data/bullethell/fairy_waves/catalog.json} — metadata for a
+ * One row in {@code data/bullethell/fairy_waves/catalog.json} - metadata for a
  * reusable wave template referenced by {@code id} (filename under fairy_waves/).
  */
 public class FairyWaveCatalogEntry {

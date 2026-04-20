@@ -5,7 +5,7 @@ package mc.sayda.bullethell.boss;
  * intensity ramping and widened inter-wave gaps. When non-null on
  * {@link StageDefinition}, {@link mc.sayda.bullethell.arena.ArenaContext} expands
  * {@link #slotCount} waves after inline preamble rows (waves must not use
- * {@code waveRef} for the procedural segment — keep only hand-authored preamble
+ * {@code waveRef} for the procedural segment - keep only hand-authored preamble
  * entries in {@link StageDefinition#waves}).
  */
 public class FairyRushDefinition {
@@ -18,7 +18,7 @@ public class FairyRushDefinition {
 
     /**
      * Arena tick (after {@link mc.sayda.bullethell.config.BullethellConfig#waveTimingMult})
-     * when the first procedural wave may begin — same convention as
+     * when the first procedural wave may begin - same convention as
      * {@link WaveDefinition#spawnTick}.
      */
     public int startTick = 120;

@@ -52,6 +52,11 @@ public final class BHItems {
     public static final RegistrySupplier<SpawnEggItem> FLANDRE_NPC_SPAWN_EGG =
             ITEMS.register("flandre_npc_spawn_egg",
                     () -> BHSpawnEggFactory.create(BHEntities.FLANDRE_NPC, 0xBE6069, 0xFDCC7F, eggProps()));
+    
+    /** Reisen: purple base, red spots */
+    //public static final RegistrySupplier<SpawnEggItem> REISEN_NPC_SPAWN_EGG =
+            //ITEMS.register("reisen_npc_spawn_egg",
+                    //() -> BHSpawnEggFactory.create(BHEntities.REISEN_NPC, 0xD5BCF2, 0xBC555C, eggProps()));
 
     private BHItems() {
     }
@@ -80,6 +85,7 @@ public final class BHItems {
     }
 
     public static void register() {
+        BHMusicDiscs.registerInto(ITEMS);
         ITEMS.register();
     }
 }

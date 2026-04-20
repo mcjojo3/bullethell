@@ -68,6 +68,11 @@ public final class BHClientPackets {
             ctx.queue(() -> ClientArenaState.INSTANCE.applyGameEvent(pkt));
         });
 
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.ATTACK_ACTIVATION_SFX, (buf, ctx) -> {
+            AttackActivationSfxPacket pkt = AttackActivationSfxPacket.decode(buf);
+            ctx.queue(() -> ClientArenaState.INSTANCE.applyAttackActivationSfx(pkt));
+        });
+
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.OPEN_CHAR_SELECT, (buf, ctx) -> {
             ctx.queue(() -> Minecraft.getInstance().setScreen(new LevelSelectScreen()));
         });
@@ -98,6 +103,32 @@ public final class BHClientPackets {
             ctx.queue(() -> {
                 mc.sayda.bullethell.client.ClientArenaState.INSTANCE.pendingEndOverlay = true;
                 Minecraft.getInstance().setScreen(new mc.sayda.bullethell.client.screen.ArenaEndScreen(pkt));
+            });
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.TEST_MODE_OPEN, (buf, ctx) -> {
+            TestModeOpenPacket pkt = TestModeOpenPacket.decode(buf);
+            ctx.queue(() -> {
+                mc.sayda.bullethell.client.ClientArenaState state = mc.sayda.bullethell.client.ClientArenaState.INSTANCE;
+                state.testMode = true;
+                state.testBossIds.clear();  state.testBossIds.addAll(pkt.bossIds);
+                state.testStageIds.clear(); state.testStageIds.addAll(pkt.stageIds);
+                state.testWaveIds.clear();  state.testWaveIds.addAll(pkt.waveIds);
+                state.testCharIds.clear();  state.testCharIds.addAll(pkt.charIds);
+                state.testCurrentBossId   = pkt.currentBossId;
+                state.testCurrentStageId  = pkt.currentStageId;
+                state.testCurrentWaveId   = pkt.currentWaveId;
+                if (!pkt.currentCharId.isEmpty()) state.testCurrentCharId = pkt.currentCharId;
+                state.testCurrentDifficulty = pkt.difficultyOrdinal;
+                // Sync selected indices to match current selections
+                for (int i = 0; i < pkt.bossIds.size(); i++)
+                    if (pkt.bossIds.get(i).equals(pkt.currentBossId)) { state.testSelectedIdx = i; break; }
+                for (int i = 0; i < pkt.stageIds.size(); i++)
+                    if (pkt.stageIds.get(i).equals(pkt.currentStageId)) { state.testStageSelectedIdx = i; break; }
+                for (int i = 0; i < pkt.waveIds.size(); i++)
+                    if (pkt.waveIds.get(i).equals(pkt.currentWaveId)) { state.testWaveSelectedIdx = i; break; }
+                for (int i = 0; i < pkt.charIds.size(); i++)
+                    if (pkt.charIds.get(i).equals(pkt.currentCharId)) { state.testCharSelectedIdx = i; break; }
             });
         });
     }

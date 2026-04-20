@@ -9,14 +9,24 @@ public class JoinMatchPacket {
 
     public final UUID   hostUuid;
     public final String characterId;
+    public final int    shotTypeOrdinal;
 
-    public JoinMatchPacket(UUID hostUuid, String characterId) {
-        this.hostUuid = hostUuid; this.characterId = characterId;
+    public JoinMatchPacket(UUID hostUuid, String characterId, int shotTypeOrdinal) {
+        this.hostUuid = hostUuid;
+        this.characterId = characterId;
+        this.shotTypeOrdinal = shotTypeOrdinal;
     }
 
-    public void encode(FriendlyByteBuf buf) { buf.writeUUID(hostUuid); buf.writeUtf(characterId); }
+    public void encode(FriendlyByteBuf buf) {
+        buf.writeUUID(hostUuid);
+        buf.writeUtf(characterId);
+        buf.writeByte(shotTypeOrdinal);
+    }
 
     public static JoinMatchPacket decode(FriendlyByteBuf buf) {
-        return new JoinMatchPacket(buf.readUUID(), buf.readUtf());
+        UUID h = buf.readUUID();
+        String cid = buf.readUtf();
+        int shot = buf.readableBytes() > 0 ? (buf.readByte() & 0xFF) : 0;
+        return new JoinMatchPacket(h, cid, shot);
     }
 }

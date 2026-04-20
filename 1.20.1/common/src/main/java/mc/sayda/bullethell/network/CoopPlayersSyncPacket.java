@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class CoopPlayersSyncPacket {
 
-    public record Entry(float x, float y, int lives, int tintColor, String characterId, int playerIndex) {
+    public record Entry(float x, float y, int lives, int tintColor, String characterId, int playerIndex, long score) {
     }
 
     public final List<Entry> entries;
@@ -29,6 +29,7 @@ public class CoopPlayersSyncPacket {
             buf.writeInt(e.tintColor());
             buf.writeUtf(e.characterId());
             buf.writeVarInt(e.playerIndex());
+            buf.writeLong(e.score());
         }
     }
 
@@ -37,7 +38,7 @@ public class CoopPlayersSyncPacket {
         List<Entry> list = new ArrayList<>(count);
         for (int i = 0; i < count; i++)
             list.add(new Entry(buf.readFloat(), buf.readFloat(),
-                    buf.readVarInt(), buf.readInt(), buf.readUtf(), buf.readVarInt()));
+                    buf.readVarInt(), buf.readInt(), buf.readUtf(), buf.readVarInt(), buf.readLong()));
         return new CoopPlayersSyncPacket(list);
     }
 }

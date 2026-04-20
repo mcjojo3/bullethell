@@ -1,5 +1,8 @@
 package mc.sayda.bullethell.boss;
 
+import java.util.List;
+import java.util.Locale;
+
 /**
  * Data class for a playable character loaded from
  * {@code data/bullethell/characters/<id>.json}.
@@ -89,12 +92,93 @@ public class CharacterDefinition {
     public String description = "Balanced - small hitbox";
 
     /**
-     * Player shot layout id (see {@link mc.sayda.bullethell.arena.PlayerShotPatterns}
-     * and wiki/player-shots-and-references.md).
-     * Examples: {@code generic}, {@code th06_reimu_homing}, {@code th06_marisa_missile},
-     * {@code sakuya_knife}, {@code cirno_ice}, {@code sanae_wide}.
+     * Legacy field kept for datapacks; playable patterns are {@link #shotOptions} in the character JSON.
      */
     public String shotStyle = "generic";
+
+    /**
+     * Touhou-style shot options (A/B, …). Parallel to optional {@link #shotTypeLabels}.
+     * Two or more non-blank entries enable the shot-type menu; otherwise index {@code 0} only.
+     */
+    public List<String> shotTypes;
+
+    /** Display strings for the shot-type menu; indices match {@link #shotTypes}. */
+    public List<String> shotTypeLabels;
+
+    /** Short flavour text per shot type for the shot select screen; indices match {@link #shotTypes}. */
+    public List<String> shotTypeDescriptions;
+
+    /**
+     * Shot layouts: define in {@code data/bullethell/characters/&lt;id&gt;.json}. If missing or empty,
+     * {@link CharacterLoader} uses {@link HardcodedPlayerShots}.
+     */
+    public List<PlayerShotOptionJson> shotOptions;
+
+    public boolean usesDataDrivenShots() {
+        return shotOptions != null && !shotOptions.isEmpty();
+    }
+
+    /**
+     * Resolves the pattern id for the given shot selection ({@code 0} = first type).
+     */
+    public String effectiveShotStyle(int shotTypeIndex) {
+        if (shotTypes != null && !shotTypes.isEmpty()) {
+            int idx = Math.max(0, Math.min(shotTypeIndex, shotTypes.size() - 1));
+            String s = shotTypes.get(idx);
+            if (s != null && !s.isBlank())
+                return s.trim().toLowerCase(Locale.ROOT);
+        }
+        return shotStyle == null ? "generic" : shotStyle.trim().toLowerCase(Locale.ROOT);
+    }
+
+    /** Number of shot types offered in the select UI ({@code 1} = skip the extra screen). */
+    public int shotTypeOptionCount() {
+        if (usesDataDrivenShots()) {
+            int n = shotOptions.size();
+            return n >= 2 ? n : 1;
+        }
+        if (shotTypes == null || shotTypes.isEmpty())
+            return 1;
+        int n = 0;
+        for (String s : shotTypes) {
+            if (s != null && !s.isBlank())
+                n++;
+        }
+        return n >= 2 ? n : 1;
+    }
+
+    /** Label for the shot-type menu or stats; falls back to generic A/B text. */
+    public String shotTypeLabel(int shotTypeIndex) {
+        if (usesDataDrivenShots() && shotTypeIndex >= 0 && shotTypeIndex < shotOptions.size()) {
+            PlayerShotOptionJson o = shotOptions.get(shotTypeIndex);
+            if (o != null && o.label != null && !o.label.isBlank())
+                return o.label;
+        }
+        if (shotTypeLabels != null && shotTypeIndex >= 0 && shotTypeIndex < shotTypeLabels.size()) {
+            String l = shotTypeLabels.get(shotTypeIndex);
+            if (l != null && !l.isBlank())
+                return l;
+        }
+        if (shotTypeIndex <= 0)
+            return "Shot Type A";
+        if (shotTypeIndex == 1)
+            return "Shot Type B";
+        return "Shot Type " + (shotTypeIndex + 1);
+    }
+
+    /** Description for the shot-type UI; empty when unset. */
+    public String shotTypeDescription(int shotTypeIndex) {
+        if (usesDataDrivenShots() && shotTypeIndex >= 0 && shotTypeIndex < shotOptions.size()) {
+            PlayerShotOptionJson o = shotOptions.get(shotTypeIndex);
+            if (o != null && o.description != null)
+                return o.description;
+        }
+        if (shotTypeDescriptions != null && shotTypeIndex >= 0 && shotTypeIndex < shotTypeDescriptions.size()) {
+            String d = shotTypeDescriptions.get(shotTypeIndex);
+            return d != null ? d : "";
+        }
+        return "";
+    }
 
     /**
      * Volley interval in ticks when unfocused; {@code 0} = use

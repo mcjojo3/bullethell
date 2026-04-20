@@ -40,7 +40,7 @@ public class ArenaEndScreen extends Screen {
     private final ArenaEndPacket data;
     private Phase phase;
 
-    /** Ticks since the current phase started — drives slide-in and blink. */
+    /** Ticks since the current phase started - drives slide-in and blink. */
     private int phaseTick = 0;
     private int selectedBtn = BTN_OK;
 
@@ -107,7 +107,7 @@ public class ArenaEndScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics gfx) {
-        // No Minecraft dirt background — arena renders behind us
+        // No Minecraft dirt background - arena renders behind us
     }
 
     // ---------------------------------------------------------------- stats phase
@@ -130,8 +130,11 @@ public class ArenaEndScreen extends Screen {
         gfx.hLine(sepX, sepX + sepW - 1, sepY, won ? 0x66FFE000 : 0x66FF3344);
 
         // ---- Panel background ----
-        int panelW = 220;
-        int panelH = 90;
+        int panelW = 240;
+        int panelH = data.won && data.victoryXp > 0 ? 104 : 90;
+        if (data.won && data.scoreCombined != data.score) {
+            panelH += font.lineHeight + 2;
+        }
         int panelX = (width - panelW) / 2;
         int panelY = sepY + 6;
         gfx.fill(panelX, panelY, panelX + panelW, panelY + panelH, 0xAA000020);
@@ -146,9 +149,15 @@ public class ArenaEndScreen extends Screen {
         int lx   = panelX + 10;
         int rx   = panelX + panelW / 2 + 4;
 
-        // Row 1: Character | Score
+        // Row 1: Character | Score (personal + optional team total in co-op)
         gfx.drawString(font, "\u266A " + data.characterName, lx, rowY, 0xFFCCCCFF, false);
-        gfx.drawString(font, "Score: " + String.format("%,d", data.score), rx, rowY, 0xFFFFEE88, false);
+        if (data.won && data.scoreCombined != data.score) {
+            gfx.drawString(font, "You: " + String.format("%,d", data.score), rx, rowY, 0xFFFFEE88, false);
+            rowY += lh + 2;
+            gfx.drawString(font, "Team: " + String.format("%,d", data.scoreCombined), rx, rowY, 0xFFFFCC66, false);
+        } else {
+            gfx.drawString(font, "Score: " + String.format("%,d", data.score), rx, rowY, 0xFFFFEE88, false);
+        }
 
         // Row 2: Lives | Bombs | Graze
         rowY += lh + 3;
@@ -163,6 +172,11 @@ public class ArenaEndScreen extends Screen {
         gfx.drawString(font, spellStr, lx, rowY, 0xFFCCCCCC, false);
         if (perfect)
             gfx.drawString(font, "\u2605 PERFECT!", lx + font.width(spellStr) + 4, rowY, 0xFFFFDD00, false);
+
+        if (data.won && data.victoryXp > 0) {
+            rowY += lh + 3;
+            gfx.drawString(font, "Reward: +" + data.victoryXp + " experience", lx, rowY, 0xFF88FFAA, false);
+        }
 
         // Row 4: Progress (defeat only) or character portrait (win)
         if (!won) {
@@ -266,7 +280,8 @@ public class ArenaEndScreen extends Screen {
             case BTN_OK -> Minecraft.getInstance().setScreen(null);
             case BTN_SHARE -> BHPackets.sendShareLastRun(); // Stay on screen
             case BTN_RETRY -> {
-                BHPackets.sendRetryArena(new RetryArenaPacket(data.stageId, data.difficulty, data.characterId));
+                BHPackets.sendRetryArena(new RetryArenaPacket(data.stageId, data.difficulty, data.characterId,
+                        data.shotTypeOrdinal));
                 Minecraft.getInstance().setScreen(null);
             }
         }

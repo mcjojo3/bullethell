@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Like {@link WaterAvoidingRandomStrollGoal}, but when {@link mc.sayda.bullethell.boss.NpcDefinition#seeksShade}
  * is set and the {@link BHNpc} is already shaded (under {@link NpcSeekShadeGoal#MIN_BRIGHT_SKY}), picked
- * destinations are never brighter than the current position — so they do not wander back into sunlight.
+ * destinations are never brighter than the current position - so they do not wander back into sunlight.
  */
 public class NpcShadeAwareWaterAvoidingRandomStrollGoal extends WaterAvoidingRandomStrollGoal {
 

@@ -5,6 +5,7 @@ import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
 import mc.sayda.bullethell.BHControlScheme;
 import mc.sayda.bullethell.BHControlSettings;
+import mc.sayda.bullethell.arena.BulletPool;
 import mc.sayda.bullethell.arena.PlayerState2D;
 import mc.sayda.bullethell.client.BHKeyMappings;
 import mc.sayda.bullethell.client.BHMusicManager;
@@ -60,6 +61,8 @@ public class BHClientEvents {
                 th9ZHoldStreak = 0;
                 return;
             }
+
+            state.arenaAnimTick++;
 
             boolean timeStopped = state.abilityType == 1;
 
@@ -145,7 +148,19 @@ public class BHClientEvents {
             prevXDown = xDown;
             prevZDown = zDown;
 
+            state.inputDx = dx;
+            state.inputDy = dy;
+            state.inputFocused = focused;
             state.updateAnimation(dx);
+
+            // Advance client-predicted position one tick ahead of server authority
+            if (state.active && !state.spectating) {
+                float predSpeed = focused ? state.player.speedFocused : state.player.speedNormal;
+                float ndx = dx, ndy = dy;
+                if (ndx != 0 && ndy != 0) predSpeed *= 0.7071f;
+                state.predX = Math.max(8f, Math.min(BulletPool.ARENA_W - 8f, state.predX + ndx * predSpeed));
+                state.predY = Math.max(8f, Math.min(BulletPool.ARENA_H - 8f, state.predY + ndy * predSpeed));
+            }
 
             if (state.bossMaxHp > 0)
                 state.bossAnimCounter++;
@@ -164,6 +179,7 @@ public class BHClientEvents {
 
         ClientGuiEvent.RENDER_HUD.register((gfx, partialTick) -> {
             BulletHellRenderer.INSTANCE.render(gfx, partialTick);
+            mc.sayda.bullethell.client.TestModeHud.draw(gfx, partialTick);
         });
     }
     
@@ -172,6 +188,9 @@ public class BHClientEvents {
         return screen instanceof mc.sayda.bullethell.client.screen.LevelSelectScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.DifficultySelectScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.CharacterSelectScreen ||
+               screen instanceof mc.sayda.bullethell.client.screen.JoinCharacterSelectScreen ||
+               screen instanceof mc.sayda.bullethell.client.screen.ShotTypeSelectScreen ||
+               screen instanceof mc.sayda.bullethell.client.screen.ChallengeScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.ArenaPlayScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.ArenaQuitScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.ArenaEndScreen ||

@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.arena;
 
 import mc.sayda.bullethell.boss.StageDefinition;
+import mc.sayda.bullethell.debug.BHDebugMode;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class BulletHellManager {
     /** host UUID → list of accepted participant info (pre-arena lobby). */
     private final Map<UUID, List<ParticipantInfo>> pendingInvites = new ConcurrentHashMap<>();
 
-    public record ParticipantInfo(UUID uuid, mc.sayda.bullethell.boss.CharacterDefinition charDef) {}
+    public record ParticipantInfo(UUID uuid, mc.sayda.bullethell.boss.CharacterDefinition charDef, int shotTypeOrdinal) {}
 
     private BulletHellManager() {
     }
@@ -44,6 +45,7 @@ public class BulletHellManager {
 
     public ArenaContext startArena(UUID playerUuid, DifficultyConfig difficulty,
             String stageId, String characterId) {
+        BHDebugMode.clear(playerUuid);
         ArenaContext ctx = new ArenaContext(playerUuid, difficulty, stageId, characterId);
         arenas.put(playerUuid, ctx);
         return ctx;
@@ -55,6 +57,7 @@ public class BulletHellManager {
      */
     public ArenaContext startArena(ServerPlayer host, DifficultyConfig difficulty,
             String stageId, String characterId) {
+        BHDebugMode.clear(host.getUUID());
         ArenaContext ctx = new ArenaContext(host.getUUID(), difficulty, stageId, characterId, host);
         arenas.put(host.getUUID(), ctx);
         return ctx;
@@ -66,6 +69,7 @@ public class BulletHellManager {
      */
     public ArenaContext startArena(ServerPlayer host, DifficultyConfig difficulty, StageDefinition stage,
             String characterId, int skipToBossPhase1Based) {
+        BHDebugMode.clear(host.getUUID());
         ArenaContext ctx = new ArenaContext(host.getUUID(), difficulty, stage, characterId, host);
         if (skipToBossPhase1Based >= 1)
             ctx.debugSkipToBossPhase(skipToBossPhase1Based - 1);
@@ -76,6 +80,10 @@ public class BulletHellManager {
     public void stopArena(UUID playerUuid) {
         ArenaContext ctx = arenas.remove(playerUuid);
         if (ctx != null) {
+            BHDebugMode.clear(playerUuid);
+            for (UUID coopId : ctx.getCoopPlayers().keySet()) {
+                BHDebugMode.clear(coopId);
+            }
             // Evict any co-op participants that were in this arena
             playerToMatch.entrySet().removeIf(e -> e.getValue().equals(playerUuid));
         }
@@ -93,11 +101,11 @@ public class BulletHellManager {
      * @param participant     joining player (for attribute bonuses)
      */
     public void joinMatch(UUID participantUuid, UUID hostUuid,
-            mc.sayda.bullethell.boss.CharacterDefinition charDef, ServerPlayer participant) {
+            mc.sayda.bullethell.boss.CharacterDefinition charDef, ServerPlayer participant, int shotTypeOrdinal) {
         ArenaContext ctx = arenas.get(hostUuid);
         if (ctx == null)
             return;
-        ctx.addCoopPlayer(participantUuid, charDef, participant);
+        ctx.addCoopPlayer(participantUuid, charDef, participant, shotTypeOrdinal);
         playerToMatch.put(participantUuid, hostUuid);
         // Grant spawn invulnerability so the joining player doesn't die instantly
         mc.sayda.bullethell.arena.PlayerState2D ps = ctx.getPlayerState(participantUuid);
@@ -108,6 +116,7 @@ public class BulletHellManager {
     /** Remove a co-op participant from their current match. */
     public void leaveMatch(UUID participantUuid) {
         UUID hostUuid = playerToMatch.remove(participantUuid);
+        BHDebugMode.clear(participantUuid);
         if (hostUuid != null) {
             ArenaContext ctx = arenas.get(hostUuid);
             if (ctx != null)

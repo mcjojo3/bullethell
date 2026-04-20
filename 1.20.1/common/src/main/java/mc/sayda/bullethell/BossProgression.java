@@ -25,6 +25,8 @@ public final class BossProgression {
     /** Boss order chain used for challenge caps. */
     private static final Map<String, List<String>> PREREQS = Map.of(
             "cirno_boss", List.of(),
+            "marisa_boss", List.of(),       // optional side boss - no prerequisites
+            "sanae_boss", List.of(),        // optional side boss - no prerequisites
             "sakuya_boss", List.of("cirno_boss"),
             "remilia_boss", List.of("cirno_boss", "sakuya_boss"),
             "flandre_boss", List.of("remilia_boss"));
@@ -32,6 +34,8 @@ public final class BossProgression {
     /** Stage id -> boss id mapping for challenge checks. */
     private static final Map<String, String> STAGE_TO_BOSS = Map.of(
             "cirno_stage", "cirno_boss",
+            "marisa_stage", "marisa_boss",
+            "sanae_stage", "sanae_boss",
             "sakuya_stage", "sakuya_boss",
             "remilia_stage", "remilia_boss",
             "flandre_stage", "flandre_boss");

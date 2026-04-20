@@ -1,5 +1,6 @@
 package mc.sayda.bullethell.client;
 
+import mc.sayda.bullethell.item.BHMusicDiscItem;
 import mc.sayda.bullethell.sound.OggMetaReader;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -76,7 +77,7 @@ public final class BHMusicManager {
         }
 
         OggMetaReader.TrackMeta meta = OggMetaReader.read(wanted);
-        npTitle  = meta.title().isEmpty() ? wanted : meta.title();
+        npTitle  = meta.title().isEmpty() ? BHMusicDiscItem.fallbackTitle(wanted) : meta.title();
         npArtist = meta.artist();
         npTick   = 0;
 

@@ -41,6 +41,7 @@ public class BullethellForge {
         event.put(BHEntities.CIRNO_NPC.get(), BHNpc.createAttributes().build());
         event.put(BHEntities.SANAE_NPC.get(), BHNpc.createAttributes().build());
         event.put(BHEntities.FLANDRE_NPC.get(), BHNpc.createAttributes().build());
+        event.put(BHEntities.REISEN_NPC.get(), BHNpc.createAttributes().build());
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -50,5 +51,6 @@ public class BullethellForge {
         event.registerEntityRenderer(BHEntities.CIRNO_NPC.get(), BHNpcRenderer::new);
         event.registerEntityRenderer(BHEntities.SANAE_NPC.get(), BHNpcRenderer::new);
         event.registerEntityRenderer(BHEntities.FLANDRE_NPC.get(), BHNpcRenderer::new);
+        event.registerEntityRenderer(BHEntities.REISEN_NPC.get(), BHNpcRenderer::new);
     }
 }

@@ -5,7 +5,7 @@
   "texture": "textures/characters/sakuya.png",
   "tintColor": 14540253,
   "hitRadius": 2.5,
-  "grazeRadius": 11.0,
+  "grazeRadius": 5.5,
   "pickupRadius": 19.0,
   "speedNormal": 15.0,
   "speedFocused": 7.5,
@@ -14,5 +14,1175 @@
   "chargeRateShooting": 0.8,
   "chargeRateIdle": 4.5,
   "chargeRateCharging": 4.0,
-  "description": "Close range - time freeze"
+  "description": "Close range - time freeze",
+  "shotOptions": [
+    {
+      "label": "A \u2014 Illusion Sign",
+      "description": "Straight knife streams with a second row at power; reliable mid-range coverage.",
+      "unfocused": {
+        "powerTiers": [
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -10,
+              "offsetY": 0,
+              "vx": -1.8,
+              "vy": -15,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 10,
+              "offsetY": 0,
+              "vx": 1.8,
+              "vy": -15,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -14,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -11,
+              "offsetY": 0,
+              "vx": -2,
+              "vy": -15,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 11,
+              "offsetY": 0,
+              "vx": 2,
+              "vy": -15,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -22,
+              "offsetY": 0,
+              "vx": -4,
+              "vy": -14,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 22,
+              "offsetY": 0,
+              "vx": 4,
+              "vy": -14,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -11,
+              "offsetY": 0,
+              "vx": -2,
+              "vy": -15,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 11,
+              "offsetY": 0,
+              "vx": 2,
+              "vy": -15,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -22,
+              "offsetY": 0,
+              "vx": -4,
+              "vy": -14,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 22,
+              "offsetY": 0,
+              "vx": 4,
+              "vy": -14,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 7,
+              "vx": 0,
+              "vy": -15.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -11,
+              "offsetY": 0,
+              "vx": -2,
+              "vy": -15,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 11,
+              "offsetY": 0,
+              "vx": 2,
+              "vy": -15,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -22,
+              "offsetY": 0,
+              "vx": -4,
+              "vy": -14,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 22,
+              "offsetY": 0,
+              "vx": 4,
+              "vy": -14,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 7,
+              "vx": 0,
+              "vy": -15.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -33,
+              "offsetY": 0,
+              "vx": -6.5,
+              "vy": -13,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 33,
+              "offsetY": 0,
+              "vx": 6.5,
+              "vy": -13,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ]
+        ]
+      },
+      "focused": {
+        "powerTiers": [
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -4,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 4,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -18,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -6,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 6,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": -12,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 12,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -6,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 6,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": -12,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 12,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": -19,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -17.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 19,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -17.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "label": "B \u2014 Killing Doll",
+      "description": "Wider knife curtain and side kunai; focused mode layers knives and throwing daggers.",
+      "unfocused": {
+        "powerTiers": [
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -14,
+              "offsetY": 0,
+              "vx": -3.2,
+              "vy": -13.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 14,
+              "offsetY": 0,
+              "vx": 3.2,
+              "vy": -13.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -14,
+              "offsetY": 0,
+              "vx": -3.2,
+              "vy": -13.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 14,
+              "offsetY": 0,
+              "vx": 3.2,
+              "vy": -13.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -28,
+              "offsetY": 0,
+              "vx": -6,
+              "vy": -11,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 28,
+              "offsetY": 0,
+              "vx": 6,
+              "vy": -11,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -14,
+              "offsetY": 0,
+              "vx": -3.2,
+              "vy": -13.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 14,
+              "offsetY": 0,
+              "vx": 3.2,
+              "vy": -13.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -28,
+              "offsetY": 0,
+              "vx": -6,
+              "vy": -11,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 28,
+              "offsetY": 0,
+              "vx": 6,
+              "vy": -11,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 6,
+              "vx": 0,
+              "vy": -14.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -14,
+              "offsetY": 0,
+              "vx": -3.2,
+              "vy": -13.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 14,
+              "offsetY": 0,
+              "vx": 3.2,
+              "vy": -13.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -28,
+              "offsetY": 0,
+              "vx": -6,
+              "vy": -11,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 28,
+              "offsetY": 0,
+              "vx": 6,
+              "vy": -11,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 6,
+              "vx": 0,
+              "vy": -14.5,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -40,
+              "offsetY": 0,
+              "vx": -8,
+              "vy": -9,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 40,
+              "offsetY": 0,
+              "vx": 8,
+              "vy": -9,
+              "lifetime": 56,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ]
+        ]
+      },
+      "focused": {
+        "powerTiers": [
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -5,
+              "offsetY": 0,
+              "vx": -0.8,
+              "vy": -18.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 5,
+              "offsetY": 0,
+              "vx": 0.8,
+              "vy": -18.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": -12,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -17.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 12,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -17.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -6,
+              "offsetY": 0,
+              "vx": -1,
+              "vy": -18.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 6,
+              "offsetY": 0,
+              "vx": 1,
+              "vy": -18.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": -14,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -17.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 14,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -17.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -7,
+              "offsetY": 0,
+              "vx": -1,
+              "vy": -18.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 7,
+              "offsetY": 0,
+              "vx": 1,
+              "vy": -18.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": -16,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -17.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 16,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -17.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": -24,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 24,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "KNIFE",
+              "offsetX": -7,
+              "offsetY": 0,
+              "vx": -1,
+              "vy": -18.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 7,
+              "offsetY": 0,
+              "vx": 1,
+              "vy": -18.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": -16,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -17.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 16,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -17.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KNIFE",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": -24,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 24,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": -32,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -15.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "KUNAI",
+              "offsetX": 32,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -15.5,
+              "lifetime": 48,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ]
+        ]
+      }
+    }
+  ]
 }

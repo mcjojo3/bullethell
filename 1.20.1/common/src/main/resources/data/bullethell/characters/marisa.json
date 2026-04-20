@@ -5,7 +5,7 @@
   "texture": "textures/characters/marisa.png",
   "tintColor": 16763904,
   "hitRadius": 3.5,
-  "grazeRadius": 14.0,
+  "grazeRadius": 7.5,
   "pickupRadius": 22.0,
   "speedNormal": 16.0,
   "speedFocused": 8.0,
@@ -14,5 +14,1031 @@
   "chargeRateShooting": 1.2,
   "chargeRateIdle": 2.5,
   "chargeRateCharging": 6.5,
-  "description": "Fast & Powerful"
+  "description": "Fast & Powerful",
+  "shotOptions": [
+    {
+      "label": "A \u2014 Illusion Missile",
+      "description": "Magic missiles in a wide fan; focus adds stars for extra punch up close.",
+      "unfocused": {
+        "powerTiers": [
+          [
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -9,
+              "offsetY": 0,
+              "vx": -2.2,
+              "vy": -15,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 9,
+              "offsetY": 0,
+              "vx": 2.2,
+              "vy": -15,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -11,
+              "offsetY": 0,
+              "vx": -2.6,
+              "vy": -15,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 11,
+              "offsetY": 0,
+              "vx": 2.6,
+              "vy": -15,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -24,
+              "offsetY": 0,
+              "vx": -5,
+              "vy": -13,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 24,
+              "offsetY": 0,
+              "vx": 5,
+              "vy": -13,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -11,
+              "offsetY": 0,
+              "vx": -2.6,
+              "vy": -15,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 11,
+              "offsetY": 0,
+              "vx": 2.6,
+              "vy": -15,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -24,
+              "offsetY": 0,
+              "vx": -5,
+              "vy": -13,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 24,
+              "offsetY": 0,
+              "vx": 5,
+              "vy": -13,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 8,
+              "vx": 0,
+              "vy": -15.5,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -16,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -11,
+              "offsetY": 0,
+              "vx": -2.6,
+              "vy": -15,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 11,
+              "offsetY": 0,
+              "vx": 2.6,
+              "vy": -15,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -24,
+              "offsetY": 0,
+              "vx": -5,
+              "vy": -13,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 24,
+              "offsetY": 0,
+              "vx": 5,
+              "vy": -13,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 8,
+              "vx": 0,
+              "vy": -15.5,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -38,
+              "offsetY": 0,
+              "vx": -7,
+              "vy": -11,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 38,
+              "offsetY": 0,
+              "vx": 7,
+              "vy": -11,
+              "lifetime": 58,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ]
+        ]
+      },
+      "focused": {
+        "powerTiers": [
+          [
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": -11,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 11,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": -11,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 11,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 7,
+              "vx": 0,
+              "vy": -19.5,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": -5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -20,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": -11,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 11,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "GOLD",
+              "offsetX": 0,
+              "offsetY": 7,
+              "vx": 0,
+              "vy": -19.5,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": -17,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -18.5,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 17,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -18.5,
+              "lifetime": 50,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "label": "B \u2014 Magicannon",
+      "description": "Tight columns of stars like a laser. Very strong single-target damage when focused.",
+      "unfocused": {
+        "powerTiers": [
+          [
+            {
+              "bulletType": "STAR",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "STAR",
+              "offsetX": -3,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 3,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "STAR",
+              "offsetX": -5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.5,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "STAR",
+              "offsetX": -10,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": -4,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.5,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.8,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 4,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.5,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 10,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "STAR",
+              "offsetX": -13,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": -7,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.3,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": -2,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.8,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 2,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.8,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 7,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19.3,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 13,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -19,
+              "lifetime": 52,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ]
+        ]
+      },
+      "focused": {
+        "powerTiers": [
+          [
+            {
+              "bulletType": "STAR",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "STAR",
+              "offsetX": -2,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 2,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "STAR",
+              "offsetX": -4,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22.5,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 4,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "STAR",
+              "offsetX": -8,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": -3,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22.5,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22.8,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 3,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22.5,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 8,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ],
+          [
+            {
+              "bulletType": "STAR",
+              "offsetX": -11,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": -5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22.5,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": -1,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22.8,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 1,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22.8,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 5,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22.5,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            },
+            {
+              "bulletType": "STAR",
+              "offsetX": 11,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -22,
+              "lifetime": 46,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0.0,
+              "freezeTicks": 0
+            }
+          ]
+        ]
+      }
+    }
+  ]
 }

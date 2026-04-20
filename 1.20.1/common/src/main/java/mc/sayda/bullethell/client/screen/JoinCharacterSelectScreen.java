@@ -172,7 +172,12 @@ public class JoinCharacterSelectScreen extends Screen {
         if (characters.isEmpty()) return;
         if (!isUnlocked(selectedIndex)) return;
         BHSfx.playSelect();
-        BHPackets.sendJoinMatch(hostUuid, characters.get(selectedIndex).id);
+        CharacterDefinition ch = characters.get(selectedIndex);
+        if (ch.shotTypeOptionCount() >= 2) {
+            Minecraft.getInstance().setScreen(ShotTypeSelectScreen.forJoin(hostUuid, hostName, ch.id));
+            return;
+        }
+        BHPackets.sendJoinMatch(hostUuid, ch.id, 0);
         onClose();
     }
 

@@ -3,7 +3,7 @@ package mc.sayda.bullethell.arena;
 /** Difficulty settings passed into PatternEngine calls. */
 public enum DifficultyConfig {
 
-    EASY   (0.70f, 4,  0.60f),
+    EASY   (0.82f, 5,  0.74f),
     NORMAL (1.00f, 6,  1.00f),
     HARD   (1.35f, 8,  1.48f),
     LUNATIC(1.85f, 14, 2.48f);

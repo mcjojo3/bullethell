@@ -185,7 +185,7 @@ public class DifficultySelectScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             BHSfx.playBack();
-            Minecraft.getInstance().setScreen(new LevelSelectScreen());
+            onClose();
             return true;
         }
         if (keyCode == 263 && selectedIndex > 0) {

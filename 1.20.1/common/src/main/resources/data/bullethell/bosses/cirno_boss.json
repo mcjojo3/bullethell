@@ -4,7 +4,7 @@
   "_design_notes": [
     "TH06 ecldata2: Sub0–Sub4 eight-lane + ins_77(180f) pacing; Sub5 burst E2→L10; Sub29 Icicle (120f outer loop ins_3); Sub30 Hail; Sub31 Perfect Freeze layered ins_75 + ins_67; Sub32 Diamond ins_75 type5 + ins_121 overlay.",
     "Timing: 120f loop ≈40 mod ticks; 180f wait ≈60 mod ticks (wiki/time-and-units.md). ICE + ORB/GOLD for freeze/diamond reads (generic ORB + gold stars).",
-    "Blueprint (PatternStep): bulletLifetimeTicks matches PatternEngine defaults — RING/SPIRAL/DENSE 200, AIMED/SPREAD/LASER_BEAM 220, RAIN 230. AIMED_RING steps omit lifetime so aim uses 220 and ring 200. ringStartAngleRad: -1 = random ring start (RING_OFFSET / AIMED_RING ring), 0 = fixed. bulletAngularVelocity left 0 (straight); spawn offsets unused."
+    "Blueprint (PatternStep): bulletLifetimeTicks matches PatternEngine defaults - RING/SPIRAL/DENSE 200, AIMED/SPREAD/LASER_BEAM 220, RAIN 230. AIMED_RING steps omit lifetime so aim uses 220 and ring 200. ringStartAngleRad: -1 = random ring start (RING_OFFSET / AIMED_RING ring), 0 = fixed. bulletAngularVelocity left 0 (straight); spawn offsets unused."
   ],
   "introDialog": [
     { "speaker": "BOSS", "text": "I'm Cirno, the strongest fairy! You made it this far? Heh, now freeze!", "delayTicks": 170 }
@@ -54,7 +54,7 @@
   },
   "phases": [
     {
-      "_note": "Nonspell 1 — Sub0–4: eight lanes; ins_77(180f) between volley families → ~56–60t-equivalent pacing on main ring.",
+      "_note": "Nonspell 1 - Sub0–4: eight lanes; ins_77(180f) between volley families → ~56–60t-equivalent pacing on main ring.",
       "hp": 1100,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
@@ -89,26 +89,26 @@
       ]
     },
     {
-      "_note": "Sub30 Hailstorm: ins_47 spin + ins_70 hail density.",
+      "_note": "Sub30 Icicle Fall -Hard- (H/L): ins_47 spin + ins_70 hail density.",
       "minDifficulty": "HARD",
       "maxDifficulty": "LUNATIC",
       "hp": 1950,
       "isSpellCard": true,
-      "spellName": "Hail Sign \"Hailstorm\"",
+      "spellName": "Ice Sign \"Icicle Fall -Hard-\"",
       "spellDurationTicks": [0, 0, 420, 220],
       "spellBonus": 62000,
       "movement": "CIRCLE",
       "moveSpeed": 88,
       "music": "",
       "attacks": [
-        { "pattern": "RING", "cooldown": 11, "scalingProfile": "GEOMETRY", "bulletType": "ICE", "arms": 14, "armsMin": 12, "armsMax": 17, "speed": 1.95, "speedMin": 1.8, "speedMax": 2.15, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "RING", "cooldown": 11, "scalingProfile": "GEOMETRY", "bulletType": "ICE", "arms": 14, "armsMin": 12, "armsMax": 15, "speed": 1.95, "speedMin": 1.8, "speedMax": 2.15, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
         { "pattern": "SPREAD", "cooldown": 7, "scalingProfile": "BURST", "bulletType": "ICE", "arms": 9, "speed": 4.0, "bulletLifetimeTicks": 220 },
         { "pattern": "RING_OFFSET", "cooldown": 17, "bulletType": "ICE", "arms": 12, "speed": 1.9, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
-        { "pattern": "AIMED_RING", "cooldown": 19, "bulletType": "ICE", "arms": 5, "spread": 0.13, "speed": 2.9, "ringArms": 14, "ringSpeed": 1.5, "ringBulletType": "ORB", "ringStartAngleRad": -1 }
+        { "pattern": "AIMED_RING", "cooldown": 19, "bulletType": "ICE", "arms": 5, "spread": 0.13, "speed": 2.9, "ringArms": 14, "ringSpeed": 1.5, "ringBulletType": "DOT", "ringStartAngleRad": -1 }
       ]
     },
     {
-      "_note": "Nonspell 2 — Sub5-style burst scaling (E2→L10 single-shot families).",
+      "_note": "Nonspell 2 - Sub5-style burst scaling (E2→L10 single-shot families).",
       "hp": 1500,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
@@ -121,7 +121,7 @@
       "attacks": [
         { "pattern": "AIMED", "cooldown": 12, "scalingProfile": "PRECISION", "bulletType": "ICE", "arms": 6, "armsMin": 2, "armsMax": 10, "speed": 3.35, "spread": 0.15, "bulletLifetimeTicks": 220 },
         { "pattern": "RING", "cooldown": 19, "bulletType": "ICE", "arms": 10, "speed": 2.3, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
-        { "pattern": "AIMED_RING", "cooldown": 22, "bulletType": "ICE", "arms": 5, "spread": 0.17, "speed": 3.1, "ringArms": 10, "ringSpeed": 1.6, "ringBulletType": "ORB", "ringStartAngleRad": -1 }
+        { "pattern": "AIMED_RING", "cooldown": 22, "bulletType": "ICE", "arms": 5, "spread": 0.17, "speed": 3.1, "ringArms": 10, "ringSpeed": 1.6, "ringBulletType": "DOT", "ringStartAngleRad": -1 }
       ]
     },
     {
@@ -137,13 +137,13 @@
       "attacks": [
         { "pattern": "SPREAD", "burstCount": 3, "burstInterval": 4, "cooldown": 32, "scalingProfile": "BURST", "bulletType": "ICE", "arms": 7, "armsMin": 5, "armsMax": 9, "speed": 3.85, "bulletLifetimeTicks": 220 },
         { "pattern": "SPIRAL", "cooldown": 9, "scalingProfile": "GEOMETRY", "armsDifficultyWeight": 0.78, "bulletType": "ICE", "arms": 7, "speed": 2.45, "bulletLifetimeTicks": 200 },
-        { "pattern": "DENSE_RING", "cooldown": 15, "scalingProfile": "GEOMETRY", "bulletType": "ORB", "arms": 14, "speed": 1.8, "maxScaledArms": 18, "bulletScale": 1.15, "hitboxScale": 0.45, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "DENSE_RING", "cooldown": 15, "scalingProfile": "GEOMETRY", "bulletType": "DOT", "arms": 14, "speed": 1.8, "maxScaledArms": 16, "bulletScale": 1.15, "hitboxScale": 0.45, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
         { "pattern": "AIMED", "cooldown": 13, "bulletType": "ICE", "arms": 5, "speed": 3.45, "spread": 0.14, "bulletLifetimeTicks": 220 }
       ]
     },
     {
-      "_note": "Sub32 Diamond Blizzard: wide ins_75 snow + diamond sparkle (GOLD) mix; Normal+.",
-      "minDifficulty": "NORMAL",
+      "_note": "Sub32 Diamond Blizzard: wide ins_75 snow + diamond sparkle (GOLD) mix; TH06 is Normal+ - here HARD+ only.",
+      "minDifficulty": "HARD",
       "maxDifficulty": "LUNATIC",
       "hp": 2400,
       "isSpellCard": true,
@@ -157,7 +157,7 @@
         { "pattern": "SPREAD", "cooldown": 5, "scalingProfile": "BURST", "bulletType": "ICE", "arms": 8, "speed": 4.6, "bulletLifetimeTicks": 220 },
         { "pattern": "SPREAD", "cooldown": 5, "scalingProfile": "BURST", "bulletType": "GOLD", "arms": 6, "speed": 4.0, "bulletLifetimeTicks": 220 },
         { "pattern": "AIMED", "cooldown": 10, "bulletType": "ICE", "arms": 6, "speed": 3.7, "spread": 0.17, "bulletLifetimeTicks": 220 },
-        { "pattern": "DENSE_RING", "cooldown": 14, "bulletType": "ICE", "arms": 16, "speed": 2.25, "maxScaledArms": 20, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
+        { "pattern": "DENSE_RING", "cooldown": 14, "scalingProfile": "GEOMETRY", "bulletType": "ICE", "arms": 16, "speed": 2.25, "maxScaledArms": 18, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
         { "pattern": "AIMED_RING", "cooldown": 17, "bulletType": "ICE", "arms": 5, "spread": 0.18, "speed": 3.1, "ringArms": 12, "ringSpeed": 1.7, "ringBulletType": "GOLD", "ringStartAngleRad": -1 }
       ]
     }

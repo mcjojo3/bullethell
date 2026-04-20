@@ -24,7 +24,15 @@ public final class BHCreativeTabs {
                     () -> CreativeTabRegistry.create(
                             Component.translatable("category.bullethell.npc_spawn_eggs"),
                             () -> new ItemStack(BHItems.MARISA_NPC_SPAWN_EGG.get())));
-                       
+
+    public static final RegistrySupplier<CreativeModeTab> MUSIC_DISCS =
+            TABS.register("music_discs",
+                    () -> CreativeTabRegistry.create(
+                            Component.translatable("category.bullethell.music_discs"),
+                            () -> {
+                                ItemStack s = BHMusicDiscs.anyDiscStack();
+                                return s.isEmpty() ? new ItemStack(Items.MUSIC_DISC_13) : s;
+                            }));
 
     private BHCreativeTabs() {
     }

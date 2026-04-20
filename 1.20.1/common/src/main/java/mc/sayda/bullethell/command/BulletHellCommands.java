@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -12,12 +13,14 @@ import mc.sayda.bullethell.BHControlSettings;
 import mc.sayda.bullethell.BullethellDataIndex;
 import mc.sayda.bullethell.CharacterUnlocks;
 import mc.sayda.bullethell.boss.CharacterLoader;
+import mc.sayda.bullethell.arena.ArenaContext;
 import mc.sayda.bullethell.arena.BulletHellManager;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.boss.BossLoader;
 import mc.sayda.bullethell.boss.StageDefinition;
 import mc.sayda.bullethell.boss.StageLoader;
 import mc.sayda.bullethell.debug.BHDebugMode;
+import mc.sayda.bullethell.network.TestModeOpenPacket;
 import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.network.ControlSchemePacket;
 import mc.sayda.bullethell.network.OpenJoinSelectPacket;
@@ -29,11 +32,12 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * /bullethell start — admin (perm 2): same as bare /bullethell (char select), or
+ * /bullethell start - admin (perm 2): same as bare /bullethell (char select), or
  * {@code /bullethell start &lt;stageOrBossId&gt;} [phase] [character]. Tab-complete lists
  * stage and boss JSON ids (e.g. {@code sakuya_boss}, {@code remilia_stage}). A boss id
  * starts a boss-only arena (no fairy waves). Phase: 0 = from beginning; ≥1 = skip to that
@@ -42,7 +46,8 @@ import java.util.concurrent.CompletableFuture;
  * /bullethell stop - end own arena or leave a coop match
  * /bullethell status - print current arena stats to chat
  * /bullethell controls [&lt;th19|th9&gt;] - show saved layout, or set when a scheme is given
- * /bullethell debug - operator (perm 2+): toggle god mode for testing
+ * /bullethell test - operator (perm 2+): dev arena + overlay; temporary god mode lasts only while test arena is active.
+ * The same tree is registered as {@code /bh} (short alias).
  */
 public final class BulletHellCommands {
 
@@ -70,7 +75,12 @@ public final class BulletHellCommands {
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("bullethell")
+        dispatcher.register(bullethellCommandRoot("bullethell"));
+        dispatcher.register(bullethellCommandRoot("bh"));
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> bullethellCommandRoot(String literal) {
+        return Commands.literal(literal)
                 .requires(src -> src.hasPermission(0)) // any player
                 .executes(ctx -> start(ctx.getSource()))
 
@@ -81,17 +91,34 @@ public final class BulletHellCommands {
                         .then(Commands.argument("target", StringArgumentType.word())
                                 .suggests(BullethellDataIndex.suggestStartArenaTargets())
                                 .executes(ctx -> startDirect(ctx.getSource(),
-                                        StringArgumentType.getString(ctx, "target"), 0, "reimu"))
+                                        StringArgumentType.getString(ctx, "target"), 0, "reimu", "NORMAL", 0))
                                 .then(Commands.argument("phase", IntegerArgumentType.integer(0, 999))
                                         .executes(ctx -> startDirect(ctx.getSource(),
                                                 StringArgumentType.getString(ctx, "target"),
-                                                IntegerArgumentType.getInteger(ctx, "phase"), "reimu"))
+                                                IntegerArgumentType.getInteger(ctx, "phase"), "reimu", "NORMAL", 0))
                                         .then(Commands.argument("character", StringArgumentType.word())
                                                 .suggests(BullethellDataIndex.suggestCharacters())
                                                 .executes(ctx -> startDirect(ctx.getSource(),
                                                         StringArgumentType.getString(ctx, "target"),
                                                         IntegerArgumentType.getInteger(ctx, "phase"),
-                                                        StringArgumentType.getString(ctx, "character")))))))
+                                                        StringArgumentType.getString(ctx, "character"), "NORMAL", 0))
+                                                .then(Commands.argument("difficulty", StringArgumentType.word())
+                                                        .suggests((c, b) -> SharedSuggestionProvider.suggest(
+                                                                java.util.Arrays.stream(DifficultyConfig.values())
+                                                                        .map(Enum::name)
+                                                                        .collect(java.util.stream.Collectors.toList()), b))
+                                                        .executes(ctx -> startDirect(ctx.getSource(),
+                                                                StringArgumentType.getString(ctx, "target"),
+                                                                IntegerArgumentType.getInteger(ctx, "phase"),
+                                                                StringArgumentType.getString(ctx, "character"),
+                                                                StringArgumentType.getString(ctx, "difficulty"), 0))
+                                                        .then(Commands.argument("power", IntegerArgumentType.integer(0, mc.sayda.bullethell.arena.PlayerState2D.MAX_POWER))
+                                                                .executes(ctx -> startDirect(ctx.getSource(),
+                                                                        StringArgumentType.getString(ctx, "target"),
+                                                                        IntegerArgumentType.getInteger(ctx, "phase"),
+                                                                        StringArgumentType.getString(ctx, "character"),
+                                                                        StringArgumentType.getString(ctx, "difficulty"),
+                                                                        IntegerArgumentType.getInteger(ctx, "power")))))))))
 
                 // ---- join <playerName> ----
                 .then(Commands.literal("join")
@@ -137,7 +164,7 @@ public final class BulletHellCommands {
                                                 + " | lives=" + ps.lives
                                                 + " | bombs=" + ps.bombs);
                                 if (BHDebugMode.isGodMode(uuid)) {
-                                    msg.append(" | DBG tick=").append(arena.getDebugArenaTick())
+                                    msg.append(" | test/god tick=").append(arena.getDebugArenaTick())
                                             .append(" patCD=").append(arena.getDebugBossPatternCooldown())
                                             .append(" enemyBul=").append(arena.bullets.getActiveCount());
                                 }
@@ -156,17 +183,34 @@ public final class BulletHellCommands {
                                 .executes(ctx -> controlsSet(ctx.getSource(),
                                         StringArgumentType.getString(ctx, "scheme")))))
 
-                // ---- debug (operator) ----
-                .then(Commands.literal("debug")
+                // ---- test (operator) ----
+                .then(Commands.literal("test")
                         .requires(src -> src.hasPermission(2))
-                        .executes(ctx -> {
-                            ServerPlayer player = ctx.getSource().getPlayerOrException();
-                            boolean on = BHDebugMode.toggleGodMode(player.getUUID());
-                            player.sendSystemMessage(Component.literal(
-                                    "[BulletHell] Debug " + (on ? "ON" : "OFF")
-                                            + " - when ON: max lives/bombs, invuln, bombs cost nothing."));
-                            return 1;
-                        }))
+                        .executes(ctx -> startTest(ctx.getSource(), "marisa_boss", 0, "reimu", "NORMAL"))
+                        .then(Commands.argument("bossId", StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(BossLoader.allBossIds(), b))
+                                .executes(ctx -> startTest(ctx.getSource(),
+                                        StringArgumentType.getString(ctx, "bossId"), 0, "reimu", "NORMAL"))
+                                .then(Commands.argument("phase", IntegerArgumentType.integer(0, 999))
+                                        .executes(ctx -> startTest(ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "bossId"),
+                                                IntegerArgumentType.getInteger(ctx, "phase"), "reimu", "NORMAL"))
+                                        .then(Commands.argument("character", StringArgumentType.word())
+                                                .suggests(BullethellDataIndex.suggestCharacters())
+                                                .executes(ctx -> startTest(ctx.getSource(),
+                                                        StringArgumentType.getString(ctx, "bossId"),
+                                                        IntegerArgumentType.getInteger(ctx, "phase"),
+                                                        StringArgumentType.getString(ctx, "character"), "NORMAL"))
+                                                .then(Commands.argument("difficulty", StringArgumentType.word())
+                                                        .suggests((c, b) -> SharedSuggestionProvider.suggest(
+                                                                java.util.Arrays.stream(DifficultyConfig.values())
+                                                                        .map(Enum::name)
+                                                                        .collect(java.util.stream.Collectors.toList()), b))
+                                                        .executes(ctx -> startTest(ctx.getSource(),
+                                                                StringArgumentType.getString(ctx, "bossId"),
+                                                                IntegerArgumentType.getInteger(ctx, "phase"),
+                                                                StringArgumentType.getString(ctx, "character"),
+                                                                StringArgumentType.getString(ctx, "difficulty"))))))))
 
                 // ---- characters unlock/lock <name> (operator) ----
                 .then(Commands.literal("characters")
@@ -182,7 +226,7 @@ public final class BulletHellCommands {
                                         .suggests((c, b) -> SharedSuggestionProvider.suggest(
                                                 java.util.Arrays.asList(CharacterLoader.REGISTERED_IDS), b))
                                         .executes(ctx -> charactersSetUnlocked(ctx.getSource(),
-                                                StringArgumentType.getString(ctx, "character"), false))))));
+                                                StringArgumentType.getString(ctx, "character"), false)))));
     }
 
     // ---------------------------------------------------------------- helpers
@@ -195,13 +239,22 @@ public final class BulletHellCommands {
 
     /**
      * @param phase1BasedOrZero 0 = play from wave phase; ≥1 = skip to that boss phase (1-based index)
+     * @param startPower        0 = default (no override); 1–128 = set player power on arena start
      */
-    private static int startDirect(CommandSourceStack src, String target, int phase1BasedOrZero, String characterId)
-            throws CommandSyntaxException {
+    private static int startDirect(CommandSourceStack src, String target, int phase1BasedOrZero, String characterId,
+            String difficultyName, int startPower) throws CommandSyntaxException {
         ServerPlayer player = src.getPlayerOrException();
         if (BulletHellManager.INSTANCE.hasArena(player.getUUID())) {
             player.sendSystemMessage(Component.literal(
                     "[BulletHell] Already in an arena. Use /bullethell stop first."));
+            return 0;
+        }
+        DifficultyConfig diff;
+        try {
+            diff = DifficultyConfig.valueOf(difficultyName.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            player.sendSystemMessage(Component.literal(
+                    "[BulletHell] Unknown difficulty \"" + difficultyName + "\". Use EASY, NORMAL, HARD, or LUNATIC."));
             return 0;
         }
         StageDefinition stage;
@@ -215,21 +268,28 @@ public final class BulletHellCommands {
                             + "\" (tab-complete: stage and boss ids under data/bullethell)."));
             return 0;
         }
-        return beginResolvedArena(player, stage, characterId, phase1BasedOrZero);
+        return beginResolvedArena(player, stage, characterId, phase1BasedOrZero, diff, startPower);
     }
 
     private static int beginResolvedArena(ServerPlayer player, StageDefinition stage, String characterId,
-            int phase1BasedOrZero) {
+            int phase1BasedOrZero, DifficultyConfig diff, int startPower) {
         if (!BullethellDataIndex.characterIdsSorted().contains(characterId)) {
             player.sendSystemMessage(Component.literal(
                     "[BulletHell] Unknown character \"" + characterId + "\"."));
             return 0;
         }
-        BHPackets.startArena(player, DifficultyConfig.NORMAL, stage, characterId, phase1BasedOrZero);
+        BHPackets.startArena(player, diff, stage, characterId, phase1BasedOrZero);
+        if (startPower > 0) {
+            mc.sayda.bullethell.arena.ArenaContext ctx = BulletHellManager.INSTANCE.getArenaForPlayer(player.getUUID());
+            if (ctx != null)
+                ctx.player.power = Math.min(startPower, mc.sayda.bullethell.arena.PlayerState2D.MAX_POWER);
+        }
         StringBuilder msg = new StringBuilder("[BulletHell] Started: ").append(stage.id);
         if (phase1BasedOrZero > 0)
             msg.append(" at boss phase ").append(phase1BasedOrZero);
-        msg.append(" as ").append(characterId);
+        msg.append(" as ").append(characterId).append(" (").append(diff.name()).append(")");
+        if (startPower > 0)
+            msg.append(" power=").append(Math.min(startPower, mc.sayda.bullethell.arena.PlayerState2D.MAX_POWER));
         player.sendSystemMessage(Component.literal(msg.toString()));
         return 1;
     }
@@ -283,6 +343,51 @@ public final class BulletHellCommands {
         BHPackets.sendControlScheme(player, new ControlSchemePacket(scheme));
         player.sendSystemMessage(Component.literal(
                 "[BulletHell] Control layout set to " + scheme.id() + " - " + BHControlSettings.describe(scheme)));
+        return 1;
+    }
+
+    private static int startTest(CommandSourceStack src, String bossId, int phaseIdx,
+            String characterId, String diffName) throws CommandSyntaxException {
+        ServerPlayer player = src.getPlayerOrException();
+        DifficultyConfig diff;
+        try {
+            diff = DifficultyConfig.valueOf(diffName.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            diff = DifficultyConfig.NORMAL;
+        }
+        if (!BossLoader.resourceExists(bossId) && BossLoader.loadFromDevPath(bossId) == null) {
+            player.sendSystemMessage(Component.literal(
+                    "[BulletHell/Test] Boss \"" + bossId + "\" not found in classpath or dev path."));
+            return 0;
+        }
+        if (!BullethellDataIndex.characterIdsSorted().contains(characterId)) {
+            player.sendSystemMessage(Component.literal(
+                    "[BulletHell/Test] Unknown character \"" + characterId + "\"."));
+            return 0;
+        }
+        // Stop any running arena first
+        if (BulletHellManager.INSTANCE.hasArena(player.getUUID()))
+            BulletHellManager.INSTANCE.stopArena(player.getUUID());
+
+        // Always invalidate so the latest JSON on disk is read
+        BossLoader.invalidate(bossId);
+        StageLoader.invalidateAll();
+
+        StageDefinition stage = StageLoader.syntheticBossOnly(bossId);
+        ArenaContext ctx = BulletHellManager.INSTANCE.startArena(player, diff, stage, characterId, phaseIdx + 1);
+        ctx.testMode = true;
+        BHDebugMode.setGodMode(player.getUUID(), true);
+        BHPackets.sendFullSync(player, ctx);
+        BHPackets.sendToPlayer(player, new mc.sayda.bullethell.network.ArenaStatePacket(ctx, player.getUUID(), 1));
+        BHPackets.sendTestModeOpen(player, new TestModeOpenPacket(
+                BossLoader.allBossIds(), StageLoader.allStageIds(),
+                mc.sayda.bullethell.boss.FairyWaveLoader.allWaveIds(), CharacterLoader.allCharIds(),
+                bossId, "", "", characterId,
+                phaseIdx, diff.ordinal()));
+
+        player.sendSystemMessage(Component.literal(
+                "[BulletHell] Test: " + bossId + " phase=" + phaseIdx
+                + " char=" + characterId + " diff=" + diff.name()));
         return 1;
     }
 

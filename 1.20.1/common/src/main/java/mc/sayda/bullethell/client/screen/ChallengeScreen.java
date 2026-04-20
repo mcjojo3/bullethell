@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.client.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import mc.sayda.bullethell.client.BHScaleManager;
 import mc.sayda.bullethell.client.BHSfx;
 import mc.sayda.bullethell.network.OpenChallengePacket;
 import mc.sayda.bullethell.render.BossSheetLayout;
@@ -47,7 +48,7 @@ public class ChallengeScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        mc.sayda.bullethell.client.BHScaleManager.applyIdealScale();
+        BHScaleManager.applyIdealScale();
 
         int panelX = (width  - PANEL_W) / 2;
         int panelY = (height - PANEL_H) / 2;
@@ -105,7 +106,7 @@ public class ChallengeScreen extends Screen {
         gfx.fill(panelX, panelY, panelX + PANEL_W, panelY + PANEL_H, 0xDD000000);
         gfx.renderOutline(panelX, panelY, PANEL_W, PANEL_H, 0xFF555577);
 
-        // NPC portrait — boss sprite sheet frame 0 (see drawPortrait / textures/bosses/*_boss.png)
+        // NPC portrait - boss sprite sheet frame 0 (see drawPortrait / textures/bosses/*_boss.png)
         int portX = panelX + PADDING;
         int portY = panelY + PADDING;
         drawPortrait(gfx, portX, portY);
@@ -172,6 +173,12 @@ public class ChallengeScreen extends Screen {
         } catch (Exception ignored) {
             // Texture missing - background placeholder is already drawn above
         }
+    }
+
+    @Override
+    public void removed() {
+        super.removed();
+        BHScaleManager.restoreOriginalScale();
     }
 
     @Override

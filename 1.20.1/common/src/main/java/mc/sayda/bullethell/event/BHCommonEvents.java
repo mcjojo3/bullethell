@@ -8,6 +8,7 @@ import mc.sayda.bullethell.BossProgression;
 import mc.sayda.bullethell.BossRushMode;
 import mc.sayda.bullethell.CharacterUnlocks;
 import mc.sayda.bullethell.arena.ArenaContext;
+import mc.sayda.bullethell.arena.VictoryXpRewards;
 import mc.sayda.bullethell.arena.ArenaEndShareSnapshot;
 import mc.sayda.bullethell.arena.BulletHellManager;
 import mc.sayda.bullethell.arena.LastArenaShareState;
@@ -17,6 +18,7 @@ import mc.sayda.bullethell.boss.CharacterDefinition;
 import mc.sayda.bullethell.boss.CharacterLoader;
 import mc.sayda.bullethell.command.BulletHellCommands;
 import mc.sayda.bullethell.debug.BHDebugMode;
+import mc.sayda.bullethell.network.AttackActivationSfxPacket;
 import mc.sayda.bullethell.network.ArenaStatePacket;
 import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.network.BulletDeltaPacket;
@@ -100,7 +102,7 @@ public class BHCommonEvents {
                         if (p == null) continue;
                         // Record snapshot + send end overlay BEFORE stopped() so
                         // the client can open ArenaEndScreen before the arena clears
-                        sendEndStats(p, ctx);
+                        sendEndStats(p, ctx, true);
                         BHPackets.sendToPlayer(p, ArenaStatePacket.stopped());
                     }
                     toRemove.add(uuid);
@@ -111,6 +113,11 @@ public class BHCommonEvents {
                 GameEvent ge;
                 while ((ge = ctx.pendingEvents.poll()) != null)
                     globalEvents.add(ge);
+
+                List<String> attackActivationSfx = new ArrayList<>();
+                String sfxId;
+                while ((sfxId = ctx.pendingAttackActivationSounds.poll()) != null)
+                    attackActivationSfx.add(sfxId);
 
                 BulletDeltaPacket deltaPacket = buildBulletDelta(ctx);
                 AllPlayerBulletsSyncPacket allBulletsPacket = AllPlayerBulletsSyncPacket.fromContext(ctx);
@@ -131,7 +138,7 @@ public class BHCommonEvents {
                             mc.sayda.bullethell.boss.CharacterDefinition cd = mc.sayda.bullethell.boss.CharacterLoader
                                     .load(charId);
                             allEntries.add(new CoopPlayersSyncPacket.Entry(
-                                    ps.x, ps.y, ps.lives, cd.tintColor, charId, idx));
+                                    ps.x, ps.y, ps.lives, cd.tintColor, charId, idx, ctx.getScore(pid)));
                         }
                         idx++;
                     }
@@ -153,6 +160,9 @@ public class BHCommonEvents {
                     // Send global events
                     for (GameEvent g : globalEvents)
                         BHPackets.sendGameEvent(p, new GameEventPacket(g));
+
+                    for (String as : attackActivationSfx)
+                        BHPackets.sendAttackActivationSfx(p, new AttackActivationSfxPacket(as));
 
                     // Send personal events
                     mc.sayda.bullethell.arena.PlayerState2D ps2d = ctx.getPlayerState(pid);
@@ -243,23 +253,29 @@ public class BHCommonEvents {
                         ps.storedChargeProgress, ps.holdChargeProgress));
             }
         }
-        long carryScore = ctx.score.getScore();
+        java.util.List<UUID> partList = new java.util.ArrayList<>(ctx.allParticipants());
+        int np = Math.max(1, partList.size());
+        long carryCombined = ctx.getCombinedScore();
+        long eachBase = carryCombined / np;
+        long carryRem = carryCombined % np;
 
         for (UUID pid : ctx.allParticipants()) {
             ServerPlayer p = server.getPlayerList().getPlayer(pid);
             if (p != null) {
-                sendEndStats(p, ctx);
+                sendEndStats(p, ctx, false);
                 p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                         "[BulletHell] Continuing to next stage: " + nextStageId));
             }
         }
 
         java.util.LinkedHashMap<UUID, String> coopChars = new java.util.LinkedHashMap<>();
+        java.util.LinkedHashMap<UUID, Integer> coopShots = new java.util.LinkedHashMap<>();
         for (UUID pid : ctx.getCoopPlayers().keySet()) {
             coopChars.put(pid, ctx.getCharacterId(pid));
+            coopShots.put(pid, ctx.getShotTypeOrdinal(pid));
         }
 
-        BHPackets.startArena(host, ctx.difficulty, nextStageId, ctx.characterId);
+        BHPackets.startArena(host, ctx.difficulty, nextStageId, ctx.characterId, ctx.hostShotTypeOrdinal);
         ArenaContext nextCtx = BulletHellManager.INSTANCE.getArenaForPlayer(hostUuid);
         if (nextCtx == null)
             return true;
@@ -269,7 +285,8 @@ public class BHCommonEvents {
             if (p == null)
                 continue;
             CharacterDefinition charDef = CharacterLoader.load(e.getValue());
-            BulletHellManager.INSTANCE.joinMatch(p.getUUID(), hostUuid, charDef, p);
+            BulletHellManager.INSTANCE.joinMatch(p.getUUID(), hostUuid, charDef, p,
+                    coopShots.getOrDefault(p.getUUID(), 0));
             BHPackets.sendFullSync(p, nextCtx);
             int pIdx = 0;
             int c = 2;
@@ -283,8 +300,12 @@ public class BHCommonEvents {
             BHPackets.sendToPlayer(p, new ArenaStatePacket(nextCtx, p.getUUID(), pIdx));
         }
 
-        // Shared run score/stats carry over through chained stages.
-        nextCtx.score.importCarriedScore(carryScore, nextCtx.rules.scoreExtendEvery);
+        // Split combined run score across participants for the next stage (each keeps their own track).
+        for (int i = 0; i < partList.size(); i++) {
+            UUID pid = partList.get(i);
+            long c = eachBase + (i < carryRem ? 1L : 0L);
+            nextCtx.importCarriedScoreFor(pid, c, nextCtx.rules.scoreExtendEvery);
+        }
         for (var e : carry.entrySet()) {
             var ps = nextCtx.getPlayerState(e.getKey());
             if (ps == null)
@@ -342,7 +363,10 @@ public class BHCommonEvents {
         return new BulletDeltaPacket(slots, data, active);
     }
 
-    private static void sendEndStats(ServerPlayer player, ArenaContext ctx) {
+    /**
+     * @param grantVictoryXp when false (e.g. boss-rush mid-chain), skip Minecraft XP but still show end stats.
+     */
+    private static void sendEndStats(ServerPlayer player, ArenaContext ctx, boolean grantVictoryXp) {
         ArenaEndShareSnapshot snap = ArenaEndShareSnapshot.capture(player, ctx);
         LastArenaShareState.record(player.getUUID(), snap);
 
@@ -369,11 +393,38 @@ public class BHCommonEvents {
                     : (ctx.boss != null ? ctx.boss.defeatDialog : "");
         }
 
+        long scoreSelf = ctx.getScore(pid);
+        long scoreTeam = ctx.getCombinedScore();
+        int victoryXp = 0;
+        if (ctx.isWon() && grantVictoryXp) {
+            victoryXp = VictoryXpRewards.computePoints(scoreSelf, ctx.difficulty);
+            if (victoryXp > 0) {
+                player.giveExperiencePoints(victoryXp);
+            }
+        }
+
         BHPackets.sendArenaEnd(player, new mc.sayda.bullethell.network.ArenaEndPacket(
                 ctx.isWon(), bossName, bossId, charId, charName, bossDialog,
-                ctx.score.getScore(), ps.lives, ps.bombs, ps.graze,
+                scoreSelf, scoreTeam, victoryXp, ps.lives, ps.bombs, ps.graze,
                 ctx.getSpellsCaptured(), ctx.getSpellsAttempted(),
                 (float) ctx.getCompletionPercentage(),
-                stageId, ctx.difficulty.name()));
+                stageId, ctx.difficulty.name(), ctx.getShotTypeOrdinal(pid)));
+
+        // Execute reward commands defined in the stage JSON
+        if (ctx.stage != null && ctx.stage.rewards != null) {
+            List<String> cmds = ctx.isWon()
+                    ? ctx.stage.rewards.onWin
+                    : ctx.stage.rewards.onLoss;
+            if (cmds != null) {
+                for (String template : cmds) {
+                    String cmd = template
+                            .replace("{player}", player.getGameProfile().getName())
+                            .replace("{score}", String.valueOf(scoreSelf))
+                            .replace("{difficulty}", ctx.difficulty.name());
+                    player.getServer().getCommands().performPrefixedCommand(
+                            player.getServer().createCommandSourceStack(), cmd);
+                }
+            }
+        }
     }
 }

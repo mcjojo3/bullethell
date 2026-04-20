@@ -9,16 +9,29 @@ public class CharacterSelectPacket {
     public final String           characterId;
     public final DifficultyConfig difficulty;
     public final String           stageId;
+    /** Index into shot options ({@link mc.sayda.bullethell.boss.CharacterDefinition#shotOptions} or legacy {@code shotTypes}). */
+    public final int              shotTypeOrdinal;
 
-    public CharacterSelectPacket(String characterId, DifficultyConfig difficulty, String stageId) {
-        this.characterId = characterId; this.difficulty = difficulty; this.stageId = stageId;
+    public CharacterSelectPacket(String characterId, DifficultyConfig difficulty, String stageId,
+            int shotTypeOrdinal) {
+        this.characterId = characterId;
+        this.difficulty = difficulty;
+        this.stageId = stageId;
+        this.shotTypeOrdinal = shotTypeOrdinal;
     }
 
     public void encode(FriendlyByteBuf buf) {
-        buf.writeUtf(characterId); buf.writeByte(difficulty.ordinal()); buf.writeUtf(stageId);
+        buf.writeUtf(characterId);
+        buf.writeByte(difficulty.ordinal());
+        buf.writeUtf(stageId);
+        buf.writeByte(shotTypeOrdinal);
     }
 
     public static CharacterSelectPacket decode(FriendlyByteBuf buf) {
-        return new CharacterSelectPacket(buf.readUtf(), DifficultyConfig.values()[buf.readByte()], buf.readUtf());
+        String cid = buf.readUtf();
+        DifficultyConfig d = DifficultyConfig.values()[buf.readByte()];
+        String sid = buf.readUtf();
+        int shot = buf.readableBytes() > 0 ? (buf.readByte() & 0xFF) : 0;
+        return new CharacterSelectPacket(cid, d, sid, shot);
     }
 }

@@ -1,22 +1,15 @@
 package mc.sayda.bullethell.arena;
 
 /**
- * Tracks score, high score, and graze chain multiplier.
- *
- * Graze chain: incremented by grazing bullets. Decays to 0 if no graze
- * occurs for CHAIN_DECAY_TICKS. Higher chain = higher point-item value.
+ * Tracks score and high score.
  */
 public class ScoreSystem {
 
-    private static final int  CHAIN_DECAY_TICKS = 60; // ~3 seconds
-    private static final long GRAZE_BASE_SCORE  = 50L;
-    private static final long POINT_ITEM_BASE   = 100L;
-    private static final long POWER_ITEM_SCORE  = 200L;
+    private static final long GRAZE_SCORE      = 500L;
+    private static final long POWER_ITEM_SCORE = 200L;
 
     private long score     = 0L;
     private long highScore = 0L;
-    private int  grazeChain     = 0;
-    private int  grazeCooldown  = 0; // ticks until chain resets
 
     /** 0 = disabled. Next extend triggers when {@code score >= nextExtendScoreAt}. */
     private long scoreExtendEvery = 0L;
@@ -25,10 +18,6 @@ public class ScoreSystem {
     // ---------------------------------------------------------------- server tick
 
     public void tick() {
-        if (grazeCooldown > 0) {
-            grazeCooldown--;
-            if (grazeCooldown == 0) grazeChain = 0;
-        }
     }
 
     // ---------------------------------------------------------------- score extends
@@ -91,15 +80,7 @@ public class ScoreSystem {
     // ---------------------------------------------------------------- events
 
     public int onGraze() {
-        grazeChain++;
-        grazeCooldown = CHAIN_DECAY_TICKS;
-        return addScore(GRAZE_BASE_SCORE + grazeChain * 5L);
-    }
-
-    /** Collect a POINT item - value scales with graze chain. */
-    public int onPointItemPickup() {
-        long value = POINT_ITEM_BASE + (grazeChain / 5) * 50L;
-        return addScore(value);
+        return addScore(GRAZE_SCORE);
     }
 
     /** Collect a POWER item - fixed score bonus. */
@@ -128,7 +109,6 @@ public class ScoreSystem {
 
     // ---------------------------------------------------------------- getters
 
-    public long getScore()      { return score; }
-    public long getHighScore()  { return highScore; }
-    public int  getGrazeChain() { return grazeChain; }
+    public long getScore()     { return score; }
+    public long getHighScore() { return highScore; }
 }

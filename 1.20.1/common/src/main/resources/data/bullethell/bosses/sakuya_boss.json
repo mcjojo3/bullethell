@@ -6,7 +6,7 @@
     "Alternating nonspells are shared while spellcards are difficulty-gated.",
     "AIMED/SPREAD use bulletType KNIFE (knife.png); RING/SPIRAL/BOUNCE/RING_OFFSET knife walls use KUNAI (kunai.png, slightly smaller sprite, same hitbox).",
     "Balance pass: minCooldown + maxScaledArms on high-arm steps; spellDurationTicks ladder for E/N and H/L spell timers; see wiki/sakuya-th06-reconstruction.md.",
-    "Blueprint (PatternStep): bulletLifetimeTicks — RING/SPIRAL/RING_OFFSET 200, AIMED/SPREAD 220, BOUNCE 250. ringStartAngleRad -1 on RING_OFFSET (random), 0 on RING. bulletAngularVelocity/spawn offsets unused."
+    "Blueprint (PatternStep): bulletLifetimeTicks - RING/SPIRAL/RING_OFFSET 200, AIMED/SPREAD 220, BOUNCE 250. ringStartAngleRad -1 on RING_OFFSET (random), 0 on RING. bulletAngularVelocity/spawn offsets unused."
   ],
   "introDialog": [
     {
@@ -60,7 +60,7 @@
   },
   "phases": [
     {
-      "_note": "Nonspell 1 — baseline aimed knife pressure.",
+      "_note": "Nonspell 1 - baseline aimed knife pressure.",
       "hp": 1200,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "_note": "Conjuring \"Misdirection\" (E/N) — side-dash style aimed knife flurries.",
+      "_note": "Conjuring \"Misdirection\" (E/N) - side-dash style aimed knife flurries.",
       "minDifficulty": "EASY",
       "maxDifficulty": "NORMAL",
       "hp": 1700,
@@ -95,7 +95,7 @@
       ]
     },
     {
-      "_note": "Conjuring \"Mesmerizing Misdirection\" (H/L) — TH6-style lanes + bursts: engine burstCount/burstInterval = volleys then cooldown (reposition). BOUNCE restored; spiral + scarlet ring between bounce windows.",
+      "_note": "Conjuring \"Mesmerizing Misdirection\" (H/L) - TH6-style lanes + bursts: engine burstCount/burstInterval = volleys then cooldown (reposition). BOUNCE restored; spiral + scarlet ring between bounce windows.",
       "minDifficulty": "HARD",
       "maxDifficulty": "LUNATIC",
       "hp": 1880,
@@ -113,7 +113,7 @@
       ]
     },
     {
-      "_note": "Nonspell 2 — denser knife + ring interleave.",
+      "_note": "Nonspell 2 - denser knife + ring interleave.",
       "hp": 1350,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
@@ -130,7 +130,7 @@
       ]
     },
     {
-      "_note": "Illusion Existence \"Clock Corpse\" (E/N) — random small bullets, then arced/lane knife pressure.",
+      "_note": "Illusion Existence \"Clock Corpse\" (E/N) - random small bullets, then arced/lane knife pressure.",
       "minDifficulty": "EASY",
       "maxDifficulty": "NORMAL",
       "hp": 1950,
@@ -149,7 +149,7 @@
       ]
     },
     {
-      "_note": "Illusion Phantom \"Jack the Ludo Bile\" (H/L) — large red bullets + 3-direction knife aim.",
+      "_note": "Illusion Phantom \"Jack the Ludo Bile\" (H/L) - large red bullets + 3-direction knife aim.",
       "minDifficulty": "HARD",
       "maxDifficulty": "LUNATIC",
       "hp": 2120,
@@ -162,12 +162,13 @@
       "music": "",
       "attacks": [
         { "pattern": "SPREAD", "cooldown": 8, "minCooldown": 6, "scalingProfile": "BURST", "bulletType": "SCARLET_LARGE", "arms": 3, "maxScaledArms": 5, "speed": 4.9, "bulletScale": 1.48, "hitboxScale": 0.76, "bulletLifetimeTicks": 220 },
-        { "pattern": "AIMED", "cooldown": 8, "minCooldown": 6, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 3, "maxScaledArms": 6, "speed": 4.45, "spread": 0.26, "bulletLifetimeTicks": 220 },
+        { "pattern": "AIMED", "cooldown": 8, "minCooldown": 6, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 3, "maxScaledArms": 6, "speed": 4.45, "spread": 0.20, "bulletLifetimeTicks": 220 },
+        { "pattern": "BOUNCE", "cooldown": 14, "minCooldown": 11, "scalingProfile": "PRECISION", "bulletType": "KUNAI", "arms": 4, "maxScaledArms": 7, "speed": 3.9, "spread": 0.15, "bounceCount": 2, "bounceDamping": 0.95, "bulletLifetimeTicks": 250 },
         { "pattern": "SPREAD", "cooldown": 8, "minCooldown": 6, "scalingProfile": "BURST", "bulletType": "KNIFE", "arms": 6, "maxScaledArms": 11, "speed": 5.3, "bulletLifetimeTicks": 220 }
       ]
     },
     {
-      "_note": "Nonspell 3 — final baseline before last cards.",
+      "_note": "Nonspell 3 - final baseline before last cards.",
       "hp": 1450,
       "isSpellCard": false,
       "hpThresholdFraction": 0.20,
@@ -179,11 +180,12 @@
       "music": "",
       "attacks": [
         { "pattern": "AIMED", "cooldown": 9, "minCooldown": 7, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 7, "maxScaledArms": 11, "speed": 3.95, "spread": 0.16, "bulletLifetimeTicks": 220 },
-        { "pattern": "RING_OFFSET", "cooldown": 15, "minCooldown": 12, "scalingProfile": "BURST", "bulletType": "GOLD", "arms": 11, "maxScaledArms": 16, "speed": 2.3, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
+        { "pattern": "RING_OFFSET", "cooldown": 15, "minCooldown": 12, "scalingProfile": "BURST", "bulletType": "GOLD", "arms": 11, "maxScaledArms": 16, "speed": 2.3, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 },
+        { "pattern": "SPREAD", "cooldown": 11, "minCooldown": 8, "scalingProfile": "BURST", "bulletType": "KNIFE", "arms": 5, "maxScaledArms": 9, "speed": 4.85, "bulletLifetimeTicks": 220 }
       ]
     },
     {
-      "_note": "Illusion Image \"Luna Clock\" (E/N) — organized rings + lane knives with redirected angles.",
+      "_note": "Illusion Image \"Luna Clock\" (E/N) - organized rings + lane knives with redirected angles.",
       "minDifficulty": "EASY",
       "maxDifficulty": "NORMAL",
       "hp": 2250,
@@ -202,7 +204,7 @@
       ]
     },
     {
-      "_note": "Illusion World \"The World\" (H/L) — Luna Clock variant with fireball-like bullets and redirected knives.",
+      "_note": "Illusion World \"The World\" (H/L) - curved ORB volleys (angular velocity); enemy pool does not run player-style homing ticks.",
       "minDifficulty": "HARD",
       "maxDifficulty": "LUNATIC",
       "hp": 2400,
@@ -214,14 +216,14 @@
       "moveSpeed": 0,
       "music": "",
       "attacks": [
-        { "pattern": "RING", "cooldown": 12, "minCooldown": 9, "scalingProfile": "GEOMETRY", "bulletType": "HOMING_ORB", "arms": 12, "maxScaledArms": 17, "speed": 2.35, "bulletScale": 1.22, "hitboxScale": 0.44, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0 },
-        { "pattern": "BOUNCE", "cooldown": 11, "minCooldown": 8, "scalingProfile": "BURST", "bulletType": "HOMING_ORB", "arms": 6, "maxScaledArms": 11, "speed": 3.9, "spread": 0.2, "bounceCount": 2, "bounceDamping": 0.94, "bulletScale": 1.2, "hitboxScale": 0.46, "bulletLifetimeTicks": 250 },
+        { "pattern": "RING", "cooldown": 12, "minCooldown": 9, "scalingProfile": "GEOMETRY", "bulletType": "DOT", "arms": 12, "maxScaledArms": 17, "speed": 2.35, "bulletScale": 1.22, "hitboxScale": 0.44, "bulletLifetimeTicks": 200, "ringStartAngleRad": 0, "bulletAngularVelocity": 0.004 },
+        { "pattern": "BOUNCE", "cooldown": 11, "minCooldown": 8, "scalingProfile": "BURST", "bulletType": "DOT", "arms": 6, "maxScaledArms": 11, "speed": 3.9, "spread": 0.2, "bounceCount": 2, "bounceDamping": 0.94, "bulletScale": 1.2, "hitboxScale": 0.46, "bulletLifetimeTicks": 250, "bulletAngularVelocity": -0.0035 },
         { "pattern": "AIMED", "cooldown": 9, "minCooldown": 6, "scalingProfile": "PRECISION", "bulletType": "KNIFE", "arms": 7, "maxScaledArms": 11, "speed": 4.15, "spread": 0.14, "bulletLifetimeTicks": 220 },
         { "pattern": "RING_OFFSET", "cooldown": 13, "minCooldown": 10, "scalingProfile": "BURST", "bulletType": "KUNAI", "arms": 12, "maxScaledArms": 17, "speed": 2.65, "bulletLifetimeTicks": 200, "ringStartAngleRad": -1 }
       ]
     },
     {
-      "_note": "Maid Secret Skill \"Manipulating Doll\" (E/N) — blue then denser red knife waves, then redirected knives.",
+      "_note": "Maid Secret Skill \"Manipulating Doll\" (E/N) - blue then denser red knife waves, then redirected knives.",
       "minDifficulty": "EASY",
       "maxDifficulty": "NORMAL",
       "hp": 2450,
@@ -240,7 +242,7 @@
       ]
     },
     {
-      "_note": "Maid Secret Skill \"Killing Doll\" (H/L) — circular knife aim and large redirected knife waves.",
+      "_note": "Maid Secret Skill \"Killing Doll\" (H/L) - circular knife aim and large redirected knife waves.",
       "minDifficulty": "HARD",
       "maxDifficulty": "LUNATIC",
       "hp": 2620,

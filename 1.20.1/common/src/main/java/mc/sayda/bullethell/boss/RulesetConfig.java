@@ -45,10 +45,10 @@ public class RulesetConfig {
 
         /**
          * Drop cycle used for large (midboss-tier) enemies only.
-         * Large fairies can occasionally drop FULL_POWER items (~1 in 6).
+         * Large fairies drop POWER_LARGE (+8) and occasionally FULL_POWER.
          * Leave empty to fall back to {@link #dropCyclePattern}.
          */
-        public String largeEnemyDropCyclePattern = "POWER,POINT,POWER,FULL_POWER,POINT,POWER,POWER,POINT";
+        public String largeEnemyDropCyclePattern = "POWER_LARGE,POINT,POWER_LARGE,FULL_POWER,POINT,POWER_LARGE,POWER_LARGE,POINT";
 
         /**
          * Probability (0–1) that an item drop slot becomes a bomb instead of the
@@ -58,7 +58,7 @@ public class RulesetConfig {
 
         /**
          * When true (default), large fairies always release an item on death, while
-         * {@link #itemDropEveryNthKill} applies only to small fairies — matches how
+         * {@link #itemDropEveryNthKill} applies only to small fairies - matches how
          * veterans expect anchors to pay out even with TH6-style sparse small drops.
          */
         public boolean largeEnemyAlwaysDrops = true;

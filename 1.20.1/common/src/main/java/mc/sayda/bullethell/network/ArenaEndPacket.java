@@ -19,7 +19,12 @@ public final class ArenaEndPacket {
     public final String characterName;
     /** Boss victory or defeat quote. Empty string = no dialog, skip straight to stats. */
     public final String bossDialog;
+    /** This player's score (co-op: not the team sum). */
     public final long score;
+    /** Sum of all participants' scores; equals {@link #score} in solo. */
+    public final long scoreCombined;
+    /** Minecraft experience points granted on victory (0 if loss or intermediate boss-rush stage). */
+    public final int victoryXp;
     public final int lives;
     public final int bombs;
     public final int graze;
@@ -31,12 +36,14 @@ public final class ArenaEndPacket {
     public final String stageId;
     /** Difficulty name (EASY/NORMAL/HARD/LUNATIC) for retry. */
     public final String difficulty;
+    /** Shot type index for retry / display. */
+    public final int shotTypeOrdinal;
 
     public ArenaEndPacket(boolean won, String bossName, String bossId,
             String characterId, String characterName, String bossDialog,
-            long score, int lives, int bombs, int graze,
+            long score, long scoreCombined, int victoryXp, int lives, int bombs, int graze,
             int spellsCaptured, int spellsAttempted, float completionPercent,
-            String stageId, String difficulty) {
+            String stageId, String difficulty, int shotTypeOrdinal) {
         this.won = won;
         this.bossName = bossName != null ? bossName : "";
         this.bossId = bossId != null ? bossId : "";
@@ -44,6 +51,8 @@ public final class ArenaEndPacket {
         this.characterName = characterName != null ? characterName : "";
         this.bossDialog = bossDialog != null ? bossDialog : "";
         this.score = score;
+        this.scoreCombined = scoreCombined;
+        this.victoryXp = victoryXp;
         this.lives = lives;
         this.bombs = bombs;
         this.graze = graze;
@@ -52,6 +61,7 @@ public final class ArenaEndPacket {
         this.completionPercent = completionPercent;
         this.stageId = stageId != null ? stageId : "";
         this.difficulty = difficulty != null ? difficulty : "NORMAL";
+        this.shotTypeOrdinal = shotTypeOrdinal;
     }
 
     public void encode(FriendlyByteBuf buf) {
@@ -62,6 +72,8 @@ public final class ArenaEndPacket {
         buf.writeUtf(characterName);
         buf.writeUtf(bossDialog);
         buf.writeLong(score);
+        buf.writeLong(scoreCombined);
+        buf.writeVarInt(victoryXp);
         buf.writeVarInt(lives);
         buf.writeVarInt(bombs);
         buf.writeVarInt(graze);
@@ -70,6 +82,7 @@ public final class ArenaEndPacket {
         buf.writeFloat(completionPercent);
         buf.writeUtf(stageId);
         buf.writeUtf(difficulty);
+        buf.writeByte(shotTypeOrdinal);
     }
 
     public static ArenaEndPacket decode(FriendlyByteBuf buf) {
@@ -80,6 +93,8 @@ public final class ArenaEndPacket {
         String characterName = buf.readUtf();
         String bossDialog = buf.readUtf();
         long score = buf.readLong();
+        long scoreCombined = buf.readLong();
+        int victoryXp = buf.readVarInt();
         int lives = buf.readVarInt();
         int bombs = buf.readVarInt();
         int graze = buf.readVarInt();
@@ -88,8 +103,9 @@ public final class ArenaEndPacket {
         float completion = buf.readFloat();
         String stageId = buf.readUtf();
         String difficulty = buf.readUtf();
+        int shot = buf.readableBytes() > 0 ? (buf.readByte() & 0xFF) : 0;
         return new ArenaEndPacket(won, bossName, bossId, characterId, characterName,
-                bossDialog, score, lives, bombs, graze, captured, attempted,
-                completion, stageId, difficulty);
+                bossDialog, score, scoreCombined, victoryXp, lives, bombs, graze, captured, attempted,
+                completion, stageId, difficulty, shot);
     }
 }

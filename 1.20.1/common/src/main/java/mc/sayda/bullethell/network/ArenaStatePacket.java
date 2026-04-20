@@ -24,7 +24,10 @@ public class ArenaStatePacket {
     public final int abilityType, abilityTicks;
     public final float abilityX, abilityY;
     public final UUID abilityOwner;
+    /** Local player's score. */
     public final long score;
+    /** Sum of all co-op participants' scores (same as {@link #score} when alone). */
+    public final long combinedScore;
     public final int spellTimerTicks, spellTimerTotal;
     public final String musicTrackId;
     public final String spellName;
@@ -34,10 +37,14 @@ public class ArenaStatePacket {
     public final String dialogSpeaker, dialogText;
     public final int dialogLineIndex;
     public final int dialogReadyCount, dialogTotalCount;
+    /** {@code PENTAGRAM_RITUAL} progress; -1 when inactive (see {@link ArenaContext#getPentagramRitualTick()}). */
+    public final int pentagramRitualTick;
+    /** Tick when outline stacking finished; -1 until then (see {@link ArenaContext#getPentagramStackCompleteTick()}). */
+    public final int pentagramStackCompleteTick;
     /** True when this player is dead but spectating coop partners. */
     public final boolean spectating;
 
-    /** Operator {@code /bullethell debug} god-mode (server + HUD). */
+    /** {@link mc.sayda.bullethell.debug.BHDebugMode} god-mode bit for HUD (test mode enables on server). */
     public final boolean debugGodMode;
     /** Populated when {@link #debugGodMode} is true. */
     public final int debugArenaTick;
@@ -89,7 +96,8 @@ public class ArenaStatePacket {
             this.abilityY = 0f;
         }
 
-        this.score = ctx.score.getScore();
+        this.score = ctx.getScore(playerUuid);
+        this.combinedScore = ctx.getCombinedScore();
         this.spellTimerTicks = ctx.spellcard.getRemainingTicks();
         this.spellTimerTotal = ctx.spellcard.getTotalTicks();
         String track = ctx.getCurrentMusicTrackId();
@@ -106,6 +114,8 @@ public class ArenaStatePacket {
         this.dialogLineIndex = ctx.getDialogLineIndex(playerUuid);
         this.dialogReadyCount = ctx.getDialogReadyCount();
         this.dialogTotalCount = ctx.getDialogParticipantCount();
+        this.pentagramRitualTick = ctx.getPentagramRitualTick();
+        this.pentagramStackCompleteTick = ctx.getPentagramStackCompleteTick();
         // Player is spectating when all their lives are spent (lives < 0)
         this.spectating = (ps.lives < 0);
 
@@ -121,8 +131,8 @@ public class ArenaStatePacket {
                 0f, 0f, 0, 0, 0, 0, 0,
                 0f, 0f, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0f, 0f, new UUID(0, 0),
-                0L, 0, 0, "", "", false, false,
-                "reimu", "", "", false, "", "", 0, 0, 0,
+                0L, 0L, 0, 0, "", "", false, false,
+                "reimu", "", "", false, "", "", 0, 0, 0, -1, -1,
                 false, 0, 0, 0);
     }
 
@@ -130,10 +140,11 @@ public class ArenaStatePacket {
             float px, float py, int lives, int bombs, int graze, int power, int pIdx,
             float bx, float by, int hp, int maxHp, int phase, int bossMoveDir,
             int skillGauge, int chargeLevel, int holdChargeGauge, int abilityType, int abilityTicks, float abilityX, float abilityY, UUID abilityOwner,
-            long score, int timerTicks, int timerTotal, String musicTrackId,
+            long score, long combinedScore, int timerTicks, int timerTotal, String musicTrackId,
             String spellName, boolean activeSpellCard, boolean declaring,
             String characterId, String bossId, String bossName, boolean bossIntroVisible,
             String dialogSpeaker, String dialogText, int dialogLineIndex, int dialogReadyCount, int dialogTotalCount,
+            int pentagramRitualTick, int pentagramStackCompleteTick,
             boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount) {
         this.active = active;
         this.spectating = spectating;
@@ -159,6 +170,7 @@ public class ArenaStatePacket {
         this.abilityY = abilityY;
         this.abilityOwner = abilityOwner;
         this.score = score;
+        this.combinedScore = combinedScore;
         this.spellTimerTicks = timerTicks;
         this.spellTimerTotal = timerTotal;
         this.musicTrackId = musicTrackId;
@@ -174,6 +186,8 @@ public class ArenaStatePacket {
         this.dialogLineIndex = dialogLineIndex;
         this.dialogReadyCount = dialogReadyCount;
         this.dialogTotalCount = dialogTotalCount;
+        this.pentagramRitualTick = pentagramRitualTick;
+        this.pentagramStackCompleteTick = pentagramStackCompleteTick;
         this.debugGodMode = debugGodMode;
         this.debugArenaTick = debugArenaTick;
         this.debugPatternCooldown = debugPatternCooldown;
@@ -210,6 +224,7 @@ public class ArenaStatePacket {
         buf.writeFloat(abilityY);
         buf.writeUUID(abilityOwner);
         buf.writeLong(score);
+        buf.writeLong(combinedScore);
         buf.writeVarInt(spellTimerTicks);
         buf.writeVarInt(spellTimerTotal);
         buf.writeUtf(musicTrackId);
@@ -225,6 +240,8 @@ public class ArenaStatePacket {
         buf.writeVarInt(dialogLineIndex);
         buf.writeVarInt(dialogReadyCount);
         buf.writeVarInt(dialogTotalCount);
+        buf.writeVarInt(pentagramRitualTick);
+        buf.writeVarInt(pentagramStackCompleteTick);
         buf.writeBoolean(debugGodMode);
         if (debugGodMode) {
             buf.writeVarInt(debugArenaTick);
@@ -260,6 +277,7 @@ public class ArenaStatePacket {
         float abilityY = buf.readFloat();
         java.util.UUID abilityOwner = buf.readUUID();
         long score = buf.readLong();
+        long combinedScore = buf.readLong();
         int timerTicks = buf.readVarInt();
         int timerTotal = buf.readVarInt();
         String musicTrackId = buf.readUtf();
@@ -275,6 +293,8 @@ public class ArenaStatePacket {
         int dialogLineIndex = buf.readVarInt();
         int dialogReadyCount = buf.readVarInt();
         int dialogTotalCount = buf.readVarInt();
+        int pentagramRitualTick = buf.readVarInt();
+        int pentagramStackCompleteTick = buf.readVarInt();
         boolean dbgGod = buf.readBoolean();
         int dTick = 0, dCd = 0, dBul = 0;
         if (dbgGod) {
@@ -286,10 +306,11 @@ public class ArenaStatePacket {
                 px, py, lives, bombs, graze, power, pIdx,
                 bx, by, hp, maxHp, phase, bossMoveDir,
                 skillGauge, chargeLevel, holdChargeGauge, abilityType, abilityTicks, abilityX, abilityY, abilityOwner,
-                score, timerTicks, timerTotal,
+                score, combinedScore, timerTicks, timerTotal,
                 musicTrackId, spellName, activeSpellCard, declaring,
                 characterId, bossId, bossName, bossIntroVisible,
                 dialogSpeaker, dialogText, dialogLineIndex, dialogReadyCount, dialogTotalCount,
+                pentagramRitualTick, pentagramStackCompleteTick,
                 dbgGod, dTick, dCd, dBul);
     }
 }

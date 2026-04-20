@@ -21,7 +21,7 @@ public class PlayerState2D {
     public float speedFocused;
 
     /** Grace window (ticks) after a hit where a bomb can cancel death. */
-    public static final int DEATH_BOMB_GRACE = 8;
+    public static final int DEATH_BOMB_GRACE = 3;
 
     public float x;
     public float y;
@@ -109,10 +109,18 @@ public class PlayerState2D {
 
     /**
      * Power level 0–128.
-     * Increased by TYPE_POWER items (+4) and TYPE_FULL_POWER (+128 → max).
+     * Increased by TYPE_POWER (+1), TYPE_POWER_LARGE (+8), TYPE_FULL_POWER (→ max).
      * Determines the player's shot pattern; see {@link #powerLevel()}.
      */
     public int power = 0;
+
+    /**
+     * When {@code true}, the next pickup that raises {@link #power} to {@link #MAX_POWER} from
+     * below may run TH-style enemy bullet cancel into point items. Cleared after that cancel;
+     * set {@code true} again whenever {@link #power} drops below {@link #MAX_POWER} (e.g. death
+     * power loss). Spell-card captures run their own bullet cancel regardless.
+     */
+    public boolean maxPowerBulletCancelArmed = true;
 
     public static final int MAX_POWER = 128;
 
@@ -126,18 +134,18 @@ public class PlayerState2D {
 
     /**
      * Returns discrete power tier (0–4):
-     * 0 → 0–7 (1 bullet)
-     * 1 → 8–31 (3-way)
-     * 2 → 32–95 (5-way)
-     * 3 → 96–127 (5-way + 2 side)
-     * 4 → 128 (max: 5-way + 4 side / focused with extra rings)
+     * 0 → 0–7   (1 bullet)
+     * 1 → 8–19  (3-way)
+     * 2 → 20–39 (5-way)
+     * 3 → 40–63 (5-way + side extras)
+     * 4 → 64+   (max pattern; bullet cancel still requires MAX_POWER=128)
      */
     public int powerLevel() {
-        if (power >= MAX_POWER)
+        if (power >= 64)
             return 4;
-        if (power >= 96)
+        if (power >= 40)
             return 3;
-        if (power >= 32)
+        if (power >= 20)
             return 2;
         if (power >= 8)
             return 1;

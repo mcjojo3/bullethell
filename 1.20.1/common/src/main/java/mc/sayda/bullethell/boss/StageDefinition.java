@@ -74,4 +74,11 @@ public class StageDefinition {
      * override what you want to change.
      */
     public RulesetConfig rules = new RulesetConfig();
+
+    /**
+     * Optional commands executed on the server when the arena ends.
+     * Supports {player}, {score}, {difficulty} placeholders.
+     * Omit entirely to run no reward commands.
+     */
+    public StageRewards rewards = new StageRewards();
 }

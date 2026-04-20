@@ -44,15 +44,6 @@
       }
     ]
   },
-  "beloved_tomboyish_girl_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/beloved_tomboyish_girl_2",
-        "stream": true
-      }
-    ]
-  },
   "lunate_elf": {
     "category": "music",
     "sounds": [
@@ -94,15 +85,6 @@
     "sounds": [
       {
         "name": "bullethell:music/lunar_clock_luna_dial",
-        "stream": true
-      }
-    ]
-  },
-  "lunar_clock_luna_dial_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/lunar_clock_luna_dial_2",
         "stream": true
       }
     ]
@@ -152,29 +134,11 @@
       }
     ]
   },
-  "septette_for_the_dead_princess_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/septette_for_the_dead_princess_2",
-        "stream": true
-      }
-    ]
-  },
   "u_n_owen_was_her": {
     "category": "music",
     "sounds": [
       {
         "name": "bullethell:music/u_n_owen_was_her",
-        "stream": true
-      }
-    ]
-  },
-  "u_n_owen_was_her_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/u_n_owen_was_her_2",
         "stream": true
       }
     ]
@@ -229,15 +193,6 @@
     "sounds": [
       {
         "name": "bullethell:music/diao_ye_zong_withered_leaf",
-        "stream": true
-      }
-    ]
-  },
-  "diao_ye_zong_withered_leaf_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/diao_ye_zong_withered_leaf_2",
         "stream": true
       }
     ]
@@ -413,15 +368,6 @@
       }
     ]
   },
-  "wriggling_autumn_moon_mooned_insect_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/wriggling_autumn_moon_mooned_insect_2",
-        "stream": true
-      }
-    ]
-  },
   "eastern_youkai_beauty": {
     "category": "music",
     "sounds": [
@@ -436,15 +382,6 @@
     "sounds": [
       {
         "name": "bullethell:music/plain_asia",
-        "stream": true
-      }
-    ]
-  },
-  "plain_asia_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/plain_asia_2",
         "stream": true
       }
     ]
@@ -476,15 +413,6 @@
       }
     ]
   },
-  "love_coloured_master_spark_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/love_coloured_master_spark_2",
-        "stream": true
-      }
-    ]
-  },
   "cinderella_cage_kagome_kagome": {
     "category": "music",
     "sounds": [
@@ -503,29 +431,11 @@
       }
     ]
   },
-  "lunatic_eyes_invisible_full_moon_2023": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/lunatic_eyes_invisible_full_moon_2023",
-        "stream": true
-      }
-    ]
-  },
   "voyage_1969": {
     "category": "music",
     "sounds": [
       {
         "name": "bullethell:music/voyage_1969",
-        "stream": true
-      }
-    ]
-  },
-  "voyage_1969_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/voyage_1969_2",
         "stream": true
       }
     ]
@@ -539,15 +449,6 @@
       }
     ]
   },
-  "extend_ash_person_of_hourai_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/extend_ash_person_of_hourai_2",
-        "stream": true
-      }
-    ]
-  },
   "gensokyo_millennium_history_of_the_moon": {
     "category": "music",
     "sounds": [
@@ -557,29 +458,11 @@
       }
     ]
   },
-  "gensokyo_millennium_history_of_the_moon_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/gensokyo_millennium_history_of_the_moon_2",
-        "stream": true
-      }
-    ]
-  },
   "flight_of_the_bamboo_cutter_lunatic_princess": {
     "category": "music",
     "sounds": [
       {
         "name": "bullethell:music/flight_of_the_bamboo_cutter_lunatic_princess",
-        "stream": true
-      }
-    ]
-  },
-  "flight_of_the_bamboo_cutter_lunatic_princess_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/flight_of_the_bamboo_cutter_lunatic_princess_2",
         "stream": true
       }
     ]
@@ -620,15 +503,6 @@
       }
     ]
   },
-  "nostalgic_blood_of_the_east_old_world_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/nostalgic_blood_of_the_east_old_world_2",
-        "stream": true
-      }
-    ]
-  },
   "reach_for_the_moon_immortal_smoke": {
     "category": "music",
     "sounds": [
@@ -638,29 +512,11 @@
       }
     ]
   },
-  "reach_for_the_moon_immortal_smoke_2": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/reach_for_the_moon_immortal_smoke_2",
-        "stream": true
-      }
-    ]
-  },
   "voyage_1970": {
     "category": "music",
     "sounds": [
       {
         "name": "bullethell:music/voyage_1970",
-        "stream": true
-      }
-    ]
-  },
-  "voyage_1970_2021": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/voyage_1970_2021",
         "stream": true
       }
     ]
@@ -688,15 +544,6 @@
     "sounds": [
       {
         "name": "bullethell:music/akutagawa_ryuunosuke_s_kappa_candid_friend",
-        "stream": true
-      }
-    ]
-  },
-  "akutagawa_ryuunosuke_s_kappa_candid_friend_2_0": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/akutagawa_ryuunosuke_s_kappa_candid_friend_2_0",
         "stream": true
       }
     ]
@@ -787,15 +634,6 @@
     "sounds": [
       {
         "name": "bullethell:music/the_youkai_mountain_mysterious_mountain",
-        "stream": true
-      }
-    ]
-  },
-  "youkai_mountain_mysterious_mountain_2_0": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/youkai_mountain_mysterious_mountain_2_0",
         "stream": true
       }
     ]

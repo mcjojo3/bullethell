@@ -2,11 +2,21 @@ package mc.sayda.bullethell.boss;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import mc.sayda.bullethell.config.BullethellConfig;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -85,12 +95,16 @@ public final class BossLoader {
         }
 
         try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-            BossDefinition def = GSON.fromJson(reader, BossDefinition.class);
+            JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+            TierJson.migrateLegacyByDifficultyKeysOnBoss(root);
+            TierJson.promoteUnionTierFieldsOnBoss(root);
+            BossDefinition def = GSON.fromJson(root, BossDefinition.class);
             if (def == null || def.phases == null || def.phases.isEmpty()) {
                 System.err.println("[BulletHell] Boss definition has no phases: " + id
                         + " - using fallback");
                 return fallback(id);
             }
+            DifficultyTierArray.normalizeBossDefinition(def);
             // Ensure every phase has at least one attack step
             for (PhaseDefinition phase : def.phases) {
                 if (phase.attacks == null || phase.attacks.isEmpty()) {
@@ -113,6 +127,110 @@ public final class BossLoader {
         }
     }
 
+    // ---------------------------------------------------------------- dev-path support (test mode)
+
+    /** Last known file-modification times for dev-path files; used for auto-reload polling. */
+    private static final Map<String, Long> DEV_MOD_TIMES = new HashMap<>();
+
+    /**
+     * Load boss JSON from {@link BullethellConfig#TEST_DEV_PATH} if set and file exists.
+     * Result is cached so repeated calls are cheap. Returns {@code null} if dev path is
+     * not configured, file is absent, or parse fails.
+     */
+    public static BossDefinition loadFromDevPath(String id) {
+        String devPath = BullethellConfig.TEST_DEV_PATH.get();
+        if (devPath == null || devPath.isBlank()) return null;
+        Path file = Paths.get(devPath, "bosses", id + ".json");
+        if (!Files.exists(file)) return null;
+        try (java.io.Reader r = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+            JsonObject root = JsonParser.parseReader(r).getAsJsonObject();
+            TierJson.migrateLegacyByDifficultyKeysOnBoss(root);
+            TierJson.promoteUnionTierFieldsOnBoss(root);
+            BossDefinition def = GSON.fromJson(root, BossDefinition.class);
+            if (def == null || def.phases == null || def.phases.isEmpty()) return null;
+            DifficultyTierArray.normalizeBossDefinition(def);
+            for (PhaseDefinition phase : def.phases) {
+                if (phase.attacks == null || phase.attacks.isEmpty()) {
+                    PatternStep ring = new PatternStep();
+                    ring.pattern = "RING"; ring.arms = 8; ring.speed = 2.0f;
+                    phase.attacks = new ArrayList<>();
+                    phase.attacks.add(ring);
+                }
+                if (phase.spellDurationTicks == null || phase.spellDurationTicks.length < 4)
+                    phase.spellDurationTicks = new int[]{600, 450, 300, 150};
+            }
+            // Track mod time for auto-reload
+            try { DEV_MOD_TIMES.put(id, Files.getLastModifiedTime(file).toMillis()); }
+            catch (Exception ignored) {}
+            return def;
+        } catch (Exception e) {
+            System.err.println("[BulletHell/Test] Failed to parse dev boss: " + id + " - " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Load boss by ID, checking dev path first (if configured), then classpath cache.
+     * Used by the test-mode server and by {@link mc.sayda.bullethell.client.TestModeHud}.
+     */
+    public static BossDefinition loadWithDevPath(String id) {
+        String devPath = BullethellConfig.TEST_DEV_PATH.get();
+        if (devPath != null && !devPath.isBlank()) {
+            BossDefinition dev = loadFromDevPath(id);
+            if (dev != null) {
+                CACHE.put(id, dev);
+                return dev;
+            }
+        }
+        return load(id);
+    }
+
+    /**
+     * Returns combined list of boss IDs: dev-path JSONs first (sorted), then classpath
+     * {@link #REGISTERED_IDS}. Duplicate IDs are collapsed (dev-path wins).
+     */
+    public static List<String> allBossIds() {
+        LinkedHashSet<String> ids = new LinkedHashSet<>();
+        String devPath = BullethellConfig.TEST_DEV_PATH.get();
+        if (devPath != null && !devPath.isBlank()) {
+            Path dir = Paths.get(devPath, "bosses");
+            if (Files.isDirectory(dir)) {
+                try {
+                    Files.list(dir)
+                        .filter(p -> p.getFileName().toString().endsWith(".json"))
+                        .map(p -> p.getFileName().toString().replace(".json", ""))
+                        .sorted()
+                        .forEach(ids::add);
+                } catch (Exception ignored) {}
+            }
+        }
+        Arrays.stream(REGISTERED_IDS).forEach(ids::add);
+        return new ArrayList<>(ids);
+    }
+
+    /**
+     * Returns {@code true} if the dev-path file for {@code id} has been modified since
+     * the last time it was loaded. Resets the stored timestamp on each check so consecutive
+     * calls only fire once per change. Safe to call every few server ticks.
+     */
+    public static boolean checkDevFileChanged(String id) {
+        String devPath = BullethellConfig.TEST_DEV_PATH.get();
+        if (devPath == null || devPath.isBlank()) return false;
+        Path file = Paths.get(devPath, "bosses", id + ".json");
+        try {
+            long mtime = Files.getLastModifiedTime(file).toMillis();
+            Long prev = DEV_MOD_TIMES.get(id);
+            if (prev != null && mtime != prev) {
+                DEV_MOD_TIMES.put(id, mtime);
+                return true;
+            }
+            if (prev == null) DEV_MOD_TIMES.put(id, mtime);
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    // ---------------------------------------------------------------- fallback
+
     /** Minimal single-phase fallback so the arena can still run. */
     private static BossDefinition fallback(String id) {
         BossDefinition def   = new BossDefinition();
@@ -131,7 +249,7 @@ public final class BossLoader {
         PatternStep step  = new PatternStep();
         step.pattern      = "RING";
         step.cooldown     = 20;
-        step.bulletType   = "ORB";
+        step.bulletType   = "DOT";
         step.arms         = 8;
         step.speed        = 2.5f;
         phase.attacks.add(step);

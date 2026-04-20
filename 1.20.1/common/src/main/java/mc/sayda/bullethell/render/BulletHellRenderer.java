@@ -14,6 +14,7 @@ import mc.sayda.bullethell.client.ClientArenaState;
 import mc.sayda.bullethell.client.ScreenFXQueue;
 import mc.sayda.bullethell.mixin.client.KeyMappingAccessor;
 import mc.sayda.bullethell.pattern.BulletType;
+import mc.sayda.bullethell.pattern.BulletTypeLoader;
 import mc.sayda.bullethell.sound.BHSounds;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -53,6 +54,16 @@ public class BulletHellRenderer {
     public static final BulletHellRenderer INSTANCE = new BulletHellRenderer();
 
     private static final int GRID_STEP = 80;
+
+    /**
+     * Pre-allocated index buffer for counting-sort of enemy bullets by BulletType.
+     * Avoids per-frame allocation and groups same-type bullets together so each
+     * texture is bound only once per render pass instead of once per bullet.
+     */
+    private final int[] bulletSortBuf = new int[BulletPool.ENEMY_CAPACITY];
+    /** Reusable counts array for the counting sort (one entry per BulletType ordinal). */
+    private final int[] bulletTypeCounts = new int[BulletType.values().length];
+    private final int[] bulletTypeStarts = new int[BulletType.values().length];
     /**
      * Pixel height reserved at the bottom of the screen for the boss indicator
      * strip.
@@ -63,70 +74,31 @@ public class BulletHellRenderer {
     private static final float DEBUG_BOSS_HIT_RADIUS = 24f;
 
     // ---- Bullet textures (16x16 recommended) ------------------------------------
-    // Place PNGs at: assets/bullethell/textures/bullets/<name>.png
+    // Texture names, scales, source sizes and tint flags are loaded from
+    // data/bullethell/bullet_types.json via BulletTypeLoader.  Call reloadBulletTypes()
+    // (e.g. from the test-mode B key) to pick up edits without restarting.
     private static final ResourceLocation BULLET_FALLBACK_TEXTURE =
-            new ResourceLocation(Bullethell.MODID, "textures/bullets/orb.png");
-    private static final EnumMap<BulletType, ResourceLocation> BULLET_TEXTURES = new EnumMap<>(BulletType.class);
-    private static final EnumMap<BulletType, Float> BULLET_TEXTURE_SCALES = new EnumMap<>(BulletType.class);
-    private static final EnumMap<BulletType, Integer> BULLET_TEXTURE_SOURCE_SIZES = new EnumMap<>(BulletType.class);
-    private static final EnumMap<BulletType, Float> BULLET_TEXTURE_BASE_ANGLE_DEG = new EnumMap<>(BulletType.class);
-    static {
-        BULLET_TEXTURES.put(BulletType.ORB, new ResourceLocation(Bullethell.MODID, "textures/bullets/orb.png"));
-        BULLET_TEXTURES.put(BulletType.STAR, new ResourceLocation(Bullethell.MODID, "textures/bullets/star_5.png"));
-        BULLET_TEXTURES.put(BulletType.RICE, new ResourceLocation(Bullethell.MODID, "textures/bullets/rice.png"));
-        BULLET_TEXTURES.put(BulletType.LASER_HEAD, new ResourceLocation(Bullethell.MODID, "textures/bullets/star_12.png"));
-        BULLET_TEXTURES.put(BulletType.BUBBLE, new ResourceLocation(Bullethell.MODID, "textures/bullets/bubble.png"));
-        BULLET_TEXTURES.put(BulletType.GOLD, new ResourceLocation(Bullethell.MODID, "textures/bullets/star_4.png"));
-        BULLET_TEXTURES.put(BulletType.SPARK, new ResourceLocation(Bullethell.MODID, "textures/bullets/star_12.png"));
-        BULLET_TEXTURES.put(BulletType.HOMING_ORB, new ResourceLocation(Bullethell.MODID, "textures/bullets/orb.png"));
-        BULLET_TEXTURES.put(BulletType.PLAYER_SHOT, new ResourceLocation(Bullethell.MODID, "textures/bullets/orb.png"));
-        BULLET_TEXTURES.put(BulletType.KUNAI, new ResourceLocation(Bullethell.MODID, "textures/bullets/kunai.png"));
-        BULLET_TEXTURES.put(BulletType.NEEDLE, new ResourceLocation(Bullethell.MODID, "textures/bullets/needle.png"));
-        BULLET_TEXTURES.put(BulletType.SCARLET, new ResourceLocation(Bullethell.MODID, "textures/bullets/orb.png"));
-        BULLET_TEXTURES.put(BulletType.SCARLET_LARGE, new ResourceLocation(Bullethell.MODID, "textures/bullets/orb_large.png"));
-        BULLET_TEXTURES.put(BulletType.SCARLET_MENTOS, new ResourceLocation(Bullethell.MODID, "textures/bullets/pill.png"));
-        BULLET_TEXTURES.put(BulletType.ICE, new ResourceLocation(Bullethell.MODID, "textures/bullets/icicle.png"));
-        BULLET_TEXTURES.put(BulletType.KNIFE, new ResourceLocation(Bullethell.MODID, "textures/bullets/knife.png"));
-        BULLET_TEXTURES.put(BulletType.AMULET, new ResourceLocation(Bullethell.MODID, "textures/bullets/ofuda.png"));
-        BULLET_TEXTURES.put(BulletType.CRIMSON_ORB, new ResourceLocation(Bullethell.MODID, "textures/bullets/orb.png"));
+            new ResourceLocation(Bullethell.MODID, "textures/bullets/dot.png");
+    // Lazy ResourceLocation cache rebuilt whenever BulletTypeLoader is invalidated.
+    private static EnumMap<BulletType, ResourceLocation> bulletTexCache = null;
 
-        BULLET_TEXTURE_SCALES.put(BulletType.ORB, 2.80f);
-        BULLET_TEXTURE_SCALES.put(BulletType.STAR, 2.80f);
-        BULLET_TEXTURE_SCALES.put(BulletType.RICE, 3.10f);
-        BULLET_TEXTURE_SCALES.put(BulletType.LASER_HEAD, 2.95f);
-        BULLET_TEXTURE_SCALES.put(BulletType.BUBBLE, 2.90f);
-        BULLET_TEXTURE_SCALES.put(BulletType.GOLD, 3.15f);
-        BULLET_TEXTURE_SCALES.put(BulletType.SPARK, 3.20f);
-        BULLET_TEXTURE_SCALES.put(BulletType.HOMING_ORB, 2.90f);
-        BULLET_TEXTURE_SCALES.put(BulletType.PLAYER_SHOT, 2.65f);
-        // Kunai: slightly smaller on-screen than knife so TH6-style small daggers read correctly vs silver knives.
-        BULLET_TEXTURE_SCALES.put(BulletType.KUNAI, 4.25f);
-        BULLET_TEXTURE_SCALES.put(BulletType.NEEDLE, 4.20f);
-        BULLET_TEXTURE_SCALES.put(BulletType.SCARLET, 2.95f);
-        BULLET_TEXTURE_SCALES.put(BulletType.SCARLET_LARGE, 2.70f);
-        BULLET_TEXTURE_SCALES.put(BulletType.SCARLET_MENTOS, 3.20f);
-        // Icicle art is thin/diagonal like kunai; same large on-screen scale for readability.
-        BULLET_TEXTURE_SCALES.put(BulletType.ICE, 4.80f);
-        // Knife matches prior kunai full scale (kunai shrunk above).
-        BULLET_TEXTURE_SCALES.put(BulletType.KNIFE, 4.80f);
-        BULLET_TEXTURE_SCALES.put(BulletType.AMULET, 3.15f);
-        BULLET_TEXTURE_SCALES.put(BulletType.CRIMSON_ORB, 2.80f);
+    /** Invalidates the bullet-type loader and texture cache so the next render re-reads JSON. */
+    public static void reloadBulletTypes() {
+        BulletTypeLoader.invalidate();
+        bulletTexCache = null;
+    }
 
-        for (BulletType type : BulletType.values())
-            BULLET_TEXTURE_SOURCE_SIZES.put(type, 16);
-        // Exception: large orb art authored at 32x32.
-        BULLET_TEXTURE_SOURCE_SIZES.put(BulletType.SCARLET_LARGE, 32);
-
-        // Base orientation for directional sprites in screen space (degrees).
-        // Rotation applied at render time: travelAngle - baseAngle.
-        BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.KUNAI, 135f); // handle top-right -> tip bottom-left
-        BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.NEEDLE, 135f); // tip points bottom-left in source art
-        BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.RICE, 90f);   // authored vertical grain
-        BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.SCARLET_MENTOS, 45f); // front points bottom-right
-        BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.ICE, 135f); // align with kunai-style directional blade in source art
-        BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.KNIFE, 135f);
-        // ofuda.png: vertical strip; “down” in texture = forward (matches atan2 where +y is down on screen).
-        BULLET_TEXTURE_BASE_ANGLE_DEG.put(BulletType.AMULET, 90f);
+    private static ResourceLocation bulletTexture(BulletType type) {
+        if (bulletTexCache == null) {
+            bulletTexCache = new EnumMap<>(BulletType.class);
+            for (BulletType t : BulletType.values()) {
+                String name = BulletTypeLoader.get(t).texture;
+                bulletTexCache.put(t, name != null
+                        ? new ResourceLocation(Bullethell.MODID, "textures/bullets/" + name + ".png")
+                        : BULLET_FALLBACK_TEXTURE);
+            }
+        }
+        return bulletTexCache.getOrDefault(type, BULLET_FALLBACK_TEXTURE);
     }
 
     // ---- Character / player textures -------------------------------------------
@@ -149,22 +121,47 @@ public class BulletHellRenderer {
     // Place the actual PNG files at: assets/bullethell/textures/item/<name>.png
     // The renderer falls back to a tinted rectangle if the texture is missing.
     private static final ResourceLocation[] ITEM_TEXTURES = {
-            new ResourceLocation(Bullethell.MODID, "textures/item/power.png"), // TYPE_POWER
-            new ResourceLocation(Bullethell.MODID, "textures/item/point.png"), // TYPE_POINT
-            new ResourceLocation(Bullethell.MODID, "textures/item/full_power.png"), // TYPE_FULL_POWER
-            new ResourceLocation(Bullethell.MODID, "textures/item/one_up.png"), // TYPE_ONE_UP
-            new ResourceLocation(Bullethell.MODID, "textures/item/bomb.png"), // TYPE_BOMB
+            new ResourceLocation(Bullethell.MODID, "textures/item/power.png"),       // TYPE_POWER
+            new ResourceLocation(Bullethell.MODID, "textures/item/point.png"),       // TYPE_POINT
+            new ResourceLocation(Bullethell.MODID, "textures/item/full_power.png"),  // TYPE_FULL_POWER
+            new ResourceLocation(Bullethell.MODID, "textures/item/one_up.png"),      // TYPE_ONE_UP
+            new ResourceLocation(Bullethell.MODID, "textures/item/bomb.png"),        // TYPE_BOMB
+            new ResourceLocation(Bullethell.MODID, "textures/item/power_large.png"), // TYPE_POWER_LARGE
     };
 
-    // ---- Enemy textures (32×32 sprites) ----------------------------------------
-    // Place PNGs at: assets/bullethell/textures/enemies/<name>.png
-    // Falls back to a tinted diamond/square if the texture is missing.
+    // ---- Enemy textures (horizontal sprite sheets, 4 frames) --------------------
+    // Small colour variants: 160×40 (40×40 per frame). Police / warrior same layout.
+    // medium_fairy.png: 200×50 (50×50 × 4). large_fairy.png: 280×70 (70×70 × 4).
+    // PNG alpha is respected when drawing (blend enabled in the enemy pass).
     private static final ResourceLocation[] ENEMY_TEXTURES = {
-            new ResourceLocation(Bullethell.MODID, "textures/enemies/blue_fairy.png"), // BLUE_FAIRY
-            new ResourceLocation(Bullethell.MODID, "textures/enemies/red_fairy.png"), // RED_FAIRY
-            new ResourceLocation(Bullethell.MODID, "textures/enemies/yellow_fairy.png"), // YELLOW_FAIRY
-            new ResourceLocation(Bullethell.MODID, "textures/enemies/green_fairy.png"), // GREEN_FAIRY
+            new ResourceLocation(Bullethell.MODID, "textures/enemies/blue_fairy.png"),
+            new ResourceLocation(Bullethell.MODID, "textures/enemies/red_fairy.png"),
+            new ResourceLocation(Bullethell.MODID, "textures/enemies/yellow_fairy.png"),
+            new ResourceLocation(Bullethell.MODID, "textures/enemies/green_fairy.png"),
+            new ResourceLocation(Bullethell.MODID, "textures/enemies/police_fairy.png"),
+            new ResourceLocation(Bullethell.MODID, "textures/enemies/warrior_fairy.png"),
     };
+
+    private static final ResourceLocation MEDIUM_FAIRY_TEX =
+            new ResourceLocation(Bullethell.MODID, "textures/enemies/medium_fairy.png");
+    private static final ResourceLocation LARGE_FAIRY_TEX =
+            new ResourceLocation(Bullethell.MODID, "textures/enemies/large_fairy.png");
+
+    /** Ticks per frame on 4-wide idle strips; matches {@link #bossFrame(ClientArenaState)} (÷4 &amp; 3). */
+    private static final int FAIRY_ANIM_TICKS_PER_FRAME = 4;
+    private static final int FAIRY_FRAMES = 4;
+    private static final int SMALL_FRAME = 40;
+    private static final int SMALL_SHEET_W = 160;
+    private static final int SMALL_SHEET_H = 40;
+    private static final int MED_FRAME = 50;
+    private static final int MED_SHEET_W = 200;
+    private static final int MED_SHEET_H = 50;
+    private static final int LARGE_FRAME = 70;
+    private static final int LARGE_SHEET_W = 280;
+    private static final int LARGE_SHEET_H = 70;
+
+    /** On-screen scale for all fairy sheet tiers vs base 12×scale. Hitboxes unchanged. */
+    private static final float FAIRY_SCREEN_SCALE = 1.5f;
 
     // Fallback tint colors per texture index (used when PNG is missing)
     private static final int[] ENEMY_COLORS = {
@@ -172,6 +169,8 @@ public class BulletHellRenderer {
             0xFFFF6666, // 1 red
             0xFFFFDD44, // 2 yellow
             0xFF66EE88, // 3 green
+            0xFF4466CC, // 4 police
+            0xFFCC9944, // 5 warrior
     };
 
     public void render(GuiGraphics gfx, float partialTick) {
@@ -247,10 +246,20 @@ public class BulletHellRenderer {
         }
 
         // ---- 4. Player sprite + optional hitbox (focus / vanilla Shift–sneak) ----
+        // Sub-tick extrapolation: predX/predY already advanced one full tick ahead by
+        // BHClientEvents; add partialTick fraction of the current-tick movement on top.
+        float pSpeed = state.inputFocused ? state.player.speedFocused : state.player.speedNormal;
+        float eDx = state.inputDx, eDy = state.inputDy;
+        if (eDx != 0 && eDy != 0) pSpeed *= 0.7071f;
+        final float epx = Math.max(8f, Math.min(BulletPool.ARENA_W - 8f,
+                state.predX + eDx * pSpeed * partialTick));
+        final float epy = Math.max(8f, Math.min(BulletPool.ARENA_H - 8f,
+                state.predY + eDy * pSpeed * partialTick));
+        boolean showFocusDiamond = isDown(mc.sayda.bullethell.client.BHKeyMappings.FOCUS);
         boolean showHitbox = shouldShowArenaHitboxOverlay();
         if (!state.spectating) {
-            int px = ox + (int) (state.player.x * sx);
-            int py = oy + (int) (state.player.y * sy);
+            int px = ox + (int) (epx * sx);
+            int py = oy + (int) (epy * sy);
             int spriteHalf = Math.max(10, (int) (16 * (sx + sy) * 0.5f));
             renderCharacterSprite(gfx, state.characterId, px, py, spriteHalf);
 
@@ -273,7 +282,9 @@ public class BulletHellRenderer {
 
         // ---- 5. Enemies - partial-tick extrapolation ----
         // Generous cull bounds so off-screen entrants are visible; mask is applied
-        // later.
+        // later. Blend on so sprite-sheet PNG alpha composites correctly.
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         for (int i = 0; i < EnemyPool.CAPACITY; i++) {
             if (!state.enemies.isActive(i))
                 continue;
@@ -284,33 +295,63 @@ public class BulletHellRenderer {
             int typeId = state.enemies.getType(i);
             int sex = ox + (int) (ex * sx);
             int sey = oy + (int) (ey * sy);
-            renderEnemy(gfx, typeId, sex, sey, (sx + sy) * 0.5f);
+            renderEnemy(gfx, typeId, sex, sey, (sx + sy) * 0.5f, partialTick);
         }
+        RenderSystem.disableBlend();
 
         // ---- 5b. Laser beams (warning + active) ----
         gfx.enableScissor(ox, oy, ox + dispW, oy + dispH);
         renderLasers(gfx, state, ox, oy, sx, sy);
         gfx.disableScissor();
 
-        // ---- 6. Enemy bullets - partial-tick extrapolation ----
-        // One blend setup + one shader reset for all bullets (was: per-bullet).
+        // ---- 6. Enemy bullets - counting-sort by BulletType for texture-batch efficiency ----
+        // Grouping same-type bullets together means each texture is bound at most once
+        // per frame instead of once per bullet when types are interleaved.
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        for (int i = 0; i < BulletPool.ENEMY_CAPACITY; i++) {
-            if (!state.bullets.isActive(i))
-                continue;
-            float bx = state.bullets.getX(i) + state.bullets.getVx(i) * partialTick;
-            float by = state.bullets.getY(i) + state.bullets.getVy(i) * partialTick;
-            if (outOfArena(bx, by))
-                continue;
-            BulletType type = BulletType.fromId(state.bullets.getType(i));
-            int sbx = ox + (int) (bx * sx);
-            int sby = oy + (int) (by * sy);
-            float vis = state.bullets.getVisScale(i);
-            int r = Math.max(1, (int) (type.radius * vis * (sx + sy) * 0.5f));
-            float vx = state.bullets.getVx(i);
-            float vy = state.bullets.getVy(i);
-            renderBullet(gfx, type, sbx, sby, r, vx, vy);
+        {
+            int numTypes = bulletTypeCounts.length;
+            java.util.Arrays.fill(bulletTypeCounts, 0);
+            // Pass 1: count active bullets per type
+            for (int i = 0; i < BulletPool.ENEMY_CAPACITY; i++) {
+                if (state.bullets.isActive(i))
+                    bulletTypeCounts[state.bullets.getType(i)]++;
+            }
+            // Pass 2: prefix sums → start index per type in sorted buffer
+            int total = 0;
+            for (int t = 0; t < numTypes; t++) {
+                bulletTypeStarts[t] = total;
+                total += bulletTypeCounts[t];
+            }
+            // Pass 3: fill sorted buffer (re-use starts as cursor)
+            int[] cursor = bulletTypeStarts; // will be advanced; refilled next frame anyway
+            for (int i = 0; i < BulletPool.ENEMY_CAPACITY; i++) {
+                if (state.bullets.isActive(i)) {
+                    int t = state.bullets.getType(i);
+                    bulletSortBuf[cursor[t]++] = i;
+                }
+            }
+            // Render in type order - consecutive same-type bullets share texture/color
+            for (int si = 0; si < total; si++) {
+                int i = bulletSortBuf[si];
+                float bx = state.bullets.getX(i) + state.bullets.getVx(i) * partialTick;
+                float by = state.bullets.getY(i) + state.bullets.getVy(i) * partialTick;
+                if (outOfArena(bx, by))
+                    continue;
+                BulletType type = BulletType.fromId(state.bullets.getType(i));
+                int sbx = ox + (int) (bx * sx);
+                int sby = oy + (int) (by * sy);
+                float vis = state.bullets.getVisScale(i);
+                float bvx = state.bullets.getVx(i);
+                float bvy = state.bullets.getVy(i);
+                if (type == BulletType.BLUE_LASER || type == BulletType.RIVER_LASER) {
+                    float hit = state.bullets.getHitScale(i);
+                    renderShortLaserBullet(gfx, type, sbx, sby, vis, hit, bvx, bvy, sx, sy);
+                } else {
+                    int r = Math.max(1, (int) (type.getRadius() * vis * (sx + sy) * 0.5f));
+                    renderBullet(gfx, type, sbx, sby, r, bvx, bvy);
+                }
+            }
         }
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
@@ -327,10 +368,15 @@ public class BulletHellRenderer {
                 int sbx = ox + (int) (bx * sx);
                 int sby = oy + (int) (by * sy);
                 float vis = pool.getVisScale(i);
-                int r = Math.max(1, (int) (type.radius * vis * (sx + sy) * 0.5f));
                 float vx = pool.getVx(i);
                 float vy = pool.getVy(i);
-                renderBullet(gfx, type, sbx, sby, r, vx, vy);
+                if (type == BulletType.BLUE_LASER || type == BulletType.RIVER_LASER) {
+                    float hit = pool.getHitScale(i);
+                    renderShortLaserBullet(gfx, type, sbx, sby, vis, hit, vx, vy, sx, sy);
+                } else {
+                    int r = Math.max(1, (int) (type.getRadius() * vis * (sx + sy) * 0.5f));
+                    renderBullet(gfx, type, sbx, sby, r, vx, vy);
+                }
             }
         }
         // Must reset after player bullets: blitTintedBullet sets shader color per type
@@ -342,9 +388,12 @@ public class BulletHellRenderer {
         int phase = state.bossPhase;
         int phaseCol = phaseColour(phase);
         if (state.bossMaxHp > 0 || state.bossIntroVisible) {
-            int bx = ox + (int) (state.bossX * sx);
-            int by2 = oy + (int) (state.bossY * sy);
+            float bxf = state.prevBossX + (state.bossX - state.prevBossX) * partialTick;
+            float byf = state.prevBossY + (state.bossY - state.prevBossY) * partialTick;
+            int bx = ox + (int) (bxf * sx);
+            int by2 = oy + (int) (byf * sy);
             int sz = Math.max(24, (int) (44 * (sx + sy) * 0.5f));
+            renderSanaePentagramAura(gfx, state, bx, by2, sz, partialTick);
             renderBossSprite(gfx, state.bossId, bx, by2, sz);
         }
 
@@ -404,15 +453,15 @@ public class BulletHellRenderer {
         }
 
         // ---- 15. Hardened Hitbox Pass (Absolute Top) ----
-        if (showHitbox) {
+        if (showFocusDiamond) {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableDepthTest();
             gfx.pose().pushPose();
             gfx.pose().translate(0, 0, 500);
 
-            int lpx = ox + (int) (state.player.x * sx);
-            int lpy = oy + (int) (state.player.y * sy);
+            int lpx = ox + (int) (epx * sx);
+            int lpy = oy + (int) (epy * sy);
 
             // Pulsing logic
             float pulse = (float) Math.sin(System.currentTimeMillis() / 100.0) * 0.5f + 0.5f;
@@ -451,7 +500,6 @@ public class BulletHellRenderer {
             Font bigFont = Minecraft.getInstance().font;
             gfx.pose().scale(2.0f, 2.0f, 1.0f);
             String title = "SPECTATING";
-            int tw = bigFont.width(title);
             gfx.drawCenteredString(bigFont, title, (screenW / 2) / 2, (screenH / 4) / 2, 0xFFFF5555);
             gfx.pose().scale(0.5f, 0.5f, 1.0f);
             
@@ -463,19 +511,14 @@ public class BulletHellRenderer {
         }
 
         // ---- 17. Debug projectile/laser hitboxes (absolute top-most; focus-held) ----
-        renderDebugHitboxOverlay(gfx, state, ox, oy, sx, sy, partialTick, showHitbox);
+        renderDebugHitboxOverlay(gfx, state, ox, oy, sx, sy, partialTick, showHitbox, epx, epy);
     }
 
-    /**
-     * True while focus is held or vanilla Shift is down (sneak). Custom {@link BHKeyMappings#FOCUS}
-     * uses Left Shift; when the KeyMapping does not see the key, {@link net.minecraft.client.player.LocalPlayer#isShiftKeyDown}
-     * still matches sneaking so debug hitboxes work.
-     */
+    /** True when hitboxes should be drawn: test-mode toggle (H key) or focus held outside test mode. */
     private static boolean shouldShowArenaHitboxOverlay() {
-        if (isDown(mc.sayda.bullethell.client.BHKeyMappings.FOCUS))
-            return true;
-        Minecraft mc = Minecraft.getInstance();
-        return mc.player != null && mc.player.isShiftKeyDown();
+        ClientArenaState s = ClientArenaState.INSTANCE;
+        if (s.testMode) return s.testHitboxVisible;
+        return isDown(mc.sayda.bullethell.client.BHKeyMappings.FOCUS);
     }
 
     private static void drawDiamond(GuiGraphics gfx, int x, int y, int radius, int color) {
@@ -490,7 +533,8 @@ public class BulletHellRenderer {
      * (matches server math). Shown while focus or Shift (sneak) is held.
      */
     private static void renderDebugHitboxOverlay(GuiGraphics gfx, ClientArenaState state,
-            int ox, int oy, float sx, float sy, float partialTick, boolean focusHeld) {
+            int ox, int oy, float sx, float sy, float partialTick, boolean focusHeld,
+            float epx, float epy) {
         if (!state.debugGodMode || !state.active || !focusHeld)
             return;
 
@@ -502,10 +546,10 @@ public class BulletHellRenderer {
         // conservative GUI depth range.
         gfx.pose().translate(0, 0, 900);
 
-        // Player true hitbox (filled disc)
+        // Player true hitbox (filled disc) - use extrapolated position to match sprite
         if (!state.spectating) {
-            int px = ox + (int) (state.player.x * sx);
-            int py = oy + (int) (state.player.y * sy);
+            int px = ox + (int) (epx * sx);
+            int py = oy + (int) (epy * sy);
             int pr = Math.max(1, Math.round(state.player.hitRadius * (sx + sy) * 0.5f));
             drawFilledCircleWithOutline(gfx, px, py, pr, 0xAA00FFFF, 0xFF00FFFF);
         }
@@ -527,11 +571,33 @@ public class BulletHellRenderer {
             if (outOfArena(bx, by))
                 continue;
             BulletType bt = BulletType.fromId(state.bullets.getType(i));
-            float bulletR = bt.radius * state.bullets.getHitScale(i) * bt.hitboxCollisionMul;
-            int br = Math.max(1, Math.round(bulletR * (sx + sy) * 0.5f));
             int sbx = ox + (int) (bx * sx);
             int sby = oy + (int) (by * sy);
-            drawFilledCircleWithOutline(gfx, sbx, sby, br, 0xAAFF5050, 0xFFFF8080);
+            float scale = (sx + sy) * 0.5f;
+            if (bt == BulletType.BLUE_LASER || bt == BulletType.RIVER_LASER) {
+                float halfLen = bt.lineHitCollisionHalfLength(state.bullets.getVisScale(i));
+                float thick = bt.lineHitCollisionHalfWidth(state.bullets.getHitScale(i));
+                int hw = Math.max(0, Math.round(halfLen * scale));
+                int ht = Math.max(0, Math.round(thick * scale));
+                float vx = state.bullets.getVx(i);
+                float vy = state.bullets.getVy(i);
+                float rotDeg = bulletRotationDegrees(bt, vx, vy);
+                gfx.pose().pushPose();
+                gfx.pose().translate(sbx, sby, 0.0);
+                gfx.pose().mulPose(Objects.requireNonNull(Axis.ZP.rotationDegrees(rotDeg)));
+                gfx.fill(-hw - 1, -ht - 1, hw + 2, ht + 2, 0xFFFF8080);
+                gfx.fill(-hw, -ht, hw + 1, ht + 1, 0xAAFF5050);
+                gfx.pose().popPose();
+            } else {
+                float bulletR = bt.getRadius() * state.bullets.getHitScale(i) * bt.getHitboxMul();
+                int br = Math.max(1, Math.round(bulletR * scale));
+                if (br <= 1) {
+                    gfx.fill(sbx - 1, sby - 1, sbx + 2, sby + 2, 0xFFFF8080);
+                    gfx.fill(sbx, sby, sbx + 1, sby + 1, 0xAAFF5050);
+                } else {
+                    drawFilledCircleWithOutline(gfx, sbx, sby, br, 0xAAFF5050, 0xFFFF8080);
+                }
+            }
         }
 
         // Player bullet hitboxes (all co-op pools)
@@ -544,7 +610,7 @@ public class BulletHellRenderer {
                 if (outOfArena(bx, by))
                     continue;
                 BulletType bt = BulletType.fromId(pool.getType(i));
-                float bulletR = bt.radius * pool.getHitScale(i) * bt.hitboxCollisionMul;
+                float bulletR = bt.getRadius() * pool.getHitScale(i) * bt.getHitboxMul();
                 int br = Math.max(1, Math.round(bulletR * (sx + sy) * 0.5f));
                 int sbx = ox + (int) (bx * sx);
                 int sby = oy + (int) (by * sy);
@@ -662,7 +728,7 @@ public class BulletHellRenderer {
         // Row 0: Boss name (small, dimmed gold) + phase label (right) - only during
         // boss fight
         if (state.bossMaxHp > 0 && !state.bossName.isEmpty()) {
-            String scoreStr = String.format("%,d", state.score);
+            String scoreStr = String.format("%,d", state.combinedScore);
             gfx.drawString(font, Objects.requireNonNull(state.bossName), ox + 4, cursor, 0x88FFDD88, false);
             gfx.drawString(font, scoreStr, ox + dw - font.width(scoreStr) - 4, cursor, 0xFFFFE600, false);
             cursor += lh + 1;
@@ -710,7 +776,7 @@ public class BulletHellRenderer {
         // boss
         if (state.bossMaxHp <= 0) {
             String phLabel = "PHASE " + (phase + 1);
-            String scoreStr = String.format("%,d", state.score);
+            String scoreStr = String.format("%,d", state.combinedScore);
             gfx.drawString(font, phLabel, ox + 4, cursor, phaseCol, false);
             gfx.drawString(font, scoreStr, ox + dw - font.width(scoreStr) - 4, cursor, 0xFFFFE600, false);
             cursor += lh + 2;
@@ -726,9 +792,8 @@ public class BulletHellRenderer {
             gfx.drawString(font, Objects.requireNonNull(state.spellName), ox + 4, cursor, 0xFFFFDD00, false);
         }
 
-        // ---- Player Stats Strip (Right side) ----
-        // Anchor to the right of the arena if there's space, else anchor to screen
-        // right
+        // ---- Player Stats Strip (Right side) - suppressed in test mode (test panel covers it) ----
+        if (state.testMode) return;
         int margin = 8;
         int statPanelW = 80;
         int hudX = ox + dw + margin;
@@ -741,7 +806,8 @@ public class BulletHellRenderer {
 
         int hudY = oy + 40; // Drop down below boss HP bar
         int rowStep = lh + 6;
-        int statRows = 4 + (state.debugGodMode ? 4 : 0);
+        boolean coopHud = !state.coopPlayers.isEmpty();
+        int statRows = 4 + (coopHud ? 1 : 0) + (state.debugGodMode ? 4 : 0);
         int panelH = rowStep * statRows + 4;
 
         // Semi-transparent background panel for readability
@@ -752,16 +818,22 @@ public class BulletHellRenderer {
         String bombsStr = "\u2736 " + state.player.bombs;
         String pwrStr = "PWR " + state.power + "/128";
         String grazeStr = "GRAZE " + state.player.graze;
+        String ptsStr = "PTS " + String.format("%,d", state.score);
 
         int pwrColor = state.power >= 128 ? 0xFFFF88FF : state.power >= 64 ? 0xFFFF44CC : 0xFFFF4488;
 
         gfx.drawString(font, livesStr, hudX, hudY, 0xFF00FFE0, true);
         gfx.drawString(font, bombsStr, hudX, hudY + rowStep, 0xFFFF3FA4, true);
-        gfx.drawString(font, grazeStr, hudX, hudY + rowStep * 2, 0xFFFFE600, true);
-        gfx.drawString(font, pwrStr, hudX, hudY + rowStep * 3, pwrColor, true);
+        int grazeRow = 2;
+        if (coopHud) {
+            gfx.drawString(font, ptsStr, hudX, hudY + rowStep * 2, 0xFFFFE600, true);
+            grazeRow = 3;
+        }
+        gfx.drawString(font, grazeStr, hudX, hudY + rowStep * grazeRow, 0xFFFFE600, true);
+        gfx.drawString(font, pwrStr, hudX, hudY + rowStep * (grazeRow + 1), pwrColor, true);
 
         if (state.debugGodMode) {
-            int dbgY = hudY + rowStep * 4;
+            int dbgY = hudY + rowStep * (grazeRow + 2);
             int dbgCol = 0xFF66FF66;
             gfx.drawString(font, "DBG GOD", hudX, dbgY, dbgCol, true);
             gfx.drawString(font, "tick " + state.debugArenaTick, hudX, dbgY + rowStep, 0xFFAAFFAA, true);
@@ -776,12 +848,13 @@ public class BulletHellRenderer {
                 thudX = margin;
             int thudY = oy + 40;
 
+            int matePanelH = rowStep * 3 + lh + 8;
             for (int i = 0; i < state.coopPlayers.size(); i++) {
                 var cp = state.coopPlayers.get(i);
                 int pNum = cp.playerIndex();
-                int cpY = thudY + i * (panelH + 10);
+                int cpY = thudY + i * (matePanelH + 10);
 
-                gfx.fill(thudX - 4, cpY - 4, thudX + statPanelW, cpY + panelH, 0x88000018);
+                gfx.fill(thudX - 4, cpY - 4, thudX + statPanelW, cpY + matePanelH, 0x88000018);
                 gfx.hLine(thudX - 4, thudX + statPanelW, cpY - 4, 0x44FFFFFF);
 
                 String pLabel = "P" + pNum + " ("
@@ -789,8 +862,7 @@ public class BulletHellRenderer {
                         + ")";
                 gfx.drawString(font, pLabel, thudX, cpY, cp.tintColor() | 0xFF000000, true);
                 gfx.drawString(font, "\u2665 " + cp.lives(), thudX, cpY + rowStep, 0xFF00FFE0, true);
-                // Simple teammate HUD (Name + Lives is usually enough, but let's keep it
-                // compact)
+                gfx.drawString(font, "PTS " + String.format("%,d", cp.score()), thudX, cpY + rowStep * 2, 0xFFFFE600, true);
             }
         }
     }
@@ -1056,7 +1128,7 @@ public class BulletHellRenderer {
     // rendering
 
     /**
-     * Renders the boss using row 0 (idle) of the boss sheet — four frames across the top.
+     * Renders the boss using row 0 (idle) of the boss sheet - four frames across the top.
      * Most bosses use a 256×256 sheet (64×64 cells). Sakuya uses 256×255 with 64×85 cells
      * ({@link BossSheetLayout}). Destination size preserves cell aspect ratio.
      */
@@ -1121,6 +1193,49 @@ public class BulletHellRenderer {
         renderDialogBox(gfx, font, ox, oy, dispW,
                 speakerName, portraitId, dialogText, "[Z] Continue  [Ctrl] Skip",
                 slideInTick, isBoss);
+    }
+
+    private static final ResourceLocation SANA_PENTAGRAM_TEX = new ResourceLocation(Bullethell.MODID, "textures/pentagram.png");
+    /** Assumed square texture size for UV (resize PNG to power-of-two if needed). */
+    private static final int SANA_PENTAGRAM_TEX_SIZE = 256;
+    /** Boss ticks to ease the pentagram from the boss centre to full size (~1 s at 20 TPS). */
+    private static final int SANA_AURA_GROW_TICKS = 20;
+
+    /**
+     * Red-tinted {@code textures/pentagram.png} behind Sanae: quick intro grow, then continuous
+     * fast spin with ~10% breathing scale for the whole fight.
+     */
+    private static void renderSanaePentagramAura(GuiGraphics gfx, ClientArenaState state,
+            int bx, int by2, int sz, float partialTick) {
+        if (!"sanae_boss".equals(state.bossId))
+            return;
+
+        float tCounter = state.bossAnimCounter + partialTick;
+        float growT = Math.min(1f, tCounter / (float) SANA_AURA_GROW_TICKS);
+        float grow = 1f - (1f - growT) * (1f - growT);
+        if (state.bossIntroVisible && state.bossAnimCounter < SANA_AURA_GROW_TICKS)
+            grow = Math.max(grow, 0.38f);
+
+        float tSpin = tCounter;
+        if (state.bossAnimCounter <= 0 && state.bossIntroVisible)
+            tSpin += (System.currentTimeMillis() % 1_000_000L) * 0.00008f;
+
+        float breath = 1f + 0.10f * (float) Math.sin(tSpin * 0.12f);
+        float spinDeg = tSpin * 13.8f;
+
+        int half = Math.max(12, (int) (sz * 1.88f * grow * breath));
+        int ts = SANA_PENTAGRAM_TEX_SIZE;
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(1f, 0.22f, 0.22f, 0.88f);
+        gfx.pose().pushPose();
+        gfx.pose().translate(bx, by2, 0f);
+        gfx.pose().mulPose(Axis.ZP.rotationDegrees(spinDeg));
+        gfx.blit(SANA_PENTAGRAM_TEX, -half, -half, half * 2, half * 2, 0f, 0f, ts, ts, ts, ts);
+        gfx.pose().popPose();
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        RenderSystem.disableBlend();
     }
 
     private static void renderBossSprite(GuiGraphics gfx, String bossId,
@@ -1296,7 +1411,7 @@ public class BulletHellRenderer {
             float hwArena = pool.getHalfWidth(i);
             boolean warn = pool.isWarning(i);
             int typeId = pool.getTypeId(i);
-            int baseColor = BulletType.fromId(typeId).color & 0x00FFFFFF;
+            int baseColor = BulletTypeLoader.get(BulletType.fromId(typeId)).color & 0x00FFFFFF;
 
             int screenX = ox + (int) (pool.getX(i) * sx);
             int screenY = oy + (int) (pool.getY(i) * sy);
@@ -1353,34 +1468,68 @@ public class BulletHellRenderer {
      * Renders a single enemy bullet.
      *
      * Most types use the bullet texture + {@link BulletType#color} tint (ARGB alpha
-     * respected); {@link BulletType#AMULET} is drawn untinted (ofuda art). No axis-aligned
-     * {@code gfx.fill} halos — those read as solid
-     * “boxes” around stars/orbs and fight PNG transparency.
+     * respected). {@link BulletType#AMULET} and orb-family types ({@code dot} / {@code orb_blue}
+     * / {@code orb_red}) are drawn untinted so PNG color and alpha are preserved. No axis-aligned
+     * {@code gfx.fill} halos - those read as solid
+     * "boxes" around stars/orbs and fight PNG transparency.
      *
      * <p>Call only between {@link RenderSystem#enableBlend()} and a final
-     * {@link RenderSystem#setShaderColor(float, float, float, float)} reset — see
+     * {@link RenderSystem#setShaderColor(float, float, float, float)} reset - see
      * the enemy and player bullet loops in {@link #render}.
      */
     private static void renderBullet(GuiGraphics gfx, BulletType type, int cx, int cy, int r, float vx, float vy) {
         int texR = Math.max(1, Math.round(r * bulletTextureScale(type)));
         float rotDeg = bulletRotationDegrees(type, vx, vy);
-        blitTintedBullet(gfx, type, cx, cy, texR, type.color, rotDeg);
+        blitTintedBullet(gfx, type, cx, cy, texR, BulletTypeLoader.get(type).color, rotDeg);
     }
 
-    private static ResourceLocation bulletTexture(BulletType type) {
-        return BULLET_TEXTURES.getOrDefault(type, BULLET_FALLBACK_TEXTURE);
+    /**
+     * Non-square blit: texture X = beam along velocity (after rotation), Y = thick laser slab.
+     */
+    private static void renderShortLaserBullet(GuiGraphics gfx, BulletType type, int cx, int cy,
+            float vis, float hit, float vx, float vy, float sx, float sy) {
+        float scale = (sx + sy) * 0.5f;
+        float halfLenA = type.lineHitDrawHalfLength(vis);
+        float halfThickA = type.lineHitDrawHalfWidth(hit);
+        int halfW = Math.max(0, Math.round(halfLenA * scale));
+        int halfH = Math.max(0, Math.round(halfThickA * scale));
+        if (halfW <= 0 && halfH <= 0)
+            return;
+        float rotDeg = bulletRotationDegrees(type, vx, vy);
+        blitTintedBulletRect(gfx, type, cx, cy, halfW, halfH, BulletTypeLoader.get(type).color, rotDeg);
+    }
+
+    /** Like {@link #blitTintedBullet} but destination is a 2×halfW × 2×halfH rectangle (not square). */
+    private static void blitTintedBulletRect(GuiGraphics gfx, BulletType type, int cx, int cy,
+            int halfW, int halfH, int argb, float rotDeg) {
+        ResourceLocation texture = bulletTexture(type);
+        int srcSize = bulletTextureSourceSize(type);
+        if (bulletUsesUntintedSprite(type)) {
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        } else {
+            float a = ((argb >>> 24) & 0xFF) / 255f;
+            float cr = ((argb >>> 16) & 0xFF) / 255f;
+            float cg = ((argb >>> 8) & 0xFF) / 255f;
+            float cb = (argb & 0xFF) / 255f;
+            RenderSystem.setShaderColor(cr, cg, cb, a);
+        }
+        gfx.pose().pushPose();
+        gfx.pose().translate(cx, cy, 0.0);
+        gfx.pose().mulPose(Axis.ZP.rotationDegrees(rotDeg));
+        gfx.blit(texture, -halfW, -halfH, halfW * 2, halfH * 2, 0, 0, srcSize, srcSize, srcSize, srcSize);
+        gfx.pose().popPose();
     }
 
     private static float bulletTextureScale(BulletType type) {
-        return BULLET_TEXTURE_SCALES.getOrDefault(type, 1.0f);
+        return BulletTypeLoader.get(type).textureScale;
     }
 
     private static int bulletTextureSourceSize(BulletType type) {
-        return BULLET_TEXTURE_SOURCE_SIZES.getOrDefault(type, 16);
+        return BulletTypeLoader.get(type).sourceSize;
     }
 
     private static float bulletRotationDegrees(BulletType type, float vx, float vy) {
-        Float base = BULLET_TEXTURE_BASE_ANGLE_DEG.get(type);
+        Float base = BulletTypeLoader.get(type).baseAngleDeg;
         if (base == null)
             return 0f;
         if (Math.abs(vx) < 0.0001f && Math.abs(vy) < 0.0001f)
@@ -1389,15 +1538,14 @@ public class BulletHellRenderer {
         return travelDeg - base;
     }
 
-    /**
-     * Tinted bullet blit without per-call blend setup (caller batches blend once per
-     * frame).
-     */
+    private static boolean bulletUsesUntintedSprite(BulletType type) {
+        return !BulletTypeLoader.get(type).applyTint;
+    }
+
     private static void blitTintedBullet(GuiGraphics gfx, BulletType type, int cx, int cy, int r, int argb, float rotDeg) {
         ResourceLocation texture = bulletTexture(type);
         int srcSize = bulletTextureSourceSize(type);
-        // Reimu player amulets: full art color from PNG (no type tint).
-        if (type == BulletType.AMULET) {
+        if (bulletUsesUntintedSprite(type)) {
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         } else {
             float a = ((argb >>> 24) & 0xFF) / 255f;
@@ -1480,26 +1628,43 @@ public class BulletHellRenderer {
     // rendering
 
     /**
-     * Renders a single enemy.
-     * Uses {@link EnemyType#textureIdx} to pick from the 4-entry texture array,
-     * and {@link EnemyType#large} to scale the sprite up ~1.75× for large variants.
-     * Falls back to a tinted rectangle when the PNG is missing.
+     * Renders a single enemy from horizontal sprite sheets (4 frames).
+     * Small fairies: 160×40 sheets; {@link EnemyType#medium}: {@code medium_fairy.png};
+     * {@link EnemyType#large}: shared {@code large_fairy.png} (colour hint from
+     * {@link EnemyType#textureIdx} is unused for the large sheet).
      */
-    private static void renderEnemy(GuiGraphics gfx, int typeId, int cx, int cy, float scale) {
+    private static void renderEnemy(GuiGraphics gfx, int typeId, int cx, int cy, float scale, float partialTick) {
         EnemyType type = EnemyType.fromId(typeId);
-        // Small fairies render at a minimum of 8 px halfSz (16×16 on screen).
-        // Large variants scale up a further 1.75× with a 14 px minimum.
-        // Hitbox is independent of visual size - only the player gets the tiny hitbox.
-        float sizeMult = type.large ? 1.75f : 1.0f;
-        int minHalf = type.large ? 14 : 8;
-        int halfSz = Math.max(minHalf, (int) (12 * sizeMult * scale));
+        ClientArenaState st = ClientArenaState.INSTANCE;
+        int frame = ((int) ((st.arenaAnimTick + partialTick) / (float) FAIRY_ANIM_TICKS_PER_FRAME)) & (FAIRY_FRAMES - 1);
+
+        float sizeMult = type.large ? (LARGE_FRAME / (float) SMALL_FRAME)
+                : type.medium ? (MED_FRAME / (float) SMALL_FRAME)
+                : 1.0f;
+        int minHalf = type.large ? 14 : type.medium ? 10 : 8;
+        float baseHalf = Math.max(minHalf, 12f * sizeMult * scale);
+        int halfSz = (int) (baseHalf * FAIRY_SCREEN_SCALE);
+        int size = halfSz * 2;
         int texIdx = type.textureIdx;
 
+        if (type.large) {
+            int u = frame * LARGE_FRAME;
+            gfx.blit(LARGE_FAIRY_TEX, cx - halfSz, cy - halfSz, size, size,
+                    u, 0f, LARGE_FRAME, LARGE_FRAME, LARGE_SHEET_W, LARGE_SHEET_H);
+            return;
+        }
+        if (type.medium) {
+            int u = frame * MED_FRAME;
+            gfx.blit(MEDIUM_FAIRY_TEX, cx - halfSz, cy - halfSz, size, size,
+                    u, 0f, MED_FRAME, MED_FRAME, MED_SHEET_W, MED_SHEET_H);
+            return;
+        }
+
         if (texIdx >= 0 && texIdx < ENEMY_TEXTURES.length) {
-            int size = halfSz * 2;
+            int u = frame * SMALL_FRAME;
             gfx.blit(Objects.requireNonNull(ENEMY_TEXTURES[texIdx]),
                     cx - halfSz, cy - halfSz, size, size,
-                    0, 0, 32, 32, 32, 32);
+                    u, 0f, SMALL_FRAME, SMALL_FRAME, SMALL_SHEET_W, SMALL_SHEET_H);
         } else {
             int color = (texIdx >= 0 && texIdx < ENEMY_COLORS.length)
                     ? ENEMY_COLORS[texIdx]
