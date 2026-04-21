@@ -24,6 +24,7 @@
           [
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
@@ -38,6 +39,7 @@
           [
             {
               "bulletType": "AMULET",
+              "homing": false,
               "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
@@ -50,6 +52,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": false,
               "offsetX": -10,
               "offsetY": 0,
               "vx": -1.2,
@@ -62,6 +65,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": false,
               "offsetX": 10,
               "offsetY": 0,
               "vx": 1.2,
@@ -76,6 +80,7 @@
           [
             {
               "bulletType": "AMULET",
+              "homing": false,
               "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
@@ -88,6 +93,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -12,
               "offsetY": 0,
               "vx": -1.4,
@@ -100,6 +106,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 12,
               "offsetY": 0,
               "vx": 1.4,
@@ -112,6 +119,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -22,
               "offsetY": 0,
               "vx": -2.2,
@@ -124,6 +132,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 22,
               "offsetY": 0,
               "vx": 2.2,
@@ -138,6 +147,7 @@
           [
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
@@ -150,6 +160,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -12,
               "offsetY": 0,
               "vx": -1.4,
@@ -162,6 +173,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 12,
               "offsetY": 0,
               "vx": 1.4,
@@ -174,6 +186,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -22,
               "offsetY": 0,
               "vx": -2.2,
@@ -186,6 +199,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 22,
               "offsetY": 0,
               "vx": 2.2,
@@ -198,6 +212,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 0,
               "offsetY": 6,
               "vx": 0,
@@ -212,6 +227,7 @@
           [
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
@@ -224,6 +240,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -12,
               "offsetY": 0,
               "vx": -1.4,
@@ -236,6 +253,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 12,
               "offsetY": 0,
               "vx": 1.4,
@@ -248,6 +266,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -22,
               "offsetY": 0,
               "vx": -2.2,
@@ -260,6 +279,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 22,
               "offsetY": 0,
               "vx": 2.2,
@@ -272,6 +292,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 0,
               "offsetY": 6,
               "vx": 0,
@@ -284,6 +305,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -34,
               "offsetY": 0,
               "vx": -3.5,
@@ -296,6 +318,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 34,
               "offsetY": 0,
               "vx": 3.5,
@@ -314,6 +337,7 @@
           [
             {
               "bulletType": "AMULET",
+              "homing": false,
               "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
@@ -328,6 +352,7 @@
           [
             {
               "bulletType": "AMULET",
+              "homing": false,
               "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
@@ -340,6 +365,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": false,
               "offsetX": -6,
               "offsetY": 0,
               "vx": 0,
@@ -352,6 +378,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": false,
               "offsetX": 6,
               "offsetY": 0,
               "vx": 0,
@@ -366,6 +393,7 @@
           [
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
@@ -378,6 +406,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -6,
               "offsetY": 0,
               "vx": 0,
@@ -390,6 +419,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 6,
               "offsetY": 0,
               "vx": 0,
@@ -402,6 +432,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -12,
               "offsetY": 0,
               "vx": 0,
@@ -414,6 +445,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 12,
               "offsetY": 0,
               "vx": 0,
@@ -428,6 +460,7 @@
           [
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
@@ -440,6 +473,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -6,
               "offsetY": 0,
               "vx": 0,
@@ -452,6 +486,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 6,
               "offsetY": 0,
               "vx": 0,
@@ -464,6 +499,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -12,
               "offsetY": 0,
               "vx": 0,
@@ -476,6 +512,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 12,
               "offsetY": 0,
               "vx": 0,
@@ -488,6 +525,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 0,
               "offsetY": 7,
               "vx": 0,
@@ -502,6 +540,7 @@
           [
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
@@ -514,6 +553,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -6,
               "offsetY": 0,
               "vx": 0,
@@ -526,6 +566,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 6,
               "offsetY": 0,
               "vx": 0,
@@ -538,6 +579,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -12,
               "offsetY": 0,
               "vx": 0,
@@ -550,6 +592,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 12,
               "offsetY": 0,
               "vx": 0,
@@ -562,6 +605,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 0,
               "offsetY": 7,
               "vx": 0,
@@ -574,6 +618,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": -18,
               "offsetY": 0,
               "vx": 0,
@@ -586,6 +631,7 @@
             },
             {
               "bulletType": "AMULET",
+              "homing": true,
               "offsetX": 18,
               "offsetY": 0,
               "vx": 0,

@@ -49,17 +49,22 @@ public final class BulletTypeData {
      * is used for drawing. Effective: {@code base × pool visScale × textureScale}.
      */
     public final float lineVisualHalfLength;
-    /**
-     * Visual half-width perpendicular to velocity (arena units). If {@code 0},
+    /** Visual half-width perpendicular to velocity (arena units). If {@code 0},
      * {@link #lineCollisionHalfWidth} is used. Effective: {@code base × pool hitScale × textureScale}.
      */
     public final float lineVisualHalfWidth;
+
+    /** When true, player focus-fire and bombs using HOMING_USE_TYPE_DEFAULT will steer towards enemies (e.g. Reimu amulets). */
+    public final boolean homing;
+    /** When true, this bullet will freeze in place during Sakuya's time stop. */
+    public final boolean sakuyaBlade;
 
     public BulletTypeData(int color, float radius, float hitboxMul, String texture,
             float textureScale, int sourceSize, Float baseAngleDeg,
             boolean applyTint, boolean lineHit,
             float lineCollisionHalfLength, float lineCollisionHalfWidth,
-            float lineVisualHalfLength, float lineVisualHalfWidth) {
+            float lineVisualHalfLength, float lineVisualHalfWidth,
+            boolean homing, boolean sakuyaBlade) {
         this.color = color;
         this.radius = radius;
         this.hitboxMul = hitboxMul;
@@ -73,5 +78,7 @@ public final class BulletTypeData {
         this.lineCollisionHalfWidth = lineCollisionHalfWidth;
         this.lineVisualHalfLength = lineVisualHalfLength;
         this.lineVisualHalfWidth = lineVisualHalfWidth;
+        this.homing = homing;
+        this.sakuyaBlade = sakuyaBlade;
     }
 }

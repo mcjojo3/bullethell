@@ -10,7 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Loads and caches {@link BulletTypeData} from {@code data/bullethell/bullet_types.json}.
@@ -22,7 +23,7 @@ import java.util.EnumMap;
 public final class BulletTypeLoader {
 
     private static final String CLASSPATH_PATH = "data/bullethell/bullet_types.json";
-    private static EnumMap<BulletType, BulletTypeData> cache = null;
+    private static Map<BulletType, BulletTypeData> cache = null;
 
     private BulletTypeLoader() {}
 
@@ -41,7 +42,7 @@ public final class BulletTypeLoader {
     // ---------------------------------------------------------------- internal
 
     private static void load() {
-        cache = new EnumMap<>(BulletType.class);
+        cache = new HashMap<>();
 
         // Dev path takes priority
         String devPath = BullethellConfig.TEST_DEV_PATH != null ? BullethellConfig.TEST_DEV_PATH.get() : null;
@@ -65,14 +66,18 @@ public final class BulletTypeLoader {
         }
     }
 
-    private static void parseInto(EnumMap<BulletType, BulletTypeData> map, JsonObject root) {
-        for (BulletType type : BulletType.values()) {
-            String key = type.name();
-            if (root.has(key)) {
-                try {
-                    map.put(type, parseEntry(root.getAsJsonObject(key), type));
-                } catch (Exception ignored) {}
-            }
+    private static void parseInto(Map<BulletType, BulletTypeData> map, JsonObject root) {
+        // First, handle all keys in the JSON to allow for new dynamic types
+        for (String key : root.keySet()) {
+            try {
+                BulletType type = BulletType.fromName(key);
+                if (type.name.equals("ORB") && !key.equalsIgnoreCase("ORB")) {
+                    // It's a new type: register it with default values first, 
+                    // parseEntry will overwrite with JSON values.
+                    type = BulletType.register(key, 0xFFFFFFFF, 4.0f, 1.0f);
+                }
+                map.put(type, parseEntry(root.getAsJsonObject(key), type));
+            } catch (Exception ignored) {}
         }
     }
 
@@ -145,19 +150,22 @@ public final class BulletTypeLoader {
                 lvWid = 0f;
 
             if (Float.isNaN(lvLen) || Float.isInfinite(lvLen))
-                lvLen = 0f;
-            if (Float.isNaN(lvWid) || Float.isInfinite(lvWid))
-                lvWid = 0f;
+            lvLen = 0f;
+        if (Float.isNaN(lvWid) || Float.isInfinite(lvWid))
+            lvWid = 0f;
         }
 
+        boolean homing = o.has("homing") && o.get("homing").getAsBoolean();
+        boolean sakuyaBlade = o.has("sakuyaBlade") && o.get("sakuyaBlade").getAsBoolean();
+
         return new BulletTypeData(color, radius, hitboxMul, texture, texScale, srcSize, baseAngle, tint, lineHit,
-                lcLen, lcWid, lvLen, lvWid);
+                lcLen, lcWid, lvLen, lvWid, homing, sakuyaBlade);
     }
 
     private static BulletTypeData hardcodedFallback(BulletType type) {
         return new BulletTypeData(
                 type.color, type.radius, type.hitboxCollisionMul,
                 null, 2.80f, 16, null, true, false,
-                0f, 0f, 0f, 0f);
+                0f, 0f, 0f, 0f, false, false);
     }
 }

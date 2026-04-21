@@ -71,11 +71,7 @@ public final class PlayerShotPatterns {
 
     private static BulletType parseBulletType(String raw) {
         if (raw == null || raw.isBlank())
-            return BulletType.PLAYER_SHOT;
-        try {
-            return BulletType.valueOf(raw.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException ignored) {
-            return BulletType.PLAYER_SHOT;
-        }
+            return BulletType.fromName("PLAYER_SHOT");
+        return BulletType.fromName(raw.trim());
     }
 }

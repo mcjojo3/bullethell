@@ -1273,7 +1273,7 @@ public class ArenaContext {
                         PatternEngine.fireAimed(bullets, ex, ey,
                                 player.x, player.y,
                                 aimed, type.bulletSpread,
-                                type.bulletSpeed, difficulty, BulletType.RICE);
+                                type.bulletSpeed, difficulty, BulletType.fromName("RICE"));
                         enemies.setAtkCooldown(i, scaledInterval);
                         break;
                     }
@@ -1282,7 +1282,7 @@ public class ArenaContext {
                         float ringStart = random.nextFloat() * (float) (Math.PI * 2);
                         PatternEngine.fireRingOffset(bullets, ex, ey,
                                 scaledCount, type.bulletSpeed,
-                                difficulty, BulletType.BUBBLE, ringStart);
+                                difficulty, BulletType.fromName("BUBBLE"), ringStart);
                         enemies.setAtkCooldown(i, scaledInterval);
                         break;
                     }
@@ -1293,7 +1293,7 @@ public class ArenaContext {
                                 player.x, player.y,
                                 scaledCount, type.bulletSpread, type.bulletSpeed,
                                 8, type.bulletSpeed * 0.6f,
-                                difficulty, BulletType.STAR, BulletType.BUBBLE, ringStart);
+                                difficulty, BulletType.fromName("STAR"), BulletType.fromName("BUBBLE"), ringStart);
                         enemies.setAtkCooldown(i, scaledInterval);
                         break;
                     }
@@ -1302,7 +1302,7 @@ public class ArenaContext {
                         int spread = Math.min(scaledCount, spreadCap);
                         PatternEngine.fireSpread(bullets, ex, ey,
                                 spread, type.bulletSpeed,
-                                difficulty, BulletType.STAR);
+                                difficulty, BulletType.fromName("STAR"));
                         enemies.setAtkCooldown(i, scaledInterval);
                         break;
                     }
@@ -1310,7 +1310,7 @@ public class ArenaContext {
                         // Rapid single bullet - danger from rate, not spread
                         PatternEngine.fireAimed(bullets, ex, ey,
                                 player.x, player.y,
-                                1, 0f, type.bulletSpeed, difficulty, BulletType.RICE);
+                                1, 0f, type.bulletSpeed, difficulty, BulletType.fromName("RICE"));
                         enemies.setAtkCooldown(i, Math.max(BullethellConfig.FAIRY_STREAM_COOLDOWN_MIN_TICKS.get(),
                                 scaledInterval / Math.max(1, BullethellConfig.FAIRY_STREAM_COOLDOWN_DIVISOR.get())));
                         break;
@@ -1371,7 +1371,7 @@ public class ArenaContext {
         if (rules.onKillDeathBurstCount > 0) {
             PatternEngine.fireRing(bullets, ex, ey,
                     rules.onKillDeathBurstCount, rules.onKillDeathBurstSpeed,
-                    difficulty, BulletType.RICE);
+                    difficulty, BulletType.fromName("RICE"));
         }
 
         // Item drops: TH6-style every-Nth small kill; large anchors always pay out
@@ -2191,7 +2191,7 @@ public class ArenaContext {
                 String ringBt = stepTS(step, "ringBulletType", step.ringBulletType != null ? step.ringBulletType : "");
                 BulletType ringType = (ringBt != null && !ringBt.isEmpty())
                         ? bulletTypeByName(ringBt)
-                        : BulletType.DOT;
+                        : BulletType.fromName("DOT");
                 float ringStartRad = stepTF(step, "ringStartAngleRad", null, step.ringStartAngleRad);
                 float ringStart = ringStartRad >= 0f
                         ? ringStartRad
@@ -2333,7 +2333,7 @@ public class ArenaContext {
                 String stackRingBt = stepTS(step, "ringBulletType", step.ringBulletType != null ? step.ringBulletType : "");
                 BulletType aimedType = (stackRingBt != null && !stackRingBt.isEmpty())
                         ? bulletTypeByName(stackRingBt)
-                        : BulletType.RED_DAGGER;
+                        : BulletType.fromName("RED_DAGGER");
                 float totalFan = sampledSpread > 1e-4f ? sampledSpread : 0.38f;
                 float halfFan = totalFan * 0.5f;
                 float midAng = (float) (Math.PI * 0.5);
@@ -3157,9 +3157,9 @@ public class ArenaContext {
     /** Wide fast fan toward aim; {@code mirrorFan} flips left/right spread for the second pass. */
     private void fireMeisterShotgun(PlayerState2D aim, float baseSpeed, float dens, boolean mirrorFan) {
         PatternStep step = meisterPatternStep();
-        BulletType mainType = step != null ? bulletTypeByName(stepTS(step, "bulletType", step.bulletType)) : BulletType.RED_ORB_LARGE;
-        if (mainType == BulletType.ORB || mainType == BulletType.DOT)
-            mainType = BulletType.RED_ORB_LARGE;
+        BulletType mainType = step != null ? bulletTypeByName(stepTS(step, "bulletType", step.bulletType)) : BulletType.fromName("RED_ORB_LARGE");
+        if (mainType.name.equals("ORB") || mainType.name.equals("DOT"))
+            mainType = BulletType.fromName("RED_ORB_LARGE");
         float vis = step != null ? bulletVis(step) : 1.42f;
         float hit = step != null ? bulletHit(step) : 0.48f;
         int lifeMain = resolveBulletLifetime(step, 175);
@@ -3185,15 +3185,15 @@ public class ArenaContext {
             float ang = baseAngle + dir * (m - mmid) * mspread;
             float vx = (float) Math.cos(ang) * mspd;
             float vy = (float) Math.sin(ang) * mspd;
-            bullets.spawn(bossX, bossY, vx, vy, BulletType.SCARLET_MENTOS.getId(), lifeM, 1f, 0.88f, 0f);
+            bullets.spawn(bossX, bossY, vx, vy, BulletType.fromName("SCARLET_MENTOS").getId(), lifeM, 1f, 0.88f, 0f);
         }
     }
 
     private void fireMeisterSpinBurst(float baseAngle, float baseSpeed, float dens) {
         PatternStep step = meisterPatternStep();
-        BulletType mainType = step != null ? bulletTypeByName(stepTS(step, "bulletType", step.bulletType)) : BulletType.RED_ORB_LARGE;
-        if (mainType == BulletType.ORB || mainType == BulletType.DOT)
-            mainType = BulletType.RED_ORB_LARGE;
+        BulletType mainType = step != null ? bulletTypeByName(stepTS(step, "bulletType", step.bulletType)) : BulletType.fromName("RED_ORB_LARGE");
+        if (mainType.name.equals("ORB") || mainType.name.equals("DOT"))
+            mainType = BulletType.fromName("RED_ORB_LARGE");
         float vis = step != null ? bulletVis(step) : 1.38f;
         float hit = step != null ? bulletHit(step) : 0.46f;
         int life = resolveBulletLifetime(step, 200);
@@ -3942,7 +3942,7 @@ public class ArenaContext {
                     fireSakuyaKnifeRing(uuid, ps, 20);
                 } else if (level >= 2) {
                     fireSakuyaJackRipper(uuid, ps, 18, 0.12f);
-                    PatternEngine.fireRing(getBulletPool(uuid), ps.x, ps.y, 14, 3.4f, difficulty, BulletType.KNIFE);
+                    PatternEngine.fireRing(getBulletPool(uuid), ps.x, ps.y, 14, 3.4f, difficulty, BulletType.fromName("KNIFE"));
                 } else {
                     fireSakuyaJackRipper(uuid, ps, 10, 0.08f);
                 }
@@ -3971,13 +3971,13 @@ public class ArenaContext {
             return;
         }
         if (level == 2) {
-            PatternEngine.fireRing(pb, px, py, 12, 3.6f, difficulty, BulletType.RICE);
-            PatternEngine.fireRing(pb, px, py, 10, 2.3f, difficulty, BulletType.STAR);
+            PatternEngine.fireRing(pb, px, py, 12, 3.6f, difficulty, BulletType.fromName("RICE"));
+            PatternEngine.fireRing(pb, px, py, 10, 2.3f, difficulty, BulletType.fromName("STAR"));
             fireHomingOrbs(ps, pb, 5);
             return;
         }
-        PatternEngine.fireRing(pb, px, py, 18, 4.0f, difficulty, BulletType.RICE);
-        PatternEngine.fireRing(pb, px, py, 16, 2.6f, difficulty, BulletType.DOT);
+        PatternEngine.fireRing(pb, px, py, 18, 4.0f, difficulty, BulletType.fromName("RICE"));
+        PatternEngine.fireRing(pb, px, py, 16, 2.6f, difficulty, BulletType.fromName("DOT"));
         fireHomingOrbs(ps, pb, 10);
     }
 
@@ -3987,7 +3987,7 @@ public class ArenaContext {
             float vx = (float) Math.cos(angle) * 4f;
             float vy = (float) Math.sin(angle) * 4f;
             // ~Legacy HOMING_ORB draw (6f×2.90) with BLUE_ORB base (4f×2.80): vis ≈ 1.5; tighter hit via type mul + hitScale.
-            pb.spawn(ps.x, ps.y, vx, vy, BulletType.BLUE_ORB.getId(), 200, 1.5f, 0.88f);
+            pb.spawn(ps.x, ps.y, vx, vy, BulletType.fromName("BLUE_ORB").getId(), 200, 1.5f, 0.88f, 0f, 0, BulletPool.HOMING_ON);
         }
     }
 
@@ -4003,7 +4003,7 @@ public class ArenaContext {
             float ang = base + (i - (count - 1) / 2f) * spread;
             float sp = 11.5f * BullethellConfig.effectiveSpeedMult(difficulty);
             pb.spawn(ps.x, ps.y, (float) Math.cos(ang) * sp, (float) Math.sin(ang) * sp,
-                    BulletType.KNIFE.getId(), 140);
+                    BulletType.fromName("KNIFE").getId(), 140);
         }
     }
 
@@ -4016,7 +4016,7 @@ public class ArenaContext {
             float dist = 22f + random.nextFloat() * 8f;
             float kx = ps.x + (float) Math.cos(ang) * dist;
             float ky = ps.y + (float) Math.sin(ang) * dist;
-            pb.spawn(kx, ky, 0f, -12f, BulletType.KNIFE.getId(), 120);
+            pb.spawn(kx, ky, 0f, -12f, BulletType.fromName("KNIFE").getId(), 120);
         }
     }
 
@@ -4026,18 +4026,18 @@ public class ArenaContext {
         float cy = ps.y;
         if (level <= 1) {
             clearBulletsInRadius(cx, cy, 72f, ps);
-            PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 10, 3.2f, difficulty, BulletType.BUBBLE);
+            PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 10, 3.2f, difficulty, BulletType.fromName("BUBBLE"));
             return;
         }
         if (level == 2) {
             clearBulletsInRadius(cx, cy, 115f, ps);
-            PatternEngine.fireSpiral(getBulletPool(uuid), cx, cy - 6f, 0f, 10, 3.6f, difficulty, BulletType.STAR);
-            PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 12, 2.8f, difficulty, BulletType.BUBBLE);
+            PatternEngine.fireSpiral(getBulletPool(uuid), cx, cy - 6f, 0f, 10, 3.6f, difficulty, BulletType.fromName("STAR"));
+            PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 12, 2.8f, difficulty, BulletType.fromName("BUBBLE"));
             return;
         }
         clearBulletsInRadius(cx, cy, 200f, ps);
-        PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 22, 4.2f, difficulty, BulletType.STAR);
-        PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 16, 3.0f, difficulty, BulletType.BUBBLE);
+        PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 22, 4.2f, difficulty, BulletType.fromName("STAR"));
+        PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 16, 3.0f, difficulty, BulletType.fromName("BUBBLE"));
     }
 
     private void tickMasterSpark() {
@@ -4460,17 +4460,13 @@ public class ArenaContext {
 
     /** Kunai + knife share the same hit profile; both participate in Sakuya time stop. */
     private static boolean isSakuyaBladeBullet(int typeId) {
-        return typeId == BulletType.KUNAI.getId() || typeId == BulletType.KNIFE.getId();
+        return BulletType.fromId(typeId).isSakuyaBlade();
     }
 
     private static BulletType bulletTypeByName(String name) {
         if (name == null)
-            return BulletType.DOT;
-        try {
-            return BulletType.valueOf(name.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return BulletType.DOT;
-        }
+            return BulletType.fromName("DOT");
+        return BulletType.fromName(name);
     }
 
     // ---------------------------------------------------------------- queries

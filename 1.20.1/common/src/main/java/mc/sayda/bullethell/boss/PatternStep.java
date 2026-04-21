@@ -74,8 +74,6 @@ public class PatternStep {
 
     /**
      * Bullet visual type name (matches {@code BulletType} enum, case-insensitive).
-     * Valid values: DOT, BLUE_ORB, RED_ORB, RED_ORB_LARGE, ORB, CRIMSON_ORB, STAR, RICE, LASER_HEAD, BUBBLE, GOLD,
-     * SPARK, HOMING_ORB, KUNAI, KNIFE, NEEDLE, SCARLET, SCARLET_LARGE, SCARLET_MENTOS, ICE, AMULET
      */
     public String bulletType = "DOT";
 

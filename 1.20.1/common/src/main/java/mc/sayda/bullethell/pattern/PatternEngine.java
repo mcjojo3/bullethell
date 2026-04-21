@@ -64,7 +64,7 @@ public final class PatternEngine {
     public static void fireSpiral(BulletPool pool, float bx, float by,
                                    float angleOffset, int arms, float speed,
                                    DifficultyConfig diff) {
-        fireSpiral(pool, bx, by, angleOffset, arms, speed, diff, BulletType.DOT);
+        fireSpiral(pool, bx, by, angleOffset, arms, speed, diff, BulletType.fromName("DOT"));
     }
 
     // ---------------------------------------------------------------- aimed
@@ -105,7 +105,7 @@ public final class PatternEngine {
                                   float tx, float ty,
                                   int count, float spread, float speed,
                                   DifficultyConfig diff) {
-        fireAimed(pool, bx, by, tx, ty, count, spread, speed, diff, BulletType.STAR);
+        fireAimed(pool, bx, by, tx, ty, count, spread, speed, diff, BulletType.fromName("STAR"));
     }
 
     // ---------------------------------------------------------------- ring
@@ -143,7 +143,7 @@ public final class PatternEngine {
 
     public static void fireRing(BulletPool pool, float bx, float by,
                                  int count, float speed, DifficultyConfig diff) {
-        fireRing(pool, bx, by, count, speed, diff, BulletType.RICE);
+        fireRing(pool, bx, by, count, speed, diff, BulletType.fromName("RICE"));
     }
 
     // ---------------------------------------------------------------- spread (downward fan)
@@ -172,7 +172,7 @@ public final class PatternEngine {
 
     public static void fireSpread(BulletPool pool, float bx, float by,
                                    int count, float speed, DifficultyConfig diff) {
-        fireSpread(pool, bx, by, count, speed, diff, BulletType.STAR);
+        fireSpread(pool, bx, by, count, speed, diff, BulletType.fromName("STAR"));
     }
 
     // ---------------------------------------------------------------- dense ring
@@ -199,7 +199,7 @@ public final class PatternEngine {
                 lifetimeTicks, angVelRadPerTick, ringStartRad);
         float halfStep = (float) (Math.PI / countPerRing);
         float step     = (float) (Math.PI * 2.0 / countPerRing);
-        BulletType altType = (type == BulletType.BUBBLE) ? BulletType.RICE : BulletType.BUBBLE;
+        BulletType altType = (type.name.equals("BUBBLE")) ? BulletType.fromName("RICE") : BulletType.fromName("BUBBLE");
         int life = lifeOrDefault(lifetimeTicks, BullethellConfig.PATTERN_DEFAULT_LIFE_RING.get());
         for (int i = 0; i < countPerRing; i++) {
             float angle = ringStartRad + halfStep + step * i;
@@ -211,7 +211,7 @@ public final class PatternEngine {
 
     public static void fireDenseRing(BulletPool pool, float bx, float by,
                                       int countPerRing, float speed, DifficultyConfig diff) {
-        fireDenseRing(pool, bx, by, countPerRing, speed, diff, BulletType.BUBBLE);
+        fireDenseRing(pool, bx, by, countPerRing, speed, diff, BulletType.fromName("BUBBLE"));
     }
 
     // ---------------------------------------------------------------- ring with offset

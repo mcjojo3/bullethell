@@ -27,7 +27,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.HashMap;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -61,9 +60,8 @@ public class BulletHellRenderer {
      * texture is bound only once per render pass instead of once per bullet.
      */
     private final int[] bulletSortBuf = new int[BulletPool.ENEMY_CAPACITY];
-    /** Reusable counts array for the counting sort (one entry per BulletType ordinal). */
-    private final int[] bulletTypeCounts = new int[BulletType.values().length];
-    private final int[] bulletTypeStarts = new int[BulletType.values().length];
+    private int[] bulletTypeCounts = new int[BulletType.values().length];
+    private int[] bulletTypeStarts = new int[BulletType.values().length];
     /**
      * Pixel height reserved at the bottom of the screen for the boss indicator
      * strip.
@@ -80,7 +78,7 @@ public class BulletHellRenderer {
     private static final ResourceLocation BULLET_FALLBACK_TEXTURE =
             new ResourceLocation(Bullethell.MODID, "textures/bullets/dot.png");
     // Lazy ResourceLocation cache rebuilt whenever BulletTypeLoader is invalidated.
-    private static EnumMap<BulletType, ResourceLocation> bulletTexCache = null;
+    private static Map<BulletType, ResourceLocation> bulletTexCache = null;
 
     /** Invalidates the bullet-type loader and texture cache so the next render re-reads JSON. */
     public static void reloadBulletTypes() {
@@ -90,7 +88,7 @@ public class BulletHellRenderer {
 
     private static ResourceLocation bulletTexture(BulletType type) {
         if (bulletTexCache == null) {
-            bulletTexCache = new EnumMap<>(BulletType.class);
+            bulletTexCache = new HashMap<>();
             for (BulletType t : BulletType.values()) {
                 String name = BulletTypeLoader.get(t).texture;
                 bulletTexCache.put(t, name != null
@@ -310,6 +308,11 @@ public class BulletHellRenderer {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         {
+            int numTypesInRegistry = BulletType.values().length;
+            if (bulletTypeCounts.length < numTypesInRegistry) {
+                bulletTypeCounts = new int[numTypesInRegistry];
+                bulletTypeStarts = new int[numTypesInRegistry];
+            }
             int numTypes = bulletTypeCounts.length;
             java.util.Arrays.fill(bulletTypeCounts, 0);
             // Pass 1: count active bullets per type
@@ -344,7 +347,7 @@ public class BulletHellRenderer {
                 float vis = state.bullets.getVisScale(i);
                 float bvx = state.bullets.getVx(i);
                 float bvy = state.bullets.getVy(i);
-                if (type == BulletType.BLUE_LASER || type == BulletType.RIVER_LASER) {
+                if (type.isShortLaserLineHit()) {
                     float hit = state.bullets.getHitScale(i);
                     renderShortLaserBullet(gfx, type, sbx, sby, vis, hit, bvx, bvy, sx, sy);
                 } else {
@@ -370,7 +373,7 @@ public class BulletHellRenderer {
                 float vis = pool.getVisScale(i);
                 float vx = pool.getVx(i);
                 float vy = pool.getVy(i);
-                if (type == BulletType.BLUE_LASER || type == BulletType.RIVER_LASER) {
+                if (type.isShortLaserLineHit()) {
                     float hit = pool.getHitScale(i);
                     renderShortLaserBullet(gfx, type, sbx, sby, vis, hit, vx, vy, sx, sy);
                 } else {
@@ -574,7 +577,7 @@ public class BulletHellRenderer {
             int sbx = ox + (int) (bx * sx);
             int sby = oy + (int) (by * sy);
             float scale = (sx + sy) * 0.5f;
-            if (bt == BulletType.BLUE_LASER || bt == BulletType.RIVER_LASER) {
+            if (bt.isShortLaserLineHit()) {
                 float halfLen = bt.lineHitCollisionHalfLength(state.bullets.getVisScale(i));
                 float thick = bt.lineHitCollisionHalfWidth(state.bullets.getHitScale(i));
                 int hw = Math.max(0, Math.round(halfLen * scale));
