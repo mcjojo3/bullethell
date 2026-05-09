@@ -14,968 +14,315 @@
   "chargeRateShooting": 1.1,
   "chargeRateIdle": 3.2,
   "chargeRateCharging": 5.2,
-  "description": "Explosive Miracle - wide clear",
+  "description": "Miracle Orbs - jade option shots expand with power",
   "shotOptions": [
     {
-      "label": "A \u2014 Wind & Star",
-      "description": "Rice streams with a central star anchor; focused tightens columns.",
+      "label": "A — Miracle Orbs",
+      "description": "Main shots flanked by jade orbs and leaf option shots that grow with power; focused fires tight shots with divine spirit orbs.",
+      "note": "Based on TH13 TD pl02a unfocused. 9 power tiers (thresholds: 8,16,32,48,64,80,96,128). fireRateTicks>0 = periodic option stream.",
       "unfocused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "RICE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -16,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "RICE",
-              "offsetX": -6,
-              "offsetY": 0,
-              "vx": -1.5,
-              "vy": -15,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 6,
-              "offsetY": 0,
-              "vx": 1.5,
-              "vy": -15,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -16,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "RICE",
-              "offsetX": -12,
-              "offsetY": 0,
-              "vx": -2.8,
-              "vy": -14,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 12,
-              "offsetY": 0,
-              "vx": 2.8,
-              "vy": -14,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -16,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": -24,
-              "offsetY": 0,
-              "vx": -5,
-              "vy": -12,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 24,
-              "offsetY": 0,
-              "vx": 5,
-              "vy": -12,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -8, "offsetY": -8, "vx": -2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  8, "offsetY": -8, "vx":  2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "RICE",
-              "offsetX": -12,
-              "offsetY": 0,
-              "vx": -2.8,
-              "vy": -14,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 12,
-              "offsetY": 0,
-              "vx": 2.8,
-              "vy": -14,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -16,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": -24,
-              "offsetY": 0,
-              "vx": -5,
-              "vy": -12,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 24,
-              "offsetY": 0,
-              "vx": 5,
-              "vy": -12,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 0,
-              "offsetY": 8,
-              "vx": 0,
-              "vy": -15,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -8, "offsetY": -8, "vx": -2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  8, "offsetY": -8, "vx":  2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -20, "offsetY": 0, "vx": -4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  20, "offsetY": 0, "vx":  4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "RICE",
-              "offsetX": -12,
-              "offsetY": 0,
-              "vx": -2.8,
-              "vy": -14,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 12,
-              "offsetY": 0,
-              "vx": 2.8,
-              "vy": -14,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -16,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": -24,
-              "offsetY": 0,
-              "vx": -5,
-              "vy": -12,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 24,
-              "offsetY": 0,
-              "vx": 5,
-              "vy": -12,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 0,
-              "offsetY": 8,
-              "vx": 0,
-              "vy": -15,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": -36,
-              "offsetY": 0,
-              "vx": -7.5,
-              "vy": -10,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 36,
-              "offsetY": 0,
-              "vx": 7.5,
-              "vy": -10,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -8, "offsetY": -8, "vx": -2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  8, "offsetY": -8, "vx":  2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -20, "offsetY": 0, "vx": -4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  20, "offsetY": 0, "vx":  4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -8, "offsetY": -8, "vx": -2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  8, "offsetY": -8, "vx":  2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -20, "offsetY": 0, "vx": -4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  20, "offsetY": 0, "vx":  4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX": -22, "offsetY": 0, "vx": -3, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "JADE", "homing": false, "offsetX":  22, "offsetY": 0, "vx":  3, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -8, "offsetY": -8, "vx": -2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  8, "offsetY": -8, "vx":  2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -20, "offsetY": 0, "vx": -4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  20, "offsetY": 0, "vx":  4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX": -22, "offsetY": 0, "vx": -3, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX":  22, "offsetY": 0, "vx":  3, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -8, "offsetY": -8, "vx": -2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  8, "offsetY": -8, "vx":  2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -20, "offsetY": 0, "vx": -4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  20, "offsetY": 0, "vx":  4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX": -22, "offsetY": 0, "vx": -3, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX":  22, "offsetY": 0, "vx":  3, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -8, "offsetY": -8, "vx": -2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  8, "offsetY": -8, "vx":  2, "vy": -10, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX": -20, "offsetY": 0, "vx": -4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "LEAF", "homing": false, "offsetX":  20, "offsetY": 0, "vx":  4, "vy": -9, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX": -22, "offsetY": 0, "vx": -3, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX":  22, "offsetY": 0, "vx":  3, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
           ]
         ]
       },
       "focused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "RICE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "RICE",
-              "offsetX": -5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -16, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  16, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "RICE",
-              "offsetX": -6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -16, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  16, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
           ],
           [
-            {
-              "bulletType": "RICE",
-              "offsetX": -7,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 7,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": -13,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 13,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.5,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -20, "offsetY": 0, "vx": -3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  20, "offsetY": 0, "vx":  3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "RICE",
-              "offsetX": -7,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 7,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": -13,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 13,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.5,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": -20,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "RICE",
-              "offsetX": 20,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -20, "offsetY": 0, "vx": -3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  20, "offsetY": 0, "vx":  3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -20, "offsetY": 0, "vx": -3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  20, "offsetY": 0, "vx":  3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -20, "offsetY": 0, "vx": -3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  20, "offsetY": 0, "vx":  3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -16, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  16, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -24, "offsetY": 0, "vx": -4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  24, "offsetY": 0, "vx":  4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -12, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  12, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -24, "offsetY": 0, "vx": -4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  24, "offsetY": 0, "vx":  4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
           ]
         ]
       }
     },
     {
-      "label": "B \u2014 Sky Serpent",
-      "description": "Narrow green rice stream; focused adds a dense center line.",
+      "label": "B — Divine Wind",
+      "description": "Homing divine spirit orbs from wide options; focused fires a concentrated spirit column.",
+      "note": "Based on TH13 TD pl02a focused divine spirits. 9 power tiers (thresholds: 8,16,32,48,64,80,96,128).",
       "unfocused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -24, "offsetY": 0, "vx": -3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  24, "offsetY": 0, "vx":  3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
           ],
           [
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -4,
-              "offsetY": 0,
-              "vx": -0.6,
-              "vy": -16.5,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 4,
-              "offsetY": 0,
-              "vx": 0.6,
-              "vy": -16.5,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -24, "offsetY": 0, "vx": -3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 7 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  24, "offsetY": 0, "vx":  3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 7 }
           ],
           [
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -7,
-              "offsetY": 0,
-              "vx": -0.8,
-              "vy": -16.5,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 7,
-              "offsetY": 0,
-              "vx": 0.8,
-              "vy": -16.5,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -20, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  20, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -28, "offsetY": 0, "vx": -4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  28, "offsetY": 0, "vx":  4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
           ],
           [
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -11,
-              "offsetY": 0,
-              "vx": -1,
-              "vy": -16.5,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -4,
-              "offsetY": 0,
-              "vx": -0.4,
-              "vy": -16.8,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17.2,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 4,
-              "offsetY": 0,
-              "vx": 0.4,
-              "vy": -16.8,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 11,
-              "offsetY": 0,
-              "vx": 1,
-              "vy": -16.5,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -20, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  20, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -28, "offsetY": 0, "vx": -4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 7 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  28, "offsetY": 0, "vx":  4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 7 }
           ],
           [
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -14,
-              "offsetY": 0,
-              "vx": -1.2,
-              "vy": -16.5,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -8,
-              "offsetY": 0,
-              "vx": -0.6,
-              "vy": -16.8,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -2,
-              "offsetY": 0,
-              "vx": -0.2,
-              "vy": -17,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 2,
-              "offsetY": 0,
-              "vx": 0.2,
-              "vy": -17,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 8,
-              "offsetY": 0,
-              "vx": 0.6,
-              "vy": -16.8,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 14,
-              "offsetY": 0,
-              "vx": 1.2,
-              "vy": -16.5,
-              "lifetime": 56,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -20, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  20, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -28, "offsetY": 0, "vx": -4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  28, "offsetY": 0, "vx":  4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -16, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  16, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -28, "offsetY": 0, "vx": -4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  28, "offsetY": 0, "vx":  4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -16, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  16, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -28, "offsetY": 0, "vx": -4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  28, "offsetY": 0, "vx":  4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -16, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  16, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -28, "offsetY": 0, "vx": -4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  28, "offsetY": 0, "vx":  4, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  10, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 56, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -12, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  12, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -24, "offsetY": 0, "vx": -3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  24, "offsetY": 0, "vx":  3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -32, "offsetY": 0, "vx": -5, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  32, "offsetY": 0, "vx":  5, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ]
         ]
       },
       "focused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -3,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 3,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": 0, "offsetY": 0, "vx": 0, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.5,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -8,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -3,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.3,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.8,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 3,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.3,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 8,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
           ],
           [
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -11,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.3,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": -2,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.6,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 2,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.6,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.3,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GREEN_RICE",
-              "offsetX": 11,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -16, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  16, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": 0, "offsetY": -14, "vx": 0, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -8, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  8, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -16, "offsetY": 0, "vx": -2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  16, "offsetY": 0, "vx":  2, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "PLAYER_SHOT", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "JADE", "homing": false, "offsetX": -6, "offsetY": 0, "vx": -1, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "JADE", "homing": false, "offsetX":  6, "offsetY": 0, "vx":  1, "vy": -10, "lifetime": 64, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -10, "offsetY": 0, "vx": -1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  10, "offsetY": 0, "vx":  1, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX": -20, "offsetY": 0, "vx": -3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "DIVINE_SPIRIT", "homing": true, "offsetX":  20, "offsetY": 0, "vx":  3, "vy": -11, "lifetime": 90, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
           ]
         ]
       }

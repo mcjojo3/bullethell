@@ -19,6 +19,8 @@ public class BullethellFabricClient implements ClientModInitializer {
         EntityRendererRegistry.register(BHEntities.CIRNO_NPC.get(), BHNpcRenderer::new);
         EntityRendererRegistry.register(BHEntities.SANAE_NPC.get(), BHNpcRenderer::new);
         EntityRendererRegistry.register(BHEntities.FLANDRE_NPC.get(), BHNpcRenderer::new);
-        EntityRendererRegistry.register(BHEntities.REISEN_NPC.get(), BHNpcRenderer::new);
+        EntityRendererRegistry.register(BHEntities.SATORI_NPC.get(), BHNpcRenderer::new);
+        EntityRendererRegistry.register(BHEntities.YUUKA_NPC.get(), BHNpcRenderer::new);
+        EntityRendererRegistry.register(BHEntities.KANAKO_NPC.get(), BHNpcRenderer::new);
     }
 }

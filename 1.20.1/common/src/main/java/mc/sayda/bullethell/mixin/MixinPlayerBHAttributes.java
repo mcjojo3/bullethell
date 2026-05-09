@@ -13,8 +13,13 @@ public abstract class MixinPlayerBHAttributes {
 
     @Inject(method = "createAttributes", at = @At("RETURN"))
     private static void bullethell$addBHAttributes(CallbackInfoReturnable<AttributeSupplier.Builder> cir) {
-        cir.getReturnValue()
-                .add(BHAttributes.EXTRA_LIVES.get(), 0.0)
-                .add(BHAttributes.EXTRA_BOMBS.get(), 0.0);
+        // On Fabric, DefaultAttributes.<clinit> fires before mod init so the deferred register
+        // hasn't committed yet. EntityAttributeModificationCallback in BullethellFabric handles
+        // Fabric registration; this mixin covers Forge where timing is fine.
+        try {
+            cir.getReturnValue()
+                    .add(BHAttributes.EXTRA_LIVES.get(), 0.0)
+                    .add(BHAttributes.EXTRA_BOMBS.get(), 0.0);
+        } catch (Exception ignored) {}
     }
 }

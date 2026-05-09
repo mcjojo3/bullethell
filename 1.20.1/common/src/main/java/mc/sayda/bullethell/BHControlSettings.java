@@ -14,6 +14,7 @@ public final class BHControlSettings {
     private static volatile BHControlScheme clientScheme = BHControlScheme.TH19;
     private static final String TAG_SCHEME_TH19 = "bullethell.controls.th19";
     private static final String TAG_SCHEME_TH9 = "bullethell.controls.th9";
+    private static final String TAG_SCHEME_CLASSIC = "bullethell.controls.classic";
 
     private static final ConcurrentHashMap<UUID, String> SERVER_MIRROR = new ConcurrentHashMap<>();
 
@@ -30,7 +31,9 @@ public final class BHControlSettings {
     }
 
     private static String tagFor(BHControlScheme scheme) {
-        return scheme == BHControlScheme.TH9 ? TAG_SCHEME_TH9 : TAG_SCHEME_TH19;
+        if (scheme == BHControlScheme.TH9) return TAG_SCHEME_TH9;
+        if (scheme == BHControlScheme.CLASSIC) return TAG_SCHEME_CLASSIC;
+        return TAG_SCHEME_TH19;
     }
 
     /** Persisted on player entity tags; survives logout/restart. */
@@ -40,6 +43,7 @@ public final class BHControlSettings {
         SERVER_MIRROR.put(player.getUUID(), scheme.id());
         player.removeTag(TAG_SCHEME_TH19);
         player.removeTag(TAG_SCHEME_TH9);
+        player.removeTag(TAG_SCHEME_CLASSIC);
         player.addTag(tagFor(scheme));
     }
 
@@ -67,6 +71,8 @@ public final class BHControlSettings {
         BHControlScheme resolved;
         if (player.getTags().contains(TAG_SCHEME_TH9)) {
             resolved = BHControlScheme.TH9;
+        } else if (player.getTags().contains(TAG_SCHEME_CLASSIC)) {
+            resolved = BHControlScheme.CLASSIC;
         } else if (player.getTags().contains(TAG_SCHEME_TH19)) {
             resolved = BHControlScheme.TH19;
         } else {
@@ -83,6 +89,8 @@ public final class BHControlSettings {
     public static String describe(BHControlScheme s) {
         if (s == BHControlScheme.TH9)
             return "th9 (PoFV): tap Z to shoot; hold Z to charge; release Z to cast; bomb on C or X (same as th19 C bomb).";
+        if (s == BHControlScheme.CLASSIC)
+            return "classic (TH6): hold Z to shoot; bomb on C or X; no charging / special skills; charge bar hidden.";
         return "th19 (UM): hold Z to shoot; hold X to charge, release X to cast; bomb on C.";
     }
 
@@ -90,7 +98,8 @@ public final class BHControlSettings {
         return "Recommended (defaults):\n"
                 + "  th19 - Touhou 19-style: hold Z shoot, hold X charge / release X cast, C bomb, Shift focus.\n"
                 + "  th9  - Touhou 9 / PoFV-style: tap Z shoot, hold Z charge / release Z cast; C or X bomb (same behavior).\n"
-                + "Use: /bullethell controls <th19|th9>";
+                + "  classic - Touhou 6-style: hold Z shoot, C or X bomb, no skills.\n"
+                + "Use: /bullethell controls <th19|th9|classic>";
     }
 
     public static String formatList() {

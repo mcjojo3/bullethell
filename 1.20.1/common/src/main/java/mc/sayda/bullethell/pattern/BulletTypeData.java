@@ -54,7 +54,7 @@ public final class BulletTypeData {
      */
     public final float lineVisualHalfWidth;
 
-    /** When true, player focus-fire and bombs using HOMING_USE_TYPE_DEFAULT will steer towards enemies (e.g. Reimu amulets). */
+    /** When true, player focus-fire and bombs using HOMING_USE_TYPE_DEFAULT will steer towards enemies (e.g. Reimu ofudas). */
     public final boolean homing;
     /** When true, this bullet will freeze in place during Sakuya's time stop. */
     public final boolean sakuyaBlade;

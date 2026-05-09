@@ -17,1025 +17,250 @@
   "description": "Fast & Powerful",
   "shotOptions": [
     {
-      "label": "A \u2014 Illusion Missile",
-      "description": "Magic missiles in a wide fan; focus adds stars for extra punch up close.",
+      "label": "A — Magic Missile",
+      "description": "Forward star stream with homing side orbs; orbs quicken and multiply with power. Focus: twin/triple streams plus a single backward-launched tracking orb.",
+      "note": "Based on TH7 PCB ply01a/ply01as. 9 power tiers (thresholds: 8,16,32,48,64,80,96,128). Side option homing bullets approximated at offsetX=±24. Backward-start focused orb uses vy=+2 (speed=-2 at angle=-π/2 in source).",
       "unfocused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -16,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
           ],
           [
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -16,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -9,
-              "offsetY": 0,
-              "vx": -2.2,
-              "vy": -15,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 9,
-              "offsetY": 0,
-              "vx": 2.2,
-              "vy": -15,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
           ],
           [
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -16,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -11,
-              "offsetY": 0,
-              "vx": -2.6,
-              "vy": -15,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 11,
-              "offsetY": 0,
-              "vx": 2.6,
-              "vy": -15,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -24,
-              "offsetY": 0,
-              "vx": -5,
-              "vy": -13,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 24,
-              "offsetY": 0,
-              "vx": 5,
-              "vy": -13,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 15 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 15 }
           ],
           [
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -16,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -11,
-              "offsetY": 0,
-              "vx": -2.6,
-              "vy": -15,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 11,
-              "offsetY": 0,
-              "vx": 2.6,
-              "vy": -15,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -24,
-              "offsetY": 0,
-              "vx": -5,
-              "vy": -13,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 24,
-              "offsetY": 0,
-              "vx": 5,
-              "vy": -13,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 8,
-              "vx": 0,
-              "vy": -15.5,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84,  "vy": -13, "lifetime": 120, "visScale": 0.9, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84,  "vy": -13, "lifetime": 120, "visScale": 0.9, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -16,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -11,
-              "offsetY": 0,
-              "vx": -2.6,
-              "vy": -15,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 11,
-              "offsetY": 0,
-              "vx": 2.6,
-              "vy": -15,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -24,
-              "offsetY": 0,
-              "vx": -5,
-              "vy": -13,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 24,
-              "offsetY": 0,
-              "vx": 5,
-              "vy": -13,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 8,
-              "vx": 0,
-              "vy": -15.5,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -38,
-              "offsetY": 0,
-              "vx": -7,
-              "vy": -11,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 38,
-              "offsetY": 0,
-              "vx": 7,
-              "vy": -11,
-              "lifetime": 58,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84,  "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84,  "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 7 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 7 }
+          ],
+          [
+            { "bulletType": "GOLD",          "homing": false, "offsetX":  -8, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   8, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84,  "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84,  "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0.84,  "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx": -0.84,  "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "GOLD",          "homing": false, "offsetX":  -8, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   8, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84,  "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84,  "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0.84,  "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx": -0.84,  "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx": -1.12,  "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 1 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  1.12,  "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 1 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84,  "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84,  "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0.84,  "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx": -0.84,  "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
+          ],
+          [
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx": -1.12,  "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 1 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,     "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  1.12,  "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 1 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84,  "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84,  "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0.84,  "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx": -0.84,  "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0,     "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
           ]
         ]
       },
       "focused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
           ],
           [
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
           ],
           [
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": -11,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 11,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 0.9, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": -11,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 11,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 7,
-              "vx": 0,
-              "vy": -19.5,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": -5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": -11,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 11,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "GOLD",
-              "offsetX": 0,
-              "offsetY": 7,
-              "vx": 0,
-              "vy": -19.5,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": -17,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18.5,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 17,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18.5,
-              "lifetime": 50,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "GOLD",          "homing": false, "offsetX":  -8, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   8, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "GOLD",          "homing": false, "offsetX":  -8, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   8, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 2 }
+          ],
+          [
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx": -1.12, "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 1 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  1.12, "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 1 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 2 }
+          ],
+          [
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx": -1.12, "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 1 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",          "homing": false, "offsetX":   0, "offsetY": 0, "vx":  1.12, "vy": -16, "lifetime": 80,  "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 1 },
+            { "bulletType": "MAGIC_MISSILE",  "homing": true,  "offsetX":   0, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 2 }
           ]
         ]
       }
     },
     {
-      "label": "B \u2014 Magicannon",
-      "description": "Tight columns of stars like a laser. Very strong single-target damage when focused.",
+      "label": "B — Illusion Laser",
+      "description": "Spread of stars with homing side orbs unfocused; focused fires twin/triple streams plus a rapid center beam approximating the Illusion Laser.",
+      "note": "Based on TH7 PCB ply01b/ply01bs. 9 power tiers. Side MARISA_ORB options approximate func_on_tick side familiars. Focused: center beam from offsetY=-24 approximates the focused laser (func_on_tick=5).",
       "unfocused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
           ],
           [
-            {
-              "bulletType": "STAR",
-              "offsetX": -3,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 3,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 0.8, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
           ],
           [
-            {
-              "bulletType": "STAR",
-              "offsetX": -5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19.5,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 0.9, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 0.9, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 0.9, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 15 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 0.9, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 15 }
           ],
           [
-            {
-              "bulletType": "STAR",
-              "offsetX": -10,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": -4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19.5,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19.8,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19.5,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 10,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",       "homing": false, "offsetX": -8, "offsetY": 0, "vx": -0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  8, "offsetY": 0, "vx":  0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 7 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 7 }
           ],
           [
-            {
-              "bulletType": "STAR",
-              "offsetX": -13,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": -7,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19.3,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": -2,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19.8,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 2,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19.8,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 7,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19.3,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 13,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -19,
-              "lifetime": 52,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",       "homing": false, "offsetX": -8, "offsetY": 0, "vx": -0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  8, "offsetY": 0, "vx":  0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 7 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0,    "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 7 }
+          ],
+          [
+            { "bulletType": "GOLD",       "homing": false, "offsetX": -8, "offsetY": 0, "vx": -0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  8, "offsetY": 0, "vx":  0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "GOLD",       "homing": false, "offsetX": -8, "offsetY": 0, "vx": -0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  8, "offsetY": 0, "vx":  0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx": -1.39, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx":  1.39, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 1.1, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx": -2.77, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx": -1.39, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx":  1.39, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": 0, "vx":  2.77, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX": -24, "offsetY": 0, "vx":  0.84, "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 },
+            { "bulletType": "MARISA_ORB", "homing": true,  "offsetX":  24, "offsetY": 0, "vx": -0.84, "vy": -13, "lifetime": 120, "visScale": 1.2, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
           ]
         ]
       },
       "focused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": -24, "vx":  0,    "vy": -22, "lifetime": 55, "visScale": 0.7, "hitScale": 1.5, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 1 }
           ],
           [
-            {
-              "bulletType": "STAR",
-              "offsetX": -2,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 2,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": -24, "vx":  0,    "vy": -22, "lifetime": 55, "visScale": 0.7, "hitScale": 1.5, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 2 }
           ],
           [
-            {
-              "bulletType": "STAR",
-              "offsetX": -4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22.5,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": -24, "vx":  0,    "vy": -22, "lifetime": 55, "visScale": 0.7, "hitScale": 1.5, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 2 }
           ],
           [
-            {
-              "bulletType": "STAR",
-              "offsetX": -8,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": -3,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22.5,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22.8,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 3,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22.5,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 8,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",       "homing": false, "offsetX": -8, "offsetY":   0, "vx": -0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  8, "offsetY":   0, "vx":  0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": -24, "vx":  0,    "vy": -22, "lifetime": 55, "visScale": 0.7, "hitScale": 1.5, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 2 }
           ],
           [
-            {
-              "bulletType": "STAR",
-              "offsetX": -11,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": -5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22.5,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": -1,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22.8,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 1,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22.8,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 5,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22.5,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "STAR",
-              "offsetX": 11,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -22,
-              "lifetime": 46,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "GOLD",       "homing": false, "offsetX": -8, "offsetY":   0, "vx": -0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  8, "offsetY":   0, "vx":  0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": -24, "vx":  0,    "vy": -22, "lifetime": 55, "visScale": 0.8, "hitScale": 1.5, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 2 }
+          ],
+          [
+            { "bulletType": "GOLD",       "homing": false, "offsetX": -8, "offsetY":   0, "vx": -0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  8, "offsetY":   0, "vx":  0.56, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": -24, "vx":  0,    "vy": -22, "lifetime": 55, "visScale": 0.8, "hitScale": 1.5, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx": -1.39, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx":  1.39, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": -24, "vx":  0,    "vy": -22, "lifetime": 55, "visScale": 0.8, "hitScale": 1.5, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
+          ],
+          [
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx": -1.39, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx":  1.39, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": -24, "vx":  0,    "vy": -22, "lifetime": 55, "visScale": 0.9, "hitScale": 1.5, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 4 }
+          ],
+          [
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx": -1.39, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx":  0,    "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY":   0, "vx":  1.39, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "GOLD",       "homing": false, "offsetX":  0, "offsetY": -24, "vx":  0,    "vy": -22, "lifetime": 55, "visScale": 1.0, "hitScale": 1.5, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ]
         ]
       }

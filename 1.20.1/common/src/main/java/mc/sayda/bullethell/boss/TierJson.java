@@ -213,73 +213,14 @@ public final class TierJson {
         return fallback == null ? "" : fallback;
     }
 
-    // ---------------------------------------------------------------- unified scalar OR [E,M,H,L] on the same JSON key (boss load)
+    // ---------------------------------------------------------------- boss load — promote scalar OR [E,N,H,L] arrays
 
     /**
-     * Before {@link com.google.gson.Gson#fromJson(com.google.gson.JsonElement, java.lang.reflect.Type)}, rewrite
-     * boss JSON so any scalar field that holds a JSON array becomes {@code field} + primitive (first slot) and
-     * {@code fieldByDifficulty} + padded array. Gson then fills {@link PatternStep} / {@link PhaseDefinition} as today.
+     * For each phase: promote explicitly-listed scalar fields that hold a {@code [E,N,H,L]} array into their
+     * {@code *ByDifficulty} backing field on {@link PhaseDefinition}.
+     * For each pattern step: any field holding an array is promoted into the step's {@code byDifficulty}
+     * sub-object — fully generic, no field whitelist needed.
      */
-    /**
-     * Folds legacy {@code fooByDifficulty} keys onto {@code foo} as a tier array (removes the {@code *ByDifficulty}
-     * property). Run before {@link #promoteUnionTierFieldsOnBoss} so JSON may use either style during transition.
-     */
-    public static void migrateLegacyByDifficultyKeysOnBoss(JsonObject root) {
-        if (root == null || !root.has("phases") || !root.get("phases").isJsonArray())
-            return;
-        for (JsonElement pe : root.getAsJsonArray("phases")) {
-            if (!pe.isJsonObject())
-                continue;
-            JsonObject ph = pe.getAsJsonObject();
-            migrateObjectLegacyTierKeys(ph);
-            migratePatternStepListLegacy(ph.get("attacks"));
-            if (ph.has("emitters") && ph.get("emitters").isJsonArray()) {
-                for (JsonElement ee : ph.getAsJsonArray("emitters")) {
-                    if (!ee.isJsonObject())
-                        continue;
-                    migratePatternStepListLegacy(ee.getAsJsonObject().get("attacks"));
-                }
-            }
-        }
-    }
-
-    private static void migratePatternStepListLegacy(JsonElement attacksEl) {
-        if (attacksEl == null || !attacksEl.isJsonArray())
-            return;
-        for (JsonElement se : attacksEl.getAsJsonArray()) {
-            if (se.isJsonObject())
-                migrateObjectLegacyTierKeys(se.getAsJsonObject());
-        }
-    }
-
-    private static void migrateObjectLegacyTierKeys(JsonObject o) {
-        if (o == null)
-            return;
-        for (String key : new java.util.HashSet<>(o.keySet())) {
-            if ("byDifficulty".equals(key))
-                continue;
-            if (!key.endsWith("ByDifficulty"))
-                continue;
-            migrateLegacyTierKey(o, key);
-        }
-    }
-
-    private static void migrateLegacyTierKey(JsonObject o, String tierKey) {
-        JsonElement te = o.get(tierKey);
-        if (te == null || !te.isJsonArray() || te.getAsJsonArray().size() == 0) {
-            o.remove(tierKey);
-            return;
-        }
-        String base = tierKey.substring(0, tierKey.length() - "ByDifficulty".length());
-        if (base.isEmpty())
-            return;
-        JsonArray padded = padJsonArrayToFour(te.getAsJsonArray());
-        o.remove(tierKey);
-        if (o.has(base))
-            o.remove(base);
-        o.add(base, padded);
-    }
-
     public static void promoteUnionTierFieldsOnBoss(JsonObject root) {
         if (root == null || !root.has("phases") || !root.get("phases").isJsonArray())
             return;
@@ -309,81 +250,57 @@ public final class TierJson {
     }
 
     private static void promotePhaseScalarOrArrays(JsonObject ph) {
-        promoteIntScalarOrArray(ph, "hp", "hpByDifficulty");
-        promoteFloatScalarOrArray(ph, "moveSpeed", "moveSpeedByDifficulty");
-        promoteFloatScalarOrArray(ph, "patternTempo", "patternTempoByDifficulty");
-        promoteLongScalarOrArray(ph, "spellBonus", "spellBonusByDifficulty");
+        if (ph == null)
+            return;
+        JsonObject bd = null;
+        for (String key : new java.util.ArrayList<>(ph.keySet())) {
+            if ("byDifficulty".equals(key)
+                    || "attacks".equals(key) || "emitters".equals(key) || "spellDurationTicks".equals(key))
+                continue;
+            JsonElement el = ph.get(key);
+            if (el == null || !el.isJsonArray())
+                continue;
+            JsonArray a = el.getAsJsonArray();
+            if (a.size() == 0)
+                continue;
+            if (bd == null)
+                bd = getOrCreateByDifficulty(ph);
+            bd.add(key, padJsonArrayToFour(a));
+            ph.remove(key);
+            ph.add(key, a.get(0));
+        }
+        if (bd != null && bd.size() > 0)
+            ph.add("byDifficulty", bd);
     }
 
+    /** Pattern steps: any field holding a JSON array is generically promoted into {@code byDifficulty}. */
     private static void promotePatternStepScalarOrArrays(JsonObject o) {
-        promoteIntScalarOrArray(o, "arms", "armsByDifficulty");
-        promoteIntScalarOrArray(o, "cooldown", "cooldownByDifficulty");
-        promoteIntScalarOrArray(o, "minCooldown", "minCooldownByDifficulty");
-        promoteIntScalarOrArray(o, "maxScaledArms", "maxScaledArmsByDifficulty");
-        promoteIntScalarOrArray(o, "burstCount", "burstCountByDifficulty");
-        promoteIntScalarOrArray(o, "burstInterval", "burstIntervalByDifficulty");
-        promoteIntScalarOrArray(o, "bulletLifetimeTicks", "bulletLifetimeTicksByDifficulty");
-        promoteIntScalarOrArray(o, "segmentDurationTicks", "segmentDurationTicksByDifficulty");
-        promoteIntScalarOrArray(o, "segmentVolleyIntervalTicks", "segmentVolleyIntervalTicksByDifficulty");
-        promoteIntScalarOrArray(o, "rayStackDepth", "rayStackDepthByDifficulty");
-        promoteIntScalarOrArray(o, "combCount", "combCountByDifficulty");
-        promoteFloatScalarOrArray(o, "speed", "speedByDifficulty");
-        promoteFloatScalarOrArray(o, "spread", "spreadByDifficulty");
-        promoteFloatScalarOrArray(o, "rayStackSpacing", "rayStackSpacingByDifficulty");
-        promoteFloatScalarOrArray(o, "laserHalfWidth", "laserHalfWidthByDifficulty");
-        promoteFloatScalarOrArray(o, "laserRotateAdvanceRad", "laserRotateAdvanceRadByDifficulty");
-        promoteFloatScalarOrArray(o, "sprinklerAdvanceRad", "sprinklerAdvanceRadByDifficulty");
-        promoteFloatScalarOrArray(o, "orbCRowSpacingScale", "orbCRowSpacingScaleByDifficulty");
-        promoteFloatScalarOrArray(o, "orbCRowCurvatureScale", "orbCRowCurvatureScaleByDifficulty");
-        promoteFloatScalarOrArray(o, "orbCRowSpeedSlope", "orbCRowSpeedSlopeByDifficulty");
+        if (o == null)
+            return;
+        JsonObject bd = null;
+        for (String key : new java.util.ArrayList<>(o.keySet())) {
+            if ("byDifficulty".equals(key) || "wormCircles".equals(key))
+                continue;
+            JsonElement el = o.get(key);
+            if (el == null || !el.isJsonArray())
+                continue;
+            JsonArray a = el.getAsJsonArray();
+            if (a.size() == 0)
+                continue;
+            if (bd == null)
+                bd = getOrCreateByDifficulty(o);
+            bd.add(key, padJsonArrayToFour(a));
+            o.remove(key);
+            o.add(key, a.get(0));
+        }
+        if (bd != null && bd.size() > 0)
+            o.add("byDifficulty", bd);
     }
 
-    private static void promoteIntScalarOrArray(JsonObject o, String base, String tier) {
-        if (o == null || !o.has(base))
-            return;
-        JsonElement el = o.get(base);
-        if (!el.isJsonArray())
-            return;
-        JsonArray a = el.getAsJsonArray();
-        if (a.size() == 0)
-            return;
-        JsonArray padded = padJsonArrayToFour(a);
-        o.remove(tier);
-        o.remove(base);
-        o.add(tier, padded);
-        o.add(base, new JsonPrimitive(elementAsInt(a.get(0), 0)));
-    }
-
-    private static void promoteFloatScalarOrArray(JsonObject o, String base, String tier) {
-        if (o == null || !o.has(base))
-            return;
-        JsonElement el = o.get(base);
-        if (!el.isJsonArray())
-            return;
-        JsonArray a = el.getAsJsonArray();
-        if (a.size() == 0)
-            return;
-        JsonArray padded = padJsonArrayToFour(a);
-        o.remove(tier);
-        o.remove(base);
-        o.add(tier, padded);
-        o.add(base, new JsonPrimitive(elementAsFloat(a.get(0), 0f)));
-    }
-
-    private static void promoteLongScalarOrArray(JsonObject o, String base, String tier) {
-        if (o == null || !o.has(base))
-            return;
-        JsonElement el = o.get(base);
-        if (!el.isJsonArray())
-            return;
-        JsonArray a = el.getAsJsonArray();
-        if (a.size() == 0)
-            return;
-        JsonArray padded = padJsonArrayToFour(a);
-        o.remove(tier);
-        o.remove(base);
-        o.add(tier, padded);
-        o.add(base, new JsonPrimitive(elementAsLong(a.get(0), 0L)));
+    private static JsonObject getOrCreateByDifficulty(JsonObject o) {
+        if (o.has("byDifficulty") && o.get("byDifficulty").isJsonObject())
+            return o.getAsJsonObject("byDifficulty");
+        return new JsonObject();
     }
 
     private static JsonArray padJsonArrayToFour(JsonArray a) {

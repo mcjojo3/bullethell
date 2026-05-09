@@ -36,6 +36,7 @@ public class DifficultySelectScreen extends Screen {
 
     private final String stageId;
     private final int maxAllowedDifficultyOrdinal;
+    private final boolean practiceMode;
 
     private int selectedIndex = 1;
 
@@ -43,13 +44,18 @@ public class DifficultySelectScreen extends Screen {
     private int cardTopY;
 
     public DifficultySelectScreen(String stageId) {
-        this(stageId, DifficultyConfig.LUNATIC.ordinal());
+        this(stageId, DifficultyConfig.LUNATIC.ordinal(), false);
     }
 
     public DifficultySelectScreen(String stageId, int maxAllowedDifficultyOrdinal) {
+        this(stageId, maxAllowedDifficultyOrdinal, false);
+    }
+
+    public DifficultySelectScreen(String stageId, int maxAllowedDifficultyOrdinal, boolean practiceMode) {
         super(Component.literal("Select Difficulty"));
         this.stageId = stageId;
         this.maxAllowedDifficultyOrdinal = maxAllowedDifficultyOrdinal;
+        this.practiceMode = practiceMode;
         this.selectedIndex = Math.min(1, Math.max(0, maxAllowedDifficultyOrdinal));
     }
 
@@ -178,7 +184,7 @@ public class DifficultySelectScreen extends Screen {
         if (!isAllowed(selectedIndex))
             return;
         BHSfx.playSelect();
-        Minecraft.getInstance().setScreen(new CharacterSelectScreen(DIFFS[selectedIndex], stageId, maxAllowedDifficultyOrdinal));
+        Minecraft.getInstance().setScreen(new CharacterSelectScreen(DIFFS[selectedIndex], stageId, maxAllowedDifficultyOrdinal, practiceMode));
     }
 
     @Override

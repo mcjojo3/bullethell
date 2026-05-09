@@ -3,8 +3,10 @@ package mc.sayda.bullethell.network;
 import net.minecraft.network.FriendlyByteBuf;
 
 /**
- * S → C | Sent when the arena ends (win or game-over), before the stopped packet.
- * Carries all data needed to render the end dialog and stats overlay on the client.
+ * S → C | Sent when the arena ends (win or game-over), before the stopped
+ * packet.
+ * Carries all data needed to render the end dialog and stats overlay on the
+ * client.
  */
 public final class ArenaEndPacket {
 
@@ -17,20 +19,26 @@ public final class ArenaEndPacket {
     public final String characterId;
     /** Display name of the character. */
     public final String characterName;
-    /** Boss victory or defeat quote. Empty string = no dialog, skip straight to stats. */
+    /**
+     * Boss victory or defeat quote. Empty string = no dialog, skip straight to
+     * stats.
+     */
     public final String bossDialog;
     /** This player's score (co-op: not the team sum). */
     public final long score;
     /** Sum of all participants' scores; equals {@link #score} in solo. */
     public final long scoreCombined;
-    /** Minecraft experience points granted on victory (0 if loss or intermediate boss-rush stage). */
+    /**
+     * Minecraft experience points granted on victory (0 if loss or intermediate
+     * boss-rush stage).
+     */
     public final int victoryXp;
     public final int lives;
     public final int bombs;
     public final int graze;
     public final int spellsCaptured;
     public final int spellsAttempted;
-    /** 0–100 completion percentage (used for defeat display). */
+    /** 0-100 completion percentage (used for defeat display). */
     public final float completionPercent;
     /** Stage id for retry (e.g. "marisa_stage"). */
     public final String stageId;

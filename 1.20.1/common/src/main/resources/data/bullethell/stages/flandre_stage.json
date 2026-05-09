@@ -14,7 +14,7 @@
     "scoreExtendEvery": 1500000,
     "pocFraction": 0.2,
     "pocAutoCollect": true,
-    "itemAttractionSpeed": 8.0,
+    "itemAttractionSpeed": 16.0,
     "deathPowerLoss": 16,
     "grazeScoringEnabled": true,
     "grazeScoreMultiplier": 1.0,

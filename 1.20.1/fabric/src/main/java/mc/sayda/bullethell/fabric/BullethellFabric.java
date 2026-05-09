@@ -17,6 +17,8 @@ public class BullethellFabric implements ModInitializer {
         FabricDefaultAttributeRegistry.register(BHEntities.CIRNO_NPC.get(), BHNpc.createAttributes());
         FabricDefaultAttributeRegistry.register(BHEntities.SANAE_NPC.get(), BHNpc.createAttributes());
         FabricDefaultAttributeRegistry.register(BHEntities.FLANDRE_NPC.get(), BHNpc.createAttributes());
-        FabricDefaultAttributeRegistry.register(BHEntities.REISEN_NPC.get(), BHNpc.createAttributes());
+        FabricDefaultAttributeRegistry.register(BHEntities.SATORI_NPC.get(), BHNpc.createAttributes());
+        FabricDefaultAttributeRegistry.register(BHEntities.YUUKA_NPC.get(), BHNpc.createAttributes());
+        FabricDefaultAttributeRegistry.register(BHEntities.KANAKO_NPC.get(), BHNpc.createAttributes());
     }
 }

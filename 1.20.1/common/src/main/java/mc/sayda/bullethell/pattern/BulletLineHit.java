@@ -5,9 +5,10 @@ package mc.sayda.bullethell.pattern;
  */
 public final class BulletLineHit {
 
-    private BulletLineHit() {}
+    private BulletLineHit() {
+    }
 
-    /** Squared distance from P to the finite segment A–B. */
+    /** Squared distance from P to the finite segment A-B. */
     public static float distSqPointToSegment(float px, float py,
             float ax, float ay, float bx, float by) {
         float abx = bx - ax, aby = by - ay;
@@ -25,9 +26,12 @@ public final class BulletLineHit {
     }
 
     /**
-     * Squared distance from P to a short-laser segment centered at {@code (cx, cy)}, extending
-     * {@code halfLength} <em>along</em> {@code (vx, vy)} (beam shoots straight outward; cross-section
-     * is handled separately via thickness + player radii in {@link mc.sayda.bullethell.arena.ArenaContext}).
+     * Squared distance from P to a short-laser segment centered at
+     * {@code (cx, cy)}, extending
+     * {@code halfLength} <em>along</em> {@code (vx, vy)} (beam shoots straight
+     * outward; cross-section
+     * is handled separately via thickness + player radii in
+     * {@link mc.sayda.bullethell.arena.ArenaContext}).
      */
     public static float distSqToShortLaser(float px, float py,
             float cx, float cy, float vx, float vy, float halfLength) {

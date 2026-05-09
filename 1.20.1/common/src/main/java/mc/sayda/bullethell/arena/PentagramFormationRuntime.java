@@ -158,85 +158,105 @@ public final class PentagramFormationRuntime {
      * When {@link #dualMode}, spawns {@code typeA} and {@code typeB} at the same local position.
      */
     public boolean spawnNextBatch(BulletPool pool, int maxBullets, float starRadius,
-            BulletType typeA, BulletType typeB, float vis, float hit, int lifeTicks, float angVel) {
-        int max = Math.max(1, maxBullets);
-        int samples = samplesPerEdge;
-        float[] px = new float[5];
-        float[] py = new float[5];
-        float step = (float) (Math.PI * 2.0 / 5.0);
-        for (int i = 0; i < 5; i++) {
-            float a = step * i;
-            px[i] = (float) Math.cos(a) * starRadius;
-            py[i] = (float) Math.sin(a) * starRadius;
-        }
-        int[] starOrder = { 0, 2, 4, 1, 3, 0 };
-        int spawned = 0;
-        while (spawned < max && spawnLayerIndex < STAR_COUNT) {
-            float ax = px[starOrder[spawnEdge]];
-            float ay = py[starOrder[spawnEdge]];
-            float bx = px[starOrder[spawnEdge + 1]];
-            float by = py[starOrder[spawnEdge + 1]];
-            float u = (spawnSample + 0.5f) / samples;
-            float lx = ax + (bx - ax) * u;
-            float ly = ay + (by - ay) * u;
-            float dx = bx - ax;
-            float dy = by - ay;
-            float elen = (float) Math.sqrt(dx * dx + dy * dy);
-            float nlx;
-            float nly;
-            if (elen < 1e-4f) {
-                nlx = 1f;
-                nly = 0f;
-            } else {
-                float tx = dx / elen;
-                float ty = dy / elen;
-                float nx = -ty;
-                float ny = tx;
-                float mx = (ax + bx) * 0.5f;
-                float my = (ay + by) * 0.5f;
-                float dot = nx * mx + ny * my;
-                if (dot < 0f) {
-                    nx = -nx;
-                    ny = -ny;
-                }
-                nlx = nx;
-                nly = ny;
-            }
-            if (count >= MAX_POINTS)
-                return isStackComplete();
-            int slotA = pool.spawn(0f, 0f, 0f, 0f, typeA.getId(), lifeTicks, vis, hit, angVel);
-            if (slotA < 0)
-                return isStackComplete();
-            int slotB = -1;
-            if (dualMode && typeB != null) {
-                slotB = pool.spawn(0f, 0f, 0f, 0f, typeB.getId(), lifeTicks, vis, hit, angVel);
-                if (slotB < 0) {
-                    pool.deactivate(slotA);
-                    return isStackComplete();
-                }
-            }
-            slotsA[count] = slotA;
-            slotsB[count] = slotB;
-            layerOf[count] = (byte) spawnLayerIndex;
-            waveOf[count] = (byte) Math.min(spawnWave, 255);
-            localX[count] = lx;
-            localY[count] = ly;
-            outNlx[count] = nlx;
-            outNly[count] = nly;
-            count++;
-            spawned++;
-            spawnSample++;
-            if (spawnSample >= samples) {
-                spawnSample = 0;
-                spawnEdge++;
-                if (spawnEdge >= 5) {
-                    spawnEdge = 0;
-                    spawnLayerIndex++;
-                }
-            }
-        }
-        return isStackComplete();
+        BulletType typeA, BulletType typeB, float vis, float hit, int lifeTicks, float angVel) {
+    int max = Math.max(1, maxBullets);
+    int samples = samplesPerEdge;
+
+    float[] px = new float[5];
+    float[] py = new float[5];
+
+    float step = (float) (Math.PI * 2.0 / 5.0);
+    for (int i = 0; i < 5; i++) {
+        float a = step * i;
+        px[i] = (float) Math.cos(a) * starRadius;
+        py[i] = (float) Math.sin(a) * starRadius;
     }
+
+    // Pentagram: connect every second point
+    int[] starOrder = { 0, 2, 4, 1, 3, 0 };
+
+    int spawned = 0;
+    while (spawned < max && spawnLayerIndex < STAR_COUNT) {
+
+        float ax = px[starOrder[spawnEdge]];
+        float ay = py[starOrder[spawnEdge]];
+        float bx = px[starOrder[spawnEdge + 1]];
+        float by = py[starOrder[spawnEdge + 1]];
+
+        float u = (spawnSample + 0.5f) / samples;
+        float lx = ax + (bx - ax) * u;
+        float ly = ay + (by - ay) * u;
+
+        float dx = bx - ax;
+        float dy = by - ay;
+        float elen = (float) Math.sqrt(dx * dx + dy * dy);
+
+        float nlx, nly;
+        if (elen < 1e-4f) {
+            nlx = 1f;
+            nly = 0f;
+        } else {
+            float tx = dx / elen;
+            float ty = dy / elen;
+
+            float nx = -ty;
+            float ny = tx;
+
+            float mx = (ax + bx) * 0.5f;
+            float my = (ay + by) * 0.5f;
+
+            float dot = nx * mx + ny * my;
+            if (dot < 0f) {
+                nx = -nx;
+                ny = -ny;
+            }
+
+            nlx = nx;
+            nly = ny;
+        }
+
+        if (count >= MAX_POINTS)
+            return isStackComplete();
+
+        int slotA = pool.spawn(0f, 0f, 0f, 0f, typeA.getId(), lifeTicks, vis, hit, angVel);
+        if (slotA < 0)
+            return isStackComplete();
+
+        int slotB = -1;
+        if (dualMode && typeB != null) {
+            slotB = pool.spawn(0f, 0f, 0f, 0f, typeB.getId(), lifeTicks, vis, hit, angVel);
+            if (slotB < 0) {
+                pool.deactivate(slotA);
+                return isStackComplete();
+            }
+        }
+
+        slotsA[count] = slotA;
+        slotsB[count] = slotB;
+        layerOf[count] = (byte) spawnLayerIndex;
+        waveOf[count] = (byte) Math.min(spawnWave, 255);
+
+        localX[count] = lx;
+        localY[count] = ly;
+        outNlx[count] = nlx;
+        outNly[count] = nly;
+
+        count++;
+        spawned++;
+
+        spawnSample++;
+        if (spawnSample >= samples) {
+            spawnSample = 0;
+            spawnEdge++;
+
+            if (spawnEdge >= 5) {
+                spawnEdge = 0;
+                spawnLayerIndex++;
+            }
+        }
+    }
+    return isStackComplete();
+ }
 
     /**
      * World positions: each sample's star centre lies on a ring around the boss; inner/outer radius

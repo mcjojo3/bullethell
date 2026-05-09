@@ -40,6 +40,12 @@ public final class BulletType {
         return (id >= 0 && id < BY_ID.size()) ? BY_ID.get(id) : fromName("ORB");
     }
 
+    /** Triggers the {@link BulletTypeLoader} to populate the registry if it hasn't been yet. */
+    public static void ensureLoaded() {
+        fromName("ORB"); // registry fallback
+        BulletTypeLoader.get(fromName("ORB")); // trigger whole-registry load
+    }
+
     public static BulletType fromName(String name) {
         BulletType t = REGISTRY.get(name.toUpperCase());
         if (t != null) return t;
@@ -53,7 +59,7 @@ public final class BulletType {
 
     /**
      * Player bullet pools: when {@link mc.sayda.bullethell.arena.BulletPool} spawn uses
-     * {@code HOMING_USE_TYPE_DEFAULT}, homing steering is enabled for these types (e.g. Reimu amulets).
+     * {@code HOMING_USE_TYPE_DEFAULT}, homing steering is enabled for these types (e.g. Reimu ofudas).
      */
     public boolean defaultPlayerHomingSteer() {
         return BulletTypeLoader.get(this).homing;

@@ -35,11 +35,16 @@ public class ShotTypeSelectScreen extends Screen {
 
     public static ShotTypeSelectScreen forSolo(DifficultyConfig difficulty, String stageId,
             int maxAllowedDifficultyOrdinal, String characterId) {
-        return new ShotTypeSelectScreen(difficulty, stageId, maxAllowedDifficultyOrdinal, characterId, null, null);
+        return forSolo(difficulty, stageId, maxAllowedDifficultyOrdinal, characterId, false);
+    }
+
+    public static ShotTypeSelectScreen forSolo(DifficultyConfig difficulty, String stageId,
+            int maxAllowedDifficultyOrdinal, String characterId, boolean practiceMode) {
+        return new ShotTypeSelectScreen(difficulty, stageId, maxAllowedDifficultyOrdinal, characterId, null, null, practiceMode);
     }
 
     public static ShotTypeSelectScreen forJoin(UUID hostUuid, String hostName, String characterId) {
-        return new ShotTypeSelectScreen(null, "", 0, characterId, hostUuid, hostName);
+        return new ShotTypeSelectScreen(null, "", 0, characterId, hostUuid, hostName, false);
     }
 
     private final DifficultyConfig difficulty;
@@ -48,6 +53,7 @@ public class ShotTypeSelectScreen extends Screen {
     private final String characterId;
     private final UUID joinHostUuid;
     private final String joinHostName;
+    private final boolean practiceMode;
     private final CharacterDefinition charDef;
     private final int optionCount;
 
@@ -57,7 +63,7 @@ public class ShotTypeSelectScreen extends Screen {
     private int layoutCardY;
 
     private ShotTypeSelectScreen(DifficultyConfig difficulty, String stageId, int maxAllowedDifficultyOrdinal,
-            String characterId, UUID joinHostUuid, String joinHostName) {
+            String characterId, UUID joinHostUuid, String joinHostName, boolean practiceMode) {
         super(Component.literal("Select Shot Type"));
         this.difficulty = difficulty;
         this.stageId = stageId;
@@ -65,6 +71,7 @@ public class ShotTypeSelectScreen extends Screen {
         this.characterId = characterId;
         this.joinHostUuid = joinHostUuid;
         this.joinHostName = joinHostName;
+        this.practiceMode = practiceMode;
         this.charDef = CharacterLoader.load(characterId);
         if (charDef.usesDataDrivenShots())
             this.optionCount = charDef.shotOptions.size();
@@ -82,7 +89,7 @@ public class ShotTypeSelectScreen extends Screen {
             if (joinHostUuid != null) {
                 BHPackets.sendJoinMatch(joinHostUuid, characterId, 0);
             } else {
-                BHPackets.sendCharSelect(characterId, difficulty, stageId, 0);
+                BHPackets.sendCharSelect(characterId, difficulty, stageId, 0, practiceMode);
             }
             onClose();
             return;
@@ -184,7 +191,7 @@ public class ShotTypeSelectScreen extends Screen {
                 Minecraft.getInstance().setScreen(new JoinCharacterSelectScreen(joinHostUuid, joinHostName));
             } else {
                 Minecraft.getInstance().setScreen(
-                        new CharacterSelectScreen(difficulty, stageId, maxAllowedDifficultyOrdinal));
+                        new CharacterSelectScreen(difficulty, stageId, maxAllowedDifficultyOrdinal, practiceMode));
             }
             return true;
         }
@@ -217,7 +224,7 @@ public class ShotTypeSelectScreen extends Screen {
         if (joinHostUuid != null) {
             BHPackets.sendJoinMatch(joinHostUuid, characterId, ord);
         } else {
-            BHPackets.sendCharSelect(characterId, difficulty, stageId, ord);
+            BHPackets.sendCharSelect(characterId, difficulty, stageId, ord, practiceMode);
         }
         onClose();
     }

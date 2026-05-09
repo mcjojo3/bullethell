@@ -11,25 +11,30 @@ public class TestModeOpenPacket {
     public final List<String> stageIds;
     public final List<String> waveIds;
     public final List<String> charIds;
+    public final List<String> shotTypeIds;
     public final String currentBossId;
     public final String currentStageId;
     public final String currentWaveId;
     public final String currentCharId;
+    public final int currentShotTypeIdx;
     public final int phaseIdx;
     public final int difficultyOrdinal;
 
     public TestModeOpenPacket(List<String> bossIds, List<String> stageIds, List<String> waveIds,
-                              List<String> charIds, String currentBossId, String currentStageId,
-                              String currentWaveId, String currentCharId,
+                              List<String> charIds, List<String> shotTypeIds,
+                              String currentBossId, String currentStageId,
+                              String currentWaveId, String currentCharId, int currentShotTypeIdx,
                               int phaseIdx, int difficultyOrdinal) {
         this.bossIds          = bossIds;
         this.stageIds         = stageIds;
         this.waveIds          = waveIds;
         this.charIds          = charIds;
+        this.shotTypeIds      = shotTypeIds;
         this.currentBossId    = currentBossId;
         this.currentStageId   = currentStageId;
         this.currentWaveId    = currentWaveId;
         this.currentCharId    = currentCharId;
+        this.currentShotTypeIdx = currentShotTypeIdx;
         this.phaseIdx         = phaseIdx;
         this.difficultyOrdinal = difficultyOrdinal;
     }
@@ -51,10 +56,12 @@ public class TestModeOpenPacket {
         writeList(buf, stageIds);
         writeList(buf, waveIds);
         writeList(buf, charIds);
+        writeList(buf, shotTypeIds);
         buf.writeUtf(currentBossId);
         buf.writeUtf(currentStageId);
         buf.writeUtf(currentWaveId);
         buf.writeUtf(currentCharId);
+        buf.writeInt(currentShotTypeIdx);
         buf.writeInt(phaseIdx);
         buf.writeInt(difficultyOrdinal);
     }
@@ -64,8 +71,9 @@ public class TestModeOpenPacket {
         List<String> stageIds = readList(buf);
         List<String> waveIds  = readList(buf);
         List<String> charIds  = readList(buf);
-        return new TestModeOpenPacket(bossIds, stageIds, waveIds, charIds,
-                buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readUtf(),
+        List<String> shotTypeIds = readList(buf);
+        return new TestModeOpenPacket(bossIds, stageIds, waveIds, charIds, shotTypeIds,
+                buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readInt(),
                 buf.readInt(), buf.readInt());
     }
 }

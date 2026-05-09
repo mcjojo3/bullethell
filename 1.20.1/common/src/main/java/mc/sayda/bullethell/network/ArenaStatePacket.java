@@ -51,6 +51,23 @@ public class ArenaStatePacket {
     public final int debugPatternCooldown;
     public final int debugEnemyBulletCount;
 
+    /** Consecutive graze chain count (resets on hit or inactivity). */
+    public final int grazeChain;
+    /** Life piece count toward next extend (0 to PIECES_PER_EXTEND-1). */
+    public final int lifePieces;
+    /** Bomb piece count toward next extend (0 to PIECES_PER_EXTEND-1). */
+    public final int bombPieces;
+    /** Dynamic rank (0 = easiest, 32 = hardest). Synced so HUD can display it. */
+    public final int rank;
+    /** Y fraction from top defining the PoC line (mirrors {@code rules.pocFraction}). */
+    public final float pocFraction;
+    /** When false, PoC auto-collect is disabled (e.g. TH9 mode); hides the PoC line. */
+    public final boolean pocAutoCollect;
+    /** Character movement speed (normal / focused). Synced so client prediction uses correct values. */
+    public final float speedNormal, speedFocused;
+
+    private static final UUID ZERO_UUID = new UUID(0, 0);
+
     // ---------------------------------------------------------------- factory
 
     public ArenaStatePacket(ArenaContext ctx, UUID playerUuid, int playerIndex) {
@@ -91,7 +108,7 @@ public class ArenaStatePacket {
         } else {
             this.abilityType = 0;
             this.abilityTicks = 0;
-            this.abilityOwner = new UUID(0, 0);
+            this.abilityOwner = ZERO_UUID;
             this.abilityX = 0f;
             this.abilityY = 0f;
         }
@@ -121,19 +138,31 @@ public class ArenaStatePacket {
 
         boolean dbg = BHDebugMode.isGodMode(playerUuid);
         this.debugGodMode = dbg;
-        this.debugArenaTick = dbg ? ctx.getDebugArenaTick() : 0;
-        this.debugPatternCooldown = dbg ? ctx.getDebugBossPatternCooldown() : 0;
-        this.debugEnemyBulletCount = dbg ? ctx.bullets.getActiveCount() : 0;
+        boolean sendStats = dbg || ctx.testMode;
+        this.debugArenaTick = sendStats ? ctx.getDebugArenaTick() : 0;
+        this.debugPatternCooldown = sendStats ? ctx.getDebugBossPatternCooldown() : 0;
+        this.debugEnemyBulletCount = sendStats ? ctx.bullets.getActiveCount() : 0;
+        this.grazeChain = ps.grazeChain;
+        this.lifePieces = ps.lifePieces;
+        this.bombPieces = ps.bombPieces;
+        this.rank = ctx.getRank();
+        this.pocFraction = (float) ctx.rules.pocFraction;
+        this.pocAutoCollect = ctx.rules.pocAutoCollect;
+        this.speedNormal = ps.speedNormal;
+        this.speedFocused = ps.speedFocused;
     }
 
     public static ArenaStatePacket stopped() {
         return new ArenaStatePacket(false, false,
                 0f, 0f, 0, 0, 0, 0, 0,
                 0f, 0f, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0f, 0f, new UUID(0, 0),
+                0, 0, 0, 0, 0, 0f, 0f, ZERO_UUID,
                 0L, 0L, 0, 0, "", "", false, false,
                 "reimu", "", "", false, "", "", 0, 0, 0, -1, -1,
-                false, 0, 0, 0);
+                false, 0, 0, 0,
+                0, 0, 0,
+                16, 0.20f, true,
+                PlayerState2D.SPEED_NORMAL, PlayerState2D.SPEED_FOCUSED);
     }
 
     private ArenaStatePacket(boolean active, boolean spectating,
@@ -145,7 +174,10 @@ public class ArenaStatePacket {
             String characterId, String bossId, String bossName, boolean bossIntroVisible,
             String dialogSpeaker, String dialogText, int dialogLineIndex, int dialogReadyCount, int dialogTotalCount,
             int pentagramRitualTick, int pentagramStackCompleteTick,
-            boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount) {
+            boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount,
+            int grazeChain, int lifePieces, int bombPieces,
+            int rank, float pocFraction, boolean pocAutoCollect,
+            float speedNormal, float speedFocused) {
         this.active = active;
         this.spectating = spectating;
         this.playerX = px;
@@ -192,6 +224,14 @@ public class ArenaStatePacket {
         this.debugArenaTick = debugArenaTick;
         this.debugPatternCooldown = debugPatternCooldown;
         this.debugEnemyBulletCount = debugEnemyBulletCount;
+        this.grazeChain = grazeChain;
+        this.lifePieces = lifePieces;
+        this.bombPieces = bombPieces;
+        this.rank = rank;
+        this.pocFraction = pocFraction;
+        this.pocAutoCollect = pocAutoCollect;
+        this.speedNormal = speedNormal;
+        this.speedFocused = speedFocused;
     }
 
     // ---------------------------------------------------------------- codec
@@ -243,11 +283,17 @@ public class ArenaStatePacket {
         buf.writeVarInt(pentagramRitualTick);
         buf.writeVarInt(pentagramStackCompleteTick);
         buf.writeBoolean(debugGodMode);
-        if (debugGodMode) {
-            buf.writeVarInt(debugArenaTick);
-            buf.writeVarInt(debugPatternCooldown);
-            buf.writeVarInt(debugEnemyBulletCount);
-        }
+        buf.writeVarInt(debugArenaTick);
+        buf.writeVarInt(debugPatternCooldown);
+        buf.writeVarInt(debugEnemyBulletCount);
+        buf.writeVarInt(grazeChain);
+        buf.writeVarInt(lifePieces);
+        buf.writeVarInt(bombPieces);
+        buf.writeVarInt(rank);
+        buf.writeFloat(pocFraction);
+        buf.writeBoolean(pocAutoCollect);
+        buf.writeFloat(speedNormal);
+        buf.writeFloat(speedFocused);
     }
 
     @SuppressWarnings("null")
@@ -296,12 +342,17 @@ public class ArenaStatePacket {
         int pentagramRitualTick = buf.readVarInt();
         int pentagramStackCompleteTick = buf.readVarInt();
         boolean dbgGod = buf.readBoolean();
-        int dTick = 0, dCd = 0, dBul = 0;
-        if (dbgGod) {
-            dTick = buf.readVarInt();
-            dCd = buf.readVarInt();
-            dBul = buf.readVarInt();
-        }
+        int dTick = buf.readVarInt();
+        int dCd = buf.readVarInt();
+        int dBul = buf.readVarInt();
+        int grazeChain = buf.readVarInt();
+        int lifePieces  = buf.readVarInt();
+        int bombPieces  = buf.readVarInt();
+        int rank = buf.readVarInt();
+        float pocFraction = buf.readFloat();
+        boolean pocAutoCollect = buf.readBoolean();
+        float speedNormal = buf.readFloat();
+        float speedFocused = buf.readFloat();
         return new ArenaStatePacket(true, spectating,
                 px, py, lives, bombs, graze, power, pIdx,
                 bx, by, hp, maxHp, phase, bossMoveDir,
@@ -311,6 +362,9 @@ public class ArenaStatePacket {
                 characterId, bossId, bossName, bossIntroVisible,
                 dialogSpeaker, dialogText, dialogLineIndex, dialogReadyCount, dialogTotalCount,
                 pentagramRitualTick, pentagramStackCompleteTick,
-                dbgGod, dTick, dCd, dBul);
+                dbgGod, dTick, dCd, dBul,
+                grazeChain, lifePieces, bombPieces,
+                rank, pocFraction, pocAutoCollect,
+                speedNormal, speedFocused);
     }
 }

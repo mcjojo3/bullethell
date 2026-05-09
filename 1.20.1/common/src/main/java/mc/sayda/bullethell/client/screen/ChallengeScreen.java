@@ -3,6 +3,7 @@ package mc.sayda.bullethell.client.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import mc.sayda.bullethell.client.BHScaleManager;
 import mc.sayda.bullethell.client.BHSfx;
+import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.network.OpenChallengePacket;
 import mc.sayda.bullethell.render.BossSheetLayout;
 import mc.sayda.bullethell.arena.DifficultyConfig;
@@ -53,10 +54,10 @@ public class ChallengeScreen extends Screen {
         int panelX = (width  - PANEL_W) / 2;
         int panelY = (height - PANEL_H) / 2;
 
-        int btnW  = 120;
+        int btnW  = 100;
         int btnH  = 20;
         int btnY  = panelY + PANEL_H - btnH - PADDING;
-        int totalBtnW = btnW * 2 + 12;
+        int totalBtnW = btnW * 3 + 12 * 2;
         int btnStartX = panelX + (PANEL_W - totalBtnW) / 2;
         boolean canAccept = pkt.maxAllowedDifficultyOrdinal >= 0;
 
@@ -75,12 +76,23 @@ public class ChallengeScreen extends Screen {
         addRenderableWidget(acceptBtn);
 
         addRenderableWidget(Button.builder(
+                Component.literal("Practice"),
+                btn -> {
+                    BHSfx.playSelect();
+                    onClose();
+                    Minecraft.getInstance().setScreen(
+                            new DifficultySelectScreen(pkt.stageId, pkt.maxAllowedDifficultyOrdinal, true));
+                })
+                .bounds(btnStartX + btnW + 12, btnY, btnW, btnH)
+                .build());
+
+        addRenderableWidget(Button.builder(
                 Component.literal("Decline"),
                 btn -> {
                     BHSfx.playBack();
                     onClose();
                 })
-                .bounds(btnStartX + btnW + 12, btnY, btnW, btnH)
+                .bounds(btnStartX + (btnW + 12) * 2, btnY, btnW, btnH)
                 .build());
     }
 

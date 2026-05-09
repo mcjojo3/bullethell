@@ -1,12 +1,16 @@
 package mc.sayda.bullethell.render;
 
 /**
- * Per-boss sprite sheet layout for arena / indicator / challenge portrait blits.
+ * Per-boss sprite sheet layout for arena / indicator / challenge portrait
+ * blits.
  *
- * <p>Default: 256×256 texture, 4×4 grid of 64×64 cells - only the top row is used
+ * <p>
+ * Default: 256×256 texture, 4×4 grid of 64×64 cells - only the top row is used
  * for the four-frame idle loop.
  *
- * <p>Sakuya: 256×255 texture, 4 columns × 3 rows of 64×85 cells - idle uses row 0 only.
+ * <p>
+ * Sakuya: 256×255 texture, 4 columns × 3 rows of 64×85 cells - idle uses row 0
+ * only.
  */
 public final class BossSheetLayout {
 
@@ -26,7 +30,7 @@ public final class BossSheetLayout {
         return new BossSheetLayout(64, 64, 256, 256);
     }
 
-    /** U offset for frame index 0–3 on the idle row. */
+    /** U offset for frame index 0-3 on the idle row. */
     public float uForFrame(int frame) {
         return (frame & 3) * (float) cellW;
     }
@@ -37,7 +41,8 @@ public final class BossSheetLayout {
     }
 
     /**
-     * Destination height when the on-screen width is {@code destW}, preserving aspect
+     * Destination height when the on-screen width is {@code destW}, preserving
+     * aspect
      * ratio of one cell.
      */
     public int destHeightForWidth(int destW) {

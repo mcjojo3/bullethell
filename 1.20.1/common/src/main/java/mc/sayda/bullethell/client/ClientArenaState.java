@@ -109,20 +109,104 @@ public class ClientArenaState {
     public int debugPatternCooldown = 0;
     public int debugEnemyBulletCount = 0;
 
+    /** Consecutive graze chain (resets on hit or timeout). */
+    public int grazeChain = 0;
+
+    // ---- Cached formatted strings (recomputed only when the source value changes) ----
+    private long cachedScore = Long.MIN_VALUE;
+    private String cachedScoreStr = "0";
+    private long cachedCombinedScore = Long.MIN_VALUE;
+    private String cachedCombinedScoreStr = "0";
+
+    public String getScoreStr() {
+        if (score != cachedScore) {
+            cachedScore = score;
+            cachedScoreStr = String.format("%,d", score);
+        }
+        return cachedScoreStr;
+    }
+
+    public String getCombinedScoreStr() {
+        if (combinedScore != cachedCombinedScore) {
+            cachedCombinedScore = combinedScore;
+            cachedCombinedScoreStr = String.format("%,d", combinedScore);
+        }
+        return cachedCombinedScoreStr;
+    }
+
+    private long cachedPtsScore = Long.MIN_VALUE;
+    private String cachedPtsStr = "PTS 0";
+
+    public String getPtsStr() {
+        if (score != cachedPtsScore) {
+            cachedPtsScore = score;
+            cachedPtsStr = "PTS " + getScoreStr();
+        }
+        return cachedPtsStr;
+    }
+
+    private int cachedPhase = -1;
+    private String cachedPhLabel = "PHASE 1";
+
+    public String getPhLabel() {
+        if (bossPhase != cachedPhase) {
+            cachedPhase = bossPhase;
+            cachedPhLabel = "PHASE " + (bossPhase + 1);
+        }
+        return cachedPhLabel;
+    }
+
+    private int cachedPower = -1;
+    private String cachedPwrStr = "PWR 0/128";
+
+    public String getPwrStr() {
+        if (power != cachedPower) {
+            cachedPower = power;
+            cachedPwrStr = "PWR " + power + "/128";
+        }
+        return cachedPwrStr;
+    }
+
+    private int cachedGraze = -1;
+    private int cachedGrazeChain = -1;
+    private String cachedGrazeStr = "GRAZE 0";
+
+    public String getGrazeStr() {
+        int graze = player.graze;
+        int chain = grazeChain;
+        if (graze != cachedGraze || chain != cachedGrazeChain) {
+            cachedGraze = graze;
+            cachedGrazeChain = chain;
+            cachedGrazeStr = chain > 0 ? "GRAZE " + graze + " x" + chain : "GRAZE " + graze;
+        }
+        return cachedGrazeStr;
+    }
+
+    /** Life piece count toward next extend. */
+    public int lifePieces = 0;
+    /** Bomb piece count toward next extend. */
+    public int bombPieces = 0;
+
     // ---- test mode overlay (/bullethell test) ----
+    public int rank = 16;
+    public float pocFraction = 0.20f;
+    public boolean pocAutoCollect = true;
+
     public boolean testMode = false;
     public boolean testHitboxVisible = false;
-    public int testPage = 0; // 0=BOSS, 1=STAGE, 2=WAVE, 3=CHAR
+    public int testPage = 0; // 0=BOSS, 1=STAGE, 2=WAVE, 3=CHAR, 4=SHOT
     // per-page ID lists
     public java.util.List<String> testBossIds  = new java.util.ArrayList<>();
     public java.util.List<String> testStageIds = new java.util.ArrayList<>();
     public java.util.List<String> testWaveIds  = new java.util.ArrayList<>();
     public java.util.List<String> testCharIds  = new java.util.ArrayList<>();
+    public java.util.List<String> testShotTypeIds = new java.util.ArrayList<>();
     // current selection per page
     public String testCurrentBossId   = "";
     public String testCurrentStageId  = "";
     public String testCurrentWaveId   = "";
     public String testCurrentCharId   = "reimu";
+    public int testCurrentShotTypeIdx = 0;
     public int testCurrentDifficulty  = 1; // DifficultyConfig.NORMAL ordinal
     // scroll + selected index per page
     public int testScrollOffset       = 0; // BOSS
@@ -133,6 +217,8 @@ public class ClientArenaState {
     public int testWaveSelectedIdx    = 0;
     public int testCharScrollOffset   = 0;
     public int testCharSelectedIdx    = 0;
+    public int testShotTypeScrollOffset = 0;
+    public int testShotTypeSelectedIdx  = 0;
 
     /**
      * Track ID for the current phase's music (empty = no music).
@@ -209,7 +295,8 @@ public class ClientArenaState {
             String characterId, String bossId, String bossName, boolean bossIntroVisible,
             String dialogSpeaker, String dialogText, int dialogLineIndex, int dialogReadyCount, int dialogTotalCount,
             int pentagramRitualTick, int pentagramStackCompleteTick,
-            boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount) {
+            boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount,
+            int grazeChain, int lifePieces, int bombPieces) {
 
         if (!pktActive) {
             // ArenaEndScreen sets this flag before opening so the renderer keeps drawing
@@ -300,6 +387,9 @@ public class ClientArenaState {
         this.dialogTotalCount = dialogTotalCount;
         this.pentagramRitualTick = pentagramRitualTick;
         this.pentagramStackCompleteTick = pentagramStackCompleteTick;
+        this.grazeChain = grazeChain;
+        this.lifePieces = lifePieces;
+        this.bombPieces = bombPieces;
     }
 
     public void applyPlayerBulletSync(float[][] allSlotData, boolean[] allActive) {
@@ -307,14 +397,22 @@ public class ClientArenaState {
             playerBullets.setSlotData(i, allSlotData[i], allActive[i]);
     }
 
-    public void applyItemSync(float[][] allSlotData, boolean[] allActive) {
-        for (int i = 0; i < ItemPool.CAPACITY; i++)
-            items.setSlotData(i, allSlotData[i], allActive[i]);
+    public void applyItemSync(int[] slots, float[][] data) {
+        items.clearAll();
+        for (int j = 0; j < slots.length; j++)
+            items.setSlotData(slots[j], data[j], true);
     }
 
-    public void applyEnemySync(float[][] allSlotData, boolean[] allActive) {
+    public void applyEnemySync(int[] slots, float[][] data) {
+        java.util.BitSet prevActive = new java.util.BitSet(EnemyPool.CAPACITY);
         for (int i = 0; i < EnemyPool.CAPACITY; i++)
-            enemies.setSlotData(i, allSlotData[i], allActive[i]);
+            if (enemies.isActive(i)) prevActive.set(i);
+        for (int j = 0; j < slots.length; j++) {
+            enemies.setSlotData(slots[j], data[j], true);
+            prevActive.clear(slots[j]);
+        }
+        for (int i = prevActive.nextSetBit(0); i >= 0; i = prevActive.nextSetBit(i + 1))
+            enemies.deactivate(i);
     }
 
     public void applyCoopSync(List<Entry> entries) {
@@ -341,7 +439,15 @@ public class ClientArenaState {
                 pkt.characterId, pkt.bossId, pkt.bossName, pkt.bossIntroVisible,
                 pkt.dialogSpeaker, pkt.dialogText, pkt.dialogLineIndex, pkt.dialogReadyCount, pkt.dialogTotalCount,
                 pkt.pentagramRitualTick, pkt.pentagramStackCompleteTick,
-                pkt.debugGodMode, pkt.debugArenaTick, pkt.debugPatternCooldown, pkt.debugEnemyBulletCount);
+                pkt.debugGodMode, pkt.debugArenaTick, pkt.debugPatternCooldown, pkt.debugEnemyBulletCount,
+                pkt.grazeChain, pkt.lifePieces, pkt.bombPieces);
+        if (pkt.active) {
+            this.rank = pkt.rank;
+            this.pocFraction = pkt.pocFraction;
+            this.pocAutoCollect = pkt.pocAutoCollect;
+            this.player.speedNormal = pkt.speedNormal;
+            this.player.speedFocused = pkt.speedFocused;
+        }
     }
 
     public void applyBulletDelta(BulletDeltaPacket pkt) {
@@ -357,11 +463,11 @@ public class ClientArenaState {
     }
 
     public void applyItemSync(ItemSyncPacket pkt) {
-        applyItemSync(pkt.allSlotData, pkt.allActive);
+        applyItemSync(pkt.slots, pkt.data);
     }
 
     public void applyEnemySync(EnemySyncPacket pkt) {
-        applyEnemySync(pkt.allSlotData, pkt.allActive);
+        applyEnemySync(pkt.slots, pkt.data);
     }
 
     public void applyCoopSync(CoopPlayersSyncPacket pkt) {
@@ -376,13 +482,30 @@ public class ClientArenaState {
         for (AllPlayerBulletsSyncPacket.PlayerBullets pb : pkt.players) {
             BulletPool pool = allPlayerBullets.computeIfAbsent(
                     pb.playerIndex(), idx -> new BulletPool(BulletPool.PLAYER_CAPACITY));
+            // Track which slots were active before this packet so we can deactivate
+            // any that the server no longer reports (they expired or were recycled).
+            java.util.BitSet prevActive = new java.util.BitSet(BulletPool.PLAYER_CAPACITY);
             for (int i = 0; i < BulletPool.PLAYER_CAPACITY; i++)
-                pool.setSlotData(i, pb.data()[i], pb.active()[i]);
-            // Mirror own bullets into the legacy playerBullets field for renderers
-            // that haven't been updated yet
-            if (pb.playerIndex() == playerIndex)
+                if (pool.isActive(i)) prevActive.set(i);
+
+            for (int j = 0; j < pb.slots().length; j++) {
+                int slot = pb.slots()[j];
+                pool.setSlotData(slot, pb.data()[j], true);
+                prevActive.clear(slot);
+            }
+            // Deactivate any slot that was active but absent from this packet
+            for (int i = prevActive.nextSetBit(0); i >= 0; i = prevActive.nextSetBit(i + 1))
+                pool.deactivate(i);
+
+            // Mirror own bullets into the legacy playerBullets field
+            if (pb.playerIndex() == playerIndex) {
+                for (int j = 0; j < pb.slots().length; j++)
+                    playerBullets.setSlotData(pb.slots()[j], pb.data()[j], true);
+                // Deactivate legacy slots not in packet
                 for (int i = 0; i < BulletPool.PLAYER_CAPACITY; i++)
-                    playerBullets.setSlotData(i, pb.data()[i], pb.active()[i]);
+                    if (playerBullets.isActive(i) && !pool.isActive(i))
+                        playerBullets.deactivate(i);
+            }
         }
         if (active) {
             BulletPool local = allPlayerBullets.get(playerIndex);
@@ -405,7 +528,7 @@ public class ClientArenaState {
         switch (ev) {
             case HIT -> BHSfx.play(BHSounds.DEATH::get);
             case ENEMY_KILL -> BHSfx.play(BHSounds.KILL::get);
-            case ITEM_PICK_UP -> BHSfx.play(BHSounds.PICK_UP::get);
+            case ITEM_PICK_UP -> BHSfx.play(BHSounds.PICK_UP::get, 0.35f);
             case ITEM_POWER_UP -> BHSfx.play(BHSounds.POWER_UP::get);
             case ITEM_ONE_UP, SCORE_EXTEND -> BHSfx.play(BHSounds.ONE_UP::get);
             default -> {
@@ -476,6 +599,9 @@ public class ClientArenaState {
         debugArenaTick = 0;
         debugPatternCooldown = 0;
         debugEnemyBulletCount = 0;
+        grazeChain = 0;
+        lifePieces = 0;
+        bombPieces = 0;
         power = 0;
         skillGauge = 0;
         chargeLevel = 0;

@@ -12,11 +12,13 @@ import java.util.UUID;
  * S → C | snapshot of ALL participants' player-bullet pools, sent to every
  * client in the arena each tick so coop partners' shots are visible.
  *
- * Format: [playerCount] { [playerIndex(varint)] [active[CAP]] [data if active] }...
+ * Format: [playerCount] { [playerIndex(varint)] [activeCount(varint)] [slot(varint) data...] }...
+ * Only active slots are transmitted, saving ~2 KB per player of boolean overhead
+ * compared to the previous full-boolean-array layout.
  */
 public class AllPlayerBulletsSyncPacket {
 
-    public record PlayerBullets(int playerIndex, float[][] data, boolean[] active) {}
+    public record PlayerBullets(int playerIndex, int[] slots, float[][] data) {}
 
     public final List<PlayerBullets> players;
 
@@ -33,13 +35,18 @@ public class AllPlayerBulletsSyncPacket {
             BulletPool pool = ctx.getBulletPool(pid);
             if (pool == null) { idx++; continue; }
             int cap = BulletPool.PLAYER_CAPACITY;
-            float[][] data   = new float[cap][BulletPool.STRIDE];
-            boolean[] active = new boolean[cap];
-            for (int i = 0; i < cap; i++) {
-                data[i]   = pool.getSlotData(i);
-                active[i] = pool.isActive(i);
+            int count = pool.getActiveCount();
+            int[] slots  = new int[count];
+            float[][] data = new float[count][];
+            int j = 0;
+            for (int i = 0; i < cap && j < count; i++) {
+                if (pool.isActive(i)) {
+                    slots[j] = i;
+                    data[j]  = pool.getSlotData(i);
+                    j++;
+                }
             }
-            list.add(new PlayerBullets(idx, data, active));
+            list.add(new PlayerBullets(idx, slots, data));
             idx++;
         }
         return new AllPlayerBulletsSyncPacket(list);
@@ -51,9 +58,10 @@ public class AllPlayerBulletsSyncPacket {
         buf.writeVarInt(players.size());
         for (PlayerBullets pb : players) {
             buf.writeVarInt(pb.playerIndex());
-            for (int i = 0; i < BulletPool.PLAYER_CAPACITY; i++) {
-                buf.writeBoolean(pb.active()[i]);
-                if (pb.active()[i]) for (float f : pb.data()[i]) buf.writeFloat(f);
+            buf.writeVarInt(pb.slots().length);
+            for (int i = 0; i < pb.slots().length; i++) {
+                buf.writeVarInt(pb.slots()[i]);
+                for (float f : pb.data()[i]) buf.writeFloat(f);
             }
         }
     }
@@ -62,14 +70,16 @@ public class AllPlayerBulletsSyncPacket {
         int count = buf.readVarInt();
         List<PlayerBullets> list = new ArrayList<>(count);
         for (int p = 0; p < count; p++) {
-            int pidx = buf.readVarInt();
-            float[][] data   = new float[BulletPool.PLAYER_CAPACITY][BulletPool.STRIDE];
-            boolean[] active = new boolean[BulletPool.PLAYER_CAPACITY];
-            for (int i = 0; i < BulletPool.PLAYER_CAPACITY; i++) {
-                active[i] = buf.readBoolean();
-                if (active[i]) for (int j = 0; j < BulletPool.STRIDE; j++) data[i][j] = buf.readFloat();
+            int pidx   = buf.readVarInt();
+            int active = buf.readVarInt();
+            int[]    slots = new int[active];
+            float[][] data = new float[active][];
+            for (int i = 0; i < active; i++) {
+                slots[i] = buf.readVarInt();
+                data[i]  = new float[BulletPool.STRIDE];
+                for (int j = 0; j < BulletPool.STRIDE; j++) data[i][j] = buf.readFloat();
             }
-            list.add(new PlayerBullets(pidx, data, active));
+            list.add(new PlayerBullets(pidx, slots, data));
         }
         return new AllPlayerBulletsSyncPacket(list);
     }

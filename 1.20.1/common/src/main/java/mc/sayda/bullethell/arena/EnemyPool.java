@@ -22,7 +22,7 @@ package mc.sayda.bullethell.arena;
  */
 public class EnemyPool {
 
-    public static final int CAPACITY = 64;
+    public static final int CAPACITY = 1024;
     public static final int STRIDE   = 9;
 
     public static final int F_X        = 0;
@@ -37,7 +37,11 @@ public class EnemyPool {
 
     private final float[]   data   = new float[CAPACITY * STRIDE];
     private final boolean[] active = new boolean[CAPACITY];
+    /** Previous-tick server positions for sub-tick interpolation (client-only). */
+    private final float[] prevX = new float[CAPACITY];
+    private final float[] prevY = new float[CAPACITY];
     private int activeCount = 0;
+    private int freeSlotCursor = 0;
 
     // ---------------------------------------------------------------- tick
 
@@ -69,12 +73,16 @@ public class EnemyPool {
         }
     }
 
-    /** Client-side position extrapolation (arc + movement, no deactivation). */
+    /**
+     * Client-side position extrapolation for smooth rendering between 2-tick server syncs.
+     * Unlike bullets (delta every tick), enemies are only synced every 2 ticks, so
+     * server-position interpolation alone would rewind every tick. Extrapolation from the
+     * latest server-sent position and velocity gives smooth motion instead.
+     */
     public void clientTick() {
         for (int i = 0; i < CAPACITY; i++) {
             if (!active[i]) continue;
             int b = i * STRIDE;
-
             if (data[b + F_ARC_LEFT] > 0) {
                 float a   = data[b + F_ANG_VEL];
                 float vx  = data[b + F_VX];
@@ -85,7 +93,6 @@ public class EnemyPool {
                 data[b + F_VY] = vx * sin + vy * cos;
                 data[b + F_ARC_LEFT]--;
             }
-
             data[b + F_X] += data[b + F_VX];
             data[b + F_Y] += data[b + F_VY];
         }
@@ -122,6 +129,16 @@ public class EnemyPool {
 
     // ---------------------------------------------------------------- setters
 
+    /** Snapshot current positions into prevX/prevY. Call once per client tick before {@link #clientTick()}. */
+    public void savePrevPositions() {
+        for (int i = 0; i < CAPACITY; i++) {
+            if (active[i]) {
+                prevX[i] = data[i * STRIDE + F_X];
+                prevY[i] = data[i * STRIDE + F_Y];
+            }
+        }
+    }
+
     /** Directly set the attack cooldown for a slot (used after firing). */
     public void setAtkCooldown(int slot, int value) {
         data[slot * STRIDE + F_ATK_CD] = value;
@@ -147,6 +164,8 @@ public class EnemyPool {
     public int     getAtkCd(int slot)    { return (int) data[slot * STRIDE + F_ATK_CD]; }
     public boolean isActive(int slot)    { return active[slot]; }
     public int     getActiveCount()      { return activeCount; }
+    public float   getPrevX(int slot)    { return prevX[slot]; }
+    public float   getPrevY(int slot)    { return prevY[slot]; }
 
     // ---------------------------------------------------------------- network sync
 
@@ -157,9 +176,20 @@ public class EnemyPool {
     }
 
     public void setSlotData(int slot, float[] d, boolean isActive) {
+        if (isActive && active[slot]) {
+            prevX[slot] = data[slot * STRIDE + F_X];
+            prevY[slot] = data[slot * STRIDE + F_Y];
+        }
         System.arraycopy(d, 0, data, slot * STRIDE, STRIDE);
-        if (isActive  && !active[slot]) { active[slot] = true;  activeCount++; }
-        else if (!isActive && active[slot]) { active[slot] = false; activeCount--; }
+        if (isActive && !active[slot]) {
+            active[slot] = true;
+            activeCount++;
+            prevX[slot] = d[F_X];
+            prevY[slot] = d[F_Y];
+        } else if (!isActive && active[slot]) {
+            active[slot] = false;
+            activeCount--;
+        }
     }
 
     public void clearAll() {
@@ -169,7 +199,10 @@ public class EnemyPool {
     // ---------------------------------------------------------------- helpers
 
     private int nextFreeSlot() {
-        for (int i = 0; i < CAPACITY; i++) if (!active[i]) return i;
+        for (int i = 0; i < CAPACITY; i++) {
+            int idx = (freeSlotCursor + i) % CAPACITY;
+            if (!active[idx]) { freeSlotCursor = (idx + 1) % CAPACITY; return idx; }
+        }
         return -1;
     }
 }

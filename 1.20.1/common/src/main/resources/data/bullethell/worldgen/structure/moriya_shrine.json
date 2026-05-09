@@ -1,0 +1,7 @@
+{
+  "type": "bullethell:bh_spawn",
+  "biomes": "#minecraft:is_mountain",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "template": "bullethell:moriya_shrine"
+}

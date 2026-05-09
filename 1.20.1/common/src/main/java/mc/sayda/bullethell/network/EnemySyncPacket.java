@@ -4,38 +4,56 @@ import mc.sayda.bullethell.arena.ArenaContext;
 import mc.sayda.bullethell.arena.EnemyPool;
 import net.minecraft.network.FriendlyByteBuf;
 
-/** S → C | full enemy pool snapshot every 2 ticks. */
+/**
+ * S → C | compact enemy pool snapshot every tick.
+ *
+ * Format: [activeCount(varint)] { [slot(varint)] [STRIDE floats] }...
+ * Only active slots are transmitted; inactive slots cost 0 bytes.
+ */
 public class EnemySyncPacket {
 
-    private static final int CAP    = EnemyPool.CAPACITY;
     private static final int STRIDE = EnemyPool.STRIDE;
 
-    public final float[][] allSlotData;
-    public final boolean[] allActive;
+    public final int[]    slots;
+    public final float[][] data;
 
-    public EnemySyncPacket(float[][] data, boolean[] active) {
-        this.allSlotData = data; this.allActive = active;
+    public EnemySyncPacket(int[] slots, float[][] data) {
+        this.slots = slots; this.data = data;
     }
 
     public static EnemySyncPacket fromContext(ArenaContext ctx) {
-        float[][] data = new float[CAP][STRIDE]; boolean[] active = new boolean[CAP];
-        for (int i = 0; i < CAP; i++) { data[i] = ctx.enemies.getSlotData(i); active[i] = ctx.enemies.isActive(i); }
-        return new EnemySyncPacket(data, active);
+        int cap   = EnemyPool.CAPACITY;
+        int count = ctx.enemies.getActiveCount();
+        int[]    slots = new int[count];
+        float[][] data = new float[count][];
+        int j = 0;
+        for (int i = 0; i < cap && j < count; i++) {
+            if (ctx.enemies.isActive(i)) {
+                slots[j] = i;
+                data[j]  = ctx.enemies.getSlotData(i);
+                j++;
+            }
+        }
+        return new EnemySyncPacket(slots, data);
     }
 
     public void encode(FriendlyByteBuf buf) {
-        for (int i = 0; i < CAP; i++) {
-            buf.writeBoolean(allActive[i]);
-            if (allActive[i]) for (float f : allSlotData[i]) buf.writeFloat(f);
+        buf.writeVarInt(slots.length);
+        for (int i = 0; i < slots.length; i++) {
+            buf.writeVarInt(slots[i]);
+            for (float f : data[i]) buf.writeFloat(f);
         }
     }
 
     public static EnemySyncPacket decode(FriendlyByteBuf buf) {
-        float[][] data = new float[CAP][STRIDE]; boolean[] active = new boolean[CAP];
-        for (int i = 0; i < CAP; i++) {
-            active[i] = buf.readBoolean();
-            if (active[i]) for (int j = 0; j < STRIDE; j++) data[i][j] = buf.readFloat();
+        int count  = buf.readVarInt();
+        int[]    slots = new int[count];
+        float[][] data = new float[count][];
+        for (int i = 0; i < count; i++) {
+            slots[i] = buf.readVarInt();
+            data[i]  = new float[STRIDE];
+            for (int j = 0; j < STRIDE; j++) data[i][j] = buf.readFloat();
         }
-        return new EnemySyncPacket(data, active);
+        return new EnemySyncPacket(slots, data);
     }
 }

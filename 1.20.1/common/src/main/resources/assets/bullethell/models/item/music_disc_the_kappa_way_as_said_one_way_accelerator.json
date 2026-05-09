@@ -1,0 +1,6 @@
+{
+  "parent": "bullethell:item/music_disc/parent_th11",
+  "textures": {
+    "layer1": "bullethell:item/fan_made"
+  }
+}

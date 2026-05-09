@@ -65,13 +65,32 @@ public class BHClientEvents {
             state.arenaAnimTick++;
 
             boolean timeStopped = state.abilityType == 1;
+            boolean arenaScreenPaused = mc.screen != null && !(mc.screen instanceof ArenaPlayScreen);
 
+            // Always snapshot prev-positions so lerp stays correct after returning from
+            // any overlay (quit screen, chat, inventory). Without this, prevX/prevY
+            // stale out during pause and the first post-pause frame lerps from
+            // an old position, causing a visible bullet-warp flash.
             if (!timeStopped) {
-                state.bullets.clientTick();
-                state.enemies.clientTick();
+                state.bullets.savePrevPositions();
+                for (mc.sayda.bullethell.arena.BulletPool pool : state.allPlayerBullets.values()) {
+                    pool.savePrevPositions();
+                }
             }
-            state.playerBullets.clientTick();
-            state.items.clientTick(state.player.x, state.player.y, timeStopped);
+
+            if (!arenaScreenPaused) {
+                state.items.savePrevPositions();
+                state.items.clientTick(state.player.x, state.player.y, timeStopped);
+                if (!timeStopped) {
+                    state.bullets.clientTick();
+                    state.lasers.clientTick();
+                    state.enemies.savePrevPositions();
+                    state.enemies.clientTick();
+                    for (mc.sayda.bullethell.arena.BulletPool pool : state.allPlayerBullets.values()) {
+                        pool.clientTick();
+                    }
+                }
+            }
 
             if (state.declaring)
                 state.declarationFrame++;
@@ -125,21 +144,25 @@ public class BHClientEvents {
                 }
                 shooting = zDown;
                 charging = zDown;
+            } else if (scheme == BHControlScheme.CLASSIC) {
+                th9ZHoldStreak = 0;
+                shooting = zDown;
+                charging = false;
             } else {
                 th9ZHoldStreak = 0;
                 shooting = zDown;
                 charging = xDown;
             }
 
-            // th9: C and X both behave like th19 bomb (either edge triggers one bomb packet).
-            boolean bombPressed = scheme == BHControlScheme.TH9
+            // th9/classic: C and X both behave like th19 bomb (either edge triggers one bomb packet).
+            boolean bombPressed = (scheme == BHControlScheme.TH9 || scheme == BHControlScheme.CLASSIC)
                     ? (isDown(BHKeyMappings.BOMB) || isDown(BHKeyMappings.SKILL))
                     : isDown(BHKeyMappings.BOMB);
             boolean bombJustPressed = bombPressed && !prevBombDown;
             prevBombDown = bombPressed;
 
             boolean xReleased = !xDown && prevXDown;
-            if (scheme != BHControlScheme.TH9 && xReleased)
+            if (scheme != BHControlScheme.TH9 && scheme != BHControlScheme.CLASSIC && xReleased)
                 BHPackets.sendSkill();
 
             if (bombJustPressed)

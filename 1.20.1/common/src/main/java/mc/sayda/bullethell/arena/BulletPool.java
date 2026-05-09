@@ -17,8 +17,8 @@ import java.util.function.IntConsumer;
 public class BulletPool {
 
     /** Room for dense boss patterns; {@link #spawn} recycles the oldest slot if full so volleys never silently drop. */
-    public static final int   ENEMY_CAPACITY  = 4096;
-    public static final int   PLAYER_CAPACITY = 128; // player shots
+    public static final int   ENEMY_CAPACITY  = 16384;
+    public static final int   PLAYER_CAPACITY = 2048; // player shots
     /** Legacy alias kept for existing references. */
     public static final int   CAPACITY        = ENEMY_CAPACITY;
 
@@ -27,6 +27,14 @@ public class BulletPool {
 
     /** Floats per bullet slot (enemy + player pools share layout). */
     public static final int STRIDE = 13;
+
+    /**
+     * Default lifetime assigned when no explicit {@code bulletLifetimeTicks} is set in a pattern step.
+     * At maximum normal bullet speed (~8 px/tick) a bullet covers the 480×640 arena plus the 128-unit
+     * kill-wall margin in under 120 ticks, so 3600 is effectively infinite — the {@link #outOfBounds}
+     * kill wall handles all culling.
+     */
+    public static final int LIFE_KILL_WALL_ONLY = 3600;
 
     /** Stored in {@link #F_PLAYER_HOMING}: bullet receives boss/enemy homing steer in player pools only. */
     public static final int HOMING_OFF = 0;
@@ -61,6 +69,8 @@ public class BulletPool {
     private final float[]   data;
     private final boolean[] active;
     private final boolean[] dirty;
+    /** Previous-tick positions for sub-tick interpolation (client-only; not in STRIDE). */
+    private final float[] prevX, prevY;
     private int activeCount = 0;
     /** Optional: reset arena-side metadata (e.g. bounce state) before overwriting a slot. */
     private IntConsumer onBeforeWriteSlot;
@@ -73,6 +83,8 @@ public class BulletPool {
         this.data     = new float[capacity * STRIDE];
         this.active   = new boolean[capacity];
         this.dirty    = new boolean[capacity];
+        this.prevX    = new float[capacity];
+        this.prevY    = new float[capacity];
     }
 
     public int getCapacity() { return capacity; }
@@ -97,8 +109,9 @@ public class BulletPool {
                 if (data[b + F_FREEZE_REMAINING] <= 0f) {
                     data[b + F_VX] = data[b + F_PENDING_VX];
                     data[b + F_VY] = data[b + F_PENDING_VY];
+                    dirty[i] = true; // velocity changed, must sync
                 }
-                dirty[i] = true;
+                // else: only countdown ticked down; clientTick() mirrors it → no sync needed
                 continue;
             }
             applyAngularVelocity(data, b);
@@ -114,8 +127,10 @@ public class BulletPool {
     }
 
     /**
-     * Client-side extrapolation - moves bullets without deactivating them.
-     * Server delta packets handle deactivation.
+     * Client-side prediction: full mirror of {@link #tick()} physics including freeze countdown,
+     * lifetime decrement, and out-of-bounds deactivation. Deactivating locally when the server
+     * would also deactivate eliminates the 1-tick window where the server has killed a bullet
+     * but the client still renders it (the "phantom flash" before the death packet arrives).
      */
     public void clientTick() {
         for (int i = 0; i < capacity; i++) {
@@ -133,6 +148,10 @@ public class BulletPool {
             applyAngularVelocity(data, b);
             data[b + F_X] += data[b + F_VX];
             data[b + F_Y] += data[b + F_VY];
+            data[b + F_LIFE]--;
+            if (data[b + F_LIFE] <= 0 || outOfBounds(data[b + F_X], data[b + F_Y])) {
+                deactivate(i);
+            }
         }
     }
 
@@ -208,6 +227,8 @@ public class BulletPool {
             data[b + F_PENDING_VY] = 0f;
             data[b + F_FREEZE_REMAINING] = 0f;
         }
+        prevX[slot] = x;
+        prevY[slot] = y;
         active[slot] = true;
         dirty[slot]  = true;
         activeCount++;
@@ -226,6 +247,16 @@ public class BulletPool {
         for (int i = 0; i < capacity; i++) if (active[i]) deactivate(i);
     }
 
+    /** Snapshot current positions into prevX/prevY. Call once per client tick before {@link #clientTick()}. */
+    public void savePrevPositions() {
+        for (int i = 0; i < capacity; i++) {
+            if (active[i]) {
+                prevX[i] = data[i * STRIDE + F_X];
+                prevY[i] = data[i * STRIDE + F_Y];
+            }
+        }
+    }
+
     // ---------------------------------------------------------------- getters
 
     public float   getX(int slot)    { return data[slot * STRIDE + F_X]; }
@@ -240,6 +271,14 @@ public class BulletPool {
     public float   getPlayerHoming(int slot) { return data[slot * STRIDE + F_PLAYER_HOMING]; }
     public boolean isActive(int slot){ return active[slot]; }
     public int     getActiveCount()  { return activeCount; }
+    /** Previous-tick X for sub-tick interpolation in the renderer (client-side only). */
+    public float   getPrevX(int slot) { return prevX[slot]; }
+    /** Previous-tick Y for sub-tick interpolation in the renderer (client-side only). */
+    public float   getPrevY(int slot) { return prevY[slot]; }
+    public float   getPendingVx(int slot) { return data[slot * STRIDE + F_PENDING_VX]; }
+    public float   getPendingVy(int slot) { return data[slot * STRIDE + F_PENDING_VY]; }
+    public void    setPendingVx(int slot, float vx) { if (active[slot]) data[slot * STRIDE + F_PENDING_VX] = vx; }
+    public void    setPendingVy(int slot, float vy) { if (active[slot]) data[slot * STRIDE + F_PENDING_VY] = vy; }
 
     // ---------------------------------------------------------------- delta sync
 
@@ -253,9 +292,20 @@ public class BulletPool {
     }
 
     public void setSlotData(int slot, float[] slotData, boolean isActive) {
+        if (isActive && active[slot]) {
+            prevX[slot] = data[slot * STRIDE + F_X];
+            prevY[slot] = data[slot * STRIDE + F_Y];
+        }
         System.arraycopy(slotData, 0, data, slot * STRIDE, STRIDE);
-        if (isActive  && !active[slot]) { active[slot] = true;  activeCount++; }
-        else if (!isActive && active[slot]) { active[slot] = false; activeCount--; }
+        if (isActive && !active[slot]) {
+            active[slot] = true;
+            activeCount++;
+            prevX[slot] = slotData[F_X];
+            prevY[slot] = slotData[F_Y];
+        } else if (!isActive && active[slot]) {
+            active[slot] = false;
+            activeCount--;
+        }
     }
 
     // ---------------------------------------------------------------- helpers
@@ -291,24 +341,31 @@ public class BulletPool {
         if (!active[slot])
             return;
         int b = slot * STRIDE;
+        prevX[slot] = data[b + F_X];
+        prevY[slot] = data[b + F_Y];
         data[b + F_X] = x;
         data[b + F_Y] = y;
         dirty[slot] = true;
     }
 
+    private int freeSlotCursor = 0;
+
     private int nextFreeSlot() {
-        for (int i = 0; i < capacity; i++) if (!active[i]) return i;
-        // Pool full: recycle lowest-index active bullet so spawn() never fails silently.
-        for (int i = 0; i < capacity; i++) {
-            if (active[i]) {
-                deactivate(i);
+        for (int count = 0; count < capacity; count++) {
+            int i = (freeSlotCursor + count) % capacity;
+            if (!active[i]) {
+                freeSlotCursor = (i + 1) % capacity;
                 return i;
             }
         }
-        return -1;
+        // Pool full: recycle the slot at cursor so spawn() never fails silently.
+        int i = freeSlotCursor;
+        deactivate(i);
+        freeSlotCursor = (i + 1) % capacity;
+        return i;
     }
 
     private static boolean outOfBounds(float x, float y) {
-        return x < -32f || x > ARENA_W + 32f || y < -32f || y > ARENA_H + 32f;
+        return x < -128f || x > ARENA_W + 128f || y < -128f || y > ARENA_H + 128f;
     }
 }

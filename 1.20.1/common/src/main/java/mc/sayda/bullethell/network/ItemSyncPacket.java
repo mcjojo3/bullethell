@@ -4,37 +4,56 @@ import mc.sayda.bullethell.arena.ArenaContext;
 import mc.sayda.bullethell.arena.ItemPool;
 import net.minecraft.network.FriendlyByteBuf;
 
-/** S → C | full item pool snapshot every 4 ticks. */
+/**
+ * S → C | compact item pool snapshot every 2 ticks.
+ *
+ * Format: [activeCount(varint)] { [slot(varint)] [STRIDE floats] }...
+ * Only active slots are transmitted.
+ */
 public class ItemSyncPacket {
 
-    public final float[][] allSlotData;
-    public final boolean[] allActive;
+    private static final int STRIDE = ItemPool.STRIDE;
 
-    public ItemSyncPacket(float[][] data, boolean[] active) {
-        this.allSlotData = data; this.allActive = active;
+    public final int[]    slots;
+    public final float[][] data;
+
+    public ItemSyncPacket(int[] slots, float[][] data) {
+        this.slots = slots; this.data = data;
     }
 
     public static ItemSyncPacket fromContext(ArenaContext ctx) {
-        int cap = ItemPool.CAPACITY, stride = ItemPool.STRIDE;
-        float[][] data = new float[cap][stride]; boolean[] active = new boolean[cap];
-        for (int i = 0; i < cap; i++) { data[i] = ctx.items.getSlotData(i); active[i] = ctx.items.isActive(i); }
-        return new ItemSyncPacket(data, active);
+        int cap   = ItemPool.CAPACITY;
+        int count = ctx.items.getActiveCount();
+        int[]    slots = new int[count];
+        float[][] data = new float[count][];
+        int j = 0;
+        for (int i = 0; i < cap && j < count; i++) {
+            if (ctx.items.isActive(i)) {
+                slots[j] = i;
+                data[j]  = ctx.items.getSlotData(i);
+                j++;
+            }
+        }
+        return new ItemSyncPacket(slots, data);
     }
 
     public void encode(FriendlyByteBuf buf) {
-        for (int i = 0; i < ItemPool.CAPACITY; i++) {
-            buf.writeBoolean(allActive[i]);
-            if (allActive[i]) for (float f : allSlotData[i]) buf.writeFloat(f);
+        buf.writeVarInt(slots.length);
+        for (int i = 0; i < slots.length; i++) {
+            buf.writeVarInt(slots[i]);
+            for (float f : data[i]) buf.writeFloat(f);
         }
     }
 
     public static ItemSyncPacket decode(FriendlyByteBuf buf) {
-        int cap = ItemPool.CAPACITY, stride = ItemPool.STRIDE;
-        float[][] data = new float[cap][stride]; boolean[] active = new boolean[cap];
-        for (int i = 0; i < cap; i++) {
-            active[i] = buf.readBoolean();
-            if (active[i]) for (int j = 0; j < stride; j++) data[i][j] = buf.readFloat();
+        int count  = buf.readVarInt();
+        int[]    slots = new int[count];
+        float[][] data = new float[count][];
+        for (int i = 0; i < count; i++) {
+            slots[i] = buf.readVarInt();
+            data[i]  = new float[STRIDE];
+            for (int j = 0; j < STRIDE; j++) data[i][j] = buf.readFloat();
         }
-        return new ItemSyncPacket(data, active);
+        return new ItemSyncPacket(slots, data);
     }
 }

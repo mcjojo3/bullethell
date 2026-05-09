@@ -17,1215 +17,309 @@
   "description": "Balanced - small hitbox",
   "shotOptions": [
     {
-      "label": "A \u2014 Homing Amulet",
-      "description": "Wide amulets with homing. Strong coverage; focused fire tightens the stream.",
+      "label": "A — Homing Ofuda",
+      "description": "Forward ofuda stream; side homing orbs track enemies. Focus fires tight ofudas with slow homing talismans ahead.",
+      "note": "Based on TH7 PCB ply00a/ply00as. 9 power tiers (thresholds: 8,16,32,48,64,80,96,128). fireRateTicks>0 = periodic secondary stream.",
       "unfocused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -14,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx": 0, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "AMULET",
-              "homing": false,
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -14,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": false,
-              "offsetX": -10,
-              "offsetY": 0,
-              "vx": -1.2,
-              "vy": -13,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": false,
-              "offsetX": 10,
-              "offsetY": 0,
-              "vx": 1.2,
-              "vy": -13,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -10, "offsetY": 0, "vx": -1.5, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  10, "offsetY": 0, "vx":  1.5, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -5, "vy": -12, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  5, "vy": -12, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
           ],
           [
-            {
-              "bulletType": "AMULET",
-              "homing": false,
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -14,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -12,
-              "offsetY": 0,
-              "vx": -1.4,
-              "vy": -13,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 12,
-              "offsetY": 0,
-              "vx": 1.4,
-              "vy": -13,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -22,
-              "offsetY": 0,
-              "vx": -2.2,
-              "vy": -12,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 22,
-              "offsetY": 0,
-              "vx": 2.2,
-              "vy": -12,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -10, "offsetY": 0, "vx": -1.5, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  10, "offsetY": 0, "vx":  1.5, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -5, "vy": -12, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  5, "vy": -12, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -14,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -12,
-              "offsetY": 0,
-              "vx": -1.4,
-              "vy": -13,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 12,
-              "offsetY": 0,
-              "vx": 1.4,
-              "vy": -13,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -22,
-              "offsetY": 0,
-              "vx": -2.2,
-              "vy": -12,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 22,
-              "offsetY": 0,
-              "vx": 2.2,
-              "vy": -12,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 0,
-              "offsetY": 6,
-              "vx": 0,
-              "vy": -13.5,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx": -2, "vy": -16,   "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx":  0, "vy": -17,   "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx":  2, "vy": -16,   "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -5, "vy": -12,   "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  5, "vy": -12,   "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -14,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -12,
-              "offsetY": 0,
-              "vx": -1.4,
-              "vy": -13,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 12,
-              "offsetY": 0,
-              "vx": 1.4,
-              "vy": -13,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -22,
-              "offsetY": 0,
-              "vx": -2.2,
-              "vy": -12,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 22,
-              "offsetY": 0,
-              "vx": 2.2,
-              "vy": -12,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 0,
-              "offsetY": 6,
-              "vx": 0,
-              "vy": -13.5,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -34,
-              "offsetY": 0,
-              "vx": -3.5,
-              "vy": -11,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 34,
-              "offsetY": 0,
-              "vx": 3.5,
-              "vy": -11,
-              "lifetime": 70,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx": -2, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx":  0, "vy": -17, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx":  2, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -4, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  4, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -8, "vy": -11, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  8, "vy": -11, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx": -2, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx":  0, "vy": -17, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx":  2, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -4, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  4, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -8, "vy": -11, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  8, "vy": -11, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx": -2, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx":  0, "vy": -17, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx":  2, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  -4, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":   4, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  -8, "vy": -11, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":   8, "vy": -11, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -11, "vy":  -7, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  11, "vy":  -7, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -20, "offsetY": 0, "vx": -2, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -20, "offsetY": 0, "vx":  0, "vy": -17, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  20, "offsetY": 0, "vx":  0, "vy": -17, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  20, "offsetY": 0, "vx":  2, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  -4, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":   4, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  -8, "vy": -11, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":   8, "vy": -11, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -11, "vy":  -7, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  11, "vy":  -7, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -13, "vy":  -3, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  13, "vy":  -3, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -20, "offsetY": 0, "vx": -2, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -20, "offsetY": 0, "vx":  0, "vy": -17, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  20, "offsetY": 0, "vx":  0, "vy": -17, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  20, "offsetY": 0, "vx":  2, "vy": -16, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  -4, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":   4, "vy": -13, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  -8, "vy": -11, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":   8, "vy": -11, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -11, "vy":  -7, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  11, "vy":  -7, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx": -13, "vy":  -3, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": 0, "vx":  13, "vy":  -3, "lifetime": 120, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ]
         ]
       },
       "focused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "AMULET",
-              "homing": false,
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx": 0, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": 0, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "AMULET",
-              "homing": false,
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": false,
-              "offsetX": -6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": false,
-              "offsetX": 6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx": 0, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": 0, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -12,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 12,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -10, "offsetY": 0, "vx": -0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  10, "offsetY": 0, "vx":  0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": 0, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 5 }
           ],
           [
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -12,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17.5,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 12,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17.5,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 0,
-              "offsetY": 7,
-              "vx": 0,
-              "vy": -17.5,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -10, "offsetY": 0, "vx": -0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  10, "offsetY": 0, "vx":  0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": 0, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 3 }
           ],
           [
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 6,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -18,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -12,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17.5,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 12,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17.5,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 0,
-              "offsetY": 7,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": -18,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "AMULET",
-              "homing": true,
-              "offsetX": 18,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 85,
-              "visScale": 1.0,
-              "hitScale": 2.75,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -10, "offsetY": 0, "vx": -0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  10, "offsetY": 0, "vx":  0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": 0, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -10, "offsetY": 0, "vx": -0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  10, "offsetY": 0, "vx":  0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": -2, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx":  2, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -10, "offsetY": 0, "vx": -0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  10, "offsetY": 0, "vx":  0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": -2, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx":  2, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -10, "offsetY": 0, "vx": -0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  10, "offsetY": 0, "vx":  0.5, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": -2, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx":  2, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": -5, "vy": -12, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx":  5, "vy": -12, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 10 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -10, "offsetY": 0, "vx": -1, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":   0, "offsetY": 0, "vx":  0, "vy": -19, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  10, "offsetY": 0, "vx":  1, "vy": -18, "lifetime": 80, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": -2, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx":  2, "vy": -13, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx": -5, "vy": -12, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 4 },
+            { "bulletType": "BLUE_OFUDA", "homing": true,  "offsetX": 0, "offsetY": -25, "vx":  5, "vy": -12, "lifetime": 160, "visScale": 1.0, "hitScale": 2.75, "angularVelocity": 0, "freezeTicks": 0, "fireRateTicks": 4 }
           ]
         ]
       }
     },
     {
-      "label": "B \u2014 Persuasion Needle",
-      "description": "Fast narrow needles, high forward damage. Focused shots stack a dense column.",
+      "label": "B — Spread Amulet",
+      "description": "Wide spread of fast amulets unfocused; focused stacks a dense forward column.",
       "unfocused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx": 0, "vy": -17, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -7,
-              "offsetY": 0,
-              "vx": -1.8,
-              "vy": -16,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 7,
-              "offsetY": 0,
-              "vx": 1.8,
-              "vy": -16,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0,    "vy": -17, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -7, "offsetY": 0, "vx": -1.8, "vy": -16, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  7, "offsetY": 0, "vx":  1.8, "vy": -16, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -8,
-              "offsetY": 0,
-              "vx": -2,
-              "vy": -16,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 8,
-              "offsetY": 0,
-              "vx": 2,
-              "vy": -16,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -16,
-              "offsetY": 0,
-              "vx": -3.5,
-              "vy": -15,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 16,
-              "offsetY": 0,
-              "vx": 3.5,
-              "vy": -15,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0,  "vy": -17, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -8, "offsetY": 0, "vx": -2, "vy": -16, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  8, "offsetY": 0, "vx":  2, "vy": -16, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -16, "offsetY": 0, "vx": -3.5, "vy": -15, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  16, "offsetY": 0, "vx":  3.5, "vy": -15, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -8,
-              "offsetY": 0,
-              "vx": -2,
-              "vy": -16,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 8,
-              "offsetY": 0,
-              "vx": 2,
-              "vy": -16,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -16,
-              "offsetY": 0,
-              "vx": -3.5,
-              "vy": -15,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 16,
-              "offsetY": 0,
-              "vx": 3.5,
-              "vy": -15,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 6,
-              "vx": 0,
-              "vy": -16.5,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0,  "vy": -17,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -8, "offsetY": 0, "vx": -2, "vy": -16,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  8, "offsetY": 0, "vx":  2, "vy": -16,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -16, "offsetY": 0, "vx": -3.5, "vy": -15, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  16, "offsetY": 0, "vx":  3.5, "vy": -15, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 6, "vx":  0,   "vy": -16.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -17,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -8,
-              "offsetY": 0,
-              "vx": -2,
-              "vy": -16,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 8,
-              "offsetY": 0,
-              "vx": 2,
-              "vy": -16,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -16,
-              "offsetY": 0,
-              "vx": -3.5,
-              "vy": -15,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 16,
-              "offsetY": 0,
-              "vx": 3.5,
-              "vy": -15,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 6,
-              "vx": 0,
-              "vy": -16.5,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -26,
-              "offsetY": 0,
-              "vx": -5,
-              "vy": -13.5,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 26,
-              "offsetY": 0,
-              "vx": 5,
-              "vy": -13.5,
-              "lifetime": 55,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0,  "vy": -17,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -8, "offsetY": 0, "vx": -2, "vy": -16,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  8, "offsetY": 0, "vx":  2, "vy": -16,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -16, "offsetY": 0, "vx": -3.5, "vy": -15, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  16, "offsetY": 0, "vx":  3.5, "vy": -15, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 6, "vx":  0,   "vy": -16.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -26, "offsetY": 0, "vx": -5,  "vy": -13.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  26, "offsetY": 0, "vx":  5,  "vy": -13.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0,  "vy": -17,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -8, "offsetY": 0, "vx": -2, "vy": -16,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  8, "offsetY": 0, "vx":  2, "vy": -16,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -16, "offsetY": 0, "vx": -3.5, "vy": -15, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  16, "offsetY": 0, "vx":  3.5, "vy": -15, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 6, "vx":  0,   "vy": -16.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -26, "offsetY": 0, "vx": -5,  "vy": -13.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  26, "offsetY": 0, "vx":  5,  "vy": -13.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0,  "vy": -18,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -8, "offsetY": 0, "vx": -2, "vy": -17,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  8, "offsetY": 0, "vx":  2, "vy": -17,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -16, "offsetY": 0, "vx": -3.5, "vy": -16, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  16, "offsetY": 0, "vx":  3.5, "vy": -16, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 6, "vx":  0,   "vy": -17.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -26, "offsetY": 0, "vx": -5,  "vy": -14.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  26, "offsetY": 0, "vx":  5,  "vy": -14.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0,  "vy": -19,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -8, "offsetY": 0, "vx": -2, "vy": -18,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  8, "offsetY": 0, "vx":  2, "vy": -18,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -16, "offsetY": 0, "vx": -3.5, "vy": -17, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  16, "offsetY": 0, "vx":  3.5, "vy": -17, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 6, "vx":  0,   "vy": -18.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -26, "offsetY": 0, "vx": -5,  "vy": -15.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  26, "offsetY": 0, "vx":  5,  "vy": -15.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -36, "offsetY": 0, "vx": -7,  "vy": -13,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  36, "offsetY": 0, "vx":  7,  "vy": -13,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0,  "vy": -20,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -8, "offsetY": 0, "vx": -2, "vy": -19,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  8, "offsetY": 0, "vx":  2, "vy": -19,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -16, "offsetY": 0, "vx": -3.5, "vy": -18, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  16, "offsetY": 0, "vx":  3.5, "vy": -18, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 6, "vx":  0,   "vy": -19.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -26, "offsetY": 0, "vx": -5,  "vy": -16.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  26, "offsetY": 0, "vx":  5,  "vy": -16.5, "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -36, "offsetY": 0, "vx": -7,  "vy": -14,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  36, "offsetY": 0, "vx":  7,  "vy": -14,   "lifetime": 55, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
           ]
         ]
       },
       "focused": {
         "powerTiers": [
           [
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": 0, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -9,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 9,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -9, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  9, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -9,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.5,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 9,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.5,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 7,
-              "vx": 0,
-              "vy": -20.5,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -9, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  9, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
           ],
           [
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 4,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -9,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.5,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 9,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20.5,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 0,
-              "offsetY": 7,
-              "vx": 0,
-              "vy": -20.5,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": -14,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            },
-            {
-              "bulletType": "NEEDLE",
-              "offsetX": 14,
-              "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
-              "lifetime": 48,
-              "visScale": 1,
-              "hitScale": 1.22,
-              "angularVelocity": 0.0,
-              "freezeTicks": 0
-            }
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -9, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  9, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -14, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  14, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -9, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  9, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -14, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  14, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0, "vy": -23, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -23, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -23, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -9, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  9, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -14, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  14, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -20, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  20, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0, "vy": -23, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -23, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -23, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -9, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  9, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -14, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  14, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -20, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  20, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
+          ],
+          [
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  0, "offsetY": 0, "vx": 0, "vy": -24, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -4, "offsetY": 0, "vx": 0, "vy": -24, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  4, "offsetY": 0, "vx": 0, "vy": -24, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -9, "offsetY": 0, "vx": 0, "vy": -23, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  9, "offsetY": 0, "vx": 0, "vy": -23, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -14, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  14, "offsetY": 0, "vx": 0, "vy": -22, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -20, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  20, "offsetY": 0, "vx": 0, "vy": -21, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX": -27, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 },
+            { "bulletType": "RED_OFUDA", "homing": false, "offsetX":  27, "offsetY": 0, "vx": 0, "vy": -20, "lifetime": 48, "visScale": 1, "hitScale": 1.22, "angularVelocity": 0, "freezeTicks": 0 }
           ]
         ]
       }

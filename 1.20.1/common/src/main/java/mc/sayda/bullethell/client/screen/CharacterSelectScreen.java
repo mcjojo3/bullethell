@@ -36,6 +36,7 @@ public class CharacterSelectScreen extends Screen {
     private final String stageId;
     /** Pass-through for ESC → difficulty screen (unlock caps). */
     private final int maxAllowedDifficultyOrdinal;
+    private final boolean practiceMode;
     private final List<CharacterDefinition> characters;
 
     private int selectedIndex = 0;
@@ -44,14 +45,19 @@ public class CharacterSelectScreen extends Screen {
     private int cardTopY;
 
     public CharacterSelectScreen(DifficultyConfig difficulty, String stageId) {
-        this(difficulty, stageId, DifficultyConfig.LUNATIC.ordinal());
+        this(difficulty, stageId, DifficultyConfig.LUNATIC.ordinal(), false);
     }
 
     public CharacterSelectScreen(DifficultyConfig difficulty, String stageId, int maxAllowedDifficultyOrdinal) {
+        this(difficulty, stageId, maxAllowedDifficultyOrdinal, false);
+    }
+
+    public CharacterSelectScreen(DifficultyConfig difficulty, String stageId, int maxAllowedDifficultyOrdinal, boolean practiceMode) {
         super(Component.literal("Select Character"));
         this.difficulty = difficulty;
         this.stageId = stageId;
         this.maxAllowedDifficultyOrdinal = maxAllowedDifficultyOrdinal;
+        this.practiceMode = practiceMode;
         this.characters = CharacterLoader.loadAll();
     }
 
@@ -224,10 +230,10 @@ public class CharacterSelectScreen extends Screen {
         CharacterDefinition ch = characters.get(selectedIndex);
         if (ch.shotTypeOptionCount() >= 2) {
             Minecraft.getInstance().setScreen(ShotTypeSelectScreen.forSolo(difficulty, stageId,
-                    maxAllowedDifficultyOrdinal, ch.id));
+                    maxAllowedDifficultyOrdinal, ch.id, practiceMode));
             return;
         }
-        BHPackets.sendCharSelect(ch.id, difficulty, stageId, 0);
+        BHPackets.sendCharSelect(ch.id, difficulty, stageId, 0, practiceMode);
         onClose();
     }
 
@@ -235,7 +241,7 @@ public class CharacterSelectScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             BHSfx.playBack();
-            Minecraft.getInstance().setScreen(new DifficultySelectScreen(stageId, maxAllowedDifficultyOrdinal));
+            Minecraft.getInstance().setScreen(new DifficultySelectScreen(stageId, maxAllowedDifficultyOrdinal, practiceMode));
             return true;
         }
         if (keyCode == 263 && selectedIndex > 0) {

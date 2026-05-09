@@ -6,9 +6,9 @@ import java.util.Arrays;
  * Fixed-capacity pool of laser beams.
  *
  * Each laser passes through two phases:
- * Warning – a thin indicator line shows where the beam will fire (safe for the
+ * Warning - a thin indicator line shows where the beam will fire (safe for the
  * player)
- * Firing – the full-width beam is active and deals damage on contact
+ * Firing - the full-width beam is active and deals damage on contact
  *
  * Data is stored in a stride-7 float array for cache efficiency.
  * Slot layout: [0]=x [1]=y [2]=angle [3]=halfWidth [4]=warnTicksLeft
@@ -16,7 +16,7 @@ import java.util.Arrays;
  */
 public class LaserPool {
 
-    public static final int CAPACITY = 32;
+    public static final int CAPACITY = 128;
     public static final int STRIDE = 7;
 
     // Field offsets within each stride block
@@ -36,6 +36,9 @@ public class LaserPool {
      * Bidirectional flag - true for NDL-style beams that extend in both directions.
      */
     public final boolean[] bidir = new boolean[CAPACITY];
+
+    /** Set when any laser spawns this tick; cleared by {@link #clearDirty()}. */
+    private boolean dirty = false;
 
     // ---------------------------------------------------------------- spawn / tick
 
@@ -62,6 +65,7 @@ public class LaserPool {
         data[b + F_TYPE] = typeId;
         active[slot] = true;
         bidir[slot] = bidirectional;
+        dirty = true;
     }
 
     /** Advance all lasers by one tick; deactivate when firing ticks run out. */
@@ -79,6 +83,25 @@ public class LaserPool {
             }
         }
     }
+
+    /** Client-side mirror of {@link #tick()}: decrement timers, deactivate expired lasers. */
+    public void clientTick() {
+        for (int i = 0; i < CAPACITY; i++) {
+            if (!active[i])
+                continue;
+            int b = i * STRIDE;
+            if (data[b + F_WARN] > 0) {
+                data[b + F_WARN]--;
+            } else {
+                data[b + F_ACT]--;
+                if (data[b + F_ACT] <= 0)
+                    active[i] = false;
+            }
+        }
+    }
+
+    public boolean isDirty() { return dirty; }
+    public void clearDirty() { dirty = false; }
 
     // ---------------------------------------------------------------- queries
 

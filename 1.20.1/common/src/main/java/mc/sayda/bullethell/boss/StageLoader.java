@@ -68,6 +68,7 @@ public final class StageLoader {
         def.bossId = bossId;
         def.waves = new java.util.ArrayList<>();
         def.rules = new RulesetConfig();
+        def.rules.applyPreset();
         return def;
     }
 
@@ -100,6 +101,7 @@ public final class StageLoader {
             if (def == null) return null;
             if (def.waves   == null) def.waves = new ArrayList<>();
             if (def.rules   == null) def.rules = new RulesetConfig();
+            def.rules.applyPreset();
             if (def.rewards == null) def.rewards = new StageRewards();
             if (def.rewards.onWin  == null) def.rewards.onWin  = new ArrayList<>();
             if (def.rewards.onLoss == null) def.rewards.onLoss = new ArrayList<>();
@@ -165,6 +167,7 @@ public final class StageLoader {
         def.bossId           = "";
         def.nextStageId      = "";
         def.rules            = new RulesetConfig();
+        def.rules.applyPreset();
         def.rewards          = new StageRewards();
         def.rewards.onWin    = new ArrayList<>();
         def.rewards.onLoss   = new ArrayList<>();
@@ -195,6 +198,7 @@ public final class StageLoader {
             }
             if (def.waves   == null) def.waves = new java.util.ArrayList<>();
             if (def.rules   == null) def.rules = new RulesetConfig();
+            def.rules.applyPreset();
             if (def.rewards == null) def.rewards = new StageRewards();
             if (def.rewards.onWin  == null) def.rewards.onWin  = new java.util.ArrayList<>();
             if (def.rewards.onLoss == null) def.rewards.onLoss = new java.util.ArrayList<>();
@@ -219,7 +223,9 @@ public final class StageLoader {
         def.title      = "??? (missing: " + id + ")";
         def.bossId     = "marisa_boss";
         def.stageMusic = null;
+        def.stageMusic = null;
         def.rules      = new RulesetConfig();
+        def.rules.applyPreset();
         return def;
     }
 }

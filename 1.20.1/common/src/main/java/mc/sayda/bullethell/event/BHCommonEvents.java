@@ -69,26 +69,28 @@ public class BHCommonEvents {
                         // Derive character id from boss id: "<charId>_boss" → "<charId>"
                         String charReward = (bossId != null && bossId.endsWith("_boss"))
                                 ? bossId.substring(0, bossId.length() - 5) : "";
-                        for (UUID pid : ctx.allParticipants()) {
-                            ServerPlayer p = server.getPlayerList().getPlayer(pid);
-                            if (p == null || bossId == null || bossId.isBlank())
-                                continue;
-                            boolean improved = BossProgression.grantClearThroughDifficulty(p, bossId, ctx.difficulty);
-                            if (improved) {
-                                p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                                        "[BulletHell] Recorded clear: " + bossId + " (" + ctx.difficulty.name() + ")."));
-                            }
-                            // Notify if this clear unlocked a playable character
-                            if (!charReward.isBlank()) {
-                                boolean charUnlocked = CharacterUnlocks.grantThroughDifficulty(p, charReward, ctx.difficulty);
-                                if (charUnlocked) {
-                                    String charName = charReward.substring(0, 1).toUpperCase() + charReward.substring(1);
+                        if (!ctx.practiceMode) {
+                            for (UUID pid : ctx.allParticipants()) {
+                                ServerPlayer p = server.getPlayerList().getPlayer(pid);
+                                if (p == null || bossId == null || bossId.isBlank())
+                                    continue;
+                                boolean improved = BossProgression.grantClearThroughDifficulty(p, bossId, ctx.difficulty);
+                                if (improved) {
                                     p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                                            "[BulletHell] " + charName + " is now playable on " + ctx.difficulty.name() + " and below!"));
+                                            "[BulletHell] Recorded clear: " + bossId + " (" + ctx.difficulty.name() + ")."));
                                 }
-                                // Always sync unlock state after a win so character select reflects it
-                                BHPackets.sendCharacterUnlocks(p, new mc.sayda.bullethell.network.CharacterUnlockSyncPacket(
-                                        CharacterUnlocks.snapshot(p)));
+                                // Notify if this clear unlocked a playable character
+                                if (!charReward.isBlank()) {
+                                    boolean charUnlocked = CharacterUnlocks.grantThroughDifficulty(p, charReward, ctx.difficulty);
+                                    if (charUnlocked) {
+                                        String charName = charReward.substring(0, 1).toUpperCase() + charReward.substring(1);
+                                        p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                                                "[BulletHell] " + charName + " is now playable on " + ctx.difficulty.name() + " and below!"));
+                                    }
+                                    // Always sync unlock state after a win so character select reflects it
+                                    BHPackets.sendCharacterUnlocks(p, new mc.sayda.bullethell.network.CharacterUnlockSyncPacket(
+                                            CharacterUnlocks.snapshot(p)));
+                                }
                             }
                         }
                     }
@@ -109,26 +111,42 @@ public class BHCommonEvents {
                     continue;
                 }
 
-                List<GameEvent> globalEvents = new ArrayList<>();
-                GameEvent ge;
-                while ((ge = ctx.pendingEvents.poll()) != null)
-                    globalEvents.add(ge);
+                List<GameEvent> globalEvents = java.util.Collections.emptyList();
+                if (!ctx.pendingEvents.isEmpty()) {
+                    GameEvent ge;
+                    globalEvents = new ArrayList<>();
+                    while ((ge = ctx.pendingEvents.poll()) != null)
+                        globalEvents.add(ge);
+                }
 
-                List<String> attackActivationSfx = new ArrayList<>();
-                String sfxId;
-                while ((sfxId = ctx.pendingAttackActivationSounds.poll()) != null)
-                    attackActivationSfx.add(sfxId);
+                List<String> attackActivationSfx = java.util.Collections.emptyList();
+                if (!ctx.pendingAttackActivationSounds.isEmpty()) {
+                    String sfxId;
+                    attackActivationSfx = new ArrayList<>();
+                    while ((sfxId = ctx.pendingAttackActivationSounds.poll()) != null)
+                        attackActivationSfx.add(sfxId);
+                }
 
                 BulletDeltaPacket deltaPacket = buildBulletDelta(ctx);
+                java.util.Set<UUID> all = ctx.allParticipants();
                 AllPlayerBulletsSyncPacket allBulletsPacket = AllPlayerBulletsSyncPacket.fromContext(ctx);
-                ItemSyncPacket itemPacket = (syncTick % 4 == 0) ? ItemSyncPacket.fromContext(ctx) : null;
-                EnemySyncPacket enemyPacket = (syncTick % 2 == 0) ? EnemySyncPacket.fromContext(ctx) : null;
+                LaserSyncPacket laserPacket = ctx.lasers.isDirty() ? new LaserSyncPacket(ctx.lasers) : null;
+                ItemSyncPacket itemPacket = (syncTick % 2 == 0) ? ItemSyncPacket.fromContext(ctx) : null;
+                EnemySyncPacket enemyPacket = EnemySyncPacket.fromContext(ctx);
 
                 ctx.bullets.clearDirty();
 
-                java.util.Map<UUID, CoopPlayersSyncPacket> coopPackets = new java.util.HashMap<>();
-                java.util.Set<UUID> all = ctx.allParticipants();
+                // Pre-compute player index map once (O(N)) instead of linear-searching per player.
+                java.util.Map<UUID, Integer> pIdxMap = new java.util.HashMap<>();
+                if (ctx.playerUuid != null) pIdxMap.put(ctx.playerUuid, 1);
+                int coopCount = 2;
+                for (UUID cid : ctx.getCoopPlayers().keySet()) pIdxMap.put(cid, coopCount++);
+
+                // Safety: emptyMap() is immutable; .put() is only called inside the
+                // all.size() > 1 branch where coopPackets is reassigned to a real HashMap.
+                java.util.Map<UUID, CoopPlayersSyncPacket> coopPackets = java.util.Collections.emptyMap();
                 if (all.size() > 1) {
+                    coopPackets = new java.util.HashMap<>();
                     List<CoopPlayersSyncPacket.Entry> allEntries = new ArrayList<>();
                     int idx = 1;
                     for (UUID pid : all) {
@@ -143,10 +161,13 @@ public class BHCommonEvents {
                         idx++;
                     }
 
+                    // Build per-recipient list by skipping that recipient's index — no full copy.
                     int recipientIdx = 0;
                     for (UUID pid : all) {
-                        List<CoopPlayersSyncPacket.Entry> others = new ArrayList<>(allEntries);
-                        others.remove(recipientIdx);
+                        List<CoopPlayersSyncPacket.Entry> others = new ArrayList<>(allEntries.size() - 1);
+                        for (int i = 0; i < allEntries.size(); i++) {
+                            if (i != recipientIdx) others.add(allEntries.get(i));
+                        }
                         coopPackets.put(pid, new CoopPlayersSyncPacket(others));
                         recipientIdx++;
                     }
@@ -177,17 +198,7 @@ public class BHCommonEvents {
 
                     BHPackets.sendAllPlayerBullets(p, allBulletsPacket);
 
-                    int pIdx = (pid.equals(ctx.playerUuid)) ? 1 : 0;
-                    if (pIdx == 0) {
-                        int count = 2;
-                        for (UUID cid : ctx.getCoopPlayers().keySet()) {
-                            if (cid.equals(pid)) {
-                                pIdx = count;
-                                break;
-                            }
-                            count++;
-                        }
-                    }
+                    int pIdx = pIdxMap.getOrDefault(pid, 1);
                     BHPackets.sendToPlayer(p, new ArenaStatePacket(ctx, pid, pIdx));
 
                     if (itemPacket != null)
@@ -200,8 +211,11 @@ public class BHCommonEvents {
                     if (cpp != null)
                         BHPackets.sendCoopSync(p, cpp);
 
-                    BHPackets.sendLaserSync(p, new LaserSyncPacket(ctx.lasers));
+                    if (laserPacket != null)
+                        BHPackets.sendLaserSync(p, laserPacket);
                 }
+                if (laserPacket != null)
+                    ctx.lasers.clearDirty();
             }
 
             toRemove.forEach(manager::stopArena);
@@ -396,7 +410,7 @@ public class BHCommonEvents {
         long scoreSelf = ctx.getScore(pid);
         long scoreTeam = ctx.getCombinedScore();
         int victoryXp = 0;
-        if (ctx.isWon() && grantVictoryXp) {
+        if (ctx.isWon() && grantVictoryXp && !ctx.practiceMode) {
             victoryXp = VictoryXpRewards.computePoints(scoreSelf, ctx.difficulty);
             if (victoryXp > 0) {
                 player.giveExperiencePoints(victoryXp);

@@ -17,22 +17,26 @@ import org.lwjgl.glfw.GLFW;
 
 /**
  * Full-screen overlay shown after an arena ends, rendered over the frozen arena
- * (isPauseScreen=true keeps the game world visible behind it, matching ArenaQuitScreen).
+ * (isPauseScreen=true keeps the game world visible behind it, matching
+ * ArenaQuitScreen).
  *
- * Phase 1 – DIALOG: the boss's victory/defeat quote rendered using the same
- * dialog-box style as the in-game pre-boss intro (via BulletHellRenderer.drawEndDialogBox).
+ * Phase 1 - DIALOG: the boss's victory/defeat quote rendered using the same
+ * dialog-box style as the in-game pre-boss intro (via
+ * BulletHellRenderer.drawEndDialogBox).
  * Skipped automatically when there is no quote.
  *
- * Phase 2 – STATS: score panel (score, lives, bombs, graze, spells) with three
+ * Phase 2 - STATS: score panel (score, lives, bombs, graze, spells) with three
  * actions: OK (close), SHARE (broadcast run), RETRY (restart stage).
  */
 @Environment(EnvType.CLIENT)
 public class ArenaEndScreen extends Screen {
 
-    private enum Phase { DIALOG, STATS }
+    private enum Phase {
+        DIALOG, STATS
+    }
 
     // Button indices
-    private static final int BTN_OK    = 0;
+    private static final int BTN_OK = 0;
     private static final int BTN_SHARE = 1;
     private static final int BTN_RETRY = 2;
     private static final int BTN_COUNT = 3;
@@ -52,7 +56,7 @@ public class ArenaEndScreen extends Screen {
 
     public ArenaEndScreen(ArenaEndPacket data) {
         super(Component.empty());
-        this.data  = data;
+        this.data = data;
         this.phase = data.bossDialog.isBlank() ? Phase.STATS : Phase.DIALOG;
     }
 
@@ -65,7 +69,7 @@ public class ArenaEndScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        String[] labels = {"  OK  ", " SHARE ", " RETRY "};
+        String[] labels = { "  OK  ", " SHARE ", " RETRY " };
         int totalW = 0;
         for (int i = 0; i < BTN_COUNT; i++) {
             btnW[i] = font.width(labels[i]) + 16;
@@ -144,10 +148,10 @@ public class ArenaEndScreen extends Screen {
         gfx.vLine(panelX + panelW - 1, panelY, panelY + panelH, 0x44FFFFFF);
 
         // ---- Stats ----
-        int lh   = font.lineHeight;
+        int lh = font.lineHeight;
         int rowY = panelY + 6;
-        int lx   = panelX + 10;
-        int rx   = panelX + panelW / 2 + 4;
+        int lx = panelX + 10;
+        int rx = panelX + panelW / 2 + 4;
 
         // Row 1: Character | Score (personal + optional team total in co-op)
         gfx.drawString(font, "\u266A " + data.characterName, lx, rowY, 0xFFCCCCFF, false);
@@ -191,12 +195,12 @@ public class ArenaEndScreen extends Screen {
         }
 
         // ---- Buttons ----
-        String[] labels = {"  OK  ", " SHARE ", " RETRY "};
+        String[] labels = { "  OK  ", " SHARE ", " RETRY " };
         for (int i = 0; i < BTN_COUNT; i++) {
-            boolean sel   = (i == selectedBtn);
+            boolean sel = (i == selectedBtn);
             boolean hover = mouseX >= btnX[i] && mouseX < btnX[i] + btnW[i]
-                         && mouseY >= btnY    && mouseY < btnY + BTN_H;
-            int bgCol  = (sel || hover) ? 0xCC223366 : 0xAA0A0A20;
+                    && mouseY >= btnY && mouseY < btnY + BTN_H;
+            int bgCol = (sel || hover) ? 0xCC223366 : 0xAA0A0A20;
             int txtCol = (sel || hover) ? 0xFFFFE600 : 0xFF8899BB;
             int brdCol = (sel || hover) ? 0xFFFFE600 : 0xFF334466;
 
@@ -270,7 +274,7 @@ public class ArenaEndScreen extends Screen {
 
     private void advanceDialog() {
         BHSfx.playSelect();
-        phase     = Phase.STATS;
+        phase = Phase.STATS;
         phaseTick = 0;
     }
 

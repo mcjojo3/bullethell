@@ -1,0 +1,906 @@
+{
+  "id": "satori_boss",
+  "name": "Satori Komeiji",
+  "aura": {
+    "texture": "textures/star_david.png",
+    "spinDegsPerTick": 13.8,
+    "baseScale": 2.85,
+    "breathAmplitude": 0.10,
+    "breathFrequency": 0.12,
+    "growTicks": 20,
+    "textureSize": 256,
+    "tintR": 1.0,
+    "tintG": 0.0,
+    "tintB": 0.0,
+    "tintA": 0.85
+  },
+  "_design_notes": [
+    "SA Stage 4 boss. Phase structure mirrors TH11 Subterranean Animism Stage 4.",
+    "Test: /bullethell start satori_boss 1 LUNATIC",
+    "Reference: TH11 Stage 4 spell cards — Satori Komeiji, Palace of Earth Spirits."
+  ],
+  "introDialog": [
+    {
+      "speaker": "BOSS",
+      "text": "I know exactly what you are thinking. Every move you plan, every gap you see — I have already seen it. Still, please come ahead.",
+      "delayTicks": 185
+    }
+  ],
+  "characterDialogs": {
+    "reimu": [
+      {
+        "speaker": "BOSS",
+        "text": "Shrine maiden. Your mind is a clean, direct thing — no scheming, no doubts. Just instinct.",
+        "delayTicks": 165
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "Less talking. More fighting.",
+        "delayTicks": 105
+      },
+      {
+        "speaker": "BOSS",
+        "text": "... You thought that before I finished speaking. How refreshing.",
+        "delayTicks": 150
+      }
+    ],
+    "marisa": [
+      {
+        "speaker": "BOSS",
+        "text": "A magician who steals freely and calls it collecting. Your heart is surprisingly untroubled by that.",
+        "delayTicks": 175
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "Being judged by a mind-reader? That ain't fair, ze.",
+        "delayTicks": 120
+      },
+      {
+        "speaker": "BOSS",
+        "text": "Honesty is not the same as fairness. Now show me that unstoppable spark.",
+        "delayTicks": 155
+      }
+    ],
+    "sakuya": [
+      {
+        "speaker": "BOSS",
+        "text": "The maid who stops time. Even so, your next intention is already visible to me.",
+        "delayTicks": 170
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "Can you read a mind that has already lived through the moment you are seeing?",
+        "delayTicks": 138
+      },
+      {
+        "speaker": "BOSS",
+        "text": "... That is actually a fair question. Let us find out together.",
+        "delayTicks": 148
+      }
+    ],
+    "sanae": [
+      {
+        "speaker": "BOSS",
+        "text": "A human who became a god's shrine maiden. Your memories are colourful. And very young.",
+        "delayTicks": 170
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "My faith does not need to be old to be real!",
+        "delayTicks": 118
+      },
+      {
+        "speaker": "BOSS",
+        "text": "I believe you. That sincerity makes you harder to predict than most.",
+        "delayTicks": 150
+      }
+    ],
+    "cirno": [
+      {
+        "speaker": "BOSS",
+        "text": "A fairy who truly, completely believes she is the strongest. There is not a single doubt in there.",
+        "delayTicks": 165
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "Because it is true! And your eye will not help if you cannot dodge ice!",
+        "delayTicks": 125
+      },
+      {
+        "speaker": "BOSS",
+        "text": "I cannot argue with a mind that holds no room for argument. Very well, show me.",
+        "delayTicks": 155
+      }
+    ],
+    "yuuka": [
+      {
+        "speaker": "BOSS",
+        "text": "...You are very quiet in there. Not calm — just vast. Like trying to read an entire forest.",
+        "delayTicks": 175
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "I hope it is not too overwhelming. I have had a long time to accumulate thoughts.",
+        "delayTicks": 140
+      },
+      {
+        "speaker": "BOSS",
+        "text": "Most minds have edges. Yours simply does not. This may take a while.",
+        "delayTicks": 160
+      }
+    ]
+  },
+  "victoryDialog": "Your mind moved faster than your body. That is usually how it ends.",
+  "defeatDialog": "You emptied your thoughts... or perhaps you simply act before thinking. Either way, it worked.",
+  "victoryDialogByCharacter": {
+    "reimu": "Pure instinct. No room for me to slip between the thoughts.",
+    "marisa": "You really do just go forward without a plan. It is somehow effective.",
+    "sakuya": "A mind already living in the next moment — that is a genuine blind spot for me.",
+    "sanae": "Your faith really does fill the space where doubt would be. I see that now.",
+    "cirno": "The strongest, indeed. I could not read confidence that absolute.",
+    "yuuka": "A mind with no readable edges... I cannot predict what was never there to find."
+  },
+  "defeatDialogByCharacter": {
+    "reimu": "Instinct only gets you so far. Next time — think.",
+    "marisa": "The spark burned bright, but brightness alone cannot fill every gap.",
+    "sakuya": "Even a clock shows where the hands will be. I am simply a very attentive observer.",
+    "sanae": "Faith without practice has its limits. Come back when the two have merged.",
+    "cirno": "Strength is more than belief. But do keep believing — it suits you.",
+    "yuuka": "Even a boundless mind has a turning point. I simply found which flower it was."
+  },
+  "phases": [
+    {
+      "_note": "Nonspell 1: alternating offset rings + slow aimed pressure. SA4 classic opener.",
+      "hp": 2000,
+      "isSpellCard": false,
+      "spellName": "Nonspell 1",
+      "spellDurationTicks": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 100,
+      "music": "satori_maiden_3rd_eye",
+      "attacks": [
+        {
+          "pattern": "RING_OFFSET",
+          "cooldown": [
+            18,
+            17,
+            15,
+            13
+          ],
+          "minCooldown": [
+            14,
+            13,
+            11,
+            9
+          ],
+          "bulletType": "SCARLET",
+          "arms": [
+            10,
+            10,
+            11,
+            12
+          ],
+          "maxScaledArms": 14,
+          "speed": [
+            1.85,
+            1.95,
+            2.08,
+            2.22
+          ],
+          "bulletLifetimeTicks": [
+            220,
+            215,
+            210,
+            200
+          ],
+          "ringStartAngleRad": -1
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": [
+            14,
+            12,
+            10,
+            8
+          ],
+          "minCooldown": [
+            11,
+            9,
+            7,
+            6
+          ],
+          "bulletType": "DOT",
+          "arms": [
+            4,
+            4,
+            5,
+            5
+          ],
+          "maxScaledArms": 6,
+          "speed": [
+            3.4,
+            3.6,
+            3.8,
+            4.0
+          ],
+          "spread": [
+            0.28,
+            0.25,
+            0.22,
+            0.19
+          ],
+          "bulletLifetimeTicks": 220
+        }
+      ]
+    },
+    {
+      "_note": "Spell 1: 'Recollection Terrifying Hypnotism' — dual curving ring layers with angular velocity + aimed. The expanding rings drift as they spread, creating the hypnotic illusion of rotation.",
+      "hp": 2200,
+      "isSpellCard": true,
+      "spellName": "Recollection \"Terrifying Hypnotism\"",
+      "spellDurationTicks": [
+        740,
+        580,
+        420,
+        200
+      ],
+      "spellBonus": 52000,
+      "movement": "CIRCLE",
+      "moveSpeed": 90,
+      "music": "",
+      "attacks": [
+        {
+          "pattern": "RING",
+          "cooldown": [
+            13,
+            12,
+            11,
+            9
+          ],
+          "minCooldown": [
+            10,
+            9,
+            8,
+            6
+          ],
+          "bulletType": "SCARLET",
+          "arms": [
+            11,
+            12,
+            13,
+            14
+          ],
+          "maxScaledArms": 16,
+          "speed": [
+            2.0,
+            2.1,
+            2.22,
+            2.38
+          ],
+          "bulletLifetimeTicks": [
+            220,
+            215,
+            210,
+            200
+          ],
+          "ringStartAngleRad": 0,
+          "bulletAngularVelocity": 0.005
+        },
+        {
+          "pattern": "RING",
+          "cooldown": [
+            16,
+            14,
+            12,
+            10
+          ],
+          "minCooldown": [
+            12,
+            10,
+            9,
+            7
+          ],
+          "bulletType": "DOT",
+          "arms": [
+            10,
+            11,
+            12,
+            13
+          ],
+          "maxScaledArms": 15,
+          "speed": [
+            1.85,
+            1.95,
+            2.05,
+            2.22
+          ],
+          "bulletLifetimeTicks": [
+            220,
+            215,
+            210,
+            200
+          ],
+          "ringStartAngleRad": 1.05,
+          "bulletAngularVelocity": -0.004
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": [
+            18,
+            16,
+            13,
+            10
+          ],
+          "minCooldown": [
+            14,
+            12,
+            9,
+            7
+          ],
+          "bulletType": "SCARLET",
+          "arms": [
+            3,
+            3,
+            4,
+            4
+          ],
+          "speed": [
+            2.8,
+            3.0,
+            3.25,
+            3.55
+          ],
+          "spread": [
+            0.22,
+            0.20,
+            0.17,
+            0.15
+          ],
+          "bulletLifetimeTicks": 230
+        }
+      ]
+    },
+    {
+      "_note": "Nonspell 2: faster ring offset + blue star aimed for colour contrast.",
+      "hp": 1600,
+      "isSpellCard": false,
+      "spellName": "Nonspell 2",
+      "spellDurationTicks": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 118,
+      "music": "",
+      "attacks": [
+        {
+          "pattern": "RING_OFFSET",
+          "cooldown": [
+            14,
+            13,
+            12,
+            10
+          ],
+          "minCooldown": [
+            11,
+            10,
+            9,
+            7
+          ],
+          "bulletType": "SCARLET",
+          "arms": [
+            12,
+            12,
+            13,
+            14
+          ],
+          "maxScaledArms": 16,
+          "speed": [
+            2.02,
+            2.14,
+            2.28,
+            2.45
+          ],
+          "bulletLifetimeTicks": [
+            215,
+            210,
+            205,
+            195
+          ],
+          "ringStartAngleRad": -1
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": [
+            11,
+            10,
+            9,
+            7
+          ],
+          "minCooldown": [
+            8,
+            7,
+            6,
+            5
+          ],
+          "bulletType": "STAR",
+          "arms": [
+            5,
+            5,
+            6,
+            6
+          ],
+          "maxScaledArms": 8,
+          "speed": [
+            3.7,
+            3.85,
+            4.0,
+            4.25
+          ],
+          "spread": [
+            0.22,
+            0.20,
+            0.17,
+            0.15
+          ],
+          "bulletLifetimeTicks": 220
+        }
+      ]
+    },
+    {
+      "_note": "Spell 2: 'Recollection Cthugha's Flame' — fire rain from above + knife burst volleys. Represents the hellfire spirit she is reading the memory of.",
+      "hp": 2400,
+      "isSpellCard": true,
+      "spellName": "Recollection \"Cthugha's Flame\"",
+      "spellDurationTicks": [
+        760,
+        600,
+        440,
+        220
+      ],
+      "spellBonus": 64000,
+      "movement": "CIRCLE",
+      "moveSpeed": 80,
+      "music": "",
+      "attacks": [
+        {
+          "pattern": "RAIN",
+          "cooldown": [
+            6,
+            5,
+            4,
+            3
+          ],
+          "bulletType": "CRIMSON_ORB",
+          "arms": [
+            10,
+            11,
+            12,
+            13
+          ],
+          "armsMin": 8,
+          "armsMax": 14,
+          "speed": [
+            3.2,
+            3.4,
+            3.6,
+            3.88
+          ],
+          "speedMin": 2.9,
+          "speedMax": 4.1,
+          "spread": [
+            0.09,
+            0.09,
+            0.085,
+            0.08
+          ],
+          "rainTop": -16,
+          "rainWidth": 480,
+          "bulletLifetimeTicks": 230
+        },
+        {
+          "pattern": "SPREAD",
+          "burstCount": 2,
+          "burstInterval": 5,
+          "cooldown": [
+            30,
+            26,
+            22,
+            18
+          ],
+          "minCooldown": [
+            22,
+            18,
+            16,
+            12
+          ],
+          "bulletType": "KNIFE",
+          "arms": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "maxScaledArms": 10,
+          "speed": [
+            5.0,
+            5.2,
+            5.5,
+            5.8
+          ],
+          "bulletLifetimeTicks": 220
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": [
+            14,
+            12,
+            10,
+            8
+          ],
+          "minCooldown": [
+            10,
+            9,
+            7,
+            5
+          ],
+          "bulletType": "SCARLET",
+          "arms": [
+            4,
+            4,
+            5,
+            5
+          ],
+          "speed": [
+            3.3,
+            3.5,
+            3.7,
+            4.0
+          ],
+          "spread": [
+            0.20,
+            0.18,
+            0.15,
+            0.13
+          ],
+          "bulletLifetimeTicks": 220
+        }
+      ]
+    },
+    {
+      "_note": "Nonspell 3: AIMED_RING — gold aimed shots each accompanied by a ring of small dots.",
+      "hp": 1800,
+      "isSpellCard": false,
+      "spellName": "Nonspell 3",
+      "spellDurationTicks": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "spellBonus": 0,
+      "movement": "SINE_WAVE",
+      "moveSpeed": 128,
+      "music": "",
+      "attacks": [
+        {
+          "pattern": "AIMED_RING",
+          "cooldown": [
+            17,
+            15,
+            13,
+            11
+          ],
+          "minCooldown": [
+            13,
+            11,
+            9,
+            7
+          ],
+          "bulletType": "GOLD",
+          "arms": [
+            5,
+            5,
+            6,
+            6
+          ],
+          "spread": [
+            0.22,
+            0.20,
+            0.17,
+            0.15
+          ],
+          "speed": [
+            3.3,
+            3.5,
+            3.7,
+            3.95
+          ],
+          "ringArms": [
+            10,
+            11,
+            12,
+            13
+          ],
+          "ringSpeed": [
+            1.65,
+            1.75,
+            1.85,
+            1.98
+          ],
+          "ringBulletType": "DOT",
+          "ringStartAngleRad": -1
+        },
+        {
+          "pattern": "RING_OFFSET",
+          "cooldown": [
+            20,
+            18,
+            16,
+            14
+          ],
+          "minCooldown": [
+            15,
+            13,
+            12,
+            10
+          ],
+          "bulletType": "SCARLET",
+          "arms": [
+            9,
+            10,
+            10,
+            11
+          ],
+          "speed": [
+            1.78,
+            1.88,
+            1.98,
+            2.12
+          ],
+          "bulletLifetimeTicks": [
+            220,
+            215,
+            210,
+            200
+          ],
+          "ringStartAngleRad": -1
+        }
+      ]
+    },
+    {
+      "_note": "Spell 3: 'Recollection Non-Directional Laser' — two sets of rotating lasers (CW and CCW) with slow background rings. Mirrors SA4 laser spell.",
+      "hp": 2800,
+      "isSpellCard": true,
+      "spellName": "Recollection \"Non-Directional Laser\"",
+      "spellDurationTicks": [
+        760,
+        600,
+        440,
+        220
+      ],
+      "spellBonus": 72000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "music": "",
+      "attacks": [
+        {
+          "pattern": "LASER_ROTATING",
+          "cooldown": [
+            30,
+            28,
+            26,
+            23
+          ],
+          "bulletType": "PURPLE_LASER",
+          "arms": [
+            4,
+            4,
+            5,
+            6
+          ],
+          "speed": 0,
+          "laserHalfWidth": 6,
+          "warnTicks": 12,
+          "activeTicks": 18,
+          "laserRotateAdvanceRad": [
+            0.26,
+            0.28,
+            0.30,
+            0.34
+          ]
+        },
+        {
+          "pattern": "LASER_ROTATING",
+          "cooldown": [
+            38,
+            34,
+            30,
+            26
+          ],
+          "bulletType": "PURPLE_LASER",
+          "arms": [
+            3,
+            3,
+            4,
+            5
+          ],
+          "speed": 0,
+          "laserHalfWidth": 5,
+          "warnTicks": 10,
+          "activeTicks": 16,
+          "laserRotateAdvanceRad": [
+            -0.22,
+            -0.24,
+            -0.27,
+            -0.31
+          ]
+        },
+        {
+          "pattern": "RING_OFFSET",
+          "cooldown": [
+            22,
+            20,
+            18,
+            15
+          ],
+          "minCooldown": [
+            16,
+            14,
+            13,
+            10
+          ],
+          "bulletType": "SCARLET",
+          "arms": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "speed": [
+            1.72,
+            1.82,
+            1.92,
+            2.08
+          ],
+          "bulletLifetimeTicks": [
+            220,
+            215,
+            210,
+            200
+          ],
+          "ringStartAngleRad": -1
+        }
+      ]
+    },
+    {
+      "_note": "Final Spell: 'Recollection Rorschach in Danmaku' — dense symmetric spiral + expanding dense rings + aimed pressure. Boss anchored to centre. Signature SA4 finale.",
+      "hp": 3200,
+      "isSpellCard": true,
+      "spellName": "Recollection \"Rorschach in Danmaku\"",
+      "spellDurationTicks": [
+        800,
+        640,
+        480,
+        250
+      ],
+      "spellBonus": 85000,
+      "movement": "STATIC",
+      "moveSpeed": 0,
+      "bossPhaseAnchorX": 240,
+      "bossPhaseAnchorY": 290,
+      "patternTempo": [
+        1.0,
+        1.05,
+        1.12,
+        1.22
+      ],
+      "music": "",
+      "attacks": [
+        {
+          "pattern": "SPIRAL",
+          "cooldown": [
+            5,
+            5,
+            4,
+            4
+          ],
+          "bulletType": "SCARLET",
+          "arms": [
+            7,
+            8,
+            9,
+            11
+          ],
+          "maxScaledArms": 12,
+          "speed": [
+            2.2,
+            2.35,
+            2.52,
+            2.72
+          ],
+          "bulletLifetimeTicks": [
+            220,
+            215,
+            210,
+            200
+          ]
+        },
+        {
+          "pattern": "DENSE_RING",
+          "cooldown": [
+            20,
+            18,
+            16,
+            13
+          ],
+          "bulletType": "DOT",
+          "arms": [
+            14,
+            15,
+            16,
+            18
+          ],
+          "maxScaledArms": 20,
+          "speed": [
+            1.82,
+            1.95,
+            2.1,
+            2.32
+          ],
+          "bulletLifetimeTicks": [
+            200,
+            195,
+            190,
+            182
+          ],
+          "ringStartAngleRad": 0
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": [
+            12,
+            10,
+            9,
+            7
+          ],
+          "minCooldown": [
+            9,
+            7,
+            6,
+            5
+          ],
+          "bulletType": "DOT",
+          "arms": [
+            3,
+            3,
+            4,
+            5
+          ],
+          "speed": [
+            3.2,
+            3.4,
+            3.65,
+            3.95
+          ],
+          "spread": [
+            0.20,
+            0.18,
+            0.15,
+            0.13
+          ],
+          "bulletLifetimeTicks": 220
+        }
+      ]
+    }
+  ]
+}

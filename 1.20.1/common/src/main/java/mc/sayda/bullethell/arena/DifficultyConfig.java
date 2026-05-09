@@ -3,23 +3,19 @@ package mc.sayda.bullethell.arena;
 /** Difficulty settings passed into PatternEngine calls. */
 public enum DifficultyConfig {
 
-    EASY   (0.82f, 5,  0.74f),
-    NORMAL (1.00f, 6,  1.00f),
-    HARD   (1.35f, 8,  1.48f),
-    LUNATIC(1.85f, 14, 2.48f);
+    EASY   (1.5f, 1.5f),
+    NORMAL (1.5f, 2.0f),
+    HARD   (1.5f, 2.5f),
+    LUNATIC(1.5f, 2.5f);
 
     /** Multiplier applied to bullet speed. */
     public final float speedMult;
 
-    /** Number of spiral arms on the default spiral pattern. */
-    public final int spiralArms;
-
     /** Multiplier applied to bullet density / count in spread patterns. */
     public final float densityMult;
 
-    DifficultyConfig(float speedMult, int spiralArms, float densityMult) {
+    DifficultyConfig(float speedMult, float densityMult) {
         this.speedMult   = speedMult;
-        this.spiralArms  = spiralArms;
         this.densityMult = densityMult;
     }
 

@@ -60,4 +60,17 @@ public class BossDefinition {
      * Each phase transitions automatically when its own HP hits zero.
      */
     public List<PhaseDefinition> phases = new ArrayList<>();
+
+    /**
+     * Boss-wide movement tuning: frequencies, REPOS_TOP timing, random position
+     * bounds, and dialog intro animation parameters. All fields have defaults so
+     * this block can be omitted entirely or partially overridden.
+     */
+    public MovementConfig movementConfig = new MovementConfig();
+
+    /**
+     * Optional spinning background aura rendered behind the boss sprite.
+     * Omit the block (or leave {@code texture} empty) for no aura.
+     */
+    public BossAuraConfig aura = new BossAuraConfig();
 }

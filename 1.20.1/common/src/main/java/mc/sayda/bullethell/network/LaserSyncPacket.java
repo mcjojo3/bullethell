@@ -3,8 +3,6 @@ package mc.sayda.bullethell.network;
 import mc.sayda.bullethell.arena.LaserPool;
 import net.minecraft.network.FriendlyByteBuf;
 
-import java.util.Arrays;
-
 /** S → C | full laser pool every tick (small pool, cheap). */
 public class LaserSyncPacket {
 
@@ -13,9 +11,9 @@ public class LaserSyncPacket {
     public final boolean[] bidir;
 
     public LaserSyncPacket(LaserPool pool) {
-        this.data   = Arrays.copyOf(pool.data,   pool.data.length);
-        this.active = Arrays.copyOf(pool.active, pool.active.length);
-        this.bidir  = Arrays.copyOf(pool.bidir,  pool.bidir.length);
+        this.data   = pool.data;
+        this.active = pool.active;
+        this.bidir  = pool.bidir;
     }
 
     private LaserSyncPacket(float[] data, boolean[] active, boolean[] bidir) {

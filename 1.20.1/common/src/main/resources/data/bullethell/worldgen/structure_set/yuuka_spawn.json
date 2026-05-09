@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "bullethell:yuuka_spawn",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 24,
+    "separation": 8,
+    "salt": 312847561
+  }
+}

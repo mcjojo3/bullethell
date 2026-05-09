@@ -1,0 +1,90 @@
+{
+  "id": "satori_stage",
+  "title": "Former Hell — Palace of Earth Spirits",
+  "stageMusic": "heartfelt_fancy",
+  "bossId": "satori_boss",
+  "nextStageId": "",
+  "rules": {
+    "itemDropEveryNthKill": 3,
+    "dropCyclePattern": "POWER,POINT,POWER,POINT,POWER,POINT,POWER,POINT",
+    "largeEnemyDropCyclePattern": "POWER_LARGE,POINT,POWER_LARGE,FULL_POWER,POINT,POWER_LARGE,POWER_LARGE,POINT",
+    "scoreExtendEvery": 1500000,
+    "pocFraction": 0.2,
+    "pocAutoCollect": true,
+    "itemAttractionSpeed": 16.0,
+    "deathPowerLoss": 16,
+    "grazeScoringEnabled": true,
+    "grazeScoreMultiplier": 1.0,
+    "pointItemMaxValue": 800,
+    "pointItemMinValue": 100,
+    "cherrySystemEnabled": false,
+    "versusKillSendsBullets": false,
+    "onKillDeathBurstCount": 0
+  },
+  "waves": [
+    {
+      "_comment": "SA4 opening: hell fairies descend from the cavern ceiling in staggered formation.",
+      "spawnTick": 0,
+      "enemies": [
+        {
+          "x": 72,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 3.9,
+          "type": "RED_FAIRY"
+        },
+        {
+          "x": 156,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.0,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 8
+        },
+        {
+          "x": 240,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.1,
+          "type": "RED_FAIRY",
+          "delayTicks": 16
+        },
+        {
+          "x": 324,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 4.0,
+          "type": "BLUE_FAIRY",
+          "delayTicks": 8
+        },
+        {
+          "x": 408,
+          "y": -22,
+          "vx": 0.0,
+          "vy": 3.9,
+          "type": "RED_FAIRY"
+        }
+      ]
+    }
+  ],
+  "fairyRush": {
+    "catalogId": "default",
+    "slotCount": 44,
+    "startTick": 155,
+    "gapTicksStartMin": 72,
+    "gapTicksStartMax": 118,
+    "gapTicksEndMin": 20,
+    "gapTicksEndMax": 38,
+    "gapEasing": "SMOOTHSTEP",
+    "jitterTicks": 16,
+    "intensityStartLo": 0,
+    "intensityStartHi": 2,
+    "intensityEndLo": 4,
+    "intensityEndHi": 10,
+    "breatherEvery": 8,
+    "breatherExtraTicks": 72,
+    "breatherWaveId": "",
+    "shuffleSeed": null,
+    "noRepeatLast": 6
+  }
+}

@@ -8,6 +8,7 @@ import mc.sayda.bullethell.item.BHItems;
 import mc.sayda.bullethell.event.BHCommonEvents;
 import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.sound.BHSounds;
+import mc.sayda.bullethell.worldgen.BHStructures;
 import org.slf4j.Logger;
 
 public class Bullethell {
@@ -19,6 +20,7 @@ public class Bullethell {
         BHGameRules.init();
         BHPackets.register();
         BHCommonEvents.register();
+        BHStructures.register();
         BHSounds.register();
         BHAttributes.register();
         BHEntities.register();

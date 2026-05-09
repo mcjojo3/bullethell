@@ -36,25 +36,31 @@ import net.minecraft.world.level.Level;
  * A non-hostile NPC that challenges nearby players to a bullet-hell duel.
  *
  * AI goals (in priority order):
- *   0 – Float (stay above water)
- *   1 – Seek shade when bright daytime (if {@link NpcDefinition#seeksShade})
- *   2 – Look at the nearest player within 8 blocks
- *   3 – Random look-around when idle
- *   4 – Slow wander to stay lively
+ * 0 - Float (stay above water)
+ * 1 - Seek shade when bright daytime (if {@link NpcDefinition#seeksShade})
+ * 2 - Look at the nearest player within 8 blocks
+ * 3 - Random look-around when idle
+ * 4 - Slow wander to stay lively
  *
  * Right-clicking sends an {@link OpenChallengePacket} to the player which
  * opens the {@link mc.sayda.bullethell.client.screen.ChallengeScreen}.
- * The NPC never despawns from distance. Default stats match a normal mob ({@code 20} health,
- * {@code 0.2} movement speed, no knockback resistance so melee hits apply knockback). They are killable
- * unless {@link NpcDefinition#invulnerable} is set; on death they drop their spawn egg.
- * Optional {@link NpcDefinition#knockbackOnHit} enables knockback while invulnerable.
- * {@link NpcDefinition#seeksShade} makes Scarlet-style NPCs path toward shade, avoid wandering
- * back into bright sun, and avoids vanilla sun-burn ignition (not lava or campfires).
+ * The NPC never despawns from distance. Default stats match a normal mob
+ * ({@code 20} health,
+ * {@code 0.2} movement speed, no knockback resistance so melee hits apply
+ * knockback). They are killable
+ * unless {@link NpcDefinition#invulnerable} is set; on death they drop their
+ * spawn egg.
+ * Optional {@link NpcDefinition#knockbackOnHit} enables knockback while
+ * invulnerable.
+ * {@link NpcDefinition#seeksShade} makes Scarlet-style NPCs path toward shade,
+ * avoid wandering
+ * back into bright sun, and avoids vanilla sun-burn ignition (not lava or
+ * campfires).
  */
 public class BHNpc extends PathfinderMob {
 
-    private static final EntityDataAccessor<String> NPC_ID =
-            SynchedEntityData.defineId(BHNpc.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<String> NPC_ID = SynchedEntityData.defineId(BHNpc.class,
+            EntityDataSerializers.STRING);
 
     /** The default npcId used when this entity is spawned without NBT data. */
     private final String defaultNpcId;
@@ -128,7 +134,8 @@ public class BHNpc extends PathfinderMob {
     }
 
     /**
-     * Scarlet NPCs ({@link NpcDefinition#seeksShade}) should not ignite from direct sunlight;
+     * Scarlet NPCs ({@link NpcDefinition#seeksShade}) should not ignite from direct
+     * sunlight;
      * lava, campfires, and other fire sources behave normally.
      */
     @Override
@@ -193,14 +200,18 @@ public class BHNpc extends PathfinderMob {
         return InteractionResult.sidedSuccess(this.level().isClientSide);
     }
 
-    // ---------------------------------------------------------------- despawn / targeting
+    // ---------------------------------------------------------------- despawn /
+    // targeting
 
     @Override
     public boolean removeWhenFarAway(double distSq) {
         return false; // Never despawn
     }
 
-    /** Prevents hostile mob AI (zombies, skeletons, etc.) from selecting this NPC as a target. */
+    /**
+     * Prevents hostile mob AI (zombies, skeletons, etc.) from selecting this NPC as
+     * a target.
+     */
     @Override
     public boolean canBeSeenAsEnemy() {
         return false;

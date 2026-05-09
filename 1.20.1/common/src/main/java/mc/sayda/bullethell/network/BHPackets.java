@@ -20,6 +20,7 @@ import mc.sayda.bullethell.boss.FairyWaveLoader;
 import mc.sayda.bullethell.boss.StageDefinition;
 import mc.sayda.bullethell.boss.StageLoader;
 import mc.sayda.bullethell.debug.BHDebugMode;
+import mc.sayda.bullethell.pattern.BulletType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -80,6 +81,7 @@ public final class BHPackets {
     public static final ResourceLocation TEST_MODE_OPEN    = id("test_mode_open");
     /** C → S | select / reload a boss in test mode. */
     public static final ResourceLocation TEST_SELECT       = id("test_select");
+    public static final ResourceLocation TEST_CONTROL      = id("test_control");
 
     private static ResourceLocation id(String path) {
         return new ResourceLocation(Bullethell.MODID, path);
@@ -150,8 +152,7 @@ public final class BHPackets {
             PauseStatePacket pkt = PauseStatePacket.decode(buf);
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
-                if (sender == null)
-                    return;
+                if (sender == null) return;
                 ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(sender.getUUID());
                 if (arena != null)
                     arena.setParticipantPaused(sender.getUUID(), pkt.paused);
@@ -171,7 +172,7 @@ public final class BHPackets {
                             "[BulletHell] Character '" + pkt.characterId + "' is locked for " + pkt.difficulty.name() + "."));
                     return;
                 }
-                if (!debugBypass && !BossProgression.canChallengeStage(player, pkt.stageId, pkt.difficulty)) {
+                if (!debugBypass && !pkt.practice && !BossProgression.canChallengeStage(player, pkt.stageId, pkt.difficulty)) {
                     String bossId;
                     try {
                         bossId = mc.sayda.bullethell.boss.StageLoader.load(pkt.stageId).bossId;
@@ -185,7 +186,7 @@ public final class BHPackets {
                             "[BulletHell] " + pkt.stageId + " is currently capped at " + capText + ". " + why));
                     return;
                 }
-                startArena(player, pkt.difficulty, pkt.stageId, pkt.characterId, pkt.shotTypeOrdinal);
+                startArena(player, pkt.difficulty, pkt.stageId, pkt.characterId, pkt.shotTypeOrdinal, pkt.practice);
             });
         });
 
@@ -284,6 +285,14 @@ public final class BHPackets {
                 if (player == null) return;
                 ArenaContext current = BulletHellManager.INSTANCE.getArenaForPlayer(player.getUUID());
                 if (current == null || !current.testMode) return;
+
+                // Character refresh: restart arena with new character AND send updated shot list
+                if (pkt.testType == TestSelectPacket.TYPE_CHAR_REFRESH) {
+                    String characterId = pkt.id.isBlank() ? current.characterId : pkt.id;
+                    restartTestArena(player, current, pkt, characterId, pkt.shotTypeOrdinal);
+                    return;
+                }
+
                 // Character: use packet override if provided, else keep current
                 String characterId = (pkt.characterId != null && !pkt.characterId.isBlank())
                         ? pkt.characterId : current.characterId;
@@ -318,20 +327,56 @@ public final class BHPackets {
                 }
                 BulletHellManager.INSTANCE.stopArena(player.getUUID());
                 int startPhase = (pkt.testType == TestSelectPacket.TYPE_BOSS) ? phaseIdx + 1 : 0;
-                int preserveShot = current.hostShotTypeOrdinal;
                 ArenaContext newCtx = BulletHellManager.INSTANCE.startArena(player, diff, stage, characterId, startPhase);
-                newCtx.hostShotTypeOrdinal = preserveShot;
+                newCtx.hostShotTypeOrdinal = pkt.shotTypeOrdinal;
                 newCtx.testMode = true;
+                newCtx.player.power = PlayerState2D.MAX_POWER;
                 BHDebugMode.setGodMode(player.getUUID(), true);
                 sendFullSync(player, newCtx);
                 sendToPlayer(player, new ArenaStatePacket(newCtx, player.getUUID(), 1));
+                
+                // Build shot type list for new character
+                CharacterDefinition charDef = CharacterLoader.loadWithDevPath(characterId);
+                java.util.List<String> shotTypeLabels = new java.util.ArrayList<>();
+                if (charDef != null) {
+                    for (int i = 0; i < charDef.shotOptions.size(); i++) {
+                        shotTypeLabels.add(charDef.shotOptions.get(i).label);
+                    }
+                }
+                
                 sendTestModeOpen(player, new TestModeOpenPacket(
                         BossLoader.allBossIds(), StageLoader.allStageIds(),
                         FairyWaveLoader.allWaveIds(), CharacterLoader.allCharIds(),
-                        currentBossId, currentStageId, currentWaveId, characterId,
+                        shotTypeLabels,
+                        currentBossId, currentStageId, currentWaveId, characterId, pkt.shotTypeOrdinal,
                         phaseIdx, diff.ordinal()));
             });
         });
+
+        // C2S: test mode - real-time control (power, godmode)
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, TEST_CONTROL, (buf, ctx) -> {
+            TestControlPacket pkt = TestControlPacket.decode(buf);
+            ctx.queue(() -> {
+                ServerPlayer player = (ServerPlayer) ctx.getPlayer();
+                if (player == null) return;
+                ArenaContext current = BulletHellManager.INSTANCE.getArenaForPlayer(player.getUUID());
+                if (current == null || !current.testMode) return;
+
+                PlayerState2D ps = current.getPlayerState(player.getUUID());
+                if (ps == null) return;
+
+                if (pkt.type == TestControlPacket.TYPE_SET_POWER) {
+                    ps.power = Math.max(0, Math.min(PlayerState2D.MAX_POWER, pkt.value));
+                    sendToPlayer(player, new ArenaStatePacket(current, player.getUUID(), 1));
+                } else if (pkt.type == TestControlPacket.TYPE_TOGGLE_GODMODE) {
+                    mc.sayda.bullethell.debug.BHDebugMode.toggleGodMode(player.getUUID());
+                    if (!mc.sayda.bullethell.debug.BHDebugMode.isGodMode(player.getUUID()))
+                        ps.invulnTicks = 0;
+                    sendToPlayer(player, new ArenaStatePacket(current, player.getUUID(), 1));
+                }
+            });
+        });
+
 
         // C2S: broadcast last arena end stats (same chat format) to all online players
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, SHARE_LAST_RUN, (buf, ctx) -> {
@@ -355,6 +400,68 @@ public final class BHPackets {
         });
     }
 
+    private static void restartTestArena(ServerPlayer player, ArenaContext current, TestSelectPacket pkt, String characterId, int shotIdx) {
+        DifficultyConfig diff = DifficultyConfig.fromId(pkt.difficultyOrdinal);
+        String currentBossId  = current.boss != null ? current.boss.id : "";
+        String currentStageId = "";
+        String currentWaveId  = "";
+        int phaseIdx = 0;
+        StageDefinition stage;
+
+        // Invalidate all caches
+        BossLoader.invalidateAll();
+        StageLoader.invalidateAll();
+        FairyWaveLoader.invalidateAll();
+        CharacterLoader.invalidateAll();
+
+        if (pkt.testType == TestSelectPacket.TYPE_STAGE) {
+            String stageId = pkt.id.isBlank() ? "cirno_stage" : pkt.id;
+            stage = StageLoader.loadWithDevPath(stageId);
+            currentStageId = stageId;
+        } else if (pkt.testType == TestSelectPacket.TYPE_WAVE) {
+            String waveId = pkt.id.isBlank() ? "fw_shared_001" : pkt.id;
+            FairyWaveDefinition waveDef = FairyWaveLoader.loadWithDevPath(waveId);
+            stage = StageLoader.syntheticWaveOnly(waveId, waveDef != null ? waveDef.enemies : null);
+            currentWaveId = waveId;
+        } else if (pkt.testType == TestSelectPacket.TYPE_BOSS || pkt.testType == TestSelectPacket.TYPE_CHAR_REFRESH) {
+            String bossId = (pkt.testType == TestSelectPacket.TYPE_BOSS && !pkt.id.isBlank())
+                    ? pkt.id : (currentBossId.isBlank() ? "marisa_boss" : currentBossId);
+            phaseIdx = Math.max(0, pkt.phaseIdx);
+            BossLoader.loadWithDevPath(bossId);
+            stage = StageLoader.syntheticBossOnly(bossId);
+            currentBossId = bossId;
+        } else {
+            // Fallback for safety
+            stage = StageLoader.syntheticBossOnly("marisa_boss");
+        }
+        
+        BulletHellManager.INSTANCE.stopArena(player.getUUID());
+        int startPhase = (pkt.testType == TestSelectPacket.TYPE_BOSS) ? phaseIdx + 1 : 0;
+        ArenaContext newCtx = BulletHellManager.INSTANCE.startArena(player, diff, stage, characterId, startPhase);
+        newCtx.hostShotTypeOrdinal = shotIdx;
+        newCtx.testMode = true;
+        newCtx.player.power = PlayerState2D.MAX_POWER;
+        BHDebugMode.setGodMode(player.getUUID(), true);
+        sendFullSync(player, newCtx);
+        sendToPlayer(player, new ArenaStatePacket(newCtx, player.getUUID(), 1));
+        
+        // Build shot type list
+        CharacterDefinition charDef = CharacterLoader.loadWithDevPath(characterId);
+        java.util.List<String> shotTypeLabels = new java.util.ArrayList<>();
+        if (charDef != null) {
+            for (int i = 0; i < charDef.shotOptions.size(); i++) {
+                shotTypeLabels.add(charDef.shotOptions.get(i).label);
+            }
+        }
+        
+        sendTestModeOpen(player, new TestModeOpenPacket(
+                BossLoader.allBossIds(), StageLoader.allStageIds(),
+                FairyWaveLoader.allWaveIds(), CharacterLoader.allCharIds(),
+                shotTypeLabels,
+                currentBossId, currentStageId, currentWaveId, characterId, shotIdx,
+                phaseIdx, diff.ordinal()));
+    }
+
     // ---------------------------------------------------------------- Server → Client helpers
 
     private static FriendlyByteBuf buf() { return new FriendlyByteBuf(Unpooled.buffer()); }
@@ -371,6 +478,8 @@ public final class BHPackets {
     public static void sendFullSync(ServerPlayer player, ArenaContext ctx) {
         BulletFullSyncPacket pkt = BulletFullSyncPacket.fromContext(ctx);
         FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, BULLET_FULL, b);
+        // Send current laser state so joining players see active lasers immediately
+        sendLaserSync(player, new LaserSyncPacket(ctx.lasers));
         sendControlScheme(player, new ControlSchemePacket(BHControlSettings.serverGetPreference(player)));
     }
 
@@ -476,8 +585,14 @@ public final class BHPackets {
     @Environment(EnvType.CLIENT)
     public static void sendCharSelect(String characterId, DifficultyConfig difficulty, String stageId,
             int shotTypeOrdinal) {
+        sendCharSelect(characterId, difficulty, stageId, shotTypeOrdinal, false);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void sendCharSelect(String characterId, DifficultyConfig difficulty, String stageId,
+            int shotTypeOrdinal, boolean practice) {
         FriendlyByteBuf b = buf();
-        new CharacterSelectPacket(characterId, difficulty, stageId, shotTypeOrdinal).encode(b);
+        new CharacterSelectPacket(characterId, difficulty, stageId, shotTypeOrdinal, practice).encode(b);
         NetworkManager.sendToServer(CHAR_SELECT, b);
     }
 
@@ -519,10 +634,28 @@ public final class BHPackets {
 
     public static void startArena(ServerPlayer player, DifficultyConfig diff,
             String stageId, String characterId, int hostShotTypeOrdinal) {
+        startArena(player, diff, stageId, characterId, hostShotTypeOrdinal, false);
+    }
+
+    public static void startArena(ServerPlayer player, DifficultyConfig diff,
+            String stageId, String characterId, int hostShotTypeOrdinal, boolean practice) {
         BulletHellManager.INSTANCE.stopArena(player.getUUID());
         ArenaContext ctx = BulletHellManager.INSTANCE.startArena(
                 player, diff, stageId, characterId);
         ctx.hostShotTypeOrdinal = Math.max(0, hostShotTypeOrdinal);
+        ctx.practiceMode = practice;
+        if (practice) {
+            ctx.debugSkipToBossPhase(0);
+            ctx.player.power = mc.sayda.bullethell.arena.PlayerState2D.MAX_POWER;
+            ctx.player.reachedMaxPowerInThisLife = true;
+        }
+
+        // Apply forced control scheme if the stage rules dictate it
+        if (ctx.rules.forceControlScheme != null && !ctx.rules.forceControlScheme.isEmpty()) {
+            var forced = mc.sayda.bullethell.BHControlScheme.tryParse(ctx.rules.forceControlScheme);
+            forced.ifPresent(scheme -> sendControlScheme(player, new ControlSchemePacket(scheme)));
+        }
+
         sendFullSync(player, ctx);
         sendToPlayer(player, new ArenaStatePacket(ctx, player.getUUID(), 1));
 
@@ -600,5 +733,10 @@ public final class BHPackets {
     @Environment(EnvType.CLIENT)
     public static void sendTestSelect(TestSelectPacket pkt) {
         FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToServer(TEST_SELECT, b);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void sendTestControl(TestControlPacket pkt) {
+        FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToServer(TEST_CONTROL, b);
     }
 }

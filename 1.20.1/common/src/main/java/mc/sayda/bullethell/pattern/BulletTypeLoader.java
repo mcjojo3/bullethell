@@ -84,7 +84,9 @@ public final class BulletTypeLoader {
     private static BulletTypeData parseEntry(JsonObject o, BulletType t) {
         int color = t.color;
         if (o.has("color")) {
-            color = (int) Long.parseLong(o.get("color").getAsString(), 16);
+            String cs = o.get("color").getAsString();
+            long v = Long.parseLong(cs.startsWith("#") ? cs.substring(1) : cs, 16); // #RRGGBBAA
+            color = (int)(((v & 0xFF) << 24) | (v >>> 8)); // → AARRGGBB
         }
         float radius = o.has("radius") ? o.get("radius").getAsFloat() : t.radius;
         String texture = o.has("texture") ? o.get("texture").getAsString() : null;

@@ -30,43 +30,62 @@ public final class PlayerShotPatterns {
         fireFromData(ps, pb, def, shotTypeIndex);
     }
 
-    private static void fireFromData(PlayerState2D ps, BulletPool pb, CharacterDefinition def, int shotTypeIndex) {
-        List<PlayerShotOptionJson> opts = def.shotOptions;
-        if (opts == null || opts.isEmpty())
-            return;
-        int idx = Math.max(0, Math.min(shotTypeIndex, opts.size() - 1));
-        PlayerShotOptionJson opt = opts.get(idx);
-        if (opt == null)
-            return;
-        PlayerShotOptionJson.Mode mode = ps.focused ? opt.focused : opt.unfocused;
-        if (mode == null || mode.powerTiers == null || mode.powerTiers.isEmpty())
-            return;
-        int lv = ps.powerLevel();
-        int tierIdx = Math.max(0, Math.min(lv, mode.powerTiers.size() - 1));
-        List<PlayerShotOptionJson.Spawn> tier = mode.powerTiers.get(tierIdx);
-        if (tier == null)
-            return;
+    /**
+     * Fires periodic spawns whose {@code fireRateTicks > 0} when {@code ps.shotTick % rate == 0}.
+     * Called every tick while the player is shooting, independently of the main cooldown.
+     */
+    public static void firePeriodic(PlayerState2D ps, BulletPool pb, CharacterDefinition def, int shotTypeIndex) {
+        List<PlayerShotOptionJson.Spawn> tier = resolveTier(ps, def, shotTypeIndex);
+        if (tier == null) return;
         float px = ps.x;
         float py = ps.y - 4f;
         for (PlayerShotOptionJson.Spawn s : tier) {
-            if (s == null)
-                continue;
-            BulletType bt = parseBulletType(s.bulletType);
-            int homing = s.homing == null ? BulletPool.HOMING_USE_TYPE_DEFAULT
-                    : (s.homing ? BulletPool.HOMING_ON : BulletPool.HOMING_OFF);
-            pb.spawn(
-                    px + s.offsetX,
-                    py + s.offsetY,
-                    s.vx * SHOT_SPEED_SCALE,
-                    s.vy * SHOT_SPEED_SCALE,
-                    bt.getId(),
-                    s.lifetime,
-                    s.visScale,
-                    s.hitScale,
-                    s.angularVelocity,
-                    s.freezeTicks,
-                    homing);
+            if (s == null || s.fireRateTicks <= 0) continue;
+            if (ps.shotTick % s.fireRateTicks != 0) continue;
+            spawnBullet(pb, px, py, s);
         }
+    }
+
+    private static void fireFromData(PlayerState2D ps, BulletPool pb, CharacterDefinition def, int shotTypeIndex) {
+        List<PlayerShotOptionJson.Spawn> tier = resolveTier(ps, def, shotTypeIndex);
+        if (tier == null) return;
+        float px = ps.x;
+        float py = ps.y - 4f;
+        for (PlayerShotOptionJson.Spawn s : tier) {
+            if (s == null || s.fireRateTicks > 0) continue; // periodic spawns handled separately
+            spawnBullet(pb, px, py, s);
+        }
+    }
+
+    private static List<PlayerShotOptionJson.Spawn> resolveTier(PlayerState2D ps, CharacterDefinition def, int shotTypeIndex) {
+        List<PlayerShotOptionJson> opts = def.shotOptions;
+        if (opts == null || opts.isEmpty()) return null;
+        int idx = Math.max(0, Math.min(shotTypeIndex, opts.size() - 1));
+        PlayerShotOptionJson opt = opts.get(idx);
+        if (opt == null) return null;
+        PlayerShotOptionJson.Mode mode = ps.focused ? opt.focused : opt.unfocused;
+        if (mode == null || mode.powerTiers == null || mode.powerTiers.isEmpty()) return null;
+        int lv = ps.powerLevel();
+        int tierIdx = Math.max(0, Math.min(lv, mode.powerTiers.size() - 1));
+        return mode.powerTiers.get(tierIdx);
+    }
+
+    private static void spawnBullet(BulletPool pb, float px, float py, PlayerShotOptionJson.Spawn s) {
+        BulletType bt = parseBulletType(s.bulletType);
+        int homing = s.homing == null ? BulletPool.HOMING_USE_TYPE_DEFAULT
+                : (s.homing ? BulletPool.HOMING_ON : BulletPool.HOMING_OFF);
+        pb.spawn(
+                px + s.offsetX,
+                py + s.offsetY,
+                s.vx * SHOT_SPEED_SCALE,
+                s.vy * SHOT_SPEED_SCALE,
+                bt.getId(),
+                s.lifetime,
+                s.visScale,
+                s.hitScale,
+                s.angularVelocity,
+                s.freezeTicks,
+                homing);
     }
 
     private static BulletType parseBulletType(String raw) {

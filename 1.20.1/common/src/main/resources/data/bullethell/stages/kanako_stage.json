@@ -1,0 +1,111 @@
+{
+  "id": "yuuka_stage",
+  "title": "Garden of the Sun — Flower Master's Domain",
+  "stageMusic": "the_capital_city_of_flowers_in_the_sky",
+  "bossId": "yuuka_boss",
+  "nextStageId": "",
+  "rules": {
+    "itemDropEveryNthKill": 3,
+    "dropCyclePattern": "POWER,POINT,POWER,POINT,POWER,POINT,POWER,POINT",
+    "largeEnemyDropCyclePattern": "POWER_LARGE,POINT,POWER_LARGE,FULL_POWER,POINT,POWER_LARGE,POWER_LARGE,POINT",
+    "scoreExtendEvery": 1500000,
+    "pocFraction": 0.2,
+    "pocAutoCollect": true,
+    "itemAttractionSpeed": 16.0,
+    "deathPowerLoss": 16,
+    "grazeScoringEnabled": true,
+    "grazeScoreMultiplier": 1.0,
+    "pointItemMaxValue": 1000,
+    "pointItemMinValue": 200,
+    "cherrySystemEnabled": false,
+    "versusKillSendsBullets": false,
+    "onKillDeathBurstCount": 0
+  },
+  "waves": [
+    {
+      "_comment": "Opening: Sunflowers blooming in the garden. Staggered formation of green and yellow fairies.",
+      "spawnTick": 0,
+      "enemies": [
+        {
+          "x": 80,
+          "y": -30,
+          "vx": 0.0,
+          "vy": 3.5,
+          "type": "GREEN_FAIRY"
+        },
+        {
+          "x": 160,
+          "y": -30,
+          "vx": 0.0,
+          "vy": 3.6,
+          "type": "YELLOW_FAIRY",
+          "delayTicks": 10
+        },
+        {
+          "x": 240,
+          "y": -30,
+          "vx": 0.0,
+          "vy": 3.7,
+          "type": "GREEN_FAIRY",
+          "delayTicks": 20
+        },
+        {
+          "x": 320,
+          "y": -30,
+          "vx": 0.0,
+          "vy": 3.6,
+          "type": "YELLOW_FAIRY",
+          "delayTicks": 10
+        },
+        {
+          "x": 400,
+          "y": -30,
+          "vx": 0.0,
+          "vy": 3.5,
+          "type": "GREEN_FAIRY"
+        }
+      ]
+    },
+    {
+      "_comment": "Mid-wave anchor: Large green fairies appearing to defend the center.",
+      "spawnTick": 120,
+      "enemies": [
+        {
+          "x": 120,
+          "y": -40,
+          "vx": 0.5,
+          "vy": 2.5,
+          "type": "LARGE_GREEN"
+        },
+        {
+          "x": 360,
+          "y": -40,
+          "vx": -0.5,
+          "vy": 2.5,
+          "type": "LARGE_GREEN",
+          "delayTicks": 30
+        }
+      ]
+    }
+  ],
+  "fairyRush": {
+    "catalogId": "default",
+    "slotCount": 44,
+    "startTick": 250,
+    "gapTicksStartMin": 60,
+    "gapTicksStartMax": 100,
+    "gapTicksEndMin": 15,
+    "gapTicksEndMax": 30,
+    "gapEasing": "SMOOTHSTEP",
+    "jitterTicks": 12,
+    "intensityStartLo": 1,
+    "intensityStartHi": 3,
+    "intensityEndLo": 5,
+    "intensityEndHi": 12,
+    "breatherEvery": 10,
+    "breatherExtraTicks": 80,
+    "breatherWaveId": "",
+    "shuffleSeed": 12345,
+    "noRepeatLast": 4
+  }
+}

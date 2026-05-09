@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
  */
 public enum BHControlScheme {
     TH19,
-    TH9;
+    TH9,
+    CLASSIC;
 
     /**
      * Strict parse for commands: only known tokens (th19 / th9 and a few aliases).
@@ -23,6 +24,7 @@ public enum BHControlScheme {
         return switch (raw.trim().toLowerCase(Locale.ROOT)) {
             case "th19", "19", "um" -> Optional.of(TH19);
             case "th9", "pofv", "9" -> Optional.of(TH9);
+            case "classic", "th6", "6" -> Optional.of(CLASSIC);
             default -> Optional.empty();
         };
     }

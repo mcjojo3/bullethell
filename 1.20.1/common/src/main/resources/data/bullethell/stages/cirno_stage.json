@@ -10,21 +10,7 @@
   "bossId": "cirno_boss",
   "nextStageId": "sakuya_stage",
   "rules": {
-    "itemDropEveryNthKill": 3,
-    "dropCyclePattern": "POWER,POINT,POWER,POINT,POWER,POINT,POWER,POINT",
-    "largeEnemyDropCyclePattern": "POWER_LARGE,POINT,POWER_LARGE,FULL_POWER,POINT,POWER_LARGE,POWER_LARGE,POINT",
-    "scoreExtendEvery": 1500000,
-    "pocFraction": 0.2,
-    "pocAutoCollect": true,
-    "itemAttractionSpeed": 8.0,
-    "deathPowerLoss": 16,
-    "grazeScoringEnabled": true,
-    "grazeScoreMultiplier": 1.0,
-    "pointItemMaxValue": 800,
-    "pointItemMinValue": 100,
-    "cherrySystemEnabled": false,
-    "versusKillSendsBullets": false,
-    "onKillDeathBurstCount": 0
+    "preset": "TH6"
   },
   "waves": [
     {

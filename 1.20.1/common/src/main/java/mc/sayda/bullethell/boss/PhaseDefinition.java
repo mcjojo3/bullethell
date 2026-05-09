@@ -13,6 +13,7 @@ import java.util.List;
  * Touhou-style per-spellcard health bar.
  *
  * JSON example:
+ * 
  * <pre>
  * {
  *   "hp": 600,
@@ -40,12 +41,15 @@ public class PhaseDefinition {
     public boolean isSpellCard = true;
 
     /**
-     * Survival spell: boss does not take damage; the phase ends when the spell timer
+     * Survival spell: boss does not take damage; the phase ends when the spell
+     * timer
      * expires (capture if the player did not bomb or die). Ignores HP depletion.
      */
     public boolean survival = false;
 
-    /** Name shown in the HUD. Wrap in escaped quotes for display: {@code "\"Name\""} */
+    /**
+     * Name shown in the HUD. Wrap in escaped quotes for display: {@code "\"Name\""}
+     */
     public String spellName = "";
 
     /**
@@ -53,64 +57,35 @@ public class PhaseDefinition {
      * Index order: [EASY, NORMAL, HARD, LUNATIC]. Must have exactly 4 entries.
      * Use [0, 0, 0, 0] for non-spell phases (no timer bar).
      */
-    public int[] spellDurationTicks = {800, 600, 400, 200};
+    public int[] spellDurationTicks = { 800, 600, 400, 200 };
 
     /**
-     * Optional per-difficulty overrides for {@link #hp} (same index order as {@link #spellDurationTicks}).
-     * Shorter arrays pad with the last value. {@code null} = use scalar {@link #hp} only.
-     */
-    public int[] hpByDifficulty = null;
-
-    /**
-     * Optional per-difficulty overrides for {@link #moveSpeed}.
-     */
-    public float[] moveSpeedByDifficulty = null;
-
-    /**
-     * Optional per-difficulty overrides for {@link #patternTempo}.
-     */
-    public float[] patternTempoByDifficulty = null;
-
-    /**
-     * Optional per-difficulty overrides for {@link #spellBonus} (spell capture score).
-     */
-    public long[] spellBonusByDifficulty = null;
-
-    /**
-     * Generic per-difficulty overrides: keys match scalar JSON field names (e.g. {@code "hp"},
-     * {@code "patternTempo"}); each value is {@code [EASY, NORMAL, HARD, LUNATIC]}. Optional; omit for
-     * scalar-only JSON. Legacy {@code *ByDifficulty} fields take precedence when both are set.
+     * Generic per-difficulty overrides: keys match scalar JSON field names (e.g.
+     * {@code "hp"},
+     * {@code "patternTempo"}); each value is {@code [EASY, NORMAL, HARD, LUNATIC]}.
+     * Populated at load time by {@link TierJson#promoteUnionTierFieldsOnBoss} when
+     * a field holds an inline array (e.g. {@code "hp": [2100, 2300, 2550, 2800]}).
      */
     public JsonObject byDifficulty = null;
 
-    /** Bonus score awarded when the spellcard is captured without dying or bombing. */
+    /**
+     * Bonus score awarded when the spellcard is captured without dying or bombing.
+     */
     public long spellBonus = 50_000L;
 
-    /** @see #hpByDifficulty */
     public int resolveHp(int difficultyOrdinal) {
-        if (DifficultyTierArray.isValid(hpByDifficulty))
-            return DifficultyTierArray.pickInt(hpByDifficulty, difficultyOrdinal, hp);
         return TierJson.pickInt(byDifficulty, "hp", difficultyOrdinal, hp);
     }
 
-    /** @see #moveSpeedByDifficulty */
     public float resolveMoveSpeed(int difficultyOrdinal) {
-        if (DifficultyTierArray.isValid(moveSpeedByDifficulty))
-            return DifficultyTierArray.pickFloat(moveSpeedByDifficulty, difficultyOrdinal, moveSpeed);
         return TierJson.pickFloat(byDifficulty, "moveSpeed", difficultyOrdinal, moveSpeed);
     }
 
-    /** @see #patternTempoByDifficulty */
     public float resolvePatternTempo(int difficultyOrdinal) {
-        if (DifficultyTierArray.isValid(patternTempoByDifficulty))
-            return DifficultyTierArray.pickFloat(patternTempoByDifficulty, difficultyOrdinal, patternTempo);
         return TierJson.pickFloat(byDifficulty, "patternTempo", difficultyOrdinal, patternTempo);
     }
 
-    /** @see #spellBonusByDifficulty */
     public long resolveSpellBonus(int difficultyOrdinal) {
-        if (DifficultyTierArray.isValid(spellBonusByDifficulty))
-            return DifficultyTierArray.pickLong(spellBonusByDifficulty, difficultyOrdinal, spellBonus);
         return TierJson.pickLong(byDifficulty, "spellBonus", difficultyOrdinal, spellBonus);
     }
 
@@ -150,10 +125,17 @@ public class PhaseDefinition {
     }
 
     public String resolveMusic(int difficultyOrdinal) {
+        if (musicPool != null && !musicPool.isEmpty())
+            return musicPool.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(musicPool.size()));
         String base = music != null ? music : "";
         if (TierJson.hasTierArray(byDifficulty, "music"))
             return TierJson.pickString(byDifficulty, "music", difficultyOrdinal, base);
         return base;
+    }
+
+    public int resolveReposShootTicks(int difficultyOrdinal) {
+        int base = reposShootTicks != null ? reposShootTicks : 40;
+        return TierJson.pickInt(byDifficulty, "reposShootTicks", difficultyOrdinal, base);
     }
 
     public String resolveMovement(int difficultyOrdinal) {
@@ -170,13 +152,28 @@ public class PhaseDefinition {
     public String movement = "SINE_WAVE";
 
     /**
-     * When set, overrides boss X when this phase begins (arena units, e.g. {@link mc.sayda.bullethell.arena.BulletPool#ARENA_W} / 2).
+     * Optional override for this phase's REPOS_TOP shoot duration.
+     * If null, falls back to the boss's {@link MovementConfig#reposShootTicks}.
+     */
+    public Integer reposShootTicks = null;
+
+    /**
+     * When true (default), difficulty multipliers from {@link DifficultyConfig} are
+     * applied to
+     * all attacks in this phase.
+     */
+    public boolean dynamicDifficulty = true;
+
+    /**
+     * When set, overrides boss X when this phase begins (arena units, e.g.
+     * {@link mc.sayda.bullethell.arena.BulletPool#ARENA_W} / 2).
      * Omit or null to keep the position from the inter-phase centre lerp.
      */
     public Float bossPhaseAnchorX = null;
 
     /**
-     * When set, overrides boss Y when this phase begins (arena units). Use with {@link #bossPhaseAnchorX}
+     * When set, overrides boss Y when this phase begins (arena units). Use with
+     * {@link #bossPhaseAnchorX}
      * to place the boss in the playfield centre for a spell.
      */
     public Float bossPhaseAnchorY = null;
@@ -203,38 +200,74 @@ public class PhaseDefinition {
     public float moveSpeed = 140f;
 
     /**
-     * Boss pattern timing multiplier for this phase ({@code 1} = default). Above {@code 1} speeds up
-     * attack rotation, burst gaps, laser telegraphs, and emitter angular advances (e.g. SPRINKLER
-     * {@link mc.sayda.bullethell.boss.PatternStep#sprinklerAdvanceRad}); below {@code 1} slows them.
-     * Does <strong>not</strong> scale bullet travel {@link mc.sayda.bullethell.boss.PatternStep#speed}.
+     * Boss pattern timing multiplier for this phase ({@code 1} = default). Above
+     * {@code 1} speeds up
+     * attack rotation, burst gaps, laser telegraphs, and emitter angular advances
+     * (e.g. SPRINKLER
+     * {@link mc.sayda.bullethell.boss.PatternStep#sprinklerAdvanceRad}); below
+     * {@code 1} slows them.
+     * Does <strong>not</strong> scale bullet travel
+     * {@link mc.sayda.bullethell.boss.PatternStep#speed}.
      */
     public float patternTempo = 1f;
 
     /**
-     * Music track ID to play during this phase.
-     * Must match a key in {@code assets/bullethell/sounds.json}, e.g.
-     * {@code "love_coloured_master_spark"}.
-     * {@code null}, omitted, or {@code ""} = keep playing whatever was already running.
+     * Music track ID to play during this phase. Use a plain string for a single
+     * track, or an array of strings to pick one at random each time the phase
+     * starts: {@code "music": ["track_a", "track_b"]}.
+     * {@code null}, omitted, or {@code ""} = keep playing whatever was already
+     * running.
      */
     public String music = null;
 
     /**
-     * HP fraction (0–1) at which this phase ends early and the next phase declares.
+     * Populated by {@link mc.sayda.bullethell.boss.BossLoader} when the JSON
+     * {@code "music"} field is an array. {@link #resolveMusic} picks randomly.
+     */
+    public List<String> musicPool = null;
+
+    /**
+     * HP fraction (0-1) at which this phase ends early and the next phase declares.
      * 0.20 = spell card is declared when 20 % HP remains (boss becomes invincible).
-     * 0.0  = must deplete HP to zero (standard for spell card phases themselves).
+     * 0.0 = must deplete HP to zero (standard for spell card phases themselves).
      */
     public float hpThresholdFraction = 0.0f;
 
     /**
-     * Ordered list of attack steps, cycled repeatedly while this phase is active (unless a step
-     * sets {@link PatternStep#everyTickWhilePhase}, in which case that step runs every tick outside
+     * Ordered list of attack steps, cycled repeatedly while this phase is active
+     * (unless a step
+     * sets {@link PatternStep#everyTickWhilePhase}, in which case that step runs
+     * every tick outside
      * the rotation).
      */
     public List<PatternStep> attacks = new ArrayList<>();
 
     /**
-     * Optional extra stationary emitters for this phase (Flandre clones/traps, etc.).
-     * Each emitter runs its own PatternStep list independently, aimed at the current boss target.
+     * Optional extra stationary emitters for this phase (Flandre clones/traps,
+     * etc.).
+     * Each emitter runs its own PatternStep list independently, aimed at the
+     * current boss target.
      */
     public List<BossEmitterDefinition> emitters = new ArrayList<>();
+
+    /**
+     * Cached subset of {@link #attacks} used by the main rotation: excludes
+     * {@code everyTickWhilePhase} steps and {@code PENTAGRAM_RITUAL} steps.
+     * Computed once on first access; safe to use per-tick without allocation.
+     */
+    private transient List<PatternStep> cachedMainRotation;
+
+    public List<PatternStep> getMainRotation() {
+        if (cachedMainRotation != null) return cachedMainRotation;
+        List<PatternStep> out = new ArrayList<>();
+        if (attacks != null) {
+            for (PatternStep s : attacks) {
+                if (s == null || s.everyTickWhilePhase) continue;
+                if ("PENTAGRAM_RITUAL".equals(s.getPatternUpper())) continue;
+                out.add(s);
+            }
+        }
+        cachedMainRotation = java.util.Collections.unmodifiableList(out);
+        return cachedMainRotation;
+    }
 }

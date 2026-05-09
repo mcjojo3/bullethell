@@ -79,8 +79,8 @@ public class ScoreSystem {
 
     // ---------------------------------------------------------------- events
 
-    public int onGraze() {
-        return addScore(GRAZE_SCORE);
+    public int onGraze(float multiplier) {
+        return addScore((long) (GRAZE_SCORE * multiplier));
     }
 
     /** Collect a POWER item - fixed score bonus. */

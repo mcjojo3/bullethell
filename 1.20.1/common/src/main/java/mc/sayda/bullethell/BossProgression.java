@@ -10,15 +10,20 @@ import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.boss.StageLoader;
 import mc.sayda.bullethell.debug.BHDebugMode;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.advancements.Advancement;
 
-/** Per-player boss clear progression + difficulty-gated challenge checks. */
+/**
+ * Per-player boss clear progression + difficulty-gated challenge checks.
+ *
+ * Source of truth: Minecraft advancements ({@code bullethell:progression/<bossId>_<difficulty>}).
+ * No scoreboard tags are written — advancements are the only persistent state.
+ * Character unlock checks (CharacterUnlocks) use the identical advancement naming scheme
+ * so beating a boss immediately unlocks the matching character at that difficulty.
+ */
 public final class BossProgression {
 
-    private static final String TAG_PREFIX = "bullethell.clear.";
     private static final String ROOT_ADV = "bullethell:progression/root";
     private static final String ADV_PREFIX = "bullethell:progression/";
 
@@ -43,44 +48,26 @@ public final class BossProgression {
     private BossProgression() {
     }
 
-    private static String tagPrefixFor(String bossId) {
-        return TAG_PREFIX + bossId + ".";
-    }
-
-    private static String tagFor(String bossId, int maxDifficultyOrdinal) {
-        return tagPrefixFor(bossId) + maxDifficultyOrdinal;
-    }
-
     public static int getMaxClearedDifficultyOrdinal(ServerPlayer player, String bossId) {
         if (player == null || bossId == null || bossId.isBlank())
             return -1;
         int best = -1;
-        String prefix = tagPrefixFor(bossId);
-        for (String tag : player.getTags()) {
-            if (!tag.startsWith(prefix))
-                continue;
-            String raw = tag.substring(prefix.length());
-            try {
-                best = Math.max(best, Integer.parseInt(raw));
-            } catch (NumberFormatException ignored) {
-            }
+        DifficultyConfig[] diffs = DifficultyConfig.values();
+        for (int i = 0; i < diffs.length; i++) {
+            String advId = ADV_PREFIX + bossId + "_" + diffs[i].name().toLowerCase();
+            if (hasAdvancement(player, advId))
+                best = Math.max(best, i);
         }
         return best;
     }
 
-    private static void clearBossTags(ServerPlayer player, String bossId) {
-        String prefix = tagPrefixFor(bossId);
-        for (String tag : List.copyOf(player.getTags())) {
-            if (tag.startsWith(prefix))
-                player.removeTag(tag);
-        }
-    }
-
-    private static void setMaxClearedDifficultyOrdinal(ServerPlayer player, String bossId, int ordinal) {
-        clearBossTags(player, bossId);
-        if (ordinal >= 0) {
-            player.addTag(tagFor(bossId, ordinal));
-        }
+    private static boolean hasAdvancement(ServerPlayer player, String advId) {
+        if (advId == null) return false;
+        ResourceLocation rl = new ResourceLocation(advId);
+        Advancement adv = player.server.getAdvancements().getAdvancement(rl);
+        if (adv == null)
+            return false;
+        return player.getAdvancements().getOrStartProgress(adv).isDone();
     }
 
     /** Record a boss clear and grant all advancement tiers up to that difficulty. */
@@ -91,7 +78,6 @@ public final class BossProgression {
         int next = Math.max(cur, difficulty.ordinal());
         if (next == cur)
             return false;
-        setMaxClearedDifficultyOrdinal(player, bossId, next);
         grantAdvancementsThrough(player, bossId, next);
         return true;
     }

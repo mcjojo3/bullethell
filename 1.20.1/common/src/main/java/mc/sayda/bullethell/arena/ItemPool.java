@@ -18,14 +18,16 @@ import mc.sayda.bullethell.config.BullethellConfig;
  */
 public class ItemPool {
 
-    public static final int CAPACITY = 128;
+    public static final int CAPACITY = 1024;
 
     public static final int STRIDE = 6;
     public static final float INITIAL_VY = -2.5f;
     private static final float GRAVITY = 0.08f;
     private static final float MAX_FALL_SPEED = 3.5f;
+
     /**
      * Speed at which bomb-attracted items fly toward the player (arena units/tick).
+     * 
      * @see BullethellConfig#ITEM_ATTRACT_SPEED
      */
     public static float attractSpeed() {
@@ -45,15 +47,19 @@ public class ItemPool {
 
     // ---------------------------------------------------------------- item types
 
-    public static final int TYPE_POWER       = 0; // pink  - small power chip (+1)
-    public static final int TYPE_POINT       = 1; // yellow - score item
-    public static final int TYPE_FULL_POWER  = 2; // blue  - max power instantly
-    public static final int TYPE_ONE_UP      = 3; // green - extra life
-    public static final int TYPE_BOMB        = 4; // orange - bomb stock +1
-    public static final int TYPE_POWER_LARGE = 5; // magenta - large power item (+8)
+    public static final int TYPE_POWER = 0;
+    public static final int TYPE_POINT = 1;
+    public static final int TYPE_FULL_POWER = 2;
+    public static final int TYPE_ONE_UP = 3;
+    public static final int TYPE_BOMB = 4;
+    public static final int TYPE_POWER_LARGE = 5;
+    public static final int TYPE_LIFE_PIECE = 6;
+    public static final int TYPE_BOMB_PIECE = 7;
+    public static final int TYPE_POINT_GREEN = 8;
 
-    private static final int[] ITEM_COLORS = { 0xFFFF4488, 0xFFFFE600, 0xFF44AAFF, 0xFF44FF88, 0xFFFF8800, 0xFFFF00CC };
-    private static final int[] ITEM_SIZES  = { 3, 3, 5, 5, 4, 5 };
+    private static final int[] ITEM_COLORS = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+            0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+    private static final int[] ITEM_SIZES = { 3, 3, 5, 5, 4, 5, 3, 3, 3 };
 
     public static int colorOf(int type) {
         return type < ITEM_COLORS.length ? ITEM_COLORS[type] : 0xFFFFFFFF;
@@ -67,6 +73,8 @@ public class ItemPool {
 
     private final float[] data = new float[CAPACITY * STRIDE];
     private final boolean[] active = new boolean[CAPACITY];
+    private final float[] prevX = new float[CAPACITY];
+    private final float[] prevY = new float[CAPACITY];
     private int activeCount = 0;
 
     // ---------------------------------------------------------------- tick
@@ -136,6 +144,8 @@ public class ItemPool {
         data[b + F_TYPE] = type;
         data[b + F_LIFE] = BullethellConfig.ITEM_COLLECTIBLE_LIFE_TICKS.get();
         data[b + F_ATTRACT] = 0f;
+        prevX[slot] = x;
+        prevY[slot] = y;
         active[slot] = true;
         activeCount++;
         return slot;
@@ -178,6 +188,18 @@ public class ItemPool {
         return data[slot * STRIDE + F_ATTRACT] != 0f;
     }
 
+    public float getPrevX(int slot) { return prevX[slot]; }
+    public float getPrevY(int slot) { return prevY[slot]; }
+
+    public void savePrevPositions() {
+        for (int i = 0; i < CAPACITY; i++) {
+            if (active[i]) {
+                prevX[i] = data[i * STRIDE + F_X];
+                prevY[i] = data[i * STRIDE + F_Y];
+            }
+        }
+    }
+
     public void setX(int slot, float x) {
         data[slot * STRIDE + F_X] = x;
     }
@@ -199,8 +221,14 @@ public class ItemPool {
     }
 
     public void setSlotData(int slot, float[] d, boolean isActive) {
+        if (isActive && active[slot]) {
+            prevX[slot] = data[slot * STRIDE + F_X];
+            prevY[slot] = data[slot * STRIDE + F_Y];
+        }
         System.arraycopy(d, 0, data, slot * STRIDE, STRIDE);
         if (isActive && !active[slot]) {
+            prevX[slot] = d[F_X];
+            prevY[slot] = d[F_Y];
             active[slot] = true;
             activeCount++;
         } else if (!isActive && active[slot]) {

@@ -14,10 +14,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Loads and caches {@link BossDefinition} objects from JSON files on the classpath.
@@ -39,11 +39,12 @@ public final class BossLoader {
      * directory listing is unavailable).
      */
     public static final String[] REGISTERED_IDS = {
-            "cirno_boss", "flandre_boss", "marisa_boss", "remilia_boss", "sakuya_boss", "sanae_boss"
+            "cirno_boss", "flandre_boss", "marisa_boss", "remilia_boss", "sakuya_boss", "sanae_boss",
+            "satori_boss", "yuuka_boss"
     };
 
     private static final Gson GSON = new GsonBuilder().create();
-    private static final Map<String, BossDefinition> CACHE = new HashMap<>();
+    private static final Map<String, BossDefinition> CACHE = new ConcurrentHashMap<>();
 
     private BossLoader() {}
 
@@ -95,34 +96,14 @@ public final class BossLoader {
         }
 
         try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-            JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-            TierJson.migrateLegacyByDifficultyKeysOnBoss(root);
-            TierJson.promoteUnionTierFieldsOnBoss(root);
-            BossDefinition def = GSON.fromJson(root, BossDefinition.class);
-            if (def == null || def.phases == null || def.phases.isEmpty()) {
-                System.err.println("[BulletHell] Boss definition has no phases: " + id
-                        + " - using fallback");
+            BossDefinition def = parseAndNormalize(JsonParser.parseReader(reader).getAsJsonObject());
+            if (def == null) {
+                System.err.println("[BulletHell] Boss definition has no phases: " + id + " - using fallback");
                 return fallback(id);
-            }
-            DifficultyTierArray.normalizeBossDefinition(def);
-            // Ensure every phase has at least one attack step
-            for (PhaseDefinition phase : def.phases) {
-                if (phase.attacks == null || phase.attacks.isEmpty()) {
-                    PatternStep ring = new PatternStep();
-                    ring.pattern = "RING";
-                    ring.arms    = 8;
-                    ring.speed   = 2.0f;
-                    phase.attacks = new java.util.ArrayList<>();
-                    phase.attacks.add(ring);
-                }
-                if (phase.spellDurationTicks == null || phase.spellDurationTicks.length < 4) {
-                    phase.spellDurationTicks = new int[]{600, 450, 300, 150};
-                }
             }
             return def;
         } catch (Exception e) {
-            System.err.println("[BulletHell] Failed to parse boss definition: " + path
-                    + " - " + e.getMessage());
+            System.err.println("[BulletHell] Failed to parse boss definition: " + path + " - " + e.getMessage());
             return fallback(id);
         }
     }
@@ -130,7 +111,7 @@ public final class BossLoader {
     // ---------------------------------------------------------------- dev-path support (test mode)
 
     /** Last known file-modification times for dev-path files; used for auto-reload polling. */
-    private static final Map<String, Long> DEV_MOD_TIMES = new HashMap<>();
+    private static final Map<String, Long> DEV_MOD_TIMES = new ConcurrentHashMap<>();
 
     /**
      * Load boss JSON from {@link BullethellConfig#TEST_DEV_PATH} if set and file exists.
@@ -143,25 +124,9 @@ public final class BossLoader {
         Path file = Paths.get(devPath, "bosses", id + ".json");
         if (!Files.exists(file)) return null;
         try (java.io.Reader r = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            JsonObject root = JsonParser.parseReader(r).getAsJsonObject();
-            TierJson.migrateLegacyByDifficultyKeysOnBoss(root);
-            TierJson.promoteUnionTierFieldsOnBoss(root);
-            BossDefinition def = GSON.fromJson(root, BossDefinition.class);
-            if (def == null || def.phases == null || def.phases.isEmpty()) return null;
-            DifficultyTierArray.normalizeBossDefinition(def);
-            for (PhaseDefinition phase : def.phases) {
-                if (phase.attacks == null || phase.attacks.isEmpty()) {
-                    PatternStep ring = new PatternStep();
-                    ring.pattern = "RING"; ring.arms = 8; ring.speed = 2.0f;
-                    phase.attacks = new ArrayList<>();
-                    phase.attacks.add(ring);
-                }
-                if (phase.spellDurationTicks == null || phase.spellDurationTicks.length < 4)
-                    phase.spellDurationTicks = new int[]{600, 450, 300, 150};
-            }
-            // Track mod time for auto-reload
-            try { DEV_MOD_TIMES.put(id, Files.getLastModifiedTime(file).toMillis()); }
-            catch (Exception ignored) {}
+            BossDefinition def = parseAndNormalize(JsonParser.parseReader(r).getAsJsonObject());
+            if (def == null) return null;
+            try { DEV_MOD_TIMES.put(id, Files.getLastModifiedTime(file).toMillis()); } catch (Exception ignored) {}
             return def;
         } catch (Exception e) {
             System.err.println("[BulletHell/Test] Failed to parse dev boss: " + id + " - " + e.getMessage());
@@ -227,6 +192,46 @@ public final class BossLoader {
             if (prev == null) DEV_MOD_TIMES.put(id, mtime);
         } catch (Exception ignored) {}
         return false;
+    }
+
+    // ---------------------------------------------------------------- shared parse + normalize
+
+    private static BossDefinition parseAndNormalize(JsonObject root) {
+        TierJson.promoteUnionTierFieldsOnBoss(root);
+        normalizeMusicArrays(root);
+        BossDefinition def = GSON.fromJson(root, BossDefinition.class);
+        if (def == null || def.phases == null || def.phases.isEmpty()) return null;
+        DifficultyTierArray.normalizeBossDefinition(def);
+        for (PhaseDefinition phase : def.phases) {
+            if (phase.attacks == null || phase.attacks.isEmpty()) {
+                PatternStep ring = new PatternStep();
+                ring.pattern = "RING"; ring.arms = 8; ring.speed = 2.0f;
+                phase.attacks = new ArrayList<>();
+                phase.attacks.add(ring);
+            }
+            if (phase.spellDurationTicks == null || phase.spellDurationTicks.length < 4)
+                phase.spellDurationTicks = new int[]{600, 450, 300, 150};
+        }
+        return def;
+    }
+
+    // ---------------------------------------------------------------- pre-processing
+
+    /**
+     * Converts {@code "music": ["a", "b"]} in each phase to {@code "musicPool": ["a", "b"]}
+     * so Gson can deserialize it into {@link PhaseDefinition#musicPool} (List<String>)
+     * rather than failing on the array type.  Single-string {@code "music"} entries are
+     * left untouched.
+     */
+    private static void normalizeMusicArrays(JsonObject root) {
+        if (!root.has("phases")) return;
+        for (com.google.gson.JsonElement el : root.getAsJsonArray("phases")) {
+            if (!el.isJsonObject()) continue;
+            com.google.gson.JsonObject phase = el.getAsJsonObject();
+            if (phase.has("music") && phase.get("music").isJsonArray()) {
+                phase.add("musicPool", phase.remove("music"));
+            }
+        }
     }
 
     // ---------------------------------------------------------------- fallback

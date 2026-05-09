@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "bullethell:cirno_spawn",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 20,
+    "separation": 7,
+    "salt": 947182635
+  }
+}

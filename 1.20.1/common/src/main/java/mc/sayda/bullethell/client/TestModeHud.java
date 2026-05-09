@@ -231,6 +231,10 @@ public final class TestModeHud {
         if (state.testPage == PAGE_CHAR) {
             // Character page: show current char selection and note
             row(gfx, font, x, y, "char", state.testCurrentCharId, RIGHT_W - 10); y += LH;
+            String shotLabel = state.testShotTypeIds.isEmpty() ? "(none)" :
+                    state.testCurrentShotTypeIdx >= 0 && state.testCurrentShotTypeIdx < state.testShotTypeIds.size() ?
+                    state.testShotTypeIds.get(state.testCurrentShotTypeIdx) : "(none)";
+            row(gfx, font, x, y, "shot", shotLabel, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "diff", DifficultyConfig.fromId(state.testCurrentDifficulty).name(), RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "boss", state.bossId.isEmpty() ? state.testCurrentBossId : state.bossId, RIGHT_W - 10); y += LH;
             y += 2;
@@ -238,12 +242,15 @@ public final class TestModeHud {
             gfx.drawString(font, "Click to set char for", x, y, TEXT_DIM, false); y += LH;
             gfx.drawString(font, "next test run.", x, y, TEXT_DIM, false); y += LH;
             gfx.drawString(font, "Hit [ R ] to restart", x, y, TEXT_DIM, false); y += LH;
-            gfx.drawString(font, "with new char.", x, y, TEXT_DIM, false); y += LH;
         } else if (state.testPage == PAGE_STAGE) {
             String stageId = state.testCurrentStageId.isEmpty() ? "(none)" : state.testCurrentStageId;
             row(gfx, font, x, y, "stage", stageId, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "diff", DifficultyConfig.fromId(state.testCurrentDifficulty).name(), RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "char", state.testCurrentCharId, RIGHT_W - 10); y += LH;
+            String shotLabel = state.testShotTypeIds.isEmpty() ? "(none)" :
+                    state.testCurrentShotTypeIdx >= 0 && state.testCurrentShotTypeIdx < state.testShotTypeIds.size() ?
+                            state.testShotTypeIds.get(state.testCurrentShotTypeIdx) : "(none)";
+            row(gfx, font, x, y, "shot", shotLabel, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "boss", state.bossId.isEmpty() ? "-" : state.bossId, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "phase", String.valueOf(state.bossPhase + 1), RIGHT_W - 10); y += LH;
         } else if (state.testPage == PAGE_WAVE) {
@@ -251,13 +258,20 @@ public final class TestModeHud {
             row(gfx, font, x, y, "wave", waveId, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "diff", DifficultyConfig.fromId(state.testCurrentDifficulty).name(), RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "char", state.testCurrentCharId, RIGHT_W - 10); y += LH;
+            String shotLabel = state.testShotTypeIds.isEmpty() ? "(none)" :
+                    state.testCurrentShotTypeIdx >= 0 && state.testCurrentShotTypeIdx < state.testShotTypeIds.size() ?
+                            state.testShotTypeIds.get(state.testCurrentShotTypeIdx) : "(none)";
+            row(gfx, font, x, y, "shot", shotLabel, RIGHT_W - 10); y += LH;
             y += LH; // blank line where boss/phase would be
         } else { // BOSS
             String bossId = state.bossId.isEmpty() ? state.testCurrentBossId : state.bossId;
             row(gfx, font, x, y, "boss", bossId, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "diff", DifficultyConfig.fromId(state.testCurrentDifficulty).name(), RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "char", state.testCurrentCharId, RIGHT_W - 10); y += LH;
-            row(gfx, font, x, y, "phase", String.valueOf(state.bossPhase + 1), RIGHT_W - 10); y += LH;
+            String shotLabel = state.testShotTypeIds.isEmpty() ? "(none)" :
+                    state.testCurrentShotTypeIdx >= 0 && state.testCurrentShotTypeIdx < state.testShotTypeIds.size() ?
+                            state.testShotTypeIds.get(state.testCurrentShotTypeIdx) : "(none)";
+            row(gfx, font, x, y, "shot", shotLabel, RIGHT_W - 10); y += LH;
         }
 
         // Spell name
@@ -294,6 +308,9 @@ public final class TestModeHud {
         row(gfx, font, x, y, "p.bullets", String.valueOf(pBullets),                    RIGHT_W - 10); y += LH;
         row(gfx, font, x, y, "tick",      String.valueOf(state.debugArenaTick),        RIGHT_W - 10); y += LH;
         row(gfx, font, x, y, "pat cd",    String.valueOf(state.debugPatternCooldown),  RIGHT_W - 10); y += LH;
+        int rankColor = state.rank <= 8 ? 0xFF44FF88 : state.rank <= 20 ? 0xFFFFDD44 : 0xFFFF6644;
+        gfx.drawString(font, "rank: ", x, y, TEXT_DIM, false);
+        gfx.drawString(font, String.valueOf(state.rank) + "/32", x + font.width("rank: "), y, rankColor, false); y += LH;
 
         if (state.active && state.spellTimerTotal > 0) {
             int remSec = state.spellTimerTicks / 20;
@@ -309,6 +326,9 @@ public final class TestModeHud {
             row(gfx, font, x, y, "bombs",  String.valueOf(state.player.bombs), RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "power",  String.valueOf(state.power),        RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "graze",  String.valueOf(state.player.graze), RIGHT_W - 10); y += LH;
+            int godColor = state.debugGodMode ? 0xFF44FF88 : 0xFFFF4444;
+            gfx.drawString(font, "godmode: ", x, y, TEXT_DIM, false);
+            gfx.drawString(font, state.debugGodMode ? "ON" : "OFF", x + font.width("godmode: "), y, godColor, false); y += LH;
             row(gfx, font, x, y, "pos",
                     String.format("%.0f,%.0f", state.player.x, state.player.y), RIGHT_W - 10); y += LH;
         }
@@ -322,8 +342,12 @@ public final class TestModeHud {
             gfx.drawString(font, "[PgUp/Dn]   next/prev phase", x, y, TEXT_DIM, false); y += LH;
         }
         gfx.drawString(font, "[ 1-4 ]     difficulty", x, y, TEXT_DIM, false); y += LH;
+        gfx.drawString(font, "[ 5-6 ]     shot type", x, y, TEXT_DIM, false); y += LH;
+        gfx.drawString(font, "[ 7-8 ]     power (hold)", x, y, TEXT_DIM, false); y += LH;
         gfx.drawString(font, "[ Tab ]     next page", x, y, TEXT_DIM, false); y += LH;
+        gfx.drawString(font, "[Shift+Tab] prev page", x, y, TEXT_DIM, false); y += LH;
         gfx.drawString(font, "[ H ]       hitboxes", x, y, TEXT_DIM, false); y += LH;
+        gfx.drawString(font, "[ G ]       godmode toggle", x, y, TEXT_DIM, false); y += LH;
         gfx.drawString(font, "scroll      list", x, y, TEXT_DIM, false); y += LH;
         gfx.drawString(font, "click       select", x, y, TEXT_DIM, false);
     }

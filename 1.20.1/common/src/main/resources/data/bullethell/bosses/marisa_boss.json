@@ -8,31 +8,115 @@
     "LASER_ROTATING: bidirectional beams, one burst in the Typhoon phase for a laser-wheel moment.",
     "LASER: wide aimed beam (Master Spark). GOLD / STAR / RICE / SPARK / ORB as usual."
   ],
+  "introDialog": [
+    {
+      "speaker": "BOSS",
+      "text": "You made it this far? Color me impressed, ze. Now let's see if that luck holds!",
+      "delayTicks": 160
+    }
+  ],
   "characterDialogs": {
     "reimu": [
-      { "speaker": "BOSS", "text": "Yo, Reimu. I borrowed the good stuff first, try and take it back, ze!", "delayTicks": 160 },
-      { "speaker": "PLAYER", "text": "Return it now, Marisa. If not, I'll exterminate first and ask later.", "delayTicks": 130 },
-      { "speaker": "BOSS", "text": "Ha! Try exterminating after you survive this star shower, ze!", "delayTicks": 155 }
+      {
+        "speaker": "BOSS",
+        "text": "Yo, Reimu. I borrowed the good stuff first, try and take it back, ze!",
+        "delayTicks": 160
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "Return it now, Marisa. If not, I'll exterminate first and ask later.",
+        "delayTicks": 130
+      },
+      {
+        "speaker": "BOSS",
+        "text": "Ha! Try exterminating after you survive this star shower, ze!",
+        "delayTicks": 155
+      }
     ],
     "marisa": [
-      { "speaker": "BOSS", "text": "Hold up, another me? Then let's settle who's the real ordinary magician!", "delayTicks": 160 },
-      { "speaker": "PLAYER", "text": "Fine by me. Winner keeps the title and the Master Spark bragging rights!", "delayTicks": 130 },
-      { "speaker": "BOSS", "text": "Guess that means two Master Sparks, let's see whose is brighter, ze!", "delayTicks": 155 }
+      {
+        "speaker": "BOSS",
+        "text": "Hold up, another me? Then let's settle who's the real ordinary magician!",
+        "delayTicks": 160
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "Fine by me. Winner keeps the title and the Master Spark bragging rights!",
+        "delayTicks": 130
+      },
+      {
+        "speaker": "BOSS",
+        "text": "Guess that means two Master Sparks, let's see whose is brighter, ze!",
+        "delayTicks": 155
+      }
     ],
     "sakuya": [
-      { "speaker": "BOSS", "text": "Oh hey, Sakuya. Tell Patchy I'll return those books... eventually.", "delayTicks": 160 },
-      { "speaker": "PLAYER", "text": "Lady Patchouli sent me for them now. If needed, by force.", "delayTicks": 130 },
-      { "speaker": "BOSS", "text": "Knives versus lasers, bring it, I'll return the favor with interest!", "delayTicks": 155 }
+      {
+        "speaker": "BOSS",
+        "text": "Oh hey, Sakuya. Tell Patchy I'll return those books... eventually.",
+        "delayTicks": 160
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "Lady Patchouli sent me for them now. If needed, by force.",
+        "delayTicks": 130
+      },
+      {
+        "speaker": "BOSS",
+        "text": "Knives versus lasers, bring it, I'll return the favor with interest!",
+        "delayTicks": 155
+      }
     ],
     "sanae": [
-      { "speaker": "BOSS", "text": "Moriya's wind priestess, huh? Looking for faith points in a duel?", "delayTicks": 160 },
-      { "speaker": "PLAYER", "text": "Exactly. Beating you should make for excellent shrine publicity.", "delayTicks": 130 },
-      { "speaker": "BOSS", "text": "Great headline, hope your dodging keeps up with the front page, ze!", "delayTicks": 155 }
+      {
+        "speaker": "BOSS",
+        "text": "Moriya's wind priestess, huh? Looking for faith points in a duel?",
+        "delayTicks": 160
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "Exactly. Beating you should make for excellent shrine publicity.",
+        "delayTicks": 130
+      },
+      {
+        "speaker": "BOSS",
+        "text": "Great headline, hope your dodging keeps up with the front page, ze!",
+        "delayTicks": 155
+      }
     ],
     "cirno": [
-      { "speaker": "BOSS", "text": "Cirno?! Alright, strongest fairy, try dodging my stars!", "delayTicks": 160 },
-      { "speaker": "PLAYER", "text": "I'll freeze your magic and prove who's strongest!", "delayTicks": 130 },
-      { "speaker": "BOSS", "text": "Ice versus stars, let's see which one shatters first!", "delayTicks": 150 }
+      {
+        "speaker": "BOSS",
+        "text": "Cirno?! Alright, strongest fairy, try dodging my stars!",
+        "delayTicks": 160
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "I'll freeze your magic and prove who's strongest!",
+        "delayTicks": 130
+      },
+      {
+        "speaker": "BOSS",
+        "text": "Ice versus stars, let's see which one shatters first!",
+        "delayTicks": 150
+      }
+    ],
+    "yuuka": [
+      {
+        "speaker": "BOSS",
+        "text": "Yuuka?! What brings the flower master all the way to my forest, ze?",
+        "delayTicks": 160
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "I heard someone has been trampling the undergrowth during their research. Care to explain?",
+        "delayTicks": 140
+      },
+      {
+        "speaker": "BOSS",
+        "text": "The mushrooms need room to breathe! And stars don't hurt anyone, ze!",
+        "delayTicks": 155
+      }
     ]
   },
   "victoryDialog": "Not bad at all. Next time I'll bring an even bigger spark, ze!",
@@ -42,32 +126,76 @@
     "marisa": "What?! I lost to... me? Fine, you can borrow the title for now.",
     "sakuya": "Ow, those knives are no joke. Tell Patchy I still owe her... maybe.",
     "sanae": "Okay, miracle girl, that was flashy. I admit it, you earned that win.",
-    "cirno": "Whoa, the strongest really did it. Remind me not to underestimate fairies."
+    "cirno": "Whoa, the strongest really did it. Remind me not to underestimate fairies.",
+    "yuuka": "Beaten by a garden... I'll leave the undergrowth alone. Probably, ze."
   },
   "defeatDialogByCharacter": {
     "reimu": "That all you've got, shrine maiden? I expected cleaner dodging.",
     "marisa": "Fake or not, I'm still the one and only ordinary magician!",
     "sakuya": "Too slow, maid. Time waits for no one, especially not you.",
     "sanae": "Common sense from outside won't save you here, ze!",
-    "cirno": "Even the strongest needs better footing. Try again, Cirno."
+    "cirno": "Even the strongest needs better footing. Try again, Cirno.",
+    "yuuka": "Stars still outshine petals, ze. Bloom harder next time!"
   },
   "phases": [
     {
       "_note": "TH8-style opening: aimed gold streams + one layered fan/ring + light rice wall.",
       "hp": 1200,
       "isSpellCard": false,
-      "hpThresholdFraction": 0.20,
       "spellName": "Opening",
-      "spellDurationTicks": [0, 0, 0, 0],
+      "spellDurationTicks": [
+        0,
+        0,
+        0,
+        0
+      ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
       "moveSpeed": 100,
       "music": "love_coloured_master_spark",
       "attacks": [
-        { "pattern": "AIMED", "cooldown": 14, "minCooldown": 10, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 5, "speed": 3.1, "spread": 0.22 },
-        { "pattern": "AIMED", "cooldown": 12, "minCooldown": 9, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 7, "speed": 2.9, "spread": 0.16 },
-        { "pattern": "AIMED_RING", "cooldown": 20, "minCooldown": 15, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 5, "spread": 0.20, "speed": 3.0, "ringArms": 10, "ringSpeed": 1.65, "ringBulletType": "RICE" },
-        { "pattern": "RING", "cooldown": 24, "minCooldown": 19, "scalingProfile": "GEOMETRY", "bulletType": "RICE", "arms": 10, "speed": 1.75 }
+        {
+          "pattern": "AIMED",
+          "cooldown": 14,
+          "minCooldown": 10,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 5,
+          "speed": 3.1,
+          "spread": 0.22
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 12,
+          "minCooldown": 9,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 7,
+          "speed": 2.9,
+          "spread": 0.16
+        },
+        {
+          "pattern": "AIMED_RING",
+          "cooldown": 20,
+          "minCooldown": 15,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 5,
+          "spread": 0.20,
+          "speed": 3.0,
+          "ringArms": 10,
+          "ringSpeed": 1.65,
+          "ringBulletType": "RICE"
+        },
+        {
+          "pattern": "RING",
+          "cooldown": 24,
+          "minCooldown": 19,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "RICE",
+          "arms": 10,
+          "speed": 1.75
+        }
       ]
     },
     {
@@ -75,36 +203,139 @@
       "hp": 2000,
       "isSpellCard": true,
       "spellName": "Magic Sign \"Milky Way\"",
-      "spellDurationTicks": [900, 700, 480, 260],
+      "spellDurationTicks": [
+        900,
+        700,
+        480,
+        260
+      ],
       "spellBonus": 50000,
       "movement": "CIRCLE",
       "moveSpeed": 70,
       "music": "",
       "attacks": [
-        { "pattern": "AIMED", "cooldown": 11, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 6, "speed": 3.5, "spread": 0.20 },
-        { "pattern": "LASER_BEAM", "cooldown": 9, "minCooldown": 7, "scalingProfile": "PRECISION", "bulletType": "SPARK", "arms": 3, "speed": 6.0 },
-        { "pattern": "AIMED", "cooldown": 13, "minCooldown": 10, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 5, "speed": 3.2, "spread": 0.24 },
-        { "pattern": "AIMED_RING", "cooldown": 18, "minCooldown": 13, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 5, "spread": 0.18, "speed": 3.4, "ringArms": 12, "ringSpeed": 1.55, "ringBulletType": "DOT" },
-        { "pattern": "RING", "cooldown": 16, "minCooldown": 12, "scalingProfile": "GEOMETRY", "bulletType": "GOLD", "arms": 14, "maxScaledArms": 18, "speed": 2.9 },
-        { "pattern": "AIMED", "cooldown": 12, "minCooldown": 9, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 4, "speed": 4.0, "spread": 0.14 }
+        {
+          "pattern": "AIMED",
+          "cooldown": 11,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 6,
+          "speed": 3.5,
+          "spread": 0.20
+        },
+        {
+          "pattern": "LASER_BEAM",
+          "cooldown": 9,
+          "minCooldown": 7,
+          "scalingProfile": "PRECISION",
+          "bulletType": "SPARK",
+          "arms": 3,
+          "speed": 6.0
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 13,
+          "minCooldown": 10,
+          "scalingProfile": "PRECISION",
+          "bulletType": "STAR",
+          "arms": 5,
+          "speed": 3.2,
+          "spread": 0.24
+        },
+        {
+          "pattern": "AIMED_RING",
+          "cooldown": 18,
+          "minCooldown": 13,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 5,
+          "spread": 0.18,
+          "speed": 3.4,
+          "ringArms": 12,
+          "ringSpeed": 1.55,
+          "ringBulletType": "DOT"
+        },
+        {
+          "pattern": "RING",
+          "cooldown": 16,
+          "minCooldown": 12,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "GOLD",
+          "arms": 14,
+          "maxScaledArms": 18,
+          "speed": 2.9
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 12,
+          "minCooldown": 9,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 4,
+          "speed": 4.0,
+          "spread": 0.14
+        }
       ]
     },
     {
       "_note": "Mid nonspell: sustained aimed pressure + one Milky Way-style layer + light spiral.",
       "hp": 1600,
       "isSpellCard": false,
-      "hpThresholdFraction": 0.20,
       "spellName": "Stardust",
-      "spellDurationTicks": [0, 0, 0, 0],
+      "spellDurationTicks": [
+        0,
+        0,
+        0,
+        0
+      ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
       "moveSpeed": 125,
       "music": "",
       "attacks": [
-        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 7, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 6, "speed": 3.6, "spread": 0.19 },
-        { "pattern": "AIMED_RING", "cooldown": 17, "minCooldown": 13, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 5, "spread": 0.22, "speed": 3.2, "ringArms": 10, "ringSpeed": 1.7, "ringBulletType": "RICE" },
-        { "pattern": "SPIRAL", "cooldown": 9, "minCooldown": 7, "scalingProfile": "GEOMETRY", "bulletType": "RICE", "arms": 4, "speed": 2.7 },
-        { "pattern": "AIMED", "cooldown": 11, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "RICE", "arms": 7, "speed": 3.0, "spread": 0.26 }
+        {
+          "pattern": "AIMED",
+          "cooldown": 10,
+          "minCooldown": 7,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 6,
+          "speed": 3.6,
+          "spread": 0.19
+        },
+        {
+          "pattern": "AIMED_RING",
+          "cooldown": 17,
+          "minCooldown": 13,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 5,
+          "spread": 0.22,
+          "speed": 3.2,
+          "ringArms": 10,
+          "ringSpeed": 1.7,
+          "ringBulletType": "RICE"
+        },
+        {
+          "pattern": "SPIRAL",
+          "cooldown": 9,
+          "minCooldown": 7,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "RICE",
+          "arms": 4,
+          "speed": 2.7
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 11,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "RICE",
+          "arms": 7,
+          "speed": 3.0,
+          "spread": 0.26
+        }
       ]
     },
     {
@@ -112,18 +343,81 @@
       "hp": 2400,
       "isSpellCard": true,
       "spellName": "Love Storm \"Starlight Typhoon\"",
-      "spellDurationTicks": [820, 640, 440, 230],
+      "spellDurationTicks": [
+        820,
+        640,
+        440,
+        230
+      ],
       "spellBonus": 60000,
       "movement": "STATIC",
       "moveSpeed": 0,
       "music": "",
       "attacks": [
-        { "pattern": "LASER_BEAM", "cooldown": 10, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "SPARK", "arms": 3, "speed": 6.5 },
-        { "pattern": "AIMED", "cooldown": 11, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 5, "speed": 3.5, "spread": 0.21 },
-        { "pattern": "AIMED_RING", "cooldown": 19, "minCooldown": 14, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 5, "spread": 0.25, "speed": 3.1, "ringArms": 11, "ringSpeed": 1.6, "ringBulletType": "RICE" },
-        { "pattern": "LASER_ROTATING", "cooldown": 38, "minCooldown": 30, "scalingProfile": "GEOMETRY", "bulletType": "LASER_HEAD", "arms": 8, "speed": 0, "laserHalfWidth": 7, "warnTicks": 14, "activeTicks": 22, "laserRotateAdvanceRad": 0.34 },
-        { "pattern": "AIMED", "cooldown": 13, "minCooldown": 10, "scalingProfile": "PRECISION", "bulletType": "RICE", "arms": 6, "speed": 3.2, "spread": 0.28 },
-        { "pattern": "RING", "cooldown": 26, "minCooldown": 20, "scalingProfile": "GEOMETRY", "bulletType": "DOT", "arms": 10, "speed": 1.55 }
+        {
+          "pattern": "LASER_BEAM",
+          "cooldown": 10,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "SPARK",
+          "arms": 3,
+          "speed": 6.5
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 11,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 5,
+          "speed": 3.5,
+          "spread": 0.21
+        },
+        {
+          "pattern": "AIMED_RING",
+          "cooldown": 19,
+          "minCooldown": 14,
+          "scalingProfile": "PRECISION",
+          "bulletType": "STAR",
+          "arms": 5,
+          "spread": 0.25,
+          "speed": 3.1,
+          "ringArms": 11,
+          "ringSpeed": 1.6,
+          "ringBulletType": "RICE"
+        },
+        {
+          "pattern": "LASER_ROTATING",
+          "cooldown": 38,
+          "minCooldown": 30,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "PURPLE_LASER",
+          "arms": 8,
+          "speed": 0,
+          "laserHalfWidth": 7,
+          "warnTicks": 14,
+          "activeTicks": 22,
+          "laserRotateAdvanceRad": 0.34
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 13,
+          "minCooldown": 10,
+          "scalingProfile": "PRECISION",
+          "bulletType": "RICE",
+          "arms": 6,
+          "speed": 3.2,
+          "spread": 0.28
+        },
+        {
+          "pattern": "RING",
+          "cooldown": 26,
+          "minCooldown": 20,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "DOT",
+          "arms": 10,
+          "speed": 1.55
+        }
       ]
     },
     {
@@ -132,17 +426,50 @@
       "maxDifficulty": "NORMAL",
       "hp": 2000,
       "isSpellCard": false,
-      "hpThresholdFraction": 0.20,
       "spellName": "Surge",
-      "spellDurationTicks": [0, 0, 0, 0],
+      "spellDurationTicks": [
+        0,
+        0,
+        0,
+        0
+      ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
       "moveSpeed": 115,
       "music": "",
       "attacks": [
-        { "pattern": "AIMED", "cooldown": 12, "minCooldown": 9, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 5, "speed": 3.2, "spread": 0.20 },
-        { "pattern": "AIMED_RING", "cooldown": 20, "minCooldown": 15, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 4, "spread": 0.22, "speed": 2.8, "ringArms": 8, "ringSpeed": 1.6, "ringBulletType": "DOT" },
-        { "pattern": "RING", "cooldown": 19, "minCooldown": 14, "scalingProfile": "GEOMETRY", "bulletType": "GOLD", "arms": 10, "speed": 2.2 }
+        {
+          "pattern": "AIMED",
+          "cooldown": 12,
+          "minCooldown": 9,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 5,
+          "speed": 3.2,
+          "spread": 0.20
+        },
+        {
+          "pattern": "AIMED_RING",
+          "cooldown": 20,
+          "minCooldown": 15,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 4,
+          "spread": 0.22,
+          "speed": 2.8,
+          "ringArms": 8,
+          "ringSpeed": 1.6,
+          "ringBulletType": "DOT"
+        },
+        {
+          "pattern": "RING",
+          "cooldown": 19,
+          "minCooldown": 14,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "GOLD",
+          "arms": 10,
+          "speed": 2.2
+        }
       ]
     },
     {
@@ -151,18 +478,60 @@
       "maxDifficulty": "LUNATIC",
       "hp": 2000,
       "isSpellCard": false,
-      "hpThresholdFraction": 0.20,
       "spellName": "Surge",
-      "spellDurationTicks": [0, 0, 0, 0],
+      "spellDurationTicks": [
+        0,
+        0,
+        0,
+        0
+      ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
       "moveSpeed": 140,
       "music": "",
       "attacks": [
-        { "pattern": "AIMED", "cooldown": 9, "minCooldown": 7, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 7, "speed": 3.9, "spread": 0.17 },
-        { "pattern": "AIMED_RING", "cooldown": 16, "minCooldown": 12, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 6, "spread": 0.18, "speed": 3.5, "ringArms": 12, "ringSpeed": 1.75, "ringBulletType": "DOT" },
-        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 5, "speed": 4.0, "spread": 0.15 },
-        { "pattern": "RING", "cooldown": 15, "minCooldown": 11, "scalingProfile": "GEOMETRY", "bulletType": "GOLD", "arms": 14, "speed": 2.6 }
+        {
+          "pattern": "AIMED",
+          "cooldown": 9,
+          "minCooldown": 7,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 7,
+          "speed": 3.9,
+          "spread": 0.17
+        },
+        {
+          "pattern": "AIMED_RING",
+          "cooldown": 16,
+          "minCooldown": 12,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 6,
+          "spread": 0.18,
+          "speed": 3.5,
+          "ringArms": 12,
+          "ringSpeed": 1.75,
+          "ringBulletType": "DOT"
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 10,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 5,
+          "speed": 4.0,
+          "spread": 0.15
+        },
+        {
+          "pattern": "RING",
+          "cooldown": 15,
+          "minCooldown": 11,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "GOLD",
+          "arms": 14,
+          "speed": 2.6
+        }
       ]
     },
     {
@@ -170,21 +539,104 @@
       "hp": 2600,
       "isSpellCard": true,
       "spellName": "Love Sign \"Master Spark\"",
-      "spellDurationTicks": [800, 620, 420, 220],
+      "spellDurationTicks": [
+        800,
+        620,
+        420,
+        220
+      ],
       "spellBonus": 80000,
       "movement": "STATIC",
       "moveSpeed": 0,
       "music": "",
       "attacks": [
-        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 6, "speed": 3.3, "spread": 0.20 },
-        { "pattern": "LASER_BEAM", "cooldown": 12, "minCooldown": 9, "scalingProfile": "PRECISION", "bulletType": "SPARK", "arms": 3, "speed": 6.2 },
-        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "RICE", "arms": 4, "speed": 3.8, "spread": 0.14 },
-        { "pattern": "RING", "cooldown": 13, "minCooldown": 10, "scalingProfile": "GEOMETRY", "bulletType": "GOLD", "arms": 12, "speed": 2.15 },
-        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 5, "speed": 3.4, "spread": 0.19 },
-        { "pattern": "LASER", "cooldown": 125, "bulletType": "SPARK", "arms": 1, "speed": 0, "laserHalfWidth": 75, "warnTicks": 48, "activeTicks": 72 },
-        { "pattern": "AIMED", "cooldown": 12, "minCooldown": 9, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 6, "speed": 3.5, "spread": 0.18 },
-        { "pattern": "AIMED", "cooldown": 11, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "STAR", "arms": 5, "speed": 3.6, "spread": 0.20 },
-        { "pattern": "RING", "cooldown": 14, "minCooldown": 10, "scalingProfile": "GEOMETRY", "bulletType": "GOLD", "arms": 12, "speed": 2.35 }
+        {
+          "pattern": "AIMED",
+          "cooldown": 10,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 6,
+          "speed": 3.3,
+          "spread": 0.20
+        },
+        {
+          "pattern": "LASER_BEAM",
+          "cooldown": 12,
+          "minCooldown": 9,
+          "scalingProfile": "PRECISION",
+          "bulletType": "SPARK",
+          "arms": 3,
+          "speed": 6.2
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 10,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "RICE",
+          "arms": 4,
+          "speed": 3.8,
+          "spread": 0.14
+        },
+        {
+          "pattern": "RING",
+          "cooldown": 13,
+          "minCooldown": 10,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "GOLD",
+          "arms": 12,
+          "speed": 2.15
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 10,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 5,
+          "speed": 3.4,
+          "spread": 0.19
+        },
+        {
+          "pattern": "LASER",
+          "cooldown": 125,
+          "bulletType": "SPARK",
+          "arms": 1,
+          "speed": 0,
+          "laserHalfWidth": 75,
+          "warnTicks": 48,
+          "activeTicks": 72
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 12,
+          "minCooldown": 9,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 6,
+          "speed": 3.5,
+          "spread": 0.18
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 11,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "STAR",
+          "arms": 5,
+          "speed": 3.6,
+          "spread": 0.20
+        },
+        {
+          "pattern": "RING",
+          "cooldown": 14,
+          "minCooldown": 10,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "GOLD",
+          "arms": 12,
+          "speed": 2.35
+        }
       ]
     },
     {
@@ -194,17 +646,67 @@
       "hp": 3000,
       "isSpellCard": true,
       "spellName": "Comet Sign \"Blazing Star\"",
-      "spellDurationTicks": [900, 720, 0, 0],
+      "spellDurationTicks": [
+        900,
+        720,
+        0,
+        0
+      ],
       "spellBonus": 80000,
       "movement": "CIRCLE",
       "moveSpeed": 75,
       "music": "",
       "attacks": [
-        { "pattern": "SPREAD", "cooldown": 4, "minCooldown": 3, "scalingProfile": "BURST", "bulletType": "SPARK", "arms": 3, "speed": 5.0 },
-        { "pattern": "LASER_BEAM", "cooldown": 12, "minCooldown": 9, "scalingProfile": "PRECISION", "bulletType": "SPARK", "arms": 2, "speed": 5.5 },
-        { "pattern": "AIMED", "cooldown": 12, "minCooldown": 9, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 4, "speed": 3.0, "spread": 0.22 },
-        { "pattern": "AIMED_RING", "cooldown": 19, "minCooldown": 14, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 4, "spread": 0.22, "speed": 3.0, "ringArms": 10, "ringSpeed": 1.6, "ringBulletType": "STAR" },
-        { "pattern": "RING", "cooldown": 16, "minCooldown": 12, "scalingProfile": "GEOMETRY", "bulletType": "GOLD", "arms": 12, "speed": 2.0 }
+        {
+          "pattern": "SPREAD",
+          "cooldown": 4,
+          "minCooldown": 3,
+          "scalingProfile": "BURST",
+          "bulletType": "SPARK",
+          "arms": 3,
+          "speed": 5.0
+        },
+        {
+          "pattern": "LASER_BEAM",
+          "cooldown": 12,
+          "minCooldown": 9,
+          "scalingProfile": "PRECISION",
+          "bulletType": "SPARK",
+          "arms": 2,
+          "speed": 5.5
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 12,
+          "minCooldown": 9,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 4,
+          "speed": 3.0,
+          "spread": 0.22
+        },
+        {
+          "pattern": "AIMED_RING",
+          "cooldown": 19,
+          "minCooldown": 14,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 4,
+          "spread": 0.22,
+          "speed": 3.0,
+          "ringArms": 10,
+          "ringSpeed": 1.6,
+          "ringBulletType": "STAR"
+        },
+        {
+          "pattern": "RING",
+          "cooldown": 16,
+          "minCooldown": 12,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "GOLD",
+          "arms": 12,
+          "speed": 2.0
+        }
       ]
     },
     {
@@ -214,18 +716,77 @@
       "hp": 3000,
       "isSpellCard": true,
       "spellName": "Comet Sign \"Blazing Star\"",
-      "spellDurationTicks": [0, 0, 380, 190],
+      "spellDurationTicks": [
+        0,
+        0,
+        380,
+        190
+      ],
       "spellBonus": 100000,
       "movement": "CIRCLE",
       "moveSpeed": 90,
       "music": "",
       "attacks": [
-        { "pattern": "SPREAD", "cooldown": 3, "minCooldown": 2, "scalingProfile": "BURST", "bulletType": "SPARK", "arms": 5, "speed": 6.5 },
-        { "pattern": "LASER_BEAM", "cooldown": 10, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "SPARK", "arms": 3, "speed": 6.8 },
-        { "pattern": "AIMED", "cooldown": 10, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 6, "speed": 3.9, "spread": 0.19 },
-        { "pattern": "AIMED_RING", "cooldown": 16, "minCooldown": 12, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 5, "spread": 0.21, "speed": 3.6, "ringArms": 14, "ringSpeed": 1.8, "ringBulletType": "STAR" },
-        { "pattern": "RING", "cooldown": 13, "minCooldown": 10, "scalingProfile": "GEOMETRY", "bulletType": "GOLD", "arms": 16, "speed": 2.55 },
-        { "pattern": "AIMED", "cooldown": 11, "minCooldown": 8, "scalingProfile": "PRECISION", "bulletType": "GOLD", "arms": 5, "speed": 4.0, "spread": 0.17 }
+        {
+          "pattern": "SPREAD",
+          "cooldown": 3,
+          "minCooldown": 2,
+          "scalingProfile": "BURST",
+          "bulletType": "SPARK",
+          "arms": 5,
+          "speed": 6.5
+        },
+        {
+          "pattern": "LASER_BEAM",
+          "cooldown": 10,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "SPARK",
+          "arms": 3,
+          "speed": 6.8
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 10,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 6,
+          "speed": 3.9,
+          "spread": 0.19
+        },
+        {
+          "pattern": "AIMED_RING",
+          "cooldown": 16,
+          "minCooldown": 12,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 5,
+          "spread": 0.21,
+          "speed": 3.6,
+          "ringArms": 14,
+          "ringSpeed": 1.8,
+          "ringBulletType": "STAR"
+        },
+        {
+          "pattern": "RING",
+          "cooldown": 13,
+          "minCooldown": 10,
+          "scalingProfile": "GEOMETRY",
+          "bulletType": "GOLD",
+          "arms": 16,
+          "speed": 2.55
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 11,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": 5,
+          "speed": 4.0,
+          "spread": 0.17
+        }
       ]
     }
   ]

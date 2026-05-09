@@ -5,26 +5,40 @@ import java.util.function.Supplier;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 
 /**
- * Runtime gameplay tuning mirrored from Forge TOML / Fabric JSON (see sister project creraces).
- * Defaults are used until the platform loader calls {@code apply} and rebinds the suppliers.
+ * Runtime gameplay tuning mirrored from Forge TOML / Fabric JSON (see sister
+ * project creraces).
+ * Defaults are used until the platform loader calls {@code apply} and rebinds
+ * the suppliers.
  * <p>
- * <b>Major groups (Forge TOML / Fabric JSON)</b>: {@code WaveTiming}, {@code DifficultyTuning},
- * {@code FairyEnemyAi}, {@code FairyRush}, {@code BossDifficulty}, {@code PatternDefaults},
+ * <b>Major groups (Forge TOML / Fabric JSON)</b>: {@code WaveTiming},
+ * {@code DifficultyTuning},
+ * {@code FairyEnemyAi}, {@code FairyRush}, {@code BossDifficulty},
+ * {@code PatternDefaults},
  * {@code ItemCollectibles}, {@code Combat}, {@code VictoryXp}.
  * <p>
  * <b>Wave schedule (non-redundant roles)</b>
  * <ul>
- *   <li>{@link #waveTimingMult} - divisor on stage designer ticks ({@code spawnTick}, {@code startTick}, and the
- *       baked gap after each wave). Higher values compress the whole schedule (waves land sooner in arena time).</li>
- *   <li>{@link #effectiveSpeedMult} / {@link #effectiveDensityMult} - scale the base {@link DifficultyConfig} enum
- *       multipliers per difficulty (global "retune Lunatic" without editing code).</li>
- *   <li>Procedural fairy rush only: {@link #fairyRushDurationHintScale} scales how long each catalog wave is assumed to
- *       run before the next slot; {@link #fairyRushGapBreathingScale} scales the catalog-derived <em>rest gap</em>
- *       after that (from the stage's gap curve). Together they change the mix of "wave time" vs "gap time" without
- *       editing JSON; they do not replace {@link #waveTimingMult}.</li>
- *   <li>{@link #fairyRushIntensityBias} shifts which catalog intensity band (0–10) is targeted.
- *       {@link #fairyCatalogIntensityWeightMultiplier} on Hard+ boosts <em>selection weight</em> of high-intensity
- *       entries when intensity is already above the threshold - complementary, not duplicate.</li>
+ * <li>{@link #waveTimingMult} - divisor on stage designer ticks
+ * ({@code spawnTick}, {@code startTick}, and the
+ * baked gap after each wave). Higher values compress the whole schedule (waves
+ * land sooner in arena time).</li>
+ * <li>{@link #effectiveSpeedMult} / {@link #effectiveDensityMult} - scale the
+ * base {@link DifficultyConfig} enum
+ * multipliers per difficulty (global "retune Lunatic" without editing
+ * code).</li>
+ * <li>Procedural fairy rush only: {@link #fairyRushDurationHintScale} scales
+ * how long each catalog wave is assumed to
+ * run before the next slot; {@link #fairyRushGapBreathingScale} scales the
+ * catalog-derived <em>rest gap</em>
+ * after that (from the stage's gap curve). Together they change the mix of
+ * "wave time" vs "gap time" without
+ * editing JSON; they do not replace {@link #waveTimingMult}.</li>
+ * <li>{@link #fairyRushIntensityBias} shifts which catalog intensity band
+ * (0-10) is targeted.
+ * {@link #fairyCatalogIntensityWeightMultiplier} on Hard+ boosts <em>selection
+ * weight</em> of high-intensity
+ * entries when intensity is already above the threshold - complementary, not
+ * duplicate.</li>
  * </ul>
  */
 public final class BullethellConfig {
@@ -33,8 +47,10 @@ public final class BullethellConfig {
     }
 
     /**
-     * Divisor when baking designer ticks into the live schedule ({@link mc.sayda.bullethell.arena.ArenaContext#buildScheduledList}).
-     * Higher = more compression (lower tick values), so wave spawns and procedural slots land sooner. Separate from
+     * Divisor when baking designer ticks into the live schedule
+     * ({@link mc.sayda.bullethell.arena.ArenaContext#buildScheduledList}).
+     * Higher = more compression (lower tick values), so wave spawns and procedural
+     * slots land sooner. Separate from
      * {@link DifficultyConfig} bullet density/speed.
      */
     public static final float DEF_WAVE_TIMING_EASY = 3.0f;
@@ -63,7 +79,8 @@ public final class BullethellConfig {
         return WAVE_TIMING_NORMAL.get();
     }
 
-    // ---- Difficulty multipliers (applied on top of {@link DifficultyConfig} enum values everywhere tuning is used) ----
+    // ---- Difficulty multipliers (applied on top of {@link DifficultyConfig} enum
+    // values everywhere tuning is used) ----
 
     public static final float DEF_DIFFICULTY_SPEED_TUNER_EASY = 1.0f;
     public static final float DEF_DIFFICULTY_SPEED_TUNER_NORMAL = 1.0f;
@@ -117,7 +134,10 @@ public final class BullethellConfig {
         return DIFFICULTY_DENSITY_TUNER_NORMAL.get();
     }
 
-    /** {@link DifficultyConfig#speedMult} × per-difficulty tuner (before global enemy bullet mult). */
+    /**
+     * {@link DifficultyConfig#speedMult} × per-difficulty tuner (before global
+     * enemy bullet mult).
+     */
     public static float effectiveSpeedMult(DifficultyConfig difficulty) {
         return difficulty.speedMult * difficultySpeedTuner(difficulty);
     }
@@ -127,7 +147,8 @@ public final class BullethellConfig {
         return difficulty.densityMult * difficultyDensityTuner(difficulty);
     }
 
-    // ---- Fairy / wave enemy attack AI ({@link mc.sayda.bullethell.arena.ArenaContext#tickEnemyAI}) ----
+    // ---- Fairy / wave enemy attack AI ({@link
+    // mc.sayda.bullethell.arena.ArenaContext#tickEnemyAI}) ----
 
     public static final int DEF_FAIRY_MIN_ATTACK_INTERVAL_TICKS = 10;
     public static final int DEF_FAIRY_AIMED_BURST_CAP = 3;
@@ -161,12 +182,16 @@ public final class BullethellConfig {
                 : FAIRY_SPREAD_BURST_CAP.get();
     }
 
-    // ---- Procedural fairy rush ({@link mc.sayda.bullethell.arena.ArenaContext#appendProceduralFairyRush}) ----
+    // ---- Procedural fairy rush ({@link
+    // mc.sayda.bullethell.arena.ArenaContext#appendProceduralFairyRush}) ----
 
     /**
-     * Scales the catalog gap curve's rest period between procedural waves (after duration hint). Not the optional
-     * breather mini-waves - only the gap ticks from {@code gapTicks*} / {@link mc.sayda.bullethell.boss.FairyRushDefinition}.
-     * Lower = shorter pauses. Defaults may match across difficulties; keys stay split for per-difficulty tuning.
+     * Scales the catalog gap curve's rest period between procedural waves (after
+     * duration hint). Not the optional
+     * breather mini-waves - only the gap ticks from {@code gapTicks*} /
+     * {@link mc.sayda.bullethell.boss.FairyRushDefinition}.
+     * Lower = shorter pauses. Defaults may match across difficulties; keys stay
+     * split for per-difficulty tuning.
      */
     public static final float DEF_FAIRY_RUSH_GAP_BREATHING_EASY = 0.3f;
     public static final float DEF_FAIRY_RUSH_GAP_BREATHING_NORMAL = 0.3f;
@@ -174,28 +199,37 @@ public final class BullethellConfig {
     public static final float DEF_FAIRY_RUSH_GAP_BREATHING_LUNATIC = 0.3f;
 
     /**
-     * Scales the estimated "this wave is still going" window (catalog {@code durationHintTicks} or a default from
-     * enemy list) before the inter-wave gap is applied. Lower = assume waves clear faster → next wave sooner.
+     * Scales the estimated "this wave is still going" window (catalog
+     * {@code durationHintTicks} or a default from
+     * enemy list) before the inter-wave gap is applied. Lower = assume waves clear
+     * faster → next wave sooner.
      */
     public static final float DEF_FAIRY_RUSH_DURATION_HINT_EASY = 0.3f;
     public static final float DEF_FAIRY_RUSH_DURATION_HINT_NORMAL = 0.3f;
     public static final float DEF_FAIRY_RUSH_DURATION_HINT_HARD = 0.3f;
     public static final float DEF_FAIRY_RUSH_DURATION_HINT_LUNATIC = 0.3f;
 
-    /** Added to the stage's procedural intensity window {@code [lo,hi]} (clamped 0–10) before catalog picks. */
+    /**
+     * Added to the stage's procedural intensity window {@code [lo,hi]} (clamped
+     * 0-10) before catalog picks.
+     */
     public static final int DEF_FAIRY_RUSH_INTENSITY_BIAS_EASY = -1;
     public static final int DEF_FAIRY_RUSH_INTENSITY_BIAS_NORMAL = 0;
     public static final int DEF_FAIRY_RUSH_INTENSITY_BIAS_HARD = 1;
     public static final int DEF_FAIRY_RUSH_INTENSITY_BIAS_LUNATIC = 2;
 
     /**
-     * Catalog entry field {@code intensity}: at or above this value, and only on Hard+, {@link #fairyCatalogIntensityWeightMultiplier}
-     * multiplies pick weight (does not change the {@code [iLo,iHi]} window - use {@link #fairyRushIntensityBias} for that).
+     * Catalog entry field {@code intensity}: at or above this value, and only on
+     * Hard+, {@link #fairyCatalogIntensityWeightMultiplier}
+     * multiplies pick weight (does not change the {@code [iLo,iHi]} window - use
+     * {@link #fairyRushIntensityBias} for that).
      */
     public static final int DEF_FAIRY_CATALOG_INTENSITY_THRESHOLD = 5;
     /**
-     * On Hard+, for entries with {@code intensity >= threshold}: weight multiplier is {@code 1 + k * this} where
-     * {@code k} is 1 on Hard, 2 on Lunatic (steeper bias toward intense rows on higher difficulties).
+     * On Hard+, for entries with {@code intensity >= threshold}: weight multiplier
+     * is {@code 1 + k * this} where
+     * {@code k} is 1 on Hard, 2 on Lunatic (steeper bias toward intense rows on
+     * higher difficulties).
      */
     public static final float DEF_FAIRY_CATALOG_INTENSITY_BOOST_PER_STEP = 0.08f;
 
@@ -266,7 +300,8 @@ public final class BullethellConfig {
     }
 
     /**
-     * Multiplier on a catalog row's {@code weight} when difficulty is Hard or Lunatic and {@code entryIntensity}
+     * Multiplier on a catalog row's {@code weight} when difficulty is Hard or
+     * Lunatic and {@code entryIntensity}
      * meets the configured threshold; Easy/Normal always get {@code 1}.
      */
     public static float fairyCatalogIntensityWeightMultiplier(DifficultyConfig difficulty, int entryIntensity) {
@@ -278,7 +313,8 @@ public final class BullethellConfig {
         return 1f;
     }
 
-    // ---- Boss pattern scaling (on top of {@link DifficultyConfig#densityMult} / {@link DifficultyConfig#speedMult}; those stay in the enum)
+    // ---- Boss pattern scaling (on top of {@link DifficultyConfig#densityMult} /
+    // {@link DifficultyConfig#speedMult}; those stay in the enum)
 
     /** Max additive phase creep for boss bullet density (added to 1.0). */
     public static final float DEF_BOSS_PHASE_DENSITY_CAP = 0.30f;
@@ -286,7 +322,10 @@ public final class BullethellConfig {
     public static final float DEF_BOSS_PHASE_DENSITY_PER_PHASE = 0.034f;
     public static final float DEF_BOSS_PHASE_SPEED_CAP = 0.22f;
     public static final float DEF_BOSS_PHASE_SPEED_PER_PHASE = 0.026f;
-    /** Extra density multiplier when difficulty is Lunatic only (Hard uses enum alone). */
+    /**
+     * Extra density multiplier when difficulty is Lunatic only (Hard uses enum
+     * alone).
+     */
     public static final float DEF_BOSS_LUNATIC_DENSITY_EXTRA = 1.12f;
     public static final float DEF_BOSS_LUNATIC_SPEED_EXTRA = 1.10f;
     /** Clamp for ring-arm scaling vs density in AIMED_RING boss attacks. */
@@ -305,7 +344,8 @@ public final class BullethellConfig {
     public static Supplier<Integer> BOSS_RING_ARMS_MAX = () -> DEF_BOSS_RING_ARMS_MAX;
     public static Supplier<Integer> BOSS_LASER_BEAM_MIN_COOLDOWN = () -> DEF_BOSS_LASER_BEAM_MIN_COOLDOWN;
 
-    // ---- Pattern defaults ({@link mc.sayda.bullethell.pattern.PatternEngine} when JSON omits lifetime / spread) ----
+    // ---- Pattern defaults ({@link mc.sayda.bullethell.pattern.PatternEngine} when
+    // JSON omits lifetime / spread) ----
 
     public static final int DEF_PATTERN_DEFAULT_LIFE_RING = 200;
     public static final int DEF_PATTERN_DEFAULT_LIFE_AIMED = 220;
@@ -320,30 +360,35 @@ public final class BullethellConfig {
     // ---- Collectible item drops ({@link mc.sayda.bullethell.arena.ItemPool}) ----
 
     public static final int DEF_ITEM_COLLECTIBLE_LIFE_TICKS = 400;
-    public static final float DEF_ITEM_ATTRACT_SPEED = 14.0f;
+    public static final float DEF_ITEM_ATTRACT_SPEED = 16.0f;
 
     public static Supplier<Integer> ITEM_COLLECTIBLE_LIFE_TICKS = () -> DEF_ITEM_COLLECTIBLE_LIFE_TICKS;
     public static Supplier<Float> ITEM_ATTRACT_SPEED = () -> DEF_ITEM_ATTRACT_SPEED;
 
     /**
-     * Multiplier on enemy / fairy / boss bullet speed after {@link DifficultyConfig#speedMult} (and boss-specific
-     * scaling). Applied in {@link mc.sayda.bullethell.pattern.PatternEngine} and {@link mc.sayda.bullethell.arena.ArenaContext}
+     * Multiplier on enemy / fairy / boss bullet speed after
+     * {@link DifficultyConfig#speedMult} (and boss-specific
+     * scaling). Applied in {@link mc.sayda.bullethell.pattern.PatternEngine} and
+     * {@link mc.sayda.bullethell.arena.ArenaContext}
      * spawns. Slightly below {@code 1} slows all patterns without editing JSON.
      */
     public static final float DEF_GLOBAL_ENEMY_BULLET_SPEED_MULT = 1.0f;
     public static Supplier<Float> GLOBAL_ENEMY_BULLET_SPEED_MULT = () -> DEF_GLOBAL_ENEMY_BULLET_SPEED_MULT;
 
     /**
-     * Speed factor for enemy / fairy / boss bullets: {@link #effectiveSpeedMult} × {@link #GLOBAL_ENEMY_BULLET_SPEED_MULT}.
+     * Speed factor for enemy / fairy / boss bullets: {@link #effectiveSpeedMult} ×
+     * {@link #GLOBAL_ENEMY_BULLET_SPEED_MULT}.
      */
     public static float enemyBulletSpeedFactor(DifficultyConfig difficulty) {
         return effectiveSpeedMult(difficulty) * GLOBAL_ENEMY_BULLET_SPEED_MULT.get();
     }
 
-    // ---- Victory XP (Minecraft experience points; tunable in Forge TOML / Fabric JSON) ----
+    // ---- Victory XP (Minecraft experience points; tunable in Forge TOML / Fabric
+    // JSON) ----
 
     /**
-     * Clear reward XP: {@code floor(min(max, base + sqrt(score) * sqrtMult * diffMult))} - see
+     * Clear reward XP:
+     * {@code floor(min(max, base + sqrt(score) * sqrtMult * diffMult))} - see
      * {@link mc.sayda.bullethell.arena.VictoryXpRewards}.
      */
     public static final int DEF_VICTORY_XP_BASE = 12;
@@ -381,9 +426,12 @@ public final class BullethellConfig {
     // ---- Test-mode dev path ----
 
     /**
-     * Filesystem directory from which {@code /bullethell test} loads boss/stage JSONs.
-     * Empty string (default) = classpath only. Set in Forge TOML / Fabric JSON to point at
-     * your working {@code src/main/resources/data/bullethell/bosses/} folder for hot-reload.
+     * Filesystem directory from which {@code /bullethell test} loads boss/stage
+     * JSONs.
+     * Empty string (default) = classpath only. Set in Forge TOML / Fabric JSON to
+     * point at
+     * your working {@code src/main/resources/data/bullethell/bosses/} folder for
+     * hot-reload.
      */
     public static final String DEF_TEST_DEV_PATH = "";
     public static java.util.function.Supplier<String> TEST_DEV_PATH = () -> DEF_TEST_DEV_PATH;

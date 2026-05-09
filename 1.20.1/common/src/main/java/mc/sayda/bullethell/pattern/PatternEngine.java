@@ -1,5 +1,6 @@
 package mc.sayda.bullethell.pattern;
 
+import java.util.concurrent.ThreadLocalRandom;
 import mc.sayda.bullethell.arena.BulletPool;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.config.BullethellConfig;
@@ -7,18 +8,28 @@ import mc.sayda.bullethell.config.BullethellConfig;
 /**
  * Stateless shot factories.
  *
- * Each method receives a BulletPool and DifficultyConfig so patterns scale across difficulties.
- * {@code lifetimeTicks} &le; 0 selects pattern defaults; {@code angVelRadPerTick} rotates the
+ * Each method receives a BulletPool and DifficultyConfig so patterns scale
+ * across difficulties.
+ * {@code lifetimeTicks} &le; 0 means no explicit lifetime — bullets are culled
+ * by the arena
+ * kill wall ({@link BulletPool#LIFE_KILL_WALL_ONLY}); {@code angVelRadPerTick}
+ * rotates the
  * velocity vector each tick (0 = straight).
  *
- * Scale overloads ({@code visScale}, {@code hitScale}) multiply render radius and hit radius
- * vs {@link BulletType#radius} (see {@link BulletPool#F_VIS_SCALE} / {@link BulletPool#F_HIT_SCALE}).
+ * Scale overloads ({@code visScale}, {@code hitScale}) multiply render radius
+ * and hit radius
+ * vs {@link BulletType#radius} (see {@link BulletPool#F_VIS_SCALE} /
+ * {@link BulletPool#F_HIT_SCALE}).
  */
 public final class PatternEngine {
 
-    private PatternEngine() {}
+    private PatternEngine() {
+    }
 
-    /** Difficulty speed mult × tuners × global enemy bullet slowdown ({@link BullethellConfig#enemyBulletSpeedFactor}). */
+    /**
+     * Difficulty speed mult × tuners × global enemy bullet slowdown
+     * ({@link BullethellConfig#enemyBulletSpeedFactor}).
+     */
     public static float enemySpeedScale(DifficultyConfig diff) {
         return BullethellConfig.enemyBulletSpeedFactor(diff);
     }
@@ -28,33 +39,46 @@ public final class PatternEngine {
     }
 
     private static int lifeOrDefault(int lifetimeTicks, int def) {
-        return lifetimeTicks > 0 ? lifetimeTicks : def;
+        return lifetimeTicks > 0 ? lifetimeTicks : BulletPool.LIFE_KILL_WALL_ONLY;
     }
 
     // ---------------------------------------------------------------- spiral
 
     public static void fireSpiral(BulletPool pool, float bx, float by,
-                                   float angleOffset, int arms, float speed,
-                                   DifficultyConfig diff, BulletType type) {
+            float angleOffset, int arms, float speed,
+            DifficultyConfig diff, BulletType type) {
         fireSpiral(pool, bx, by, angleOffset, arms, speed, diff, type, 1f, 1f, -1, 0f);
     }
 
     public static void fireSpiral(BulletPool pool, float bx, float by,
-                                   float angleOffset, int arms, float speed,
-                                   DifficultyConfig diff, BulletType type,
-                                   float visScale, float hitScale) {
+            float angleOffset, int arms, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale) {
         fireSpiral(pool, bx, by, angleOffset, arms, speed, diff, type, visScale, hitScale, -1, 0f);
     }
 
     public static void fireSpiral(BulletPool pool, float bx, float by,
-                                   float angleOffset, int arms, float speed,
-                                   DifficultyConfig diff, BulletType type,
-                                   float visScale, float hitScale, int lifetimeTicks,
-                                   float angVelRadPerTick) {
+            float angleOffset, int arms, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick) {
+        fireSpiral(pool, bx, by, angleOffset, arms, speed, diff, type, visScale, hitScale, lifetimeTicks,
+                angVelRadPerTick, 0f);
+    }
+
+    public static void fireSpiral(BulletPool pool, float bx, float by,
+            float angleOffset, int arms, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick, float jitter) {
         int life = lifeOrDefault(lifetimeTicks, BullethellConfig.PATTERN_DEFAULT_LIFE_RING.get());
         float step = (float) (Math.PI * 2.0 / arms);
+        ThreadLocalRandom rng = ThreadLocalRandom.current();
         for (int i = 0; i < arms; i++) {
             float angle = angleOffset + step * i;
+            if (jitter > 1e-4f) {
+                angle += (rng.nextFloat() - 0.5f) * jitter;
+            }
             float vx = (float) Math.cos(angle) * speed * enemySpeed(diff);
             float vy = (float) Math.sin(angle) * speed * enemySpeed(diff);
             pool.spawn(bx, by, vx, vy, type.getId(), life, visScale, hitScale, angVelRadPerTick);
@@ -62,39 +86,73 @@ public final class PatternEngine {
     }
 
     public static void fireSpiral(BulletPool pool, float bx, float by,
-                                   float angleOffset, int arms, float speed,
-                                   DifficultyConfig diff) {
+            float angleOffset, int arms, float speed,
+            DifficultyConfig diff) {
         fireSpiral(pool, bx, by, angleOffset, arms, speed, diff, BulletType.fromName("DOT"));
     }
 
     // ---------------------------------------------------------------- aimed
 
     public static void fireAimed(BulletPool pool, float bx, float by,
-                                  float tx, float ty,
-                                  int count, float spread, float speed,
-                                  DifficultyConfig diff, BulletType type) {
+            float tx, float ty,
+            int count, float spread, float speed,
+            DifficultyConfig diff, BulletType type) {
         fireAimed(pool, bx, by, tx, ty, count, spread, speed, diff, type, 1f, 1f, -1, 0f);
     }
 
     public static void fireAimed(BulletPool pool, float bx, float by,
-                                  float tx, float ty,
-                                  int count, float spread, float speed,
-                                  DifficultyConfig diff, BulletType type,
-                                  float visScale, float hitScale) {
+            float tx, float ty,
+            int count, float spread, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale) {
         fireAimed(pool, bx, by, tx, ty, count, spread, speed, diff, type, visScale, hitScale, -1, 0f);
     }
 
     public static void fireAimed(BulletPool pool, float bx, float by,
-                                  float tx, float ty,
-                                  int count, float spread, float speed,
-                                  DifficultyConfig diff, BulletType type,
-                                  float visScale, float hitScale, int lifetimeTicks,
-                                  float angVelRadPerTick) {
+            float tx, float ty,
+            int count, float spread, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick) {
+        fireAimed(pool, bx, by, tx, ty, count, spread, speed, diff, type, visScale, hitScale, lifetimeTicks,
+                angVelRadPerTick, 0f);
+    }
+
+    public static void fireAimed(BulletPool pool, float bx, float by,
+            float tx, float ty,
+            int count, float spread, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick, float jitter) {
+        float baseAngle = (float) Math.atan2(ty - by, tx - bx);
+        fireAimedAtAngle(pool, bx, by, baseAngle, count, spread, speed, diff, type, visScale, hitScale, lifetimeTicks,
+                angVelRadPerTick, jitter);
+    }
+
+    public static void fireAimedAtAngle(BulletPool pool, float bx, float by,
+            float baseAngle,
+            int count, float spread, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick) {
+        fireAimedAtAngle(pool, bx, by, baseAngle, count, spread, speed, diff, type, visScale, hitScale, lifetimeTicks,
+                angVelRadPerTick, 0f);
+    }
+
+    public static void fireAimedAtAngle(BulletPool pool, float bx, float by,
+            float baseAngle,
+            int count, float spread, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick, float jitter) {
         int life = lifeOrDefault(lifetimeTicks, BullethellConfig.PATTERN_DEFAULT_LIFE_AIMED.get());
-        float baseAngle  = (float) Math.atan2(ty - by, tx - bx);
         float halfSpread = spread * (count - 1) / 2f;
+        ThreadLocalRandom rng = ThreadLocalRandom.current();
         for (int i = 0; i < count; i++) {
             float angle = baseAngle - halfSpread + spread * i;
+            if (jitter > 1e-4f) {
+                angle += (rng.nextFloat() - 0.5f) * jitter;
+            }
             float vx = (float) Math.cos(angle) * speed * enemySpeed(diff);
             float vy = (float) Math.sin(angle) * speed * enemySpeed(diff);
             pool.spawn(bx, by, vx, vy, type.getId(), life, visScale, hitScale, angVelRadPerTick);
@@ -102,35 +160,36 @@ public final class PatternEngine {
     }
 
     public static void fireAimed(BulletPool pool, float bx, float by,
-                                  float tx, float ty,
-                                  int count, float spread, float speed,
-                                  DifficultyConfig diff) {
+            float tx, float ty,
+            int count, float spread, float speed,
+            DifficultyConfig diff) {
         fireAimed(pool, bx, by, tx, ty, count, spread, speed, diff, BulletType.fromName("STAR"));
     }
 
     // ---------------------------------------------------------------- ring
 
     public static void fireRing(BulletPool pool, float bx, float by,
-                                 int count, float speed,
-                                 DifficultyConfig diff, BulletType type) {
+            int count, float speed,
+            DifficultyConfig diff, BulletType type) {
         fireRing(pool, bx, by, count, speed, diff, type, 1f, 1f, -1, 0f, 0f);
     }
 
     public static void fireRing(BulletPool pool, float bx, float by,
-                                 int count, float speed,
-                                 DifficultyConfig diff, BulletType type,
-                                 float visScale, float hitScale) {
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale) {
         fireRing(pool, bx, by, count, speed, diff, type, visScale, hitScale, -1, 0f, 0f);
     }
 
     /**
-     * @param ringStartRad first bullet angle; 0 = first bullet to +X, stepping CCW in screen space
+     * @param ringStartRad first bullet angle; 0 = first bullet to +X, stepping CCW
+     *                     in screen space
      */
     public static void fireRing(BulletPool pool, float bx, float by,
-                                 int count, float speed,
-                                 DifficultyConfig diff, BulletType type,
-                                 float visScale, float hitScale, int lifetimeTicks,
-                                 float angVelRadPerTick, float ringStartRad) {
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick, float ringStartRad) {
         int life = lifeOrDefault(lifetimeTicks, BullethellConfig.PATTERN_DEFAULT_LIFE_RING.get());
         float step = (float) (Math.PI * 2.0 / count);
         for (int i = 0; i < count; i++) {
@@ -142,63 +201,64 @@ public final class PatternEngine {
     }
 
     public static void fireRing(BulletPool pool, float bx, float by,
-                                 int count, float speed, DifficultyConfig diff) {
+            int count, float speed, DifficultyConfig diff) {
         fireRing(pool, bx, by, count, speed, diff, BulletType.fromName("RICE"));
     }
 
-    // ---------------------------------------------------------------- spread (downward fan)
+    // ---------------------------------------------------------------- spread
+    // (downward fan)
 
     public static void fireSpread(BulletPool pool, float bx, float by,
-                                   int count, float speed,
-                                   DifficultyConfig diff, BulletType type) {
+            int count, float speed,
+            DifficultyConfig diff, BulletType type) {
         fireSpread(pool, bx, by, count, speed, diff, type, 1f, 1f, -1, 0f);
     }
 
     public static void fireSpread(BulletPool pool, float bx, float by,
-                                   int count, float speed,
-                                   DifficultyConfig diff, BulletType type,
-                                   float visScale, float hitScale) {
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale) {
         fireSpread(pool, bx, by, count, speed, diff, type, visScale, hitScale, -1, 0f);
     }
 
     public static void fireSpread(BulletPool pool, float bx, float by,
-                                   int count, float speed,
-                                   DifficultyConfig diff, BulletType type,
-                                   float visScale, float hitScale, int lifetimeTicks,
-                                   float angVelRadPerTick) {
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick) {
         fireAimed(pool, bx, by, bx, by + 100f, count, 0.28f, speed, diff, type, visScale, hitScale,
                 lifetimeTicks, angVelRadPerTick);
     }
 
     public static void fireSpread(BulletPool pool, float bx, float by,
-                                   int count, float speed, DifficultyConfig diff) {
+            int count, float speed, DifficultyConfig diff) {
         fireSpread(pool, bx, by, count, speed, diff, BulletType.fromName("STAR"));
     }
 
     // ---------------------------------------------------------------- dense ring
 
     public static void fireDenseRing(BulletPool pool, float bx, float by,
-                                      int countPerRing, float speed,
-                                      DifficultyConfig diff, BulletType type) {
+            int countPerRing, float speed,
+            DifficultyConfig diff, BulletType type) {
         fireDenseRing(pool, bx, by, countPerRing, speed, diff, type, 1f, 1f, -1, 0f, 0f);
     }
 
     public static void fireDenseRing(BulletPool pool, float bx, float by,
-                                      int countPerRing, float speed,
-                                      DifficultyConfig diff, BulletType type,
-                                      float visScale, float hitScale) {
+            int countPerRing, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale) {
         fireDenseRing(pool, bx, by, countPerRing, speed, diff, type, visScale, hitScale, -1, 0f, 0f);
     }
 
     public static void fireDenseRing(BulletPool pool, float bx, float by,
-                                      int countPerRing, float speed,
-                                      DifficultyConfig diff, BulletType type,
-                                      float visScale, float hitScale, int lifetimeTicks,
-                                      float angVelRadPerTick, float ringStartRad) {
+            int countPerRing, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick, float ringStartRad) {
         fireRing(pool, bx, by, countPerRing, speed, diff, type, visScale, hitScale,
                 lifetimeTicks, angVelRadPerTick, ringStartRad);
         float halfStep = (float) (Math.PI / countPerRing);
-        float step     = (float) (Math.PI * 2.0 / countPerRing);
+        float step = (float) (Math.PI * 2.0 / countPerRing);
         BulletType altType = (type.name.equals("BUBBLE")) ? BulletType.fromName("RICE") : BulletType.fromName("BUBBLE");
         int life = lifeOrDefault(lifetimeTicks, BullethellConfig.PATTERN_DEFAULT_LIFE_RING.get());
         for (int i = 0; i < countPerRing; i++) {
@@ -210,73 +270,75 @@ public final class PatternEngine {
     }
 
     public static void fireDenseRing(BulletPool pool, float bx, float by,
-                                      int countPerRing, float speed, DifficultyConfig diff) {
+            int countPerRing, float speed, DifficultyConfig diff) {
         fireDenseRing(pool, bx, by, countPerRing, speed, diff, BulletType.fromName("BUBBLE"));
     }
 
-    // ---------------------------------------------------------------- ring with offset
+    // ---------------------------------------------------------------- ring with
+    // offset
 
     public static void fireRingOffset(BulletPool pool, float bx, float by,
-                                       int count, float speed,
-                                       DifficultyConfig diff, BulletType type,
-                                       float startAngle) {
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float startAngle) {
         fireRingOffset(pool, bx, by, count, speed, diff, type, startAngle, 1f, 1f, -1, 0f);
     }
 
     public static void fireRingOffset(BulletPool pool, float bx, float by,
-                                       int count, float speed,
-                                       DifficultyConfig diff, BulletType type,
-                                       float startAngle,
-                                       float visScale, float hitScale) {
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float startAngle,
+            float visScale, float hitScale) {
         fireRingOffset(pool, bx, by, count, speed, diff, type, startAngle, visScale, hitScale, -1, 0f);
     }
 
     public static void fireRingOffset(BulletPool pool, float bx, float by,
-                                       int count, float speed,
-                                       DifficultyConfig diff, BulletType type,
-                                       float startAngle,
-                                       float visScale, float hitScale, int lifetimeTicks,
-                                       float angVelRadPerTick) {
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float startAngle,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick) {
         fireRing(pool, bx, by, count, speed, diff, type, visScale, hitScale,
                 lifetimeTicks, angVelRadPerTick, startAngle);
     }
 
-    // ---------------------------------------------------------------- aimed fan + outer ring
+    // ---------------------------------------------------------------- aimed fan +
+    // outer ring
 
     public static void fireAimedWithRing(BulletPool pool, float bx, float by,
-                                          float tx, float ty,
-                                          int aimCount, float aimSpread, float aimSpeed,
-                                          int ringCount, float ringSpeed,
-                                          DifficultyConfig diff,
-                                          BulletType aimType, BulletType ringType,
-                                          float ringStartAngle) {
+            float tx, float ty,
+            int aimCount, float aimSpread, float aimSpeed,
+            int ringCount, float ringSpeed,
+            DifficultyConfig diff,
+            BulletType aimType, BulletType ringType,
+            float ringStartAngle) {
         fireAimedWithRing(pool, bx, by, tx, ty, aimCount, aimSpread, aimSpeed,
                 ringCount, ringSpeed, diff, aimType, ringType, ringStartAngle, 1f, 1f, -1, -1, 0f);
     }
 
     public static void fireAimedWithRing(BulletPool pool, float bx, float by,
-                                          float tx, float ty,
-                                          int aimCount, float aimSpread, float aimSpeed,
-                                          int ringCount, float ringSpeed,
-                                          DifficultyConfig diff,
-                                          BulletType aimType, BulletType ringType,
-                                          float ringStartAngle,
-                                          float visScale, float hitScale) {
+            float tx, float ty,
+            int aimCount, float aimSpread, float aimSpeed,
+            int ringCount, float ringSpeed,
+            DifficultyConfig diff,
+            BulletType aimType, BulletType ringType,
+            float ringStartAngle,
+            float visScale, float hitScale) {
         fireAimedWithRing(pool, bx, by, tx, ty, aimCount, aimSpread, aimSpeed,
                 ringCount, ringSpeed, diff, aimType, ringType, ringStartAngle, visScale, hitScale,
                 -1, -1, 0f);
     }
 
     public static void fireAimedWithRing(BulletPool pool, float bx, float by,
-                                          float tx, float ty,
-                                          int aimCount, float aimSpread, float aimSpeed,
-                                          int ringCount, float ringSpeed,
-                                          DifficultyConfig diff,
-                                          BulletType aimType, BulletType ringType,
-                                          float ringStartAngle,
-                                          float visScale, float hitScale,
-                                          int aimLifetimeTicks, int ringLifetimeTicks,
-                                          float angVelRadPerTick) {
+            float tx, float ty,
+            int aimCount, float aimSpread, float aimSpeed,
+            int ringCount, float ringSpeed,
+            DifficultyConfig diff,
+            BulletType aimType, BulletType ringType,
+            float ringStartAngle,
+            float visScale, float hitScale,
+            int aimLifetimeTicks, int ringLifetimeTicks,
+            float angVelRadPerTick) {
         int aimLife = lifeOrDefault(aimLifetimeTicks, BullethellConfig.PATTERN_DEFAULT_LIFE_AIMED.get());
         int ringLife = lifeOrDefault(ringLifetimeTicks, BullethellConfig.PATTERN_DEFAULT_LIFE_RING.get());
         fireAimed(pool, bx, by, tx, ty, aimCount, aimSpread, aimSpeed, diff, aimType, visScale, hitScale,
@@ -288,48 +350,62 @@ public final class PatternEngine {
     // ---------------------------------------------------------------- laser beam
 
     public static void fireLaserBeam(BulletPool pool, float bx, float by,
-                                      float tx, float ty,
-                                      int count, float speed,
-                                      DifficultyConfig diff, BulletType type) {
+            float tx, float ty,
+            int count, float speed,
+            DifficultyConfig diff, BulletType type) {
         fireLaserBeam(pool, bx, by, tx, ty, count, speed, diff, type, 1f, 1f, -1, 0f);
     }
 
     public static void fireLaserBeam(BulletPool pool, float bx, float by,
-                                      float tx, float ty,
-                                      int count, float speed,
-                                      DifficultyConfig diff, BulletType type,
-                                      float visScale, float hitScale) {
+            float tx, float ty,
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale) {
         fireLaserBeam(pool, bx, by, tx, ty, count, speed, diff, type, visScale, hitScale, -1, 0f);
     }
 
     public static void fireLaserBeam(BulletPool pool, float bx, float by,
-                                      float tx, float ty,
-                                      int count, float speed,
-                                      DifficultyConfig diff, BulletType type,
-                                      float visScale, float hitScale, int lifetimeTicks,
-                                      float angVelRadPerTick) {
+            float tx, float ty,
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick) {
         fireLaserBeam(pool, bx, by, tx, ty, count, speed, diff, type, visScale, hitScale,
                 lifetimeTicks, angVelRadPerTick, BullethellConfig.PATTERN_DEFAULT_LASER_BEAM_SPREAD_RAD.get());
     }
 
     /**
-     * {@code LASER_BEAM}: rapid tight fan toward the aim point (not LaserPool geometry).
+     * {@code LASER_BEAM}: rapid tight fan toward the aim point (not LaserPool
+     * geometry).
      *
-     * @param spreadRad radians between adjacent bullets; TH needle stakes often ~0.03.
+     * @param spreadRad radians between adjacent bullets; TH needle stakes often
+     *                  ~0.03.
      */
     public static void fireLaserBeam(BulletPool pool, float bx, float by,
-                                      float tx, float ty,
-                                      int count, float speed,
-                                      DifficultyConfig diff, BulletType type,
-                                      float visScale, float hitScale, int lifetimeTicks,
-                                      float angVelRadPerTick, float spreadRad) {
+            float tx, float ty,
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick, float spreadRad) {
+        float base = (float) Math.atan2(ty - by, tx - bx);
+        fireLaserBeamAtAngle(pool, bx, by, base, count, speed, diff, type, visScale, hitScale, lifetimeTicks,
+                angVelRadPerTick, spreadRad);
+    }
+
+    public static void fireLaserBeamAtAngle(BulletPool pool, float bx, float by,
+            float angle,
+            int count, float speed,
+            DifficultyConfig diff, BulletType type,
+            float visScale, float hitScale, int lifetimeTicks,
+            float angVelRadPerTick, float spreadRad) {
         float s = spreadRad >= 0f ? spreadRad : BullethellConfig.PATTERN_DEFAULT_LASER_BEAM_SPREAD_RAD.get();
-        fireAimed(pool, bx, by, tx, ty, count, s, speed, diff, type, visScale, hitScale,
+        fireAimedAtAngle(pool, bx, by, angle, count, s, speed, diff, type, visScale, hitScale,
                 lifetimeTicks, angVelRadPerTick);
     }
 
     /**
-     * Two concentric regular N-gons offset by half a step (MoF / Sanae "star ritual" lattice).
+     * Two concentric regular N-gons offset by half a step (MoF / Sanae "star
+     * ritual" lattice).
      * Outer ring uses {@code outerType}; inner uses {@code innerType}.
      */
     public static void firePentagramDouble(BulletPool pool, float bx, float by,
@@ -357,7 +433,8 @@ public final class PatternEngine {
     }
 
     /**
-     * True five-point star (pentagram): vertices on a circle, edges connect every second vertex.
+     * True five-point star (pentagram): vertices on a circle, edges connect every
+     * second vertex.
      * Spawns stationary bullets along each edge (outline).
      */
     public static void firePentagramStarOutline(BulletPool pool, float cx, float cy,
@@ -390,8 +467,10 @@ public final class PatternEngine {
     }
 
     /**
-     * Pentagram edges emit parallel rows perpendicular to each edge (TH "comb" / lattice).
-     * Outward normal is chosen so streams move away from the local star center through each edge band.
+     * Pentagram edges emit parallel rows perpendicular to each edge (TH "comb" /
+     * lattice).
+     * Outward normal is chosen so streams move away from the local star center
+     * through each edge band.
      */
     public static void firePentagramStarEdgeStreams(BulletPool pool, float cx, float cy,
             float radius, float rotationRad, int samplesPerEdge, float speed,
@@ -402,11 +481,15 @@ public final class PatternEngine {
     }
 
     /**
-     * Same as {@link #firePentagramStarEdgeStreams(BulletPool, float, float, float, float, int, float, DifficultyConfig, BulletType, float, float, int, float)}
-     * but offsets multiple parallel lines along each edge (tangent direction) for a thicker comb band.
+     * Same as
+     * {@link #firePentagramStarEdgeStreams(BulletPool, float, float, float, float, int, float, DifficultyConfig, BulletType, float, float, int, float)}
+     * but offsets multiple parallel lines along each edge (tangent direction) for a
+     * thicker comb band.
      *
-     * @param parallelRows 1 = single line per edge sample; 3–5 matches TH-style wide combs
-     * @param rowSpacing    world units between adjacent parallel rows along the edge tangent
+     * @param parallelRows 1 = single line per edge sample; 3-5 matches TH-style
+     *                     wide combs
+     * @param rowSpacing   world units between adjacent parallel rows along the edge
+     *                     tangent
      */
     public static void firePentagramStarEdgeStreams(BulletPool pool, float cx, float cy,
             float radius, float rotationRad, int samplesPerEdge,
@@ -465,12 +548,16 @@ public final class PatternEngine {
     }
 
     /**
-     * Row of orbs in one line perpendicular to {@code flightRad}, with small per-bullet
-     * {@code angVel} so the row opens into a slight C while flying along that direction.
+     * Row of orbs in one line perpendicular to {@code flightRad}, with small
+     * per-bullet
+     * {@code angVel} so the row opens into a slight C while flying along that
+     * direction.
      *
-     * @param flightRad radians; 0 = +X, {@code PI*0.5} = +Y (down in screen space)
-     * @param rowCount how many bullets in the row (minimum {@code 1})
-     * @param rowSpacingScale multiply default spacing ({@code 1f} = legacy loose row; ~{@code 0.62f} = tight "comet")
+     * @param flightRad       radians; 0 = +X, {@code PI*0.5} = +Y (down in screen
+     *                        space)
+     * @param rowCount        how many bullets in the row (minimum {@code 1})
+     * @param rowSpacingScale multiply default spacing ({@code 1f} = legacy loose
+     *                        row; ~{@code 0.62f} = tight "comet")
      */
     public static void fireOrbCRowInDirection(BulletPool pool,
             float bx, float by, float flightRad,
@@ -503,7 +590,8 @@ public final class PatternEngine {
     }
 
     /**
-     * Same as {@link #fireOrbCRowInDirection} with default row spacing (looser row).
+     * Same as {@link #fireOrbCRowInDirection} with default row spacing (looser
+     * row).
      */
     public static void fireOrbCRowInDirection(BulletPool pool,
             float bx, float by, float flightRad,
@@ -515,8 +603,10 @@ public final class PatternEngine {
     }
 
     /**
-     * Row of orbs (same {@code visScale} / {@code hitScale} as the pentagram outline), in one line
-     * perpendicular to aim toward ({@code tx}, {@code ty}), with a small per-bullet {@code angVel}
+     * Row of orbs (same {@code visScale} / {@code hitScale} as the pentagram
+     * outline), in one line
+     * perpendicular to aim toward ({@code tx}, {@code ty}), with a small per-bullet
+     * {@code angVel}
      * so the row opens into a very slight C while flying at the target.
      *
      * @param rowCount how many bullets in the row (minimum {@code 1})
@@ -532,8 +622,10 @@ public final class PatternEngine {
     }
 
     /**
-     * Stacked "walls" from a single spawn: fan toward ({@code tx}, {@code ty}), multiple parallel
-     * stacks perpendicular to each ray; each ray uses a different {@code angVel} so streams drift
+     * Stacked "walls" from a single spawn: fan toward ({@code tx}, {@code ty}),
+     * multiple parallel
+     * stacks perpendicular to each ray; each ray uses a different {@code angVel} so
+     * streams drift
      * into a shallow C while still roughly homing the fan at the target.
      */
     public static void fireCurvingWallFanFromPoint(BulletPool pool,

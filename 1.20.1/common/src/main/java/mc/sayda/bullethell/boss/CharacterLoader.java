@@ -12,10 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Loads and caches {@link CharacterDefinition} objects from JSON files
@@ -31,10 +31,11 @@ public final class CharacterLoader {
      * All character IDs available in this build.
      * Order determines the display order on the select screen.
      */
-    public static final String[] REGISTERED_IDS = { "reimu", "marisa", "sakuya", "sanae", "cirno" };
+    public static final String[] REGISTERED_IDS = { "reimu", "marisa", "sakuya", "sanae", "yuuka" };
 
     private static final Gson GSON = new GsonBuilder().create();
-    private static final Map<String, CharacterDefinition> CACHE = new HashMap<>();
+    private static final Map<String, CharacterDefinition> CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, Long> DEV_MOD_TIMES = new ConcurrentHashMap<>();
 
     private CharacterLoader() {
     }
@@ -60,17 +61,42 @@ public final class CharacterLoader {
         CACHE.clear();
     }
 
-    // ---------------------------------------------------------------- dev-path support (test mode)
+    /**
+     * Returns {@code true} if the dev-path file for {@code id} has changed since
+     * the last call. Safe to poll every few server ticks.
+     */
+    public static boolean checkDevFileChanged(String id) {
+        String devPath = BullethellConfig.TEST_DEV_PATH.get();
+        if (devPath == null || devPath.isBlank()) return false;
+        Path file = Paths.get(devPath, "characters", id + ".json");
+        try {
+            long mtime = Files.getLastModifiedTime(file).toMillis();
+            Long prev = DEV_MOD_TIMES.get(id);
+            if (prev != null && mtime != prev) {
+                DEV_MOD_TIMES.put(id, mtime);
+                return true;
+            }
+            if (prev == null) DEV_MOD_TIMES.put(id, mtime);
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    // ---------------------------------------------------------------- dev-path
+    // support (test mode)
 
     public static CharacterDefinition loadFromDevPath(String id) {
         String devPath = BullethellConfig.TEST_DEV_PATH.get();
-        if (devPath == null || devPath.isBlank()) return null;
+        if (devPath == null || devPath.isBlank())
+            return null;
         Path file = Paths.get(devPath, "characters", id + ".json");
-        if (!Files.exists(file)) return null;
+        if (!Files.exists(file))
+            return null;
         try (java.io.Reader r = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             CharacterDefinition def = GSON.fromJson(r, CharacterDefinition.class);
-            if (def == null) return null;
-            if (def.id == null) def.id = id;
+            if (def == null)
+                return null;
+            if (def.id == null)
+                def.id = id;
             resolveShotOptions(def);
             return def;
         } catch (Exception e) {
@@ -83,7 +109,10 @@ public final class CharacterLoader {
         String devPath = BullethellConfig.TEST_DEV_PATH.get();
         if (devPath != null && !devPath.isBlank()) {
             CharacterDefinition dev = loadFromDevPath(id);
-            if (dev != null) { CACHE.put(id, dev); return dev; }
+            if (dev != null) {
+                CACHE.put(id, dev);
+                return dev;
+            }
         }
         return load(id);
     }
@@ -96,11 +125,12 @@ public final class CharacterLoader {
             if (Files.isDirectory(dir)) {
                 try {
                     Files.list(dir)
-                        .filter(p -> p.getFileName().toString().endsWith(".json"))
-                        .map(p -> p.getFileName().toString().replace(".json", ""))
-                        .sorted()
-                        .forEach(ids::add);
-                } catch (Exception ignored) {}
+                            .filter(p -> p.getFileName().toString().endsWith(".json"))
+                            .map(p -> p.getFileName().toString().replace(".json", ""))
+                            .sorted()
+                            .forEach(ids::add);
+                } catch (Exception ignored) {
+                }
             }
         }
         Arrays.stream(REGISTERED_IDS).forEach(ids::add);
@@ -135,7 +165,8 @@ public final class CharacterLoader {
     }
 
     /**
-     * If {@link CharacterDefinition#shotOptions} is null or empty after parsing the character JSON,
+     * If {@link CharacterDefinition#shotOptions} is null or empty after parsing the
+     * character JSON,
      * fills it from {@link HardcodedPlayerShots} (green spread tiers).
      */
     private static void resolveShotOptions(CharacterDefinition def) {

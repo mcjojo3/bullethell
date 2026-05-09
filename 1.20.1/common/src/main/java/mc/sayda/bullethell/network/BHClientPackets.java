@@ -115,10 +115,12 @@ public final class BHClientPackets {
                 state.testStageIds.clear(); state.testStageIds.addAll(pkt.stageIds);
                 state.testWaveIds.clear();  state.testWaveIds.addAll(pkt.waveIds);
                 state.testCharIds.clear();  state.testCharIds.addAll(pkt.charIds);
+                state.testShotTypeIds.clear(); state.testShotTypeIds.addAll(pkt.shotTypeIds);
                 state.testCurrentBossId   = pkt.currentBossId;
                 state.testCurrentStageId  = pkt.currentStageId;
                 state.testCurrentWaveId   = pkt.currentWaveId;
                 if (!pkt.currentCharId.isEmpty()) state.testCurrentCharId = pkt.currentCharId;
+                state.testCurrentShotTypeIdx = pkt.currentShotTypeIdx;
                 state.testCurrentDifficulty = pkt.difficultyOrdinal;
                 // Sync selected indices to match current selections
                 for (int i = 0; i < pkt.bossIds.size(); i++)
@@ -129,6 +131,7 @@ public final class BHClientPackets {
                     if (pkt.waveIds.get(i).equals(pkt.currentWaveId)) { state.testWaveSelectedIdx = i; break; }
                 for (int i = 0; i < pkt.charIds.size(); i++)
                     if (pkt.charIds.get(i).equals(pkt.currentCharId)) { state.testCharSelectedIdx = i; break; }
+                state.testShotTypeSelectedIdx = pkt.currentShotTypeIdx;
             });
         });
     }
