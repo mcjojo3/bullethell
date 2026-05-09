@@ -29,6 +29,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.advancements.Advancement;
 import mc.sayda.bullethell.boss.CharacterDefinition;
 
 import java.util.ArrayList;
@@ -308,6 +311,29 @@ public final class BulletHellCommands {
                                                 .requires(src -> src.hasPermission(2))
                                                 .executes(ctx -> reloadAllJson(ctx.getSource())))
 
+                                // ---- unlock all | <characterId> (operator) ----
+                                .then(Commands.literal("unlock")
+                                                .requires(src -> src.hasPermission(2))
+                                                .then(Commands.argument("target", StringArgumentType.word())
+                                                                .suggests((c, b) -> {
+                                                                        List<String> suggestions = new ArrayList<>();
+                                                                        suggestions.add("all");
+                                                                        suggestions.addAll(java.util.Arrays.asList(
+                                                                                        mc.sayda.bullethell.boss.CharacterLoader.REGISTERED_IDS));
+                                                                        return SharedSuggestionProvider
+                                                                                        .suggest(suggestions, b);
+                                                                })
+                                                                .executes(ctx -> {
+                                                                        String target = StringArgumentType
+                                                                                        .getString(ctx, "target");
+                                                                        if (target.equalsIgnoreCase("all")) {
+                                                                                return unlockAll(ctx.getSource());
+                                                                        } else {
+                                                                                return unlockCharacter(ctx.getSource(),
+                                                                                                target);
+                                                                        }
+                                                                })))
+
                                 // ---- characters unlock/lock <name> (operator) ----
                                 .then(Commands.literal("characters")
                                                 .requires(src -> src.hasPermission(2))
@@ -316,14 +342,16 @@ public final class BulletHellCommands {
                                                                                 StringArgumentType.word())
                                                                                 .suggests((c, b) -> SharedSuggestionProvider
                                                                                                 .suggest(
-                                                                                                                java.util.Arrays.asList(
+                                                                                        
+                                                                                                       
+                                                                                                 java.util.Arrays.asList(
                                                                                                                                 CharacterLoader.REGISTERED_IDS),
                                                                                                                 b))
                                                                                 .executes(ctx -> charactersSetUnlocked(
                                                                                                 ctx.getSource(),
-                                                                                                StringArgumentType
-                                                                                                                .getString(ctx, "character"),
+                                                                                                StringArgumentType.getString(ctx, "character"),
                                                                                                 true))))
+                                                                                                
                                                 .then(Commands.literal("lock")
                                                                 .then(Commands.argument("character",
                                                                                 StringArgumentType.word())
@@ -531,7 +559,9 @@ public final class BulletHellCommands {
                 mc.sayda.bullethell.boss.FairyWaveLoader.invalidateAll();
                 mc.sayda.bullethell.boss.CharacterLoader.invalidateAll();
                 mc.sayda.bullethell.boss.BossProgressionLoader.invalidate();
-                src.sendSuccess(() -> Component.literal("[BulletHell] JSON caches cleared — boss, stage, character, wave, and progression files will reload on next use."), true);
+                src.sendSuccess(() -> Component.literal(
+                                "[BulletHell] JSON caches cleared — boss, stage, character, wave, and progression files will reload on next use."),
+                                true);
                 return 1;
         }
 
@@ -551,5 +581,54 @@ public final class BulletHellCommands {
                 player.sendSystemMessage(Component.literal(
                                 "[BulletHell] " + characterId + (unlock ? " unlocked." : " locked.")));
                 return 1;
+        }
+
+        private static int unlockAll(CommandSourceStack src) throws CommandSyntaxException {
+                ServerPlayer player = src.getPlayerOrException();
+                Advancement root = player.server.getAdvancements()
+                                .getAdvancement(new ResourceLocation("bullethell:progression/root"));
+                if (root == null) {
+                        src.sendFailure(Component.literal("[BulletHell] Progression root advancement not found."));
+                        return 0;
+                }
+
+                grantAdvancementRecursive(player, root);
+
+                // Also sync character unlocks to client
+                BHPackets.sendCharacterUnlocks(player, new mc.sayda.bullethell.network.CharacterUnlockSyncPacket(
+                                CharacterUnlocks.snapshot(player)));
+
+                src.sendSuccess(() -> Component.literal(
+                                "[BulletHell] Granted all progression advancements and unlocked all characters."),
+                                true);
+                return 1;
+        }
+
+        private static int unlockCharacter(CommandSourceStack src, String characterId) throws CommandSyntaxException {
+                ServerPlayer player = src.getPlayerOrException();
+                java.util.List<String> ids = java.util.Arrays
+                                .asList(mc.sayda.bullethell.boss.CharacterLoader.REGISTERED_IDS);
+                if (!ids.contains(characterId)) {
+                        src.sendFailure(Component
+                                        .literal("[BulletHell] Unknown character \"" + characterId + "\". Valid: all, "
+                                                        + String.join(", ", ids) + "."));
+                        return 0;
+                }
+                CharacterUnlocks.setAdminUnlocked(player, characterId, true);
+                BHPackets.sendCharacterUnlocks(player, new mc.sayda.bullethell.network.CharacterUnlockSyncPacket(
+                                CharacterUnlocks.snapshot(player)));
+                src.sendSuccess(() -> Component
+                                .literal("[BulletHell] Unlocked all difficulties for " + characterId + "."), true);
+                return 1;
+        }
+
+        private static void grantAdvancementRecursive(ServerPlayer player, Advancement adv) {
+                PlayerAdvancements pa = player.getAdvancements();
+                for (String criterion : pa.getOrStartProgress(adv).getRemainingCriteria()) {
+                        pa.award(adv, criterion);
+                }
+                for (Advancement child : adv.getChildren()) {
+                        grantAdvancementRecursive(player, child);
+                }
         }
 }
