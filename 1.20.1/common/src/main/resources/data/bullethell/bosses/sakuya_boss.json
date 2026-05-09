@@ -1,6 +1,8 @@
 {
   "id": "sakuya_boss",
   "name": "Sakuya Izayoi",
+  "prerequisites": ["cirno_boss"],
+  "requirementSummary": "Defeat Cirno first. Lowest clear difficulty is your cap.",
   "_design_notes": [
     "TH6 Stage 5 strict split: E/N uses Clock Corpse -> Luna Clock -> Manipulating Doll; H/L uses Jack the Ludo Bile -> The World -> Killing Doll.",
     "Alternating nonspells are shared while spellcards are difficulty-gated.",

@@ -34,7 +34,7 @@ public final class StageLoader {
      * All stage IDs available in this build, in display order.
      * Add new IDs here when you create their JSON file.
      */
-    public static final String[] REGISTERED_IDS = { "cirno_stage", "sakuya_stage", "remilia_stage", "marisa_stage", "sanae_stage", "flandre_stage" };
+    public static final String[] REGISTERED_IDS = { "cirno_stage", "sakuya_stage", "remilia_stage", "marisa_stage", "sanae_stage", "flandre_stage", "kanako_stage" };
 
     private static final Gson GSON = new GsonBuilder().create();
     private static final Map<String, StageDefinition> CACHE = new HashMap<>();

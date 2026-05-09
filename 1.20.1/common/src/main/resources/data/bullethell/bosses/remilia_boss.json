@@ -1,6 +1,8 @@
 {
   "id": "remilia_boss",
   "name": "Remilia Scarlet",
+  "prerequisites": ["cirno_boss", "sakuya_boss"],
+  "requirementSummary": "Defeat both Cirno and Sakuya first. Lowest clear difficulty is your cap.",
   "aura": {
     "texture": "textures/star_david.png",
     "spinDegsPerTick": 8.0,

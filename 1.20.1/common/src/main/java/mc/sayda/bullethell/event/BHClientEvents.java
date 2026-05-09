@@ -83,6 +83,7 @@ public class BHClientEvents {
                 state.items.clientTick(state.player.x, state.player.y, timeStopped);
                 if (!timeStopped) {
                     state.bullets.clientTick();
+                    state.lasers.savePrevPositions();
                     state.lasers.clientTick();
                     state.enemies.savePrevPositions();
                     state.enemies.clientTick();

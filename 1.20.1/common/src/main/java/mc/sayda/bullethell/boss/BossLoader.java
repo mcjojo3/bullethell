@@ -39,8 +39,8 @@ public final class BossLoader {
      * directory listing is unavailable).
      */
     public static final String[] REGISTERED_IDS = {
-            "cirno_boss", "flandre_boss", "marisa_boss", "remilia_boss", "sakuya_boss", "sanae_boss",
-            "satori_boss", "yuuka_boss"
+            "cirno_boss", "flandre_boss", "kanako_boss", "marisa_boss", "remilia_boss", "sakuya_boss",
+            "sanae_boss", "satori_boss", "yuuka_boss"
     };
 
     private static final Gson GSON = new GsonBuilder().create();

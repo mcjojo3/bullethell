@@ -329,7 +329,7 @@ public class BulletHellRenderer {
 
         // ---- 5b. Laser beams (warning + active) ----
         gfx.enableScissor(ox, oy, ox + dispW, oy + dispH);
-        renderLasers(gfx, state, ox, oy, sx, sy);
+        renderLasers(gfx, state, ox, oy, sx, sy, partialTick);
         gfx.disableScissor();
 
         // ---- 6. Enemy bullets - counting-sort by BulletType for texture-batch
@@ -1511,7 +1511,7 @@ public class BulletHellRenderer {
      * The scissor region must be set by the caller to clip to the arena bounds.
      */
     private static void renderLasers(GuiGraphics gfx, ClientArenaState state,
-            int ox, int oy, float sx, float sy) {
+            int ox, int oy, float sx, float sy, float partialTick) {
         LaserPool pool = state.lasers;
         // Length long enough to always reach the far edge of the arena from any origin
         float diag = (float) Math.sqrt((double) (BulletPool.ARENA_W * BulletPool.ARENA_W)
@@ -1528,8 +1528,10 @@ public class BulletHellRenderer {
             int typeId = pool.getTypeId(i);
             int baseColor = BulletTypeLoader.get(BulletType.fromId(typeId)).color & 0x00FFFFFF;
 
-            int screenX = ox + (int) (pool.getX(i) * sx);
-            int screenY = oy + (int) (pool.getY(i) * sy);
+            float lx = pool.getPrevX(i) + (pool.getX(i) - pool.getPrevX(i)) * partialTick;
+            float ly = pool.getPrevY(i) + (pool.getY(i) - pool.getPrevY(i)) * partialTick;
+            int screenX = ox + (int) (lx * sx);
+            int screenY = oy + (int) (ly * sy);
 
             // Scale half-width from arena units to screen pixels
             float hwScreen = Math.max(warn ? 1f : 2f, hwArena * (sx + sy) * 0.5f);

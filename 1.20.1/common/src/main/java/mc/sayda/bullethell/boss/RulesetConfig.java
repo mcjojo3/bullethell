@@ -33,7 +33,9 @@ public class RulesetConfig {
         /** Touhou 9: No screen clear on power, versus focus. */
         TH9,
         /** Touhou 8: Standard modern feel. */
-        TH8
+        TH8,
+        /** Touhou 10 (Mountain of Faith): Modern item/PoC, no cherry, 10M score extend. */
+        TH10
     }
 
     /**
@@ -145,6 +147,28 @@ public class RulesetConfig {
                     pointItemMinValue = 20000;
                 if (scoreExtendEvery == null)
                     scoreExtendEvery = 15000000L;
+            }
+            case TH10 -> {
+                if (itemDropEveryNthKill == null)
+                    itemDropEveryNthKill = 1;
+                if (largeEnemyAlwaysDrops == null)
+                    largeEnemyAlwaysDrops = true;
+                if (pocAutoCollect == null)
+                    pocAutoCollect = true;
+                if (deathPowerLoss == null)
+                    deathPowerLoss = 16;
+                if (bulletClearOnMaxPower == null)
+                    bulletClearOnMaxPower = false;
+                if (bulletClearVacuum == null)
+                    bulletClearVacuum = true;
+                if (grazeScoringEnabled == null)
+                    grazeScoringEnabled = true;
+                if (pointItemMaxValue == null)
+                    pointItemMaxValue = 100000;
+                if (pointItemMinValue == null)
+                    pointItemMinValue = 20000;
+                if (scoreExtendEvery == null)
+                    scoreExtendEvery = 10000000L;
             }
         }
         // Final fallback for any still null (Modern defaults)

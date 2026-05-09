@@ -181,6 +181,12 @@ public class CharacterDefinition {
     }
 
     /**
+     * When true, this character can move freely while time stop is active.
+     * Sakuya is the canonical example; all other characters are frozen.
+     */
+    public boolean immuneToTimeStop = false;
+
+    /**
      * Volley interval in ticks when unfocused; {@code 0} = use
      * {@link PlayerState2D#SHOT_COOLDOWN_NORMAL}.
      */

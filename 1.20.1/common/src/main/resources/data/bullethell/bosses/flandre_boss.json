@@ -1,6 +1,8 @@
 {
   "id": "flandre_boss",
   "name": "Flandre Scarlet",
+  "prerequisites": ["remilia_boss"],
+  "requirementSummary": "Defeat Remilia first. Lowest clear difficulty is your cap.",
   "_design_notes": [
     "ECL mapping: wiki/flandre-th06-reconstruction.md - dump ecldata7_bullets.txt; summarize with tools/th06-ecl-dump (chunk ids like ecldata7_bullets.txt#sub:Sub33).",
     "TH06 Extra Stage boss (ecldata7 / Stage 7). Spell order: Cranberry Trap → Kagome Kagome → Lævateinn → Four of a Kind → Maze of Love → Catadioptric (E/N) / Starbow Break (H/L) → Q.E.D.",

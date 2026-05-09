@@ -37,6 +37,19 @@ public class BossDefinition {
      */
     public Map<String, List<DialogLine>> characterDialogs = new HashMap<>();
 
+    /**
+     * Boss IDs that must have at least one clear before this boss can be challenged.
+     * The player's allowed difficulty is capped to their lowest clear difficulty among
+     * all prerequisites.  Empty list means no gate (open from the start).
+     */
+    public List<String> prerequisites = new ArrayList<>();
+
+    /**
+     * Short human-readable description of the unlock requirement, shown in the UI.
+     * Leave empty for bosses with no prerequisites.
+     */
+    public String requirementSummary = "";
+
     /** Optional one-line boss quote shown when the player wins this fight. */
     public String victoryDialog = "";
 

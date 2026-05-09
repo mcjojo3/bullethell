@@ -1,343 +1,462 @@
 {
-  "id": "yuuka_boss",
-  "name": "Yuuka Kazami",
+  "id": "kanako_boss",
+  "name": "Kanako Yasaka",
+  "prerequisites": ["sanae_boss"],
+  "requirementSummary": "Defeat Sanae first. Lowest clear difficulty is your cap.",
   "aura": {
-    "texture": "textures/star_david.png",
-    "spinDegsPerTick": 8.5,
-    "baseScale": 3.0,
-    "breathAmplitude": 0.12,
-    "breathFrequency": 0.1,
-    "growTicks": 25,
+    "texture": "textures/pentagram.png",
+    "spinDegsPerTick": -3.5,
+    "baseScale": 3.2,
+    "breathAmplitude": 0.09,
+    "breathFrequency": 0.09,
+    "growTicks": 28,
     "textureSize": 256,
-    "tintR": 0.2,
-    "tintG": 0.8,
-    "tintB": 0.2,
-    "tintA": 0.8
+    "tintR": 0.25,
+    "tintG": 0.55,
+    "tintB": 1.0,
+    "tintA": 0.82
   },
   "_design_notes": [
-    "Yuuka Kazami: The Flower Master of the Four Seasons.",
-    "Patterns favor floral-inspired geometry, dense ring curtains, and powerful 'Double Spark'-style beams.",
-    "Aesthetic: Green, Yellow, and Red bullets."
+    "Kanako Yasaka: Goddess of Wind and Rain, head deity of the Moriya Shrine on Youkai Mountain.",
+    "Patterns draw from Mountain of Faith Stage 6: divine rings, onbashira column curtains, howling wind spirals.",
+    "Aesthetic: Red and Blue orbs (divine duality), Golden stars (shrine radiance), Divine Spirits (godly essence).",
+    "Spellcard 2 references 'Native God — Omiwatari that God Walked' from The Grimoire of Marisa.",
+    "Final card echoes 'Divine Virtues of Wind God' (MoF Lunatic), the hardest attack in the fight."
   ],
   "introDialog": [
     {
       "speaker": "BOSS",
-      "text": "The flowers are blooming so beautifully today. It would be a pity if someone... ruined them.",
+      "text": "You've climbed all the way to the summit of Youkai Mountain. I respect the effort.",
       "delayTicks": 170
+    },
+    {
+      "speaker": "BOSS",
+      "text": "But faith alone won't save you here. Let's see if you can endure a god's divine wind.",
+      "delayTicks": 140
     }
   ],
   "characterDialogs": {
     "reimu": [
       {
         "speaker": "BOSS",
-        "text": "Halt, shrine maiden. My sunflowers are napping.",
+        "text": "The Hakurei Shrine Maiden. Tell me — how has your faith been lately?",
         "delayTicks": 160
       },
       {
         "speaker": "PLAYER",
-        "text": "I'm not here for your flowers. This incident needs to end.",
+        "text": "I'm not here for theology. The incidents on this mountain end today.",
         "delayTicks": 130
       },
       {
         "speaker": "BOSS",
-        "text": "And you're going to use your needles to 'end' it? How violent.",
-        "delayTicks": 150
+        "text": "Then let us see if the Hakurei god grants you more power than I.",
+        "delayTicks": 145
       }
     ],
     "marisa": [
       {
         "speaker": "BOSS",
-        "text": "Ah, the ordinary magician who likes to borrow things.",
-        "delayTicks": 160
+        "text": "A human who reached the mountain summit by sheer stubbornness. Impressive.",
+        "delayTicks": 155
       },
       {
         "speaker": "PLAYER",
-        "text": "I just need a few seeds! They'll look great in my collection!",
+        "text": "Stubbornness and a really good broom, ze. Now show me this divine wind!",
         "delayTicks": 130
       },
       {
         "speaker": "BOSS",
-        "text": "How about I plant you instead? You'd make excellent fertilizer.",
+        "text": "Your broom will be no match for a storm that reshapes mountains.",
+        "delayTicks": 148
+      }
+    ],
+    "sanae": [
+      {
+        "speaker": "BOSS",
+        "text": "Sanae. Have you come to test the faith you carry in your heart?",
+        "delayTicks": 165
+      },
+      {
+        "speaker": "PLAYER",
+        "text": "Lady Kanako! I must prove my worth — please, don't hold back!",
+        "delayTicks": 130
+      },
+      {
+        "speaker": "BOSS",
+        "text": "Then I will give you the full measure of a god's blessing — and wrath.",
         "delayTicks": 150
       }
     ],
     "sakuya": [
       {
         "speaker": "BOSS",
-        "text": "The head maid of the Scarlet Mansion. Are you here to prune my garden?",
-        "delayTicks": 160
+        "text": "The Scarlet Mansion's head maid. An odd visitor for a mountain shrine.",
+        "delayTicks": 158
       },
       {
         "speaker": "PLAYER",
-        "text": "The Mistress simply wishes for a few blooms that won't wilt in the dark.",
-        "delayTicks": 130
+        "text": "The Mistress asked me to investigate the disturbances. I merely followed orders.",
+        "delayTicks": 128
       },
       {
         "speaker": "BOSS",
-        "text": "A bold request. Perhaps you should learn how to respect nature first.",
-        "delayTicks": 155
-      }
-    ],
-    "sanae": [
-      {
-        "speaker": "BOSS",
-        "text": "A living god, visiting a humble garden? How flattering.",
-        "delayTicks": 160
-      },
-      {
-        "speaker": "PLAYER",
-        "text": "Such vitality! This garden feels almost like it has its own divinity.",
-        "delayTicks": 130
-      },
-      {
-        "speaker": "BOSS",
-        "text": "It does. And it doesn't like intruders who talk too much.",
-        "delayTicks": 145
+        "text": "Orders from a vampire, against a wind god. I almost admire the audacity.",
+        "delayTicks": 150
       }
     ],
     "reisen": [
       {
         "speaker": "BOSS",
-        "text": "A moon rabbit? Your ears look like they'd make interesting sprouts.",
-        "delayTicks": 170
+        "text": "A moon rabbit, on Youkai Mountain? Did you take a wrong turn at the kappa's river?",
+        "delayTicks": 165
       },
       {
         "speaker": "PLAYER",
-        "text": "Eek! I'm just here to deliver some medicine! Please let me through!",
+        "text": "I-I was just delivering medicine and got completely lost, I swear!",
         "delayTicks": 130
       },
       {
         "speaker": "BOSS",
-        "text": "The medicine of the soil is much more effective, little rabbit.",
-        "delayTicks": 150
+        "text": "Lost rabbits find their way by enduring the storm. Let's begin.",
+        "delayTicks": 145
       }
     ],
     "cirno": [
       {
         "speaker": "BOSS",
-        "text": "Ah, the little ice fairy from the Lake. Have the sunflowers been bothering you again?",
-        "delayTicks": 160
+        "text": "An ice fairy at the mountain summit? The wind here can shatter ice, you know.",
+        "delayTicks": 158
       },
       {
         "speaker": "PLAYER",
-        "text": "N-nobody bothers the strongest! I'm here to beat you this time for real!",
-        "delayTicks": 135
+        "text": "I'm the strongest! I can take any wind — even a god's!",
+        "delayTicks": 128
       },
       {
         "speaker": "BOSS",
-        "text": "This time? How many times has there been? I confess I have lost count.",
-        "delayTicks": 155
+        "text": "Then let the strongest withstand the divine gale.",
+        "delayTicks": 140
       }
     ]
   },
-  "victoryDialog": "You've proven to be quite a durable weed. I'll let you be for now.",
-  "defeatDialog": "Perhaps you'll bloom better in the next life.",
+  "victoryDialog": "You withstood the wind and rain of a god. Take that faith with you when you descend.",
+  "defeatDialog": "The mountain reclaims what it is owed. Rest here a while.",
   "victoryDialogByCharacter": {
-    "reimu": "Such a persistent shrine maiden. You've pruned more than just my garden today.",
-    "marisa": "A bright spark, but quite messy. Don't think this means you can start plucking my sunflowers.",
-    "sakuya": "Precision that rivals a gardener... you've pruned me well today, maid of the mansion.",
-    "sanae": "A miracle of growth, or just luck? Either way, you've bested the soil today.",
-    "reisen": "The rabbit has some bite after all. Go on, before I change my mind about letting you leave.",
-    "cirno": "Strongest by ice point? I can accept that. Try not to wilt come summer."
+    "reimu": "The Hakurei bloodline remains unbroken. I grant you passage through my domain — this time.",
+    "marisa": "Your spark burned bright enough to scatter even my divine wind. I acknowledge it, ze.",
+    "sanae": "You have surpassed your own god, Sanae. That is the finest miracle you have ever made.",
+    "sakuya": "The maid stops even time and a divine gale. Report to your mistress: the mountain is stable.",
+    "reisen": "The lost rabbit found her footing on the mountain. Perhaps the moon is not your only home.",
+    "cirno": "Strongest indeed. The mountain air agrees with you, little ice fairy."
   },
   "defeatDialogByCharacter": {
-    "reimu": "Your needles didn't prune me today. Go home, miko, and try not to step on the sprouts next time.",
-    "marisa": "Not even a Master Spark can outshine the sun in my garden. You'd make excellent fertilizer.",
-    "sakuya": "Precision alone won't let you pluck a flower from this field. Your time has run out in this garden.",
-    "sanae": "Miracles aren't as reliable as deep roots, are they? The wind has died down among my blooms.",
-    "reisen": "Run back to the moon, little rabbit. Earth's soil is far too rich for your kind.",
-    "cirno": "Back to the Lake, little snowflake. The sunflowers don't need the frost just yet."
+    "reimu": "The Hakurei god could not lend you enough faith today. Try visiting the mountain shrine next time.",
+    "marisa": "Not even your spark can outshine a storm that births lightning. Return when you're ready.",
+    "sanae": "Faith is the beginning, Sanae — not the end. Come back when you've grown stronger.",
+    "sakuya": "Precision falters before a wind with no fixed moment. Tell your mistress to look elsewhere.",
+    "reisen": "The mountain is no place for a moon rabbit without her bearings. Find your way home.",
+    "cirno": "Ice melts before the divine gale. Come back when the seasons have been kinder to you."
   },
   "phases": [
     {
-      "_note": "Nonspell 1: Floral Awakening. Rings of LEAF and JADE.",
-      "hp": 1500,
-      "isSpellCard": false,
-      "spellName": "Floral Awakening",
-      "spellDurationTicks": [0, 0, 0, 0],
-      "movement": "SINE_WAVE",
-      "moveSpeed": 100,
-      "music": "oriental_dark_flight",
-      "attacks": [
-        {
-          "pattern": "RING",
-          "cooldown": 30,
-          "minCooldown": 20,
-          "scalingProfile": "GEOMETRY",
-          "bulletType": "LEAF",
-          "arms": 12,
-          "speed": 2.2
-        },
-        {
-          "pattern": "AIMED",
-          "cooldown": 15,
-          "minCooldown": 10,
-          "scalingProfile": "PRECISION",
-          "bulletType": "JADE",
-          "arms": 3,
-          "speed": 3.0,
-          "spread": 0.2
-        }
-      ]
-    },
-    {
-      "_note": "Spell 1: Flower Sign \"Reflowering of Gensokyo\". Spirals of LEAF + aimed JADE streams.",
-      "hp": 2500,
-      "isSpellCard": true,
-      "spellName": "Flower Sign \"Reflowering of Gensokyo\"",
-      "spellDurationTicks": [800, 600, 450, 300],
-      "spellBonus": 50000,
-      "movement": "CIRCLE",
-      "moveSpeed": 80,
-      "attacks": [
-        {
-          "pattern": "SPIRAL",
-          "cooldown": 8,
-          "minCooldown": 5,
-          "scalingProfile": "GEOMETRY",
-          "bulletType": "LEAF",
-          "arms": 6,
-          "speed": 2.5
-        },
-        {
-          "pattern": "AIMED",
-          "cooldown": 12,
-          "minCooldown": 8,
-          "scalingProfile": "PRECISION",
-          "bulletType": "JADE",
-          "arms": 5,
-          "speed": 3.2,
-          "spread": 0.25
-        }
-      ]
-    },
-    {
-      "_note": "Nonspell 2: Solar Energy. Aimed GOLD streams + SPARK bursts.",
+      "_note": "Nonspell 1: Mountain Wind Awakening. Remilia-style double counter-rotating SPRINKLER curtains + occasional aimed volleys. patternTempo 200 makes the rotation loop fire almost every tick.",
       "hp": 1800,
       "isSpellCard": false,
-      "spellName": "Solar Energy",
+      "spellName": "Mountain Wind Awakening",
       "spellDurationTicks": [0, 0, 0, 0],
-      "movement": "STATIC",
+      "movement": "SINE_WAVE",
+      "moveSpeed": 110,
+      "patternTempo": 200.0,
+      "music": "the_venerable_ancient_battlefield_suwa_foughten_field",
       "attacks": [
         {
-          "pattern": "AIMED",
-          "cooldown": 10,
-          "minCooldown": 7,
-          "scalingProfile": "PRECISION",
-          "bulletType": "GOLD",
-          "arms": 8,
+          "_note": "CW rotating 2-arm RED_ORB curtain",
+          "pattern": "SPRINKLER",
+          "cooldown": 0,
+          "minCooldown": 0,
+          "bulletType": "RED_ORB",
+          "arms": 2,
+          "speed": 5.5,
+          "sprinklerAdvanceRad": 2.80
+        },
+        {
+          "_note": "CCW rotating 3-arm BLUE_ORB_LARGE curtain — counter-spin creates diamond gaps",
+          "pattern": "SPRINKLER",
+          "cooldown": 0,
+          "minCooldown": 0,
+          "bulletType": "BLUE_ORB_LARGE",
+          "arms": 3,
           "speed": 4.0,
-          "spread": 0.15
+          "sprinklerAdvanceRad": -1.40
         },
         {
-          "pattern": "RING",
-          "cooldown": 40,
-          "minCooldown": 30,
-          "scalingProfile": "GEOMETRY",
-          "bulletType": "SPARK",
-          "arms": 6,
-          "speed": 2.0
+          "_note": "Fan-comb burst of GOLD every ~0.5s — aimed pressure fill",
+          "pattern": "SPRINKLER",
+          "cooldown": 100,
+          "minCooldown": 100,
+          "bulletType": "GOLD",
+          "arms": 1,
+          "maxScaledArms": 1,
+          "combCount": 5,
+          "speed": 4.8,
+          "sprinklerAdvanceRad": 0.02,
+          "sprinklerSpread": 0.06,
+          "sprinklerSpeedSlope": 0.006
         }
       ]
     },
     {
-      "_note": "Spell 2: \"The Beauty of Nature\". Large expanding floral patterns.",
-      "hp": 3000,
+      "_note": "Spell 1: Wind Sign 'Divine Wind from the Moriya Shrine'. Kanako's signature DIVINE_WIND C-curl pattern + fast RING_OFFSET background pressure + aimed GOLD.",
+      "hp": 2600,
       "isSpellCard": true,
-      "spellName": "The Beauty of Nature",
+      "spellName": "Wind Sign \"Divine Wind from the Moriya Shrine\"",
       "spellDurationTicks": [900, 700, 500, 350],
-      "spellBonus": 75000,
-      "movement": "STATIC",
+      "spellBonus": 60000,
+      "movement": "REPOS_TOP",
+      "reposBossY": 160,
+      "reposShootTicks": 30,
       "attacks": [
         {
-          "pattern": "RING_OFFSET",
-          "cooldown": 25,
-          "minCooldown": 18,
-          "scalingProfile": "GEOMETRY",
-          "bulletType": "LEAF",
-          "arms": 16,
-          "speed": 1.8,
-          "ringStartAngleRad": -1
+          "_note": "DIVINE_WIND: Yasaka-scripted C-turn spiral. Builds layered rings then releases with angular curve.",
+          "pattern": "DIVINE_WIND",
+          "cooldown": 38,
+          "minCooldown": 24,
+          "bulletType": "DIVINE_SPIRIT",
+          "arms": [5, 6, 7, 8],
+          "speed": 3.0,
+          "sprinklerAdvanceRad": 0.30,
+          "divineWindLayers": 21,
+          "divineWindLayerSpacing": 8.0,
+          "divineWindCurveAngularVelocity": 0.035,
+          "divineWindCurveTicks": 20
         },
         {
+          "_note": "Dense BLUE_ORB ring fires every tick — tightens gaps between DIVINE_WIND waves",
           "pattern": "RING_OFFSET",
-          "cooldown": 25,
-          "minCooldown": 18,
-          "scalingProfile": "GEOMETRY",
-          "bulletType": "GOLD",
-          "arms": 12,
-          "speed": 2.4,
-          "ringStartAngleRad": 1
+          "everyTickWhilePhase": true,
+          "cooldown": 5,
+          "minCooldown": 5,
+          "bulletType": "BLUE_ORB",
+          "arms": [8, 10, 12, 14],
+          "speed": 5.5,
+          "angleJitterRad": 0.32,
+          "activeTicks": 20
         },
         {
           "pattern": "AIMED",
-          "cooldown": 20,
-          "minCooldown": 15,
+          "cooldown": 14,
+          "minCooldown": 9,
           "scalingProfile": "PRECISION",
-          "bulletType": "JADE",
-          "arms": 5,
-          "speed": 3.5,
-          "spread": 0.3
+          "bulletType": "GOLD",
+          "arms": [4, 5, 6, 7],
+          "speed": 4.5,
+          "spread": 0.20
         }
       ]
     },
     {
-      "_note": "Nonspell 3: Final Bloom. Dense LEAF spirals.",
+      "_note": "Nonspell 2: Sacred Mountain Rainfall. Remilia Nonspell-2-style dual SWEEP curtains from opposite directions + aimed GOLD pressure.",
       "hp": 2000,
       "isSpellCard": false,
-      "spellName": "Final Bloom",
+      "spellName": "Sacred Mountain Rainfall",
       "spellDurationTicks": [0, 0, 0, 0],
-      "movement": "CIRCLE",
-      "moveSpeed": 120,
+      "movement": "STATIC",
+      "patternTempo": 2.0,
       "attacks": [
         {
-          "pattern": "SPIRAL",
-          "cooldown": 6,
-          "minCooldown": 4,
-          "scalingProfile": "GEOMETRY",
-          "bulletType": "LEAF",
-          "arms": 8,
-          "speed": 3.0
+          "_note": "Blue rain sweeps L→R",
+          "pattern": "SWEEP",
+          "everyTickWhilePhase": true,
+          "activeTicks": 20,
+          "cooldown": 0,
+          "bulletType": "BLUE_ORB",
+          "arms": 3,
+          "speed": 20,
+          "sweepTicksPerHalf": 7,
+          "sweepAlternate": true
+        },
+        {
+          "_note": "Red shrine shots sweep R→L — counter-direction cuts off retreat",
+          "pattern": "SWEEP",
+          "everyTickWhilePhase": true,
+          "activeTicks": 20,
+          "cooldown": 0,
+          "bulletType": "RED_ORB",
+          "arms": 2,
+          "speed": 22,
+          "sweepTicksPerHalf": 5,
+          "sweepAlternate": false,
+          "sweepStartLeft": false
+        },
+        {
+          "pattern": "AIMED",
+          "cooldown": 14,
+          "minCooldown": 8,
+          "scalingProfile": "PRECISION",
+          "bulletType": "GOLD",
+          "arms": [4, 5, 6, 7],
+          "speed": 4.8,
+          "spread": 0.20
         }
       ]
     },
     {
-      "_note": "Spell 3: \"The Flower Master's Wrath\". Master Spark + dense LEAF spirals.",
-      "hp": 3500,
+      "_note": "Spell 2: Native God 'Omiwatari that God Walked'. Remilia Spell-1-style LASER_ROTATING grid from center + dense RING_OFFSET every-tick fill.",
+      "hp": 3200,
       "isSpellCard": true,
-      "spellName": "The Flower Master's Wrath",
-      "spellDurationTicks": [1000, 800, 600, 400],
-      "spellBonus": 100000,
-      "movement": "STATIC",
+      "spellName": "Native God \"Omiwatari that God Walked\"",
+      "spellDurationTicks": [1000, 800, 550, 380],
+      "spellBonus": 80000,
+      "movement": "REPOS_TOP",
+      "reposBossY": 170,
+      "reposShootTicks": 40,
       "attacks": [
         {
-          "pattern": "LASER",
-          "cooldown": 150,
-          "bulletType": "SPARK",
-          "arms": 1,
+          "_note": "Rotating laser grid — arm count and warn time scale with difficulty",
+          "pattern": "LASER_ROTATING",
+          "cooldown": 180,
+          "bulletType": "CYAN_LASER",
+          "arms": [12, 14, 16, 20],
           "speed": 0,
-          "laserHalfWidth": 60,
-          "warnTicks": 40,
-          "activeTicks": 80
+          "laserHalfWidth": 8,
+          "warnTicks": [30, 22, 16, 10],
+          "activeTicks": 28
         },
         {
-          "pattern": "SPIRAL",
-          "cooldown": 10,
-          "minCooldown": 7,
-          "scalingProfile": "GEOMETRY",
-          "bulletType": "LEAF",
-          "arms": 12,
-          "speed": 2.2
+          "_note": "Large blue orbs every tick — fill the space between laser spokes",
+          "pattern": "RING_OFFSET",
+          "everyTickWhilePhase": true,
+          "cooldown": 5,
+          "minCooldown": 5,
+          "bulletType": "BLUE_ORB_LARGE",
+          "arms": [10, 12, 14, 16],
+          "speed": 8,
+          "angleJitterRad": 0.40,
+          "activeTicks": 20,
+          "bulletScale": 1.2
         },
         {
-          "pattern": "AIMED",
-          "cooldown": 15,
-          "minCooldown": 10,
-          "scalingProfile": "PRECISION",
-          "bulletType": "GOLD",
-          "arms": 5,
+          "_note": "Small red orbs every tick — faster, fills gaps left by large orbs",
+          "pattern": "RING_OFFSET",
+          "everyTickWhilePhase": true,
+          "cooldown": 5,
+          "minCooldown": 5,
+          "bulletType": "RED_ORB",
+          "arms": [8, 10, 12, 14],
+          "speed": 10,
+          "angleJitterRad": 0.0,
+          "ringStartAngleRad": -1
+        }
+      ]
+    },
+    {
+      "_note": "Nonspell 3: Onbashira Pillar Storm. Intense dual counter-rotating SPRINKLER with comb fans while circling fast. Harder than nonspell 1.",
+      "hp": 2200,
+      "isSpellCard": false,
+      "spellName": "Onbashira Pillar Storm",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "movement": "CIRCLE",
+      "moveSpeed": 140,
+      "patternTempo": 220.0,
+      "attacks": [
+        {
+          "_note": "3-nozzle DIVINE_SPIRIT, each fires a 2-bullet fan — pillar of teal pairs",
+          "pattern": "SPRINKLER",
+          "cooldown": 0,
+          "minCooldown": 0,
+          "bulletType": "DIVINE_SPIRIT",
+          "arms": 3,
+          "combCount": 2,
+          "sprinklerSpread": 0.12,
+          "speed": 4.5,
+          "sprinklerAdvanceRad": 2.20
+        },
+        {
+          "_note": "4-arm RED_ORB counter-spinning curtain",
+          "pattern": "SPRINKLER",
+          "cooldown": 0,
+          "minCooldown": 0,
+          "bulletType": "RED_ORB",
+          "arms": 4,
           "speed": 3.8,
-          "spread": 0.2
+          "sprinklerAdvanceRad": -2.80
+        },
+        {
+          "_note": "Gold fan burst every ~0.5s",
+          "pattern": "SPRINKLER",
+          "cooldown": 100,
+          "minCooldown": 100,
+          "bulletType": "GOLD",
+          "arms": 1,
+          "maxScaledArms": 1,
+          "combCount": 7,
+          "speed": 5.5,
+          "sprinklerAdvanceRad": 0.02,
+          "sprinklerSpread": 0.07,
+          "sprinklerSpeedSlope": 0.008
+        }
+      ]
+    },
+    {
+      "_note": "Spell 3: Divine Virtue 'Virtue of Wind God'. Brutal rotating laser grid + DIVINE_WIND C-curls + two dense every-tick RING_OFFSET layers.",
+      "hp": 4000,
+      "isSpellCard": true,
+      "spellName": "Divine Virtue \"Virtue of Wind God\"",
+      "spellDurationTicks": [1100, 900, 650, 420],
+      "spellBonus": 120000,
+      "movement": "REPOS_TOP",
+      "reposBossY": 150,
+      "reposShootTicks": 35,
+      "attacks": [
+        {
+          "_note": "Wide rotating laser grid — lunatic has 32 spokes with only 8-tick warning",
+          "pattern": "LASER_ROTATING",
+          "cooldown": 150,
+          "bulletType": "CYAN_LASER",
+          "arms": [16, 20, 24, 32],
+          "speed": 0,
+          "laserHalfWidth": 9,
+          "warnTicks": [22, 16, 12, 8],
+          "activeTicks": 30
+        },
+        {
+          "_note": "DIVINE_WIND between laser cycles — C-curl walls that force micro-dodging",
+          "pattern": "DIVINE_WIND",
+          "cooldown": 35,
+          "minCooldown": 22,
+          "bulletType": "DIVINE_SPIRIT",
+          "arms": [6, 7, 8, 9],
+          "speed": 3.5,
+          "sprinklerAdvanceRad": 0.28,
+          "divineWindLayers": 21,
+          "divineWindLayerSpacing": 8.0,
+          "divineWindCurveAngularVelocity": 0.042,
+          "divineWindCurveTicks": 18
+        },
+        {
+          "_note": "Large red orbs every tick — no safe corner while dodging lasers",
+          "pattern": "RING_OFFSET",
+          "everyTickWhilePhase": true,
+          "cooldown": 5,
+          "minCooldown": 5,
+          "bulletType": "RED_ORB_LARGE",
+          "arms": [10, 12, 14, 16],
+          "speed": 7,
+          "angleJitterRad": 0.0,
+          "ringStartAngleRad": -0.8
+        },
+        {
+          "_note": "Blue orbs every tick offset from red — alternating layers block retreat",
+          "pattern": "RING_OFFSET",
+          "everyTickWhilePhase": true,
+          "cooldown": 5,
+          "minCooldown": 5,
+          "bulletType": "BLUE_ORB_LARGE",
+          "arms": [10, 12, 14, 16],
+          "speed": 5,
+          "angleJitterRad": 0.22,
+          "ringStartAngleRad": 0.8,
+          "bulletScale": 1.2
         }
       ]
     }

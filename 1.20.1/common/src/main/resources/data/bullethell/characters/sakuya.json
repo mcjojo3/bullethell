@@ -14,6 +14,7 @@
   "chargeRateShooting": 0.8,
   "chargeRateIdle": 4.5,
   "chargeRateCharging": 4.0,
+  "immuneToTimeStop": true,
   "description": "Close range - time freeze",
   "shotOptions": [
     {

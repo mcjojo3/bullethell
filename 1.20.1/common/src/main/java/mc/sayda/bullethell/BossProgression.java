@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 import mc.sayda.bullethell.arena.DifficultyConfig;
+import mc.sayda.bullethell.boss.BossLoader;
+import mc.sayda.bullethell.boss.BossProgressionLoader;
 import mc.sayda.bullethell.boss.StageLoader;
 import mc.sayda.bullethell.debug.BHDebugMode;
 import net.minecraft.resources.ResourceLocation;
@@ -27,23 +29,6 @@ public final class BossProgression {
     private static final String ROOT_ADV = "bullethell:progression/root";
     private static final String ADV_PREFIX = "bullethell:progression/";
 
-    /** Boss order chain used for challenge caps. */
-    private static final Map<String, List<String>> PREREQS = Map.of(
-            "cirno_boss", List.of(),
-            "marisa_boss", List.of(),       // optional side boss - no prerequisites
-            "sanae_boss", List.of(),        // optional side boss - no prerequisites
-            "sakuya_boss", List.of("cirno_boss"),
-            "remilia_boss", List.of("cirno_boss", "sakuya_boss"),
-            "flandre_boss", List.of("remilia_boss"));
-
-    /** Stage id -> boss id mapping for challenge checks. */
-    private static final Map<String, String> STAGE_TO_BOSS = Map.of(
-            "cirno_stage", "cirno_boss",
-            "marisa_stage", "marisa_boss",
-            "sanae_stage", "sanae_boss",
-            "sakuya_stage", "sakuya_boss",
-            "remilia_stage", "remilia_boss",
-            "flandre_stage", "flandre_boss");
 
     private BossProgression() {
     }
@@ -113,7 +98,7 @@ public final class BossProgression {
     public static int maxAllowedDifficultyOrdinal(ServerPlayer player, String bossId) {
         if (player != null && BHDebugMode.isGodMode(player.getUUID()))
             return DifficultyConfig.LUNATIC.ordinal();
-        List<String> required = PREREQS.get(bossId);
+        List<String> required = BossProgressionLoader.prerequisites(bossId);
         if (required == null || required.isEmpty())
             return DifficultyConfig.LUNATIC.ordinal();
         int cap = DifficultyConfig.LUNATIC.ordinal();
@@ -137,12 +122,10 @@ public final class BossProgression {
     }
 
     public static boolean canChallengeStage(ServerPlayer player, String stageId, DifficultyConfig difficulty) {
-        String bossId = STAGE_TO_BOSS.get(stageId);
-        if (bossId == null) {
-            try {
-                bossId = StageLoader.load(stageId).bossId;
-            } catch (Exception ignored) {
-            }
+        String bossId = null;
+        try {
+            bossId = StageLoader.load(stageId).bossId;
+        } catch (Exception ignored) {
         }
         if (bossId == null || bossId.isBlank())
             return true;
@@ -150,21 +133,13 @@ public final class BossProgression {
     }
 
     public static String requirementSummary(String bossId) {
-        List<String> req = PREREQS.get(bossId);
-        if (req == null || req.isEmpty())
-            return "";
-        return switch (bossId) {
-            case "sakuya_boss" -> "Defeat Cirno first. Lowest clear difficulty is your cap.";
-            case "remilia_boss" -> "Defeat both Cirno and Sakuya first. Lowest clear difficulty is your cap.";
-            case "flandre_boss" -> "Defeat Remilia first. Lowest clear difficulty is your cap.";
-            default -> "Defeat prerequisite bosses first. Lowest clear difficulty is your cap.";
-        };
+        return BossProgressionLoader.requirementSummary(bossId);
     }
 
     /** Debug/status helper if needed for command/UI later. */
     public static Map<String, Integer> snapshot(ServerPlayer player) {
         Map<String, Integer> out = new LinkedHashMap<>();
-        Set<String> bosses = new LinkedHashSet<>(PREREQS.keySet());
+        Set<String> bosses = new LinkedHashSet<>(BossLoader.allBossIds());
         for (String stageId : StageLoader.REGISTERED_IDS) {
             try {
                 bosses.add(StageLoader.load(stageId).bossId);

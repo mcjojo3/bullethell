@@ -421,9 +421,21 @@ public class ClientArenaState {
     }
 
     public void applyLaserSync(float[] data, boolean[] active, boolean[] bidir) {
+        for (int i = 0; i < LaserPool.CAPACITY; i++) {
+            if (lasers.active[i]) {
+                lasers.prevX[i] = lasers.data[i * LaserPool.STRIDE];
+                lasers.prevY[i] = lasers.data[i * LaserPool.STRIDE + 1];
+            }
+        }
         System.arraycopy(active, 0, lasers.active, 0, LaserPool.CAPACITY);
         System.arraycopy(bidir, 0, lasers.bidir, 0, LaserPool.CAPACITY);
         System.arraycopy(data, 0, lasers.data, 0, data.length);
+        for (int i = 0; i < LaserPool.CAPACITY; i++) {
+            if (lasers.active[i] && lasers.prevX[i] == 0 && lasers.prevY[i] == 0) {
+                lasers.prevX[i] = lasers.data[i * LaserPool.STRIDE];
+                lasers.prevY[i] = lasers.data[i * LaserPool.STRIDE + 1];
+            }
+        }
     }
 
     // ---------------------------------------------------------------- packet

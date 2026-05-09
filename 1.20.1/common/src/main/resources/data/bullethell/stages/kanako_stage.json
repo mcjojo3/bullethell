@@ -1,111 +1,79 @@
 {
-  "id": "yuuka_stage",
-  "title": "Garden of the Sun — Flower Master's Domain",
-  "stageMusic": "the_capital_city_of_flowers_in_the_sky",
-  "bossId": "yuuka_boss",
+  "id": "kanako_stage",
+  "title": "Youkai Mountain — Path to the Divine Summit",
+  "stageMusic": "cemetery_of_onbashira_grave_of_being",
+  "bossId": "kanako_boss",
   "nextStageId": "",
   "rules": {
-    "itemDropEveryNthKill": 3,
-    "dropCyclePattern": "POWER,POINT,POWER,POINT,POWER,POINT,POWER,POINT",
-    "largeEnemyDropCyclePattern": "POWER_LARGE,POINT,POWER_LARGE,FULL_POWER,POINT,POWER_LARGE,POWER_LARGE,POINT",
-    "scoreExtendEvery": 1500000,
-    "pocFraction": 0.2,
-    "pocAutoCollect": true,
-    "itemAttractionSpeed": 16.0,
-    "deathPowerLoss": 16,
-    "grazeScoringEnabled": true,
-    "grazeScoreMultiplier": 1.0,
-    "pointItemMaxValue": 1000,
-    "pointItemMinValue": 200,
-    "cherrySystemEnabled": false,
-    "versusKillSendsBullets": false,
-    "onKillDeathBurstCount": 0
+    "preset": "TH10"
   },
   "waves": [
     {
-      "_comment": "Opening: Sunflowers blooming in the garden. Staggered formation of green and yellow fairies.",
+      "_comment": "Opening: Wind fairies descend from the mountain peak — blues from the left, yellows from the right.",
       "spawnTick": 0,
       "enemies": [
-        {
-          "x": 80,
-          "y": -30,
-          "vx": 0.0,
-          "vy": 3.5,
-          "type": "GREEN_FAIRY"
-        },
-        {
-          "x": 160,
-          "y": -30,
-          "vx": 0.0,
-          "vy": 3.6,
-          "type": "YELLOW_FAIRY",
-          "delayTicks": 10
-        },
-        {
-          "x": 240,
-          "y": -30,
-          "vx": 0.0,
-          "vy": 3.7,
-          "type": "GREEN_FAIRY",
-          "delayTicks": 20
-        },
-        {
-          "x": 320,
-          "y": -30,
-          "vx": 0.0,
-          "vy": 3.6,
-          "type": "YELLOW_FAIRY",
-          "delayTicks": 10
-        },
-        {
-          "x": 400,
-          "y": -30,
-          "vx": 0.0,
-          "vy": 3.5,
-          "type": "GREEN_FAIRY"
-        }
+        { "x": 80,  "y": -30, "vx": 0.5,  "vy": 3.2, "type": "BLUE_FAIRY" },
+        { "x": 150, "y": -30, "vx": 0.3,  "vy": 3.4, "type": "BLUE_FAIRY",   "delayTicks": 14 },
+        { "x": 340, "y": -30, "vx": -0.3, "vy": 3.4, "type": "YELLOW_FAIRY", "delayTicks": 14 },
+        { "x": 400, "y": -30, "vx": -0.5, "vy": 3.2, "type": "YELLOW_FAIRY", "delayTicks": 28 }
       ]
     },
     {
-      "_comment": "Mid-wave anchor: Large green fairies appearing to defend the center.",
-      "spawnTick": 120,
+      "_comment": "Shrine guardian sweep: Red fairies cross horizontally from both sides.",
+      "spawnTick": 90,
       "enemies": [
-        {
-          "x": 120,
-          "y": -40,
-          "vx": 0.5,
-          "vy": 2.5,
-          "type": "LARGE_GREEN"
-        },
-        {
-          "x": 360,
-          "y": -40,
-          "vx": -0.5,
-          "vy": 2.5,
-          "type": "LARGE_GREEN",
-          "delayTicks": 30
-        }
+        { "x": -20, "y": 110, "vx": 3.6,  "vy": 0.4,  "type": "RED_FAIRY" },
+        { "x": -20, "y": 155, "vx": 3.6,  "vy": 0.2,  "type": "RED_FAIRY", "delayTicks": 18 },
+        { "x": 500, "y": 110, "vx": -3.6, "vy": 0.4,  "type": "RED_FAIRY" },
+        { "x": 500, "y": 155, "vx": -3.6, "vy": 0.2,  "type": "RED_FAIRY", "delayTicks": 18 }
+      ]
+    },
+    {
+      "_comment": "Mountain anchor pair: LARGE_RED fairies flank the center path.",
+      "spawnTick": 200,
+      "enemies": [
+        { "x": 130, "y": -50, "vx": 0.4,  "vy": 2.0, "type": "LARGE_RED" },
+        { "x": 360, "y": -50, "vx": -0.4, "vy": 2.0, "type": "LARGE_RED", "delayTicks": 25 }
+      ]
+    },
+    {
+      "_comment": "Green ring-burst wave: Shrine boundary guardians cascade down the center.",
+      "spawnTick": 340,
+      "enemies": [
+        { "x": 100, "y": -30, "vx": 0.0, "vy": 3.0, "type": "GREEN_FAIRY" },
+        { "x": 190, "y": -30, "vx": 0.0, "vy": 3.0, "type": "GREEN_FAIRY", "delayTicks": 12 },
+        { "x": 290, "y": -30, "vx": 0.0, "vy": 3.0, "type": "GREEN_FAIRY", "delayTicks": 24 },
+        { "x": 380, "y": -30, "vx": 0.0, "vy": 3.0, "type": "GREEN_FAIRY", "delayTicks": 36 }
+      ]
+    },
+    {
+      "_comment": "Pre-boss summit approach: Large green wall fairy flanked by medium fairies.",
+      "spawnTick": 490,
+      "enemies": [
+        { "x": 240, "y": -60, "vx": 0.0,  "vy": 1.8, "type": "LARGE_GREEN" },
+        { "x": 110, "y": -40, "vx": 0.3,  "vy": 2.4, "type": "MEDIUM_FAIRY", "delayTicks": 30 },
+        { "x": 370, "y": -40, "vx": -0.3, "vy": 2.4, "type": "MEDIUM_FAIRY", "delayTicks": 30 }
       ]
     }
   ],
   "fairyRush": {
     "catalogId": "default",
-    "slotCount": 44,
-    "startTick": 250,
-    "gapTicksStartMin": 60,
-    "gapTicksStartMax": 100,
-    "gapTicksEndMin": 15,
-    "gapTicksEndMax": 30,
+    "slotCount": 52,
+    "startTick": 330,
+    "gapTicksStartMin": 55,
+    "gapTicksStartMax": 95,
+    "gapTicksEndMin": 12,
+    "gapTicksEndMax": 25,
     "gapEasing": "SMOOTHSTEP",
-    "jitterTicks": 12,
+    "jitterTicks": 10,
     "intensityStartLo": 1,
     "intensityStartHi": 3,
-    "intensityEndLo": 5,
-    "intensityEndHi": 12,
-    "breatherEvery": 10,
-    "breatherExtraTicks": 80,
+    "intensityEndLo": 6,
+    "intensityEndHi": 14,
+    "breatherEvery": 9,
+    "breatherExtraTicks": 70,
     "breatherWaveId": "",
-    "shuffleSeed": 12345,
+    "shuffleSeed": 78456123,
     "noRepeatLast": 4
   }
 }

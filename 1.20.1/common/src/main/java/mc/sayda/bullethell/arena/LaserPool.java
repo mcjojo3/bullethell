@@ -37,6 +37,10 @@ public class LaserPool {
      */
     public final boolean[] bidir = new boolean[CAPACITY];
 
+    /** Previous-tick origin for sub-tick interpolation on the client. */
+    public final float[] prevX = new float[CAPACITY];
+    public final float[] prevY = new float[CAPACITY];
+
     /** Set when any laser spawns this tick; cleared by {@link #clearDirty()}. */
     private boolean dirty = false;
 
@@ -102,6 +106,19 @@ public class LaserPool {
 
     public boolean isDirty() { return dirty; }
     public void clearDirty() { dirty = false; }
+
+    /** Snapshot current origin into prevX/prevY for sub-tick interpolation. Call once per client tick before clientTick(). */
+    public void savePrevPositions() {
+        for (int i = 0; i < CAPACITY; i++) {
+            if (active[i]) {
+                prevX[i] = data[i * STRIDE + F_X];
+                prevY[i] = data[i * STRIDE + F_Y];
+            }
+        }
+    }
+
+    public float getPrevX(int i) { return prevX[i]; }
+    public float getPrevY(int i) { return prevY[i]; }
 
     // ---------------------------------------------------------------- queries
 

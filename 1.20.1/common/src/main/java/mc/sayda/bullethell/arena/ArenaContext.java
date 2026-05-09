@@ -5213,7 +5213,7 @@ public class ArenaContext {
     public boolean canPlayerMove(UUID uuid) {
         if (timeStopTicks <= 0)
             return true;
-        return "sakuya".equals(getCharacterId(uuid));
+        return mc.sayda.bullethell.boss.CharacterLoader.load(getCharacterId(uuid)).immuneToTimeStop;
     }
 
     public int getSpellsCaptured() {

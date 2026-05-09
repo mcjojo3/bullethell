@@ -303,6 +303,11 @@ public final class BulletHellCommands {
                                                                                                                                 StringArgumentType
                                                                                                                                                 .getString(ctx, "difficulty"))))))))
 
+                                // ---- reload (operator): flush all JSON caches ----
+                                .then(Commands.literal("reload")
+                                                .requires(src -> src.hasPermission(2))
+                                                .executes(ctx -> reloadAllJson(ctx.getSource())))
+
                                 // ---- characters unlock/lock <name> (operator) ----
                                 .then(Commands.literal("characters")
                                                 .requires(src -> src.hasPermission(2))
@@ -517,6 +522,16 @@ public final class BulletHellCommands {
                 player.sendSystemMessage(Component.literal(
                                 "[BulletHell] Test: " + bossId + " phase=" + phaseIdx
                                                 + " char=" + characterId + " diff=" + diff.name()));
+                return 1;
+        }
+
+        private static int reloadAllJson(CommandSourceStack src) {
+                BossLoader.invalidateAll();
+                StageLoader.invalidateAll();
+                mc.sayda.bullethell.boss.FairyWaveLoader.invalidateAll();
+                mc.sayda.bullethell.boss.CharacterLoader.invalidateAll();
+                mc.sayda.bullethell.boss.BossProgressionLoader.invalidate();
+                src.sendSuccess(() -> Component.literal("[BulletHell] JSON caches cleared — boss, stage, character, wave, and progression files will reload on next use."), true);
                 return 1;
         }
 
