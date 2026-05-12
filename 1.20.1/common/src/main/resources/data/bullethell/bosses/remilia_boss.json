@@ -385,7 +385,7 @@
       "spellBonus": 100000,
       "movement": "REPOS_TOP",
       "reposBossY": 110,
-      "reposShootTicks": 20,
+      "reposShootTicks": 60,
       "moveSpeed": 0,
       "music": "",
       "attacks": [
@@ -393,7 +393,7 @@
           "_note": "Start 3 knife rings spinning around boss — runs as a background formation.",
           "pattern": "WORM_CIRCLE",
           "dynamicDifficulty": false,
-          "spinTicks": 100,
+          "spinTicks": 30,
           "speed": 5.5,
           "cooldown": 1,
           "minCooldown": 1,
@@ -404,7 +404,7 @@
               "spanDeg": 360,
               "spinSpeedDeg": -3.0,
               "orbitRadius": 78,
-              "bulletType": "KUNAI"
+              "bulletType": "RED_KNIFE"
             },
             {
               "knifeCount": 12,
@@ -412,7 +412,7 @@
               "spanDeg": 360,
               "spinSpeedDeg": 3.0,
               "orbitRadius": 78,
-              "bulletType": "KUNAI"
+              "bulletType": "RED_KNIFE"
             },
             {
               "knifeCount": 12,
@@ -420,22 +420,21 @@
               "spanDeg": 360,
               "spinSpeedDeg": -2.0,
               "orbitRadius": 78,
-              "bulletType": "KUNAI"
+              "bulletType": "RED_KNIFE"
             }
           ]
         },
         {
           "_note": "5 tight rings of red diamonds radiating outward while knives spin.",
-          "pattern": "RING",
+          "pattern": "BOUNCE",
           "dynamicDifficulty": false,
           "burstCount": 5,
-          "burstInterval": 20,
+          "burstInterval": 5,
           "cooldown": 55,
           "minCooldown": 55,
           "bulletType": "RED_DIAMOND",
-          "arms": 14,
-          "speed": 5.5,
-          "bulletLifetimeTicks": 200,
+          "arms": 56,
+          "speed": 4.5,
           "ringStartAngleRad": 0
         }
       ]

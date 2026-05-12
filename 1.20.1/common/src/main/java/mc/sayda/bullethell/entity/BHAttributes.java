@@ -41,11 +41,15 @@ public final class BHAttributes {
                     9.0)
                     .setSyncable(true));
 
+    private static boolean initialized = false;
+
     private BHAttributes() {
     }
 
     public static void register() {
+        if (initialized) return;
         ATTRIBUTES.register();
+        initialized = true;
     }
 
     /** Floored non-negative bonus from {@link #EXTRA_LIVES}. */

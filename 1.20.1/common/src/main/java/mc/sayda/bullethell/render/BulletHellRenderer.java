@@ -381,9 +381,8 @@ public class BulletHellRenderer {
                     continue;
                 float bvx = state.bullets.getVx(i);
                 float bvy = state.bullets.getVy(i);
-                float px = state.bullets.getPrevX(i), py = state.bullets.getPrevY(i);
-                float bx = px + (cx - px) * partialTick;
-                float by = py + (cy - py) * partialTick;
+                float bx = cx + bvx * partialTick;
+                float by = cy + bvy * partialTick;
                 BulletType type = BulletType.fromId(state.bullets.getType(i));
                 int sbx = ox + (int) (bx * sx);
                 int sby = oy + (int) (by * sy);
@@ -399,24 +398,22 @@ public class BulletHellRenderer {
         }
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
-        // ---- 7. All Player bullets - partial-tick interpolation (typed textures like
-        // enemy bullets)
+        // ---- 7. All Player bullets - velocity extrapolation (same as enemy bullets)
         for (mc.sayda.bullethell.arena.BulletPool pool : state.allPlayerBullets.values()) {
             for (int i = 0; i < mc.sayda.bullethell.arena.BulletPool.PLAYER_CAPACITY; i++) {
                 if (!pool.isActive(i))
                     continue;
                 float cx = pool.getX(i), cy = pool.getY(i);
-                float px = pool.getPrevX(i), py = pool.getPrevY(i);
-                float bx = px + (cx - px) * partialTick;
-                float by = py + (cy - py) * partialTick;
+                float vx = pool.getVx(i);
+                float vy = pool.getVy(i);
+                float bx = cx + vx * partialTick;
+                float by = cy + vy * partialTick;
                 if (outOfArena(bx, by))
                     continue;
                 BulletType type = BulletType.fromId(pool.getType(i));
                 int sbx = ox + (int) (bx * sx);
                 int sby = oy + (int) (by * sy);
                 float vis = pool.getVisScale(i);
-                float vx = pool.getVx(i);
-                float vy = pool.getVy(i);
                 if (type.isShortLaserLineHit()) {
                     float hit = pool.getHitScale(i);
                     renderShortLaserBullet(gfx, type, sbx, sby, vis, hit, vx, vy, sx, sy);
@@ -616,7 +613,7 @@ public class BulletHellRenderer {
         }
 
         // Enemy bullet hitboxes (server uses type.radius * hitScale)
-        // Uses the same prev→current lerp as the texture render pass so
+        // Uses velocity extrapolation matching the texture render pass so
         // hitbox and sprite are always perfectly aligned on screen.
         for (int i = 0; i < BulletPool.ENEMY_CAPACITY; i++) {
             if (!state.bullets.isActive(i))
@@ -624,9 +621,10 @@ public class BulletHellRenderer {
             float cx = state.bullets.getX(i), cy = state.bullets.getY(i);
             if (outOfArena(cx, cy))
                 continue;
-            float px = state.bullets.getPrevX(i), py = state.bullets.getPrevY(i);
-            float bx = px + (cx - px) * partialTick;
-            float by = py + (cy - py) * partialTick;
+            float vx = state.bullets.getVx(i);
+            float vy = state.bullets.getVy(i);
+            float bx = cx + vx * partialTick;
+            float by = cy + vy * partialTick;
             BulletType bt = BulletType.fromId(state.bullets.getType(i));
             int sbx = ox + (int) (bx * sx);
             int sby = oy + (int) (by * sy);
@@ -636,8 +634,6 @@ public class BulletHellRenderer {
                 float thick = bt.lineHitCollisionHalfWidth(state.bullets.getHitScale(i));
                 int hw = Math.max(0, Math.round(halfLen * scale));
                 int ht = Math.max(0, Math.round(thick * scale));
-                float vx = state.bullets.getVx(i);
-                float vy = state.bullets.getVy(i);
                 float rotDeg = bulletRotationDegrees(bt, vx, vy);
                 gfx.pose().pushPose();
                 gfx.pose().translate(sbx, sby, 0.0);
@@ -658,15 +654,15 @@ public class BulletHellRenderer {
         }
 
         // Player bullet hitboxes (all co-op pools)
-        // Same prev→current lerp as textures for perfect alignment.
+        // Same velocity extrapolation as textures for perfect alignment.
         for (mc.sayda.bullethell.arena.BulletPool pool : state.allPlayerBullets.values()) {
             for (int i = 0; i < mc.sayda.bullethell.arena.BulletPool.PLAYER_CAPACITY; i++) {
                 if (!pool.isActive(i))
                     continue;
                 float cx = pool.getX(i), cy = pool.getY(i);
-                float px2 = pool.getPrevX(i), py2 = pool.getPrevY(i);
-                float bx = px2 + (cx - px2) * partialTick;
-                float by = py2 + (cy - py2) * partialTick;
+                float vx2 = pool.getVx(i), vy2 = pool.getVy(i);
+                float bx = cx + vx2 * partialTick;
+                float by = cy + vy2 * partialTick;
                 if (outOfArena(bx, by))
                     continue;
                 BulletType bt = BulletType.fromId(pool.getType(i));

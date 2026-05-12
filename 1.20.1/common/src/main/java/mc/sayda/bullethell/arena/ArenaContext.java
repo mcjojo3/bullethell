@@ -484,11 +484,23 @@ public class ArenaContext {
      */
     public final Queue<String> pendingAttackActivationSounds = new ConcurrentLinkedQueue<>();
 
-    private boolean over = false;
+    /**
+     * Runnables queued from C2S packet handlers (MC main thread) to be drained by the
+     * arena thread at the start of each tick. Avoids mutating arena state off-thread.
+     */
+    public final ConcurrentLinkedQueue<Runnable> pendingInputs = new ConcurrentLinkedQueue<>();
+
+    /**
+     * Runnables queued by the arena thread for execution on the MC main thread
+     * (e.g. win/loss handling, advancement grants, arena removal).
+     */
+    public final ConcurrentLinkedQueue<Runnable> mainCallbacks = new ConcurrentLinkedQueue<>();
+
+    private volatile boolean over = false;
     /**
      * True when the boss's last phase was cleared (player won). False on game-over.
      */
-    private boolean won = false;
+    private volatile boolean won = false;
     /** Number of spell cards the player successfully captured (no bomb/death). */
     private int spellsCaptured = 0;
     /** Total spell card phases triggered so far. */

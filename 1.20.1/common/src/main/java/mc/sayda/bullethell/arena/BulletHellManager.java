@@ -2,6 +2,7 @@ package mc.sayda.bullethell.arena;
 
 import mc.sayda.bullethell.boss.StageDefinition;
 import mc.sayda.bullethell.debug.BHDebugMode;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
@@ -23,15 +24,22 @@ public class BulletHellManager {
     public static final BulletHellManager INSTANCE = new BulletHellManager();
 
     private final Map<UUID, ArenaContext> arenas = new ConcurrentHashMap<>();
+    private final Map<UUID, ArenaThread> arenaThreads = new ConcurrentHashMap<>();
     /** participant UUID → host UUID (not present for hosts themselves). */
     private final Map<UUID, UUID> playerToMatch = new ConcurrentHashMap<>();
     /** host UUID → list of accepted participant info (pre-arena lobby). */
     private final Map<UUID, List<ParticipantInfo>> pendingInvites = new ConcurrentHashMap<>();
 
+    private volatile MinecraftServer minecraftServer;
+
+    /** Stores the server reference once; no-op on subsequent calls. */
+    public void setServerOnce(MinecraftServer server) {
+        if (this.minecraftServer == null) this.minecraftServer = server;
+    }
+
     public record ParticipantInfo(UUID uuid, mc.sayda.bullethell.boss.CharacterDefinition charDef, int shotTypeOrdinal) {}
 
-    private BulletHellManager() {
-    }
+    private BulletHellManager() {}
 
     // ---------------------------------------------------------------- lifecycle
 
@@ -48,6 +56,7 @@ public class BulletHellManager {
         BHDebugMode.clear(playerUuid);
         ArenaContext ctx = new ArenaContext(playerUuid, difficulty, stageId, characterId);
         arenas.put(playerUuid, ctx);
+        startThread(playerUuid, ctx, minecraftServer);
         return ctx;
     }
 
@@ -60,6 +69,7 @@ public class BulletHellManager {
         BHDebugMode.clear(host.getUUID());
         ArenaContext ctx = new ArenaContext(host.getUUID(), difficulty, stageId, characterId, host);
         arenas.put(host.getUUID(), ctx);
+        startThread(host.getUUID(), ctx, host.getServer());
         return ctx;
     }
 
@@ -74,11 +84,25 @@ public class BulletHellManager {
         if (skipToBossPhase1Based >= 1)
             ctx.debugSkipToBossPhase(skipToBossPhase1Based - 1);
         arenas.put(host.getUUID(), ctx);
+        startThread(host.getUUID(), ctx, host.getServer());
         return ctx;
+    }
+
+    private void startThread(UUID hostUuid, ArenaContext ctx, MinecraftServer server) {
+        if (server == null) {
+            mc.sayda.bullethell.Bullethell.LOGGER.error(
+                    "[BulletHell] Cannot start arena thread for {} — MinecraftServer not available", hostUuid);
+            return;
+        }
+        ArenaThread thread = new ArenaThread(ctx, hostUuid, server);
+        arenaThreads.put(hostUuid, thread);
+        thread.start();
     }
 
     public void stopArena(UUID playerUuid) {
         ArenaContext ctx = arenas.remove(playerUuid);
+        ArenaThread thread = arenaThreads.remove(playerUuid);
+        if (thread != null) thread.stop();
         if (ctx != null) {
             BHDebugMode.clear(playerUuid);
             for (UUID coopId : ctx.getCoopPlayers().keySet()) {
@@ -93,24 +117,20 @@ public class BulletHellManager {
 
     /**
      * Join an existing arena as a co-op participant.
-     * 
+     *
      * @param participantUuid the joining player's UUID
-     * @param hostUuid        the host player's UUID (must already have an active
-     *                        arena)
+     * @param hostUuid        the host player's UUID (must already have an active arena)
      * @param charDef         character definition for the joining player
      * @param participant     joining player (for attribute bonuses)
      */
     public void joinMatch(UUID participantUuid, UUID hostUuid,
             mc.sayda.bullethell.boss.CharacterDefinition charDef, ServerPlayer participant, int shotTypeOrdinal) {
         ArenaContext ctx = arenas.get(hostUuid);
-        if (ctx == null)
-            return;
+        if (ctx == null) return;
         ctx.addCoopPlayer(participantUuid, charDef, participant, shotTypeOrdinal);
         playerToMatch.put(participantUuid, hostUuid);
-        // Grant spawn invulnerability so the joining player doesn't die instantly
         mc.sayda.bullethell.arena.PlayerState2D ps = ctx.getPlayerState(participantUuid);
-        if (ps != null)
-            ps.invulnTicks = mc.sayda.bullethell.arena.PlayerState2D.INVULN_TICKS;
+        if (ps != null) ps.invulnTicks = mc.sayda.bullethell.arena.PlayerState2D.INVULN_TICKS;
     }
 
     /** Remove a co-op participant from their current match. */
@@ -149,15 +169,13 @@ public class BulletHellManager {
      */
     public ArenaContext getArenaForPlayer(UUID uuid) {
         ArenaContext direct = arenas.get(uuid);
-        if (direct != null)
-            return direct;
+        if (direct != null) return direct;
         UUID hostUuid = playerToMatch.get(uuid);
         return hostUuid != null ? arenas.get(hostUuid) : null;
     }
 
     /**
-     * True if the UUID is either a host with an active arena OR a co-op
-     * participant.
+     * True if the UUID is either a host with an active arena OR a co-op participant.
      */
     public boolean isInMatch(UUID uuid) {
         return arenas.containsKey(uuid) || playerToMatch.containsKey(uuid);

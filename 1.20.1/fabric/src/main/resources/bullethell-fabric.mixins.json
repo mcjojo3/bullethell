@@ -2,7 +2,9 @@
   "required": true,
   "package": "mc.sayda.bullethell.mixin",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [],
+  "mixins": [
+    "BootstrapMixin"
+  ],
   "client": [
     "client.MixinKeyboardInput",
     "client.KeyMappingAccessor",

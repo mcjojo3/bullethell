@@ -19,6 +19,20 @@ public final class PentagramFormationRuntime {
     private static final int MAX_POINTS = 1400;
     public static final int MAX_WAVES = 24;
 
+    private static final int[] STAR_ORDER = { 0, 2, 4, 1, 3, 0 };
+    private static final float[] STAR_UNIT_X;
+    private static final float[] STAR_UNIT_Y;
+    static {
+        float step = (float) (Math.PI * 2.0 / 5.0);
+        STAR_UNIT_X = new float[5];
+        STAR_UNIT_Y = new float[5];
+        for (int i = 0; i < 5; i++) {
+            float a = step * i;
+            STAR_UNIT_X[i] = (float) Math.cos(a);
+            STAR_UNIT_Y[i] = (float) Math.sin(a);
+        }
+    }
+
     private final int[] slotsA = new int[MAX_POINTS];
     /** Second bullet per sample when dual; {@code -1} when single-colour mode. */
     private final int[] slotsB = new int[MAX_POINTS];
@@ -162,26 +176,13 @@ public final class PentagramFormationRuntime {
     int max = Math.max(1, maxBullets);
     int samples = samplesPerEdge;
 
-    float[] px = new float[5];
-    float[] py = new float[5];
-
-    float step = (float) (Math.PI * 2.0 / 5.0);
-    for (int i = 0; i < 5; i++) {
-        float a = step * i;
-        px[i] = (float) Math.cos(a) * starRadius;
-        py[i] = (float) Math.sin(a) * starRadius;
-    }
-
-    // Pentagram: connect every second point
-    int[] starOrder = { 0, 2, 4, 1, 3, 0 };
-
     int spawned = 0;
     while (spawned < max && spawnLayerIndex < STAR_COUNT) {
 
-        float ax = px[starOrder[spawnEdge]];
-        float ay = py[starOrder[spawnEdge]];
-        float bx = px[starOrder[spawnEdge + 1]];
-        float by = py[starOrder[spawnEdge + 1]];
+        float ax = STAR_UNIT_X[STAR_ORDER[spawnEdge]] * starRadius;
+        float ay = STAR_UNIT_Y[STAR_ORDER[spawnEdge]] * starRadius;
+        float bx = STAR_UNIT_X[STAR_ORDER[spawnEdge + 1]] * starRadius;
+        float by = STAR_UNIT_Y[STAR_ORDER[spawnEdge + 1]] * starRadius;
 
         float u = (spawnSample + 0.5f) / samples;
         float lx = ax + (bx - ax) * u;
@@ -264,6 +265,22 @@ public final class PentagramFormationRuntime {
      */
     public void syncPositions(BulletPool pool, float bossX, float bossY, float spin,
             float[] ringInnerPx, float[] ringOuterPx, int wavesCap) {
+        // Pre-compute cos/sin for each of the STAR_COUNT layers (40 trig calls total)
+        // rather than recomputing per bullet (up to 1400 × 4 = 5600 calls per tick).
+        float layerStep = (float) (Math.PI * 2.0 / STAR_COUNT);
+        float[] caL     = new float[STAR_COUNT];
+        float[] saL     = new float[STAR_COUNT];
+        float[] cosAaL  = new float[STAR_COUNT];
+        float[] sinAaL  = new float[STAR_COUNT];
+        for (int l = 0; l < STAR_COUNT; l++) {
+            float ang  = spin + l * layerStep;
+            caL[l]    = (float) Math.cos(ang);
+            saL[l]    = (float) Math.sin(ang);
+            float aa   = l * layerStep + spin * 1.15f;
+            cosAaL[l] = (float) Math.cos(aa);
+            sinAaL[l] = (float) Math.sin(aa);
+        }
+
         for (int i = 0; i < count; i++) {
             int sA = slotsA[i];
             if (!pool.isActive(sA))
@@ -277,21 +294,19 @@ public final class PentagramFormationRuntime {
 
             float lx = localX[i];
             float ly = localY[i];
-            float ang = spin + layer * (float) (Math.PI * 2.0 / STAR_COUNT);
-            float ca = (float) Math.cos(ang);
-            float sa = (float) Math.sin(ang);
+            float ca = caL[layer];
+            float sa = saL[layer];
             float rx = lx * ca - ly * sa;
             float ry = lx * sa + ly * ca;
 
-            float aa = layer * (float) (Math.PI * 2.0 / STAR_COUNT) + spin * 1.15f;
-            float scxIn = bossX + (float) Math.cos(aa) * rInner;
-            float scyIn = bossY + (float) Math.sin(aa) * rInner;
+            float scxIn = bossX + cosAaL[layer] * rInner;
+            float scyIn = bossY + sinAaL[layer] * rInner;
             pool.setPosition(sA, scxIn + rx, scyIn + ry);
 
             int sB = slotsB[i];
             if (sB >= 0 && pool.isActive(sB)) {
-                float scxOut = bossX + (float) Math.cos(aa) * rOuter;
-                float scyOut = bossY + (float) Math.sin(aa) * rOuter;
+                float scxOut = bossX + cosAaL[layer] * rOuter;
+                float scyOut = bossY + sinAaL[layer] * rOuter;
                 pool.setPosition(sB, scxOut + rx, scyOut + ry);
             }
         }

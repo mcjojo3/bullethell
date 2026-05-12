@@ -90,17 +90,20 @@ public final class BHPackets {
     // ---------------------------------------------------------------- Registration
 
     public static void register() {
-        // C2S: player input every tick
+        // C2S: player input every tick — queued to arena thread via pendingInputs
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, PLAYER_POS, (buf, ctx) -> {
             PlayerPos2DPacket pkt = PlayerPos2DPacket.decode(buf);
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
-                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(sender.getUUID());
+                UUID id = sender.getUUID();
+                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(id);
                 if (arena == null) return;
-                PlayerState2D ps = arena.getPlayerState(sender.getUUID());
-                if (ps == null) return;
-                ps.focused = pkt.focused; ps.shooting = pkt.shooting; ps.isCharging = pkt.charging;
-                if (arena.canPlayerMove(sender.getUUID())) ps.move(pkt.dx, pkt.dy);
+                arena.pendingInputs.offer(() -> {
+                    PlayerState2D ps = arena.getPlayerState(id);
+                    if (ps == null) return;
+                    ps.focused = pkt.focused; ps.shooting = pkt.shooting; ps.isCharging = pkt.charging;
+                    if (arena.canPlayerMove(id)) ps.move(pkt.dx, pkt.dy);
+                });
             });
         });
 
@@ -108,8 +111,9 @@ public final class BHPackets {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, BOMB, (buf, ctx) -> {
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
-                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(sender.getUUID());
-                if (arena != null) arena.activateBomb(sender.getUUID());
+                UUID id = sender.getUUID();
+                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(id);
+                if (arena != null) arena.pendingInputs.offer(() -> arena.activateBomb(id));
             });
         });
 
@@ -117,8 +121,9 @@ public final class BHPackets {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, SKILL, (buf, ctx) -> {
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
-                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(sender.getUUID());
-                if (arena != null) arena.activateSkill(sender.getUUID());
+                UUID id = sender.getUUID();
+                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(id);
+                if (arena != null) arena.pendingInputs.offer(() -> arena.activateSkill(id));
             });
         });
 
@@ -127,8 +132,9 @@ public final class BHPackets {
             SkipDialogPacket pkt = SkipDialogPacket.decode(buf);
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
-                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(sender.getUUID());
-                if (arena != null) arena.skipDialog(sender.getUUID(), pkt.skipAll);
+                UUID id = sender.getUUID();
+                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(id);
+                if (arena != null) arena.pendingInputs.offer(() -> arena.skipDialog(id, pkt.skipAll));
             });
         });
 
@@ -139,7 +145,8 @@ public final class BHPackets {
                 UUID uuid = player.getUUID();
                 ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(uuid);
                 if (arena != null) {
-                    arena.setParticipantPaused(uuid, false);
+                    // forceGameOver() sets a volatile boolean — safe to call from any thread
+                    arena.pendingInputs.offer(() -> arena.setParticipantPaused(uuid, false));
                     arena.forceGameOver();
                 } else if (BulletHellManager.INSTANCE.isInMatch(uuid)) {
                     BulletHellManager.INSTANCE.leaveMatch(uuid);
@@ -153,9 +160,10 @@ public final class BHPackets {
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
                 if (sender == null) return;
-                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(sender.getUUID());
+                UUID id = sender.getUUID();
+                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(id);
                 if (arena != null)
-                    arena.setParticipantPaused(sender.getUUID(), pkt.paused);
+                    arena.pendingInputs.offer(() -> arena.setParticipantPaused(id, pkt.paused));
             });
         });
 

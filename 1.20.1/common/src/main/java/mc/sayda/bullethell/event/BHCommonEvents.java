@@ -3,222 +3,44 @@ package mc.sayda.bullethell.event;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.event.events.common.TickEvent;
-import mc.sayda.bullethell.BHGameRules;
 import mc.sayda.bullethell.BossProgression;
 import mc.sayda.bullethell.BossRushMode;
 import mc.sayda.bullethell.CharacterUnlocks;
 import mc.sayda.bullethell.arena.ArenaContext;
-import mc.sayda.bullethell.arena.VictoryXpRewards;
-import mc.sayda.bullethell.arena.ArenaEndShareSnapshot;
+import mc.sayda.bullethell.arena.BulletPool;
 import mc.sayda.bullethell.arena.BulletHellManager;
 import mc.sayda.bullethell.arena.LastArenaShareState;
-import mc.sayda.bullethell.arena.BulletPool;
-import mc.sayda.bullethell.arena.GameEvent;
+import mc.sayda.bullethell.arena.ArenaEndShareSnapshot;
+import mc.sayda.bullethell.arena.VictoryXpRewards;
 import mc.sayda.bullethell.boss.CharacterDefinition;
 import mc.sayda.bullethell.boss.CharacterLoader;
 import mc.sayda.bullethell.command.BulletHellCommands;
 import mc.sayda.bullethell.debug.BHDebugMode;
-import mc.sayda.bullethell.network.AttackActivationSfxPacket;
-import mc.sayda.bullethell.network.ArenaStatePacket;
-import mc.sayda.bullethell.network.BHPackets;
-import mc.sayda.bullethell.network.BulletDeltaPacket;
-import mc.sayda.bullethell.network.CoopPlayersSyncPacket;
-import mc.sayda.bullethell.network.EnemySyncPacket;
-import mc.sayda.bullethell.network.GameEventPacket;
-import mc.sayda.bullethell.network.ItemSyncPacket;
-import mc.sayda.bullethell.network.LaserSyncPacket;
-import mc.sayda.bullethell.network.AllPlayerBulletsSyncPacket;
+import mc.sayda.bullethell.network.*;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class BHCommonEvents {
 
-    private static int syncTick = 0;
     private record CarryState(int lives, int bombs, int graze, int power,
             double storedChargeProgress, double holdChargeProgress) {
     }
 
     public static void register() {
         TickEvent.SERVER_POST.register(server -> {
-            syncTick++;
+            // Cache server reference once so UUID-only startArena() overloads can start threads.
+            BulletHellManager.INSTANCE.setServerOnce(server);
 
-            BulletHellManager manager = BulletHellManager.INSTANCE;
-            Map<UUID, ArenaContext> arenas = manager.getAll();
-            List<UUID> toRemove = new ArrayList<>();
-
-            for (var entry : arenas.entrySet()) {
-                UUID uuid = entry.getKey();
-                ArenaContext ctx = entry.getValue();
-
-                ctx.setGloballyPaused(BHGameRules.isGlobalPauseEnabled(server) && ctx.hasPausedParticipants());
-                ctx.tick();
-
-                ServerPlayer host = server.getPlayerList().getPlayer(uuid);
-                if (host == null) {
-                    toRemove.add(uuid);
-                    continue;
-                }
-
-                if (ctx.isOver()) {
-                    if (ctx.isWon()) {
-                        String bossId = (ctx.boss != null) ? ctx.boss.id : "";
-                        // Derive character id from boss id: "<charId>_boss" → "<charId>"
-                        String charReward = (bossId != null && bossId.endsWith("_boss"))
-                                ? bossId.substring(0, bossId.length() - 5) : "";
-                        if (!ctx.practiceMode) {
-                            for (UUID pid : ctx.allParticipants()) {
-                                ServerPlayer p = server.getPlayerList().getPlayer(pid);
-                                if (p == null || bossId == null || bossId.isBlank())
-                                    continue;
-                                boolean improved = BossProgression.grantClearThroughDifficulty(p, bossId, ctx.difficulty);
-                                if (improved) {
-                                    p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                                            "[BulletHell] Recorded clear: " + bossId + " (" + ctx.difficulty.name() + ")."));
-                                }
-                                // Notify if this clear unlocked a playable character
-                                if (!charReward.isBlank()) {
-                                    boolean charUnlocked = CharacterUnlocks.grantThroughDifficulty(p, charReward, ctx.difficulty);
-                                    if (charUnlocked) {
-                                        String charName = charReward.substring(0, 1).toUpperCase() + charReward.substring(1);
-                                        p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                                                "[BulletHell] " + charName + " is now playable on " + ctx.difficulty.name() + " and below!"));
-                                    }
-                                    // Always sync unlock state after a win so character select reflects it
-                                    BHPackets.sendCharacterUnlocks(p, new mc.sayda.bullethell.network.CharacterUnlockSyncPacket(
-                                            CharacterUnlocks.snapshot(p)));
-                                }
-                            }
-                        }
-                    }
-                    if (tryContinueToNextStage(server, uuid, ctx)) {
-                        // tryContinueToNextStage() already replaces the arena for this host UUID.
-                        // Do NOT queue removal here, or end-of-tick cleanup can delete the new arena.
-                        continue;
-                    }
-                    for (UUID pid : ctx.allParticipants()) {
-                        ServerPlayer p = server.getPlayerList().getPlayer(pid);
-                        if (p == null) continue;
-                        // Record snapshot + send end overlay BEFORE stopped() so
-                        // the client can open ArenaEndScreen before the arena clears
-                        sendEndStats(p, ctx, true);
-                        BHPackets.sendToPlayer(p, ArenaStatePacket.stopped());
-                    }
-                    toRemove.add(uuid);
-                    continue;
-                }
-
-                List<GameEvent> globalEvents = java.util.Collections.emptyList();
-                if (!ctx.pendingEvents.isEmpty()) {
-                    GameEvent ge;
-                    globalEvents = new ArrayList<>();
-                    while ((ge = ctx.pendingEvents.poll()) != null)
-                        globalEvents.add(ge);
-                }
-
-                List<String> attackActivationSfx = java.util.Collections.emptyList();
-                if (!ctx.pendingAttackActivationSounds.isEmpty()) {
-                    String sfxId;
-                    attackActivationSfx = new ArrayList<>();
-                    while ((sfxId = ctx.pendingAttackActivationSounds.poll()) != null)
-                        attackActivationSfx.add(sfxId);
-                }
-
-                BulletDeltaPacket deltaPacket = buildBulletDelta(ctx);
-                java.util.Set<UUID> all = ctx.allParticipants();
-                AllPlayerBulletsSyncPacket allBulletsPacket = AllPlayerBulletsSyncPacket.fromContext(ctx);
-                LaserSyncPacket laserPacket = ctx.lasers.isDirty() ? new LaserSyncPacket(ctx.lasers) : null;
-                ItemSyncPacket itemPacket = (syncTick % 2 == 0) ? ItemSyncPacket.fromContext(ctx) : null;
-                EnemySyncPacket enemyPacket = EnemySyncPacket.fromContext(ctx);
-
-                ctx.bullets.clearDirty();
-
-                // Pre-compute player index map once (O(N)) instead of linear-searching per player.
-                java.util.Map<UUID, Integer> pIdxMap = new java.util.HashMap<>();
-                if (ctx.playerUuid != null) pIdxMap.put(ctx.playerUuid, 1);
-                int coopCount = 2;
-                for (UUID cid : ctx.getCoopPlayers().keySet()) pIdxMap.put(cid, coopCount++);
-
-                // Safety: emptyMap() is immutable; .put() is only called inside the
-                // all.size() > 1 branch where coopPackets is reassigned to a real HashMap.
-                java.util.Map<UUID, CoopPlayersSyncPacket> coopPackets = java.util.Collections.emptyMap();
-                if (all.size() > 1) {
-                    coopPackets = new java.util.HashMap<>();
-                    List<CoopPlayersSyncPacket.Entry> allEntries = new ArrayList<>();
-                    int idx = 1;
-                    for (UUID pid : all) {
-                        mc.sayda.bullethell.arena.PlayerState2D ps = ctx.getPlayerState(pid);
-                        if (ps != null) {
-                            String charId = ctx.getCharacterId(pid);
-                            mc.sayda.bullethell.boss.CharacterDefinition cd = mc.sayda.bullethell.boss.CharacterLoader
-                                    .load(charId);
-                            allEntries.add(new CoopPlayersSyncPacket.Entry(
-                                    ps.x, ps.y, ps.lives, cd.tintColor, charId, idx, ctx.getScore(pid)));
-                        }
-                        idx++;
-                    }
-
-                    // Build per-recipient list by skipping that recipient's index — no full copy.
-                    int recipientIdx = 0;
-                    for (UUID pid : all) {
-                        List<CoopPlayersSyncPacket.Entry> others = new ArrayList<>(allEntries.size() - 1);
-                        for (int i = 0; i < allEntries.size(); i++) {
-                            if (i != recipientIdx) others.add(allEntries.get(i));
-                        }
-                        coopPackets.put(pid, new CoopPlayersSyncPacket(others));
-                        recipientIdx++;
-                    }
-                }
-
-                for (UUID pid : all) {
-                    ServerPlayer p = server.getPlayerList().getPlayer(pid);
-                    if (p == null)
-                        continue;
-
-                    // Send global events
-                    for (GameEvent g : globalEvents)
-                        BHPackets.sendGameEvent(p, new GameEventPacket(g));
-
-                    for (String as : attackActivationSfx)
-                        BHPackets.sendAttackActivationSfx(p, new AttackActivationSfxPacket(as));
-
-                    // Send personal events
-                    mc.sayda.bullethell.arena.PlayerState2D ps2d = ctx.getPlayerState(pid);
-                    if (ps2d != null) {
-                        GameEvent pe;
-                        while ((pe = ps2d.personalEvents.poll()) != null)
-                            BHPackets.sendGameEvent(p, new GameEventPacket(pe));
-                    }
-
-                    if (deltaPacket != null)
-                        BHPackets.sendBulletDelta(p, deltaPacket);
-
-                    BHPackets.sendAllPlayerBullets(p, allBulletsPacket);
-
-                    int pIdx = pIdxMap.getOrDefault(pid, 1);
-                    BHPackets.sendToPlayer(p, new ArenaStatePacket(ctx, pid, pIdx));
-
-                    if (itemPacket != null)
-                        BHPackets.sendItemSync(p, itemPacket);
-
-                    if (enemyPacket != null)
-                        BHPackets.sendEnemySync(p, enemyPacket);
-
-                    CoopPlayersSyncPacket cpp = coopPackets.get(pid);
-                    if (cpp != null)
-                        BHPackets.sendCoopSync(p, cpp);
-
-                    if (laserPacket != null)
-                        BHPackets.sendLaserSync(p, laserPacket);
-                }
-                if (laserPacket != null)
-                    ctx.lasers.clearDirty();
+            // Drain per-arena callbacks queued by arena threads onto the MC main thread
+            // (win/loss advancement grants, arena removal, boss-rush continuation, etc.).
+            for (ArenaContext ctx : BulletHellManager.INSTANCE.getAll().values()) {
+                Runnable r;
+                while ((r = ctx.mainCallbacks.poll()) != null) r.run();
             }
-
-            toRemove.forEach(manager::stopArena);
         });
 
         PlayerEvent.PLAYER_QUIT.register(player -> {
@@ -241,22 +63,65 @@ public class BHCommonEvents {
         });
     }
 
+    // ---------------------------------------------------------------- arena-over (called on MC main thread from ArenaThread via mainCallbacks)
+
     /**
-     * If stage chaining is configured, start the next stage immediately after a clear.
-     * Keeps difficulty and each participant's character selection; this is a fresh stage.
+     * Handles win/loss bookkeeping after an arena ends. Called on the MC main thread
+     * from the {@link ArenaContext#mainCallbacks} queue drained in {@code SERVER_POST}.
      */
-    private static boolean tryContinueToNextStage(net.minecraft.server.MinecraftServer server, UUID hostUuid, ArenaContext ctx) {
-        if (!BossRushMode.isEnabled())
-            return false;
-        if (!ctx.isWon())
-            return false;
+    public static void handleArenaOver(MinecraftServer server, UUID hostUuid, ArenaContext ctx) {
+        if (ctx.isWon()) {
+            String bossId = (ctx.boss != null) ? ctx.boss.id : "";
+            String charReward = (bossId != null && bossId.endsWith("_boss"))
+                    ? bossId.substring(0, bossId.length() - 5) : "";
+            if (!ctx.practiceMode) {
+                for (UUID pid : ctx.allParticipants()) {
+                    ServerPlayer p = server.getPlayerList().getPlayer(pid);
+                    if (p == null || bossId == null || bossId.isBlank()) continue;
+                    boolean improved = BossProgression.grantClearThroughDifficulty(p, bossId, ctx.difficulty);
+                    if (improved) {
+                        p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                                "[BulletHell] Recorded clear: " + bossId + " (" + ctx.difficulty.name() + ")."));
+                    }
+                    if (!charReward.isBlank()) {
+                        boolean charUnlocked = CharacterUnlocks.grantThroughDifficulty(p, charReward, ctx.difficulty);
+                        if (charUnlocked) {
+                            String charName = charReward.substring(0, 1).toUpperCase() + charReward.substring(1);
+                            p.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                                    "[BulletHell] " + charName + " is now playable on " + ctx.difficulty.name() + " and below!"));
+                        }
+                        BHPackets.sendCharacterUnlocks(p, new CharacterUnlockSyncPacket(
+                                CharacterUnlocks.snapshot(p)));
+                    }
+                }
+            }
+        }
+
+        if (tryContinueToNextStage(server, hostUuid, ctx)) {
+            // tryContinueToNextStage() already replaced the arena; nothing more to do.
+            return;
+        }
+
+        for (UUID pid : ctx.allParticipants()) {
+            ServerPlayer p = server.getPlayerList().getPlayer(pid);
+            if (p == null) continue;
+            sendEndStats(p, ctx, true);
+            BHPackets.sendToPlayer(p, ArenaStatePacket.stopped());
+        }
+
+        BulletHellManager.INSTANCE.stopArena(hostUuid);
+    }
+
+    // ---------------------------------------------------------------- stage chaining
+
+    private static boolean tryContinueToNextStage(MinecraftServer server, UUID hostUuid, ArenaContext ctx) {
+        if (!BossRushMode.isEnabled()) return false;
+        if (!ctx.isWon()) return false;
         String nextStageId = ctx.stage.nextStageId;
-        if (nextStageId == null || nextStageId.isBlank())
-            return false;
+        if (nextStageId == null || nextStageId.isBlank()) return false;
 
         ServerPlayer host = server.getPlayerList().getPlayer(hostUuid);
-        if (host == null)
-            return false;
+        if (host == null) return false;
 
         java.util.LinkedHashMap<UUID, CarryState> carry = new java.util.LinkedHashMap<>();
         for (UUID pid : ctx.allParticipants()) {
@@ -282,7 +147,7 @@ public class BHCommonEvents {
             }
         }
 
-        java.util.LinkedHashMap<UUID, String> coopChars = new java.util.LinkedHashMap<>();
+        java.util.LinkedHashMap<UUID, String>  coopChars = new java.util.LinkedHashMap<>();
         java.util.LinkedHashMap<UUID, Integer> coopShots = new java.util.LinkedHashMap<>();
         for (UUID pid : ctx.getCoopPlayers().keySet()) {
             coopChars.put(pid, ctx.getCharacterId(pid));
@@ -291,30 +156,23 @@ public class BHCommonEvents {
 
         BHPackets.startArena(host, ctx.difficulty, nextStageId, ctx.characterId, ctx.hostShotTypeOrdinal);
         ArenaContext nextCtx = BulletHellManager.INSTANCE.getArenaForPlayer(hostUuid);
-        if (nextCtx == null)
-            return true;
+        if (nextCtx == null) return true;
 
         for (var e : coopChars.entrySet()) {
             ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
-            if (p == null)
-                continue;
+            if (p == null) continue;
             CharacterDefinition charDef = CharacterLoader.load(e.getValue());
             BulletHellManager.INSTANCE.joinMatch(p.getUUID(), hostUuid, charDef, p,
                     coopShots.getOrDefault(p.getUUID(), 0));
             BHPackets.sendFullSync(p, nextCtx);
-            int pIdx = 0;
-            int c = 2;
+            int pIdx = 0, c = 2;
             for (UUID cid : nextCtx.getCoopPlayers().keySet()) {
-                if (cid.equals(p.getUUID())) {
-                    pIdx = c;
-                    break;
-                }
+                if (cid.equals(p.getUUID())) { pIdx = c; break; }
                 c++;
             }
             BHPackets.sendToPlayer(p, new ArenaStatePacket(nextCtx, p.getUUID(), pIdx));
         }
 
-        // Split combined run score across participants for the next stage (each keeps their own track).
         for (int i = 0; i < partList.size(); i++) {
             UUID pid = partList.get(i);
             long c = eachBase + (i < carryRem ? 1L : 0L);
@@ -322,31 +180,23 @@ public class BHCommonEvents {
         }
         for (var e : carry.entrySet()) {
             var ps = nextCtx.getPlayerState(e.getKey());
-            if (ps == null)
-                continue;
+            if (ps == null) continue;
             var cs = e.getValue();
-            ps.lives = cs.lives();
-            ps.bombs = cs.bombs();
-            ps.graze = cs.graze();
+            ps.lives = cs.lives(); ps.bombs = cs.bombs(); ps.graze = cs.graze();
             ps.power = cs.power();
             ps.storedChargeProgress = cs.storedChargeProgress();
             ps.holdChargeProgress = Math.min(cs.holdChargeProgress(), cs.storedChargeProgress());
             ps.syncChargePacketFields();
         }
 
-        // Push refreshed per-player state immediately after carry-over.
         for (UUID pid : nextCtx.allParticipants()) {
             ServerPlayer p = server.getPlayerList().getPlayer(pid);
-            if (p == null)
-                continue;
-            int pIdx = (pid.equals(nextCtx.playerUuid)) ? 1 : 0;
+            if (p == null) continue;
+            int pIdx = pid.equals(nextCtx.playerUuid) ? 1 : 0;
             if (pIdx == 0) {
                 int c = 2;
                 for (UUID cid : nextCtx.getCoopPlayers().keySet()) {
-                    if (cid.equals(pid)) {
-                        pIdx = c;
-                        break;
-                    }
+                    if (cid.equals(pid)) { pIdx = c; break; }
                     c++;
                 }
             }
@@ -355,14 +205,15 @@ public class BHCommonEvents {
         return true;
     }
 
+    // ---------------------------------------------------------------- helpers used by ArenaThread
+
+    /** Builds a delta packet for all dirty enemy-bullet slots. Returns null when nothing changed. */
     public static BulletDeltaPacket buildBulletDelta(ArenaContext ctx) {
         List<Integer> dirty = new ArrayList<>();
         for (int i = 0; i < BulletPool.ENEMY_CAPACITY; i++) {
-            if (ctx.bullets.isDirty(i))
-                dirty.add(i);
+            if (ctx.bullets.isDirty(i)) dirty.add(i);
         }
-        if (dirty.isEmpty())
-            return null;
+        if (dirty.isEmpty()) return null;
 
         int n = dirty.size();
         int[] slots = new int[n];
@@ -377,23 +228,21 @@ public class BHCommonEvents {
         return new BulletDeltaPacket(slots, data, active);
     }
 
-    /**
-     * @param grantVictoryXp when false (e.g. boss-rush mid-chain), skip Minecraft XP but still show end stats.
-     */
+    // ---------------------------------------------------------------- end-stats
+
     private static void sendEndStats(ServerPlayer player, ArenaContext ctx, boolean grantVictoryXp) {
         ArenaEndShareSnapshot snap = ArenaEndShareSnapshot.capture(player, ctx);
         LastArenaShareState.record(player.getUUID(), snap);
 
-        // Build ArenaEndPacket for the client-side overlay
         java.util.UUID pid = player.getUUID();
         mc.sayda.bullethell.arena.PlayerState2D ps = ctx.getPlayerState(pid);
         if (ps == null) ps = ctx.player;
-        String bossId    = ctx.boss != null ? ctx.boss.id   : "";
-        String bossName  = ctx.boss != null ? ctx.boss.name : "";
-        String charId    = ctx.getCharacterId(pid);
-        String charName  = mc.sayda.bullethell.boss.CharacterLoader.load(charId).name;
-        String stageId   = ctx.stage != null ? ctx.stage.id : "";
-        // Resolve boss quote (victory or defeat)
+        String bossId   = ctx.boss  != null ? ctx.boss.id   : "";
+        String bossName = ctx.boss  != null ? ctx.boss.name : "";
+        String charId   = ctx.getCharacterId(pid);
+        String charName = CharacterLoader.load(charId).name;
+        String stageId  = ctx.stage != null ? ctx.stage.id  : "";
+
         String bossDialog;
         if (ctx.isWon()) {
             String perChar = ctx.boss != null
@@ -412,23 +261,19 @@ public class BHCommonEvents {
         int victoryXp = 0;
         if (ctx.isWon() && grantVictoryXp && !ctx.practiceMode) {
             victoryXp = VictoryXpRewards.computePoints(scoreSelf, ctx.difficulty);
-            if (victoryXp > 0) {
-                player.giveExperiencePoints(victoryXp);
-            }
+            if (victoryXp > 0) player.giveExperiencePoints(victoryXp);
         }
 
-        BHPackets.sendArenaEnd(player, new mc.sayda.bullethell.network.ArenaEndPacket(
+        BHPackets.sendArenaEnd(player, new ArenaEndPacket(
                 ctx.isWon(), bossName, bossId, charId, charName, bossDialog,
                 scoreSelf, scoreTeam, victoryXp, ps.lives, ps.bombs, ps.graze,
                 ctx.getSpellsCaptured(), ctx.getSpellsAttempted(),
                 (float) ctx.getCompletionPercentage(),
                 stageId, ctx.difficulty.name(), ctx.getShotTypeOrdinal(pid)));
 
-        // Execute reward commands defined in the stage JSON
         if (ctx.stage != null && ctx.stage.rewards != null) {
             List<String> cmds = ctx.isWon()
-                    ? ctx.stage.rewards.onWin
-                    : ctx.stage.rewards.onLoss;
+                    ? ctx.stage.rewards.onWin : ctx.stage.rewards.onLoss;
             if (cmds != null) {
                 for (String template : cmds) {
                     String cmd = template

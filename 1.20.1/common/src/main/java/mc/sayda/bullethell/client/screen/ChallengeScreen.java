@@ -75,16 +75,20 @@ public class ChallengeScreen extends Screen {
         acceptBtn.active = canAccept;
         addRenderableWidget(acceptBtn);
 
-        addRenderableWidget(Button.builder(
+        Button practiceBtn = Button.builder(
                 Component.literal("Practice"),
                 btn -> {
+                    if (!canAccept)
+                        return;
                     BHSfx.playSelect();
                     onClose();
                     Minecraft.getInstance().setScreen(
                             new DifficultySelectScreen(pkt.stageId, pkt.maxAllowedDifficultyOrdinal, true));
                 })
                 .bounds(btnStartX + btnW + 12, btnY, btnW, btnH)
-                .build());
+                .build();
+        practiceBtn.active = canAccept;
+        addRenderableWidget(practiceBtn);
 
         addRenderableWidget(Button.builder(
                 Component.literal("Decline"),
