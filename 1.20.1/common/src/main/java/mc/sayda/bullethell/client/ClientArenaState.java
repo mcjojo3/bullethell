@@ -234,6 +234,8 @@ public class ClientArenaState {
      * Boss id for the current fight (e.g. "marisa_boss").
      */
     public String bossId = "";
+    /** Active boss texture override (empty = use bossId default). */
+    public String bossTexture = "";
     /** Synced from server during {@code PENTAGRAM_RITUAL}; -1 = inactive. */
     public int pentagramRitualTick = -1;
     /** When outline stacking finished; -1 until then. */
@@ -459,6 +461,7 @@ public class ClientArenaState {
             this.pocAutoCollect = pkt.pocAutoCollect;
             this.player.speedNormal = pkt.speedNormal;
             this.player.speedFocused = pkt.speedFocused;
+            this.bossTexture = pkt.bossTexture;
         }
     }
 
@@ -626,6 +629,7 @@ public class ClientArenaState {
         currentMusicTrackId = "";
         characterId = "reimu";
         bossId = "";
+        bossTexture = "";
         pentagramRitualTick = -1;
         pentagramStackCompleteTick = -1;
         bossName = "";

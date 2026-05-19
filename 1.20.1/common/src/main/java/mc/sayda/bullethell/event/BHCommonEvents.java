@@ -9,6 +9,7 @@ import mc.sayda.bullethell.CharacterUnlocks;
 import mc.sayda.bullethell.arena.ArenaContext;
 import mc.sayda.bullethell.arena.BulletPool;
 import mc.sayda.bullethell.arena.BulletHellManager;
+import mc.sayda.bullethell.arena.LastArenaRetryState;
 import mc.sayda.bullethell.arena.LastArenaShareState;
 import mc.sayda.bullethell.arena.ArenaEndShareSnapshot;
 import mc.sayda.bullethell.arena.VictoryXpRewards;
@@ -41,11 +42,17 @@ public class BHCommonEvents {
                 Runnable r;
                 while ((r = ctx.mainCallbacks.poll()) != null) r.run();
             }
+
+            // Tick all arena simulations once, locked to the MC server tick rate.
+            // This replaces the old scheduleAtFixedRate wall-clock timer, eliminating
+            // drift that caused 0 or 2 delta packets per client tick under load.
+            BulletHellManager.INSTANCE.tickAllArenas();
         });
 
         PlayerEvent.PLAYER_QUIT.register(player -> {
             UUID uuid = player.getUUID();
             BHDebugMode.clear(uuid);
+            LastArenaRetryState.remove(uuid);
             if (!BulletHellManager.INSTANCE.hasArena(uuid)
                     && BulletHellManager.INSTANCE.isInMatch(uuid)) {
                 BulletHellManager.INSTANCE.leaveMatch(uuid);
@@ -242,6 +249,13 @@ public class BHCommonEvents {
         String charId   = ctx.getCharacterId(pid);
         String charName = CharacterLoader.load(charId).name;
         String stageId  = ctx.stage != null ? ctx.stage.id  : "";
+        LastArenaRetryState.record(player.getUUID(), new LastArenaRetryState.Params(
+                stageId,
+                ctx.difficulty,
+                charId,
+                ctx.getShotTypeOrdinal(pid),
+                ctx.practiceMode,
+                ctx.testMode));
 
         String bossDialog;
         if (ctx.isWon()) {

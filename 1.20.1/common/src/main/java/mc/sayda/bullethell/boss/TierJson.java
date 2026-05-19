@@ -279,7 +279,8 @@ public final class TierJson {
             return;
         JsonObject bd = null;
         for (String key : new java.util.ArrayList<>(o.keySet())) {
-            if ("byDifficulty".equals(key) || "wormCircles".equals(key))
+            if ("byDifficulty".equals(key) || "wormCircles".equals(key)
+                    || "bounceExcludeSides".equals(key))
                 continue;
             JsonElement el = o.get(key);
             if (el == null || !el.isJsonArray())

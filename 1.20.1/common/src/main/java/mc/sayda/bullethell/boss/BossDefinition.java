@@ -74,12 +74,14 @@ public class BossDefinition {
      */
     public List<PhaseDefinition> phases = new ArrayList<>();
 
-    /**
-     * Boss-wide movement tuning: frequencies, REPOS_TOP timing, random position
-     * bounds, and dialog intro animation parameters. All fields have defaults so
-     * this block can be omitted entirely or partially overridden.
-     */
-    public MovementConfig movementConfig = new MovementConfig();
+    /** Arena Y the boss settles at during the dialog intro. Should clear the dialog box. */
+    public float introLandY = 210f;
+
+    /** Per-tick lerp rate toward introLandY during dialog intro. Higher = faster slide-in. */
+    public float introSlideSpeed = 0.09f;
+
+    /** Ticks to smooth the boss Y from the dialog landing position into the fight start position. */
+    public int fightEntryTicks = 40;
 
     /**
      * Optional spinning background aura rendered behind the boss sprite.

@@ -37,7 +37,7 @@ public class CharacterSelectPacket {
 
     public static CharacterSelectPacket decode(FriendlyByteBuf buf) {
         String cid = buf.readUtf();
-        DifficultyConfig d = DifficultyConfig.values()[buf.readByte()];
+        DifficultyConfig d = DifficultyConfig.fromId(buf.readByte() & 0xFF);
         String sid = buf.readUtf();
         int shot = (buf.readableBytes() > 0) ? (buf.readByte() & 0xFF) : 0;
         boolean prac = (buf.readableBytes() > 0) && buf.readBoolean();

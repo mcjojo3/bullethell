@@ -165,7 +165,7 @@
       "spellName": "Mountain Wind Awakening",
       "spellDurationTicks": [0, 0, 0, 0],
       "movement": "SINE_WAVE",
-      "moveSpeed": 110,
+      "moveRange": 110,
       "patternTempo": 200.0,
       "music": "the_venerable_ancient_battlefield_suwa_foughten_field",
       "attacks": [
@@ -177,7 +177,7 @@
           "bulletType": "RED_ORB",
           "arms": 2,
           "speed": 5.5,
-          "sprinklerAdvanceRad": 2.80
+          "advanceRad": 2.80
         },
         {
           "_note": "CCW rotating 3-arm BLUE_ORB_LARGE curtain — counter-spin creates diamond gaps",
@@ -187,7 +187,7 @@
           "bulletType": "BLUE_ORB_LARGE",
           "arms": 3,
           "speed": 4.0,
-          "sprinklerAdvanceRad": -1.40
+          "advanceRad": -1.40
         },
         {
           "_note": "Fan-comb burst of GOLD every ~0.5s — aimed pressure fill",
@@ -199,8 +199,8 @@
           "maxScaledArms": 1,
           "combCount": 5,
           "speed": 4.8,
-          "sprinklerAdvanceRad": 0.02,
-          "sprinklerSpread": 0.06,
+          "advanceRad": 0.02,
+          "spread": 0.06,
           "sprinklerSpeedSlope": 0.006
         }
       ]
@@ -224,7 +224,7 @@
           "bulletType": "DIVINE_SPIRIT",
           "arms": [5, 6, 7, 8],
           "speed": 3.0,
-          "sprinklerAdvanceRad": 0.30,
+          "advanceRad": 0.30,
           "divineWindLayers": 21,
           "divineWindLayerSpacing": 8.0,
           "divineWindCurveAngularVelocity": 0.035,
@@ -319,7 +319,7 @@
           "arms": [12, 14, 16, 20],
           "speed": 0,
           "laserHalfWidth": 8,
-          "warnTicks": [30, 22, 16, 10],
+          "warnTicks": 10,
           "activeTicks": 28
         },
         {
@@ -345,7 +345,7 @@
           "arms": [8, 10, 12, 14],
           "speed": 10,
           "angleJitterRad": 0.0,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
@@ -356,7 +356,7 @@
       "spellName": "Onbashira Pillar Storm",
       "spellDurationTicks": [0, 0, 0, 0],
       "movement": "CIRCLE",
-      "moveSpeed": 140,
+      "moveRange": 140,
       "patternTempo": 220.0,
       "attacks": [
         {
@@ -367,9 +367,9 @@
           "bulletType": "DIVINE_SPIRIT",
           "arms": 3,
           "combCount": 2,
-          "sprinklerSpread": 0.12,
+          "spread": 0.12,
           "speed": 4.5,
-          "sprinklerAdvanceRad": 2.20
+          "advanceRad": 2.20
         },
         {
           "_note": "4-arm RED_ORB counter-spinning curtain",
@@ -379,7 +379,7 @@
           "bulletType": "RED_ORB",
           "arms": 4,
           "speed": 3.8,
-          "sprinklerAdvanceRad": -2.80
+          "advanceRad": -2.80
         },
         {
           "_note": "Gold fan burst every ~0.5s",
@@ -391,8 +391,8 @@
           "maxScaledArms": 1,
           "combCount": 7,
           "speed": 5.5,
-          "sprinklerAdvanceRad": 0.02,
-          "sprinklerSpread": 0.07,
+          "advanceRad": 0.02,
+          "spread": 0.07,
           "sprinklerSpeedSlope": 0.008
         }
       ]
@@ -416,7 +416,7 @@
           "arms": [16, 20, 24, 32],
           "speed": 0,
           "laserHalfWidth": 9,
-          "warnTicks": [22, 16, 12, 8],
+          "warnTicks": 8,
           "activeTicks": 30
         },
         {
@@ -427,7 +427,7 @@
           "bulletType": "DIVINE_SPIRIT",
           "arms": [6, 7, 8, 9],
           "speed": 3.5,
-          "sprinklerAdvanceRad": 0.28,
+          "advanceRad": 0.28,
           "divineWindLayers": 21,
           "divineWindLayerSpacing": 8.0,
           "divineWindCurveAngularVelocity": 0.042,
@@ -443,7 +443,7 @@
           "arms": [10, 12, 14, 16],
           "speed": 7,
           "angleJitterRad": 0.0,
-          "ringStartAngleRad": -0.8
+          "startRad": -0.8
         },
         {
           "_note": "Blue orbs every tick offset from red — alternating layers block retreat",
@@ -455,7 +455,7 @@
           "arms": [10, 12, 14, 16],
           "speed": 5,
           "angleJitterRad": 0.22,
-          "ringStartAngleRad": 0.8,
+          "startRad": 0.8,
           "bulletScale": 1.2
         }
       ]

@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "remilia_boss",
   "name": "Remilia Scarlet",
   "prerequisites": ["cirno_boss", "sakuya_boss"],
@@ -159,8 +159,8 @@
       "spellBonus": 0,
       "movement": "REPOS_TOP",
       "reposBossY": 210,
-      "patternTempo": 200.0,
-      "moveSpeed": 0,
+      "patternTempo": 1.0,
+      "moveRange": 0,
       "music": "septette_for_the_dead_princess",
       "attacks": [
         {
@@ -168,31 +168,37 @@
           "cooldown": 0,
           "minCooldown": 0,
           "bulletType": "RED_RING",
-          "arms": 2,
-          "speed": 6.5,
-          "sprinklerAdvanceRad": 3.20
+          "arms": 5,
+          "combCount": 1,
+          "speed": 12,
+          "advanceRad": 0.37,
+          "spread": 0.08,
+          "sprinklerSpeedSlope": -0.01
+        },
+        {
+         "pattern": "SPRINKLER",
+          "cooldown": 0,
+          "minCooldown": 0,
+          "bulletType": "BLUE_ORB_LARGE",
+          "arms": 5,
+          "combCount": 1,
+          "speed": 8,
+          "advanceRad": 0.2,
+          "spread": 0.08,
+          "sprinklerSpeedSlope": -0.01,
+          "startRad": 180
         },
         {
           "pattern": "SPRINKLER",
           "cooldown": 0,
           "minCooldown": 0,
-          "bulletType": "BLUE_ORB_LARGE",
-          "arms": 3,
-          "speed": 4.2,
-          "sprinklerAdvanceRad": 0.80
-        },
-        {
-          "pattern": "SPRINKLER",
-          "cooldown": 100,
-          "minCooldown": 100,
           "bulletType": "BLUE_ORB",
           "arms": 1,
-          "maxScaledArms": 1,
           "combCount": 5,
-          "speed": 4.0,
-          "sprinklerAdvanceRad": 0.02,
-          "sprinklerSpread": 0.05,
-          "sprinklerSpeedSlope": 0.005
+          "speed": 8,
+          "advanceRad": 0.5,
+          "spread": 0.08,
+          "sprinklerSpeedSlope": -0.01
         }
       ]
     },
@@ -209,8 +215,8 @@
       "spellBonus": 90000,
       "movement": "REPOS_TOP",
       "reposShootTicks": 40,
-      "dynamicDifficulty": false,
-      "moveSpeed": 0,
+      "dynamicDifficulty": true,
+      "moveRange": 0,
       "music": "",
       "attacks": [
         {
@@ -225,12 +231,7 @@
           ],
           "speed": 0,
           "laserHalfWidth": 8,
-          "warnTicks": [
-            25,
-            20,
-            15,
-            10
-          ],
+          "warnTicks": 10,
           "activeTicks": 25
         },
         {
@@ -248,12 +249,7 @@
           ],
           "speed": 0,
           "laserHalfWidth": 8,
-          "warnTicks": [
-            25,
-            20,
-            15,
-            10
-          ],
+          "warnTicks": 10,
           "activeTicks": 25
         },
         {
@@ -271,12 +267,7 @@
           ],
           "speed": 0,
           "laserHalfWidth": 8,
-          "warnTicks": [
-            25,
-            20,
-            15,
-            10
-          ],
+          "warnTicks": 10,
           "activeTicks": 25
         },
         {
@@ -302,14 +293,14 @@
           "arms": 12,
           "speed": 8,
           "bulletScale": 1.2,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
     {
       "hp": 1750,
       "isSpellCard": false,
-      "dynamicDifficulty": false,
+      "dynamicDifficulty": true,
       "spellName": "Nonspell 2",
       "spellDurationTicks": [
         0,
@@ -331,7 +322,7 @@
           "cooldown": 0,
           "bulletType": "RED_RING",
           "arms": 2,
-          "speed": 25,
+          "speed": [16, 19, 22, 25],
           "angleJitterRad": 0.0,
           "sweepTicksPerHalf": 10,
           "sweepAlternate": false,
@@ -345,7 +336,7 @@
           "cooldown": 0,
           "bulletType": "RED_ORB_LARGE",
           "arms": 2,
-          "speed": 20,
+          "speed": [12, 15, 17, 20],
           "angleJitterRad": 1.0,
           "sweepTicksPerHalf": 5,
           "sweepAlternate": false,
@@ -359,7 +350,7 @@
           "cooldown": 0,
           "bulletType": "RED_ORB",
           "arms": 4,
-          "speed": 18,
+          "speed": [12, 15, 17, 20],
           "angleJitterRad": 1.0,
           "sweepTicksPerHalf": 5,
           "sweepAlternate": false,
@@ -386,39 +377,33 @@
       "movement": "REPOS_TOP",
       "reposBossY": 110,
       "reposShootTicks": 60,
-      "moveSpeed": 0,
+      "moveRange": 0,
       "music": "",
       "attacks": [
         {
-          "_note": "Start 3 knife rings spinning around boss — runs as a background formation.",
+          "_note": "16 CW + 16 CCW worm instances — spin then fire a 32-petal flower of knife streams.",
           "pattern": "WORM_CIRCLE",
-          "dynamicDifficulty": false,
-          "spinTicks": 30,
+          "dynamicDifficulty": true,
+          "orbitTicks": 35,
           "speed": 5.5,
           "cooldown": 1,
           "minCooldown": 1,
           "wormCircles": [
             {
-              "knifeCount": 12,
+              "instances": 16,
+              "wormLength": 5,
               "startAngleDeg": 0,
-              "spanDeg": 360,
-              "spinSpeedDeg": -3.0,
+              "spanDeg": 30,
+              "spinSpeedDeg": -1.0,
               "orbitRadius": 78,
               "bulletType": "RED_KNIFE"
             },
             {
-              "knifeCount": 12,
-              "startAngleDeg": 15,
-              "spanDeg": 360,
-              "spinSpeedDeg": 3.0,
-              "orbitRadius": 78,
-              "bulletType": "RED_KNIFE"
-            },
-            {
-              "knifeCount": 12,
-              "startAngleDeg": 30,
-              "spanDeg": 360,
-              "spinSpeedDeg": -2.0,
+              "instances": 16,
+              "wormLength": 5,
+              "startAngleDeg": 22.25,
+              "spanDeg": 30,
+              "spinSpeedDeg": 1.0,
               "orbitRadius": 78,
               "bulletType": "RED_KNIFE"
             }
@@ -426,16 +411,18 @@
         },
         {
           "_note": "5 tight rings of red diamonds radiating outward while knives spin.",
-          "pattern": "BOUNCE",
-          "dynamicDifficulty": false,
+          "pattern": "RING",
+          "dynamicDifficulty": true,
+          "bounceCount": 1,
           "burstCount": 5,
+          "bounceExcludeSides": ["bottom"],
           "burstInterval": 5,
           "cooldown": 55,
           "minCooldown": 55,
           "bulletType": "RED_DIAMOND",
-          "arms": 56,
+          "arms": 60,
           "speed": 4.5,
-          "ringStartAngleRad": 0
+          "startRad": 0
         }
       ]
     },
@@ -443,62 +430,74 @@
       "hp": 1850,
       "isSpellCard": false,
       "spellName": "Nonspell 3",
-      "spellDurationTicks": [
-        0,
-        0,
-        0,
-        0
-      ],
+      "spellDurationTicks": [0, 0, 0, 0],
       "spellBonus": 0,
-      "movement": "SINE_WAVE",
-      "moveSpeed": 150,
+      "movement": "REPOS_TOP",
+      "reposBossY": 150,
+      "reposShootTicks": 80,
+      "keepAttackIndexOnRepos": true,
+      "moveRange": 0,
       "music": "",
       "attacks": [
         {
-          "pattern": "LASER_BEAM",
-          "cooldown": 21,
-          "minCooldown": 16,
-          "scalingProfile": "GEOMETRY",
-          "bulletType": "PURPLE_LASER",
-          "arms": 3,
-          "speed": 4.25,
-          "laserBeamSpread": 0.06,
-          "bulletLifetimeTicks": 220
+          "_note": "CW windmill — nozzle A. Fires in sync with nozzle B to produce paired knives.",
+          "pattern": "SPRINKLER",
+          "segmentSyncGroup": "cw",
+          "segmentDurationTicks": 80,
+          "segmentVolleyIntervalTicks": 1,
+          "dynamicDifficulty": true,
+          "cooldown": 0,
+          "minCooldown": 0,
+          "bulletType": "RED_KNIFE",
+          "arms": 4,
+          "speed": 16.5,
+          "advanceRad": 0.12,
+          "startRad": 0.0
         },
         {
-          "pattern": "SPIRAL",
-          "cooldown": 6,
-          "scalingProfile": "GEOMETRY",
-          "bulletType": "KUNAI",
-          "arms": 8,
-          "speed": 2.45,
-          "bulletLifetimeTicks": 200
+          "_note": "CW windmill — nozzle B, offset by ~4 degrees to pair with nozzle A.",
+          "pattern": "SPRINKLER",
+          "segmentSyncGroup": "cw",
+          "segmentDurationTicks": 80,
+          "segmentVolleyIntervalTicks": 1,
+          "dynamicDifficulty": true,
+          "cooldown": 0,
+          "minCooldown": 0,
+          "bulletType": "RED_KNIFE",
+          "arms": 4,
+          "speed": 16.5,
+          "advanceRad": 0.12,
+          "startRad": 0.4
         },
         {
-          "pattern": "SPIRAL",
-          "cooldown": 5,
-          "minCooldown": 4,
-          "scalingProfile": "GEOMETRY",
-          "armsDifficultyWeight": 0.84,
-          "bulletType": "RED_ORB",
-          "arms": 7,
-          "speed": 2.2,
-          "bulletScale": 1.2,
-          "hitboxScale": 0.48,
-          "maxScaledArms": 10,
-          "bulletLifetimeTicks": 200
+          "_note": "CCW windmill — nozzle A, reverses direction with blue knives.",
+          "pattern": "SPRINKLER",
+          "segmentSyncGroup": "ccw",
+          "segmentDurationTicks": 80,
+          "segmentVolleyIntervalTicks": 1,
+          "dynamicDifficulty": true,
+          "cooldown": 0,
+          "minCooldown": 0,
+          "bulletType": "BLUE_KNIFE",
+          "arms": 4,
+          "speed": 16.5,
+          "advanceRad": -0.12,
+          "startRad": 0.0
         },
         {
-          "pattern": "RING_OFFSET",
-          "cooldown": 14,
-          "scalingProfile": "BURST",
-          "bulletType": "RED_ORB",
-          "arms": 12,
-          "speed": 2.45,
-          "bulletScale": 1.2,
-          "hitboxScale": 0.48,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "_note": "CCW windmill — nozzle B, paired with nozzle A.",
+          "pattern": "SPRINKLER",
+          "segmentSyncGroup": "ccw",
+          "segmentDurationTicks": 80,
+          "segmentVolleyIntervalTicks": 1,
+          "dynamicDifficulty": true,
+          "cooldown": 0,
+          "minCooldown": 0,
+          "bulletType": "BLUE_KNIFE",
+          "arms": 4,
+          "speed": 16.5,
+          "advanceRad": -0.12,
+          "startRad": 0.4
         }
       ]
     },
@@ -514,54 +513,128 @@
       ],
       "spellBonus": 110000,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "bossPhaseAnchorX": 240,
       "bossPhaseAnchorY": 110,
       "music": "",
       "attacks": [
         {
-          "pattern": "AIMED",
-          "cooldown": 10,
-          "bulletType": "RED_ORB_LARGE",
-          "arms": 6,
-          "speed": 4.8,
-          "spread": 0.13,
-          "bulletScale": 1.55,
-          "hitboxScale": 0.76,
-          "bulletLifetimeTicks": 220
+          "pattern": "RING_SPAWNER",
+          "cooldown": 60,
+          "minCooldown": 40,
+          "dynamicDifficulty": true,
+          "arms": 8,
+          "speed": 20,
+          "bulletType": "BLUE_RING",
+          "coneAngleDeg": 90,
+          "coneHalfAngleDeg": 35,
+          "ringBulletType": "RED_ORB",
+          "childSpawnIntervalTicks": 2,
+          "childSpeed": 3.0,
+          "childAcceleration": 0.2,
+          "childFanDeg": 18
+        }
+      ]
+    },
+    {
+      "_note": "6-stage looping nonspell: alternates normal/bat-form in a cycle",
+      "hp": 4000,
+      "isSpellCard": false,
+      "spellName": "Bat Transformation",
+      "spellDurationTicks": [0, 0, 0, 0],
+      "spellBonus": 0,
+      "movement": "STATIC",
+      "moveRange": 0,
+      "bossPhaseAnchorX": 240,
+      "bossPhaseAnchorY": 110,
+      "dashTopMinX": 80,
+      "dashTopMaxX": 400,
+      "dashTopMinY": 60,
+      "dashTopMaxY": 160,
+      "dashTopDashTicks": 5,
+      "dashTopIntervalTicks": 10,
+      "music": "",
+      "attacks": [
+        {
+          "_note": "Stage 1: Normal form",
+          "pattern": "SHOTGUN",
+          "segmentDurationTicks": 30,
+          "segmentVolleyIntervalTicks": 1,
+          "cooldown": 0,
+          "bulletType": "BAT",
+          "arms": 1,
+          "speed": 24.0,
+          "shotgunWindupTicks": 10,
+          "shotgunCycleTicks": 30,
+          "spread": 1.05,
+          "movementOverride": "STATIC"
         },
         {
-          "pattern": "LASER_ROTATING",
-          "cooldown": 28,
-          "bulletType": "PURPLE_LASER",
-          "arms": 4,
-          "speed": 0,
-          "laserHalfWidth": 5,
-          "warnTicks": 10,
-          "activeTicks": 18,
-          "laserRotateAdvanceRad": 0.32
-        },
-        {
-          "pattern": "DENSE_RING",
-          "cooldown": 13,
-          "bulletType": "RED_ORB",
+          "_note": "Stage 2: Bat form",
+          "pattern": "RING",
+          "segmentDurationTicks": 100,
+          "segmentVolleyIntervalTicks": 4,
+          "cooldown": 0,
+          "bulletType": "RED_DIAMOND",
           "arms": 12,
-          "speed": 2.05,
-          "bulletScale": 1.55,
-          "hitboxScale": 0.5,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": 0
+          "speed": 6,
+          "bulletGravity": 0.20,
+          "movementOverride": "DASH_TOP",
+          "bossTexture": "bat"
         },
         {
+          "_note": "Stage 3: Normal form",
+          "pattern": "SHOTGUN",
+          "segmentDurationTicks": 60,
+          "segmentVolleyIntervalTicks": 1,
+          "cooldown": 0,
+          "bulletType": "BAT",
+          "arms": 1,
+          "speed": 24.0,
+          "shotgunWindupTicks": 30,
+          "shotgunCycleTicks": 60,
+          "spread": 1.05,
+          "movementOverride": "STATIC"
+        },
+        {
+          "_note": "Stage 4: Bat form",
+          "pattern": "AIMED",
+          "segmentDurationTicks": 100,
+          "segmentVolleyIntervalTicks": 7,
+          "cooldown": 0,
+          "bulletType": "RED_RING",
+          "arms": 6,
+          "speed": 24.0,
+          "spread": 0.15,
+          "movementOverride": "DASH_TOP",
+          "bossTexture": "bat"
+        },
+        {
+          "_note": "Stage 5: Normal form",
+          "pattern": "SHOTGUN",
+          "segmentDurationTicks": 60,
+          "segmentVolleyIntervalTicks": 1,
+          "cooldown": 0,
+          "bulletType": "BAT",
+          "arms": 1,
+          "speed": 24.0,
+          "shotgunWindupTicks": 30,
+          "shotgunCycleTicks": 60,
+          "spread": 1.05,
+          "movementOverride": "STATIC"
+        },
+        {
+          "_note": "Stage 6: Bat form",
           "pattern": "RING_OFFSET",
-          "cooldown": 14,
-          "bulletType": "RED_ORB",
-          "arms": 10,
-          "speed": 2.15,
-          "bulletScale": 1.15,
-          "hitboxScale": 0.5,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "segmentDurationTicks": 100,
+          "segmentVolleyIntervalTicks": 4,
+          "cooldown": 0,
+          "bulletType": "RED_ORB_LARGE",
+          "arms": 24,
+          "speed": 24,
+          "startRad": -1,
+          "movementOverride": "DASH_TOP",
+          "bossTexture": "bat"
         }
       ]
     },
@@ -578,7 +651,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 160,
+      "moveRange": 160,
       "music": "",
       "attacks": [
         {
@@ -589,8 +662,7 @@
           "bulletType": "PURPLE_LASER",
           "arms": 4,
           "speed": 4.5,
-          "laserBeamSpread": 0.06,
-          "bulletLifetimeTicks": 220
+          "spread": 0.06
         },
         {
           "pattern": "SPIRAL",
@@ -601,8 +673,7 @@
           "bulletType": "RED_ORB",
           "arms": 10,
           "speed": 2.6,
-          "maxScaledArms": 13,
-          "bulletLifetimeTicks": 200
+          "maxScaledArms": 13
         },
         {
           "pattern": "AIMED",
@@ -613,8 +684,7 @@
           "speed": 4.0,
           "spread": 0.15,
           "bulletScale": 1.2,
-          "hitboxScale": 0.48,
-          "bulletLifetimeTicks": 220
+          "hitboxScale": 0.48
         },
         {
           "pattern": "RING_OFFSET",
@@ -623,8 +693,7 @@
           "bulletType": "STAR",
           "arms": 13,
           "speed": 2.45,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
@@ -643,7 +712,7 @@
       ],
       "spellBonus": 100000,
       "movement": "CIRCLE",
-      "moveSpeed": 100,
+      "moveRange": 100,
       "music": "",
       "attacks": [
         {
@@ -658,8 +727,7 @@
           "speedMax": 4.95,
           "spread": 0.115,
           "bulletScale": 1.5,
-          "hitboxScale": 0.76,
-          "bulletLifetimeTicks": 220
+          "hitboxScale": 0.76
         },
         {
           "pattern": "RING",
@@ -669,8 +737,7 @@
           "speed": 2.05,
           "bulletScale": 1.2,
           "hitboxScale": 0.48,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": 0
+          "startRad": 0
         },
         {
           "pattern": "AIMED",
@@ -682,8 +749,7 @@
           "speed": 5.05,
           "spread": 0.02,
           "bulletScale": 1.55,
-          "hitboxScale": 0.72,
-          "bulletLifetimeTicks": 220
+          "hitboxScale": 0.72
         },
         {
           "pattern": "AIMED",
@@ -697,8 +763,7 @@
           "speedMax": 5.2,
           "spread": 0.11,
           "bulletScale": 1.5,
-          "hitboxScale": 0.74,
-          "bulletLifetimeTicks": 220
+          "hitboxScale": 0.74
         },
         {
           "pattern": "RING_OFFSET",
@@ -708,15 +773,11 @@
           "speed": 1.95,
           "bulletScale": 1.15,
           "hitboxScale": 0.5,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
     {
-      "_note": "ECL Sub39 紅符「スカーレットマイスタ」 (H/L) - ins_108 Sub44; MEISTER_CYCLE: aimed shotgun + mentos tail + rotating bursts (engine). bulletType sizes main volleys.",
-      "minDifficulty": "HARD",
-      "maxDifficulty": "LUNATIC",
       "hp": 2850,
       "isSpellCard": true,
       "spellName": "Scarlet Sign \"Scarlet Meister\"",
@@ -728,7 +789,7 @@
       ],
       "spellBonus": 120000,
       "movement": "CIRCLE",
-      "moveSpeed": 105,
+      "moveRange": 105,
       "music": "",
       "attacks": [
         {
@@ -738,8 +799,7 @@
           "arms": 1,
           "speed": 0,
           "bulletScale": 1.42,
-          "hitboxScale": 0.72,
-          "bulletLifetimeTicks": 220
+          "hitboxScale": 0.72
         },
         {
           "pattern": "SPREAD",
@@ -747,8 +807,7 @@
           "minCooldown": 4,
           "bulletType": "SCARLET_MENTOS",
           "arms": 8,
-          "speed": 4.9,
-          "bulletLifetimeTicks": 220
+          "speed": 4.9
         },
         {
           "pattern": "AIMED",
@@ -759,83 +818,11 @@
           "speed": 4.15,
           "spread": 0.11,
           "bulletScale": 1.2,
-          "hitboxScale": 0.48,
-          "bulletLifetimeTicks": 220
+          "hitboxScale": 0.48
         }
       ]
     },
     {
-      "_note": "ECL Sub43 「レッドマジック」 (E/N) - large bounces + mentos/scarlet trail pressure (scarlet orbs, not homing type).",
-      "minDifficulty": "EASY",
-      "maxDifficulty": "NORMAL",
-      "hp": 3000,
-      "isSpellCard": true,
-      "spellName": "\"Red Magic\"",
-      "spellDurationTicks": [
-        660,
-        520,
-        0,
-        0
-      ],
-      "spellBonus": 120000,
-      "movement": "STATIC",
-      "moveSpeed": 0,
-      "bossPhaseAnchorX": 240,
-      "bossPhaseAnchorY": 110,
-      "music": "",
-      "attacks": [
-        {
-          "pattern": "BOUNCE",
-          "cooldown": 11,
-          "scalingProfile": "BURST",
-          "bulletType": "RED_ORB_LARGE",
-          "arms": 6,
-          "speed": 3.55,
-          "spread": 0.14,
-          "bounceCount": 2,
-          "bounceDamping": 0.94,
-          "bulletScale": 1.32,
-          "hitboxScale": 0.48,
-          "bulletLifetimeTicks": 250
-        },
-        {
-          "pattern": "AIMED",
-          "cooldown": 10,
-          "bulletType": "RED_ORB",
-          "arms": 5,
-          "speed": 3.8,
-          "spread": 0.15,
-          "bulletScale": 1.25,
-          "hitboxScale": 0.44,
-          "bulletLifetimeTicks": 220
-        },
-        {
-          "pattern": "SPIRAL",
-          "cooldown": 5,
-          "bulletType": "RED_ORB",
-          "arms": 8,
-          "speed": 2.35,
-          "bulletScale": 1.25,
-          "hitboxScale": 0.44,
-          "bulletLifetimeTicks": 200
-        },
-        {
-          "pattern": "RING_OFFSET",
-          "cooldown": 15,
-          "bulletType": "RED_ORB",
-          "arms": 12,
-          "speed": 2.2,
-          "bulletScale": 1.2,
-          "hitboxScale": 0.48,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
-        }
-      ]
-    },
-    {
-      "_note": "ECL Sub44/Sub45 「紅魔の世界」 (H/L) - large bouncing scarlet orbs + mentos + rings (tuned down vs HOMING_ORB label; enemy pool has no homing tick).",
-      "minDifficulty": "HARD",
-      "maxDifficulty": "LUNATIC",
       "hp": 3300,
       "isSpellCard": true,
       "spellName": "\"Scarlet Gensokyo\"",
@@ -847,13 +834,13 @@
       ],
       "spellBonus": 150000,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "bossPhaseAnchorX": 240,
       "bossPhaseAnchorY": 110,
       "music": "",
       "attacks": [
         {
-          "pattern": "BOUNCE",
+          "pattern": "AIMED",
           "cooldown": 14,
           "minCooldown": 11,
           "scalingProfile": "BURST",
@@ -873,8 +860,7 @@
           "bounceCount": 2,
           "bounceDamping": 0.94,
           "bulletScale": 1.35,
-          "hitboxScale": 0.5,
-          "bulletLifetimeTicks": 250
+          "hitboxScale": 0.5
         },
         {
           "pattern": "AIMED",
@@ -885,8 +871,7 @@
           "speed": 4.0,
           "spread": 0.12,
           "bulletScale": 1.35,
-          "hitboxScale": 0.55,
-          "bulletLifetimeTicks": 220
+          "hitboxScale": 0.55
         },
         {
           "pattern": "RING_OFFSET",
@@ -898,8 +883,7 @@
           "speed": 2.35,
           "bulletScale": 1.42,
           "hitboxScale": 0.76,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         },
         {
           "pattern": "SPIRAL",
@@ -911,8 +895,7 @@
           "arms": 8,
           "speed": 2.3,
           "bulletScale": 1.22,
-          "hitboxScale": 0.46,
-          "bulletLifetimeTicks": 200
+          "hitboxScale": 0.46
         },
         {
           "pattern": "DENSE_RING",
@@ -923,8 +906,7 @@
           "speed": 1.75,
           "bulletScale": 1.42,
           "hitboxScale": 0.76,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": 0
+          "startRad": 0
         }
       ]
     }

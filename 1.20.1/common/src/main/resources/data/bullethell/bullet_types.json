@@ -192,7 +192,7 @@
     "sakuyaBlade": false
   },
   "BLUE_KNIFE": {
-    "color": "#164bf8",
+    "color": "#4499FFFF",
     "radius": 4.0,
     "hitboxMul": 0.82,
     "texture": "knife",
@@ -201,7 +201,7 @@
     "sakuyaBlade": false
   },
   "BULLET": {
-    "color": "#FF5058FF",
+    "color": "#ff5058",
     "radius": 4.0,
     "hitboxMul": 0.82,
     "texture": "bullet",
@@ -255,6 +255,16 @@
     "hitboxMul": 1.2,
     "texture": "orb_red",
     "textureScale": 3.2,
+    "applyTint": false
+  },
+  "BAT": {
+    "color": "#FFFFFFFF",
+    "radius": 6.0,
+    "hitboxMul": 0.9,
+    "texture": "bat",
+    "textureScale": 8,
+    "sourceSize": 64,
+    "sourceHeight": 32,
     "applyTint": false
   },
   "RED_ORB_LARGE": {

@@ -2,8 +2,13 @@ package mc.sayda.bullethell.boss;
 
 /** Per-ring configuration for the {@code WORM_CIRCLE} pattern step. */
 public class WormCircleDef {
-    /** Number of knives in this ring (1–20). */
-    public int knifeCount = 8;
+    /**
+     * How many evenly-spaced copies of this ring to create, offset by
+     * {@code 360 / instances} degrees each.  1 = single ring (default).
+     */
+    public int instances = 1;
+    /** Number of knives forming the worm body (bullets per stream, 1–20). */
+    public int wormLength = 8;
     /** Starting angle in degrees for the first knife in the ring. */
     public float startAngleDeg = 0f;
     /** Total angular span in degrees the knives cover. 360 = full circle. */

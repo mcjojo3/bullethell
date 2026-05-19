@@ -43,6 +43,11 @@ public final class PentagramFormationRuntime {
     /** Outward unit normal in star-local space (same as {@link mc.sayda.bullethell.pattern.PatternEngine} comb logic). */
     private final float[] outNlx = new float[MAX_POINTS];
     private final float[] outNly = new float[MAX_POINTS];
+    /** Arm-relative position [0, 1]: 0 at edge start (V-tip vertex A), 1 at far end (vertex B). Used for arc speed gradient. */
+    private final float[] armUOf = new float[MAX_POINTS];
+    /** Edge tangent direction in star-local space (A→B normalised). Used for along-arm arc firing. */
+    private final float[] armTx = new float[MAX_POINTS];
+    private final float[] armTy = new float[MAX_POINTS];
     private int count;
 
     private int samplesPerEdge = 7;
@@ -51,6 +56,8 @@ public final class PentagramFormationRuntime {
     private int spawnSample;
 
     private boolean dualMode;
+    /** True after {@link #prelaunchArcStraight}: bullets are flying straight but still tracked for velocity redirect. */
+    private boolean arcPrelaunched;
 
     /** Wave index currently receiving outline spawns. */
     private int spawnWave;
@@ -69,6 +76,10 @@ public final class PentagramFormationRuntime {
 
     public void setDualMode(boolean dual) {
         this.dualMode = dual;
+    }
+
+    public boolean isArcPrelaunched() {
+        return arcPrelaunched;
     }
 
     public int getSpawnWave() {
@@ -98,6 +109,7 @@ public final class PentagramFormationRuntime {
         spawnSample = 0;
         spawnWave = 0;
         wavesStartedCount = 0;
+        arcPrelaunched = false;
         Arrays.fill(waveStackDoneAt, -1);
         Arrays.fill(slotsB, -1);
     }
@@ -132,6 +144,7 @@ public final class PentagramFormationRuntime {
         spawnSample = 0;
         spawnWave = 0;
         wavesStartedCount = 1;
+        arcPrelaunched = false;
         waveStackDoneAt[0] = -1;
     }
 
@@ -192,10 +205,12 @@ public final class PentagramFormationRuntime {
         float dy = by - ay;
         float elen = (float) Math.sqrt(dx * dx + dy * dy);
 
-        float nlx, nly;
+        float nlx, nly, etx, ety;
         if (elen < 1e-4f) {
             nlx = 1f;
             nly = 0f;
+            etx = 1f;
+            ety = 0f;
         } else {
             float tx = dx / elen;
             float ty = dy / elen;
@@ -214,6 +229,8 @@ public final class PentagramFormationRuntime {
 
             nlx = nx;
             nly = ny;
+            etx = tx;
+            ety = ty;
         }
 
         if (count >= MAX_POINTS)
@@ -241,6 +258,9 @@ public final class PentagramFormationRuntime {
         localY[count] = ly;
         outNlx[count] = nlx;
         outNly[count] = nly;
+        armUOf[count] = u;
+        armTx[count] = etx;
+        armTy[count] = ety;
 
         count++;
         spawned++;
@@ -262,9 +282,11 @@ public final class PentagramFormationRuntime {
     /**
      * World positions: each sample's star centre lies on a ring around the boss; inner/outer radius
      * per wave from {@code ringInnerPx[w]} / {@code ringOuterPx[w]} (single-colour uses inner only).
+     * No-op when {@link #arcPrelaunched}: bullets are flying free and must not be snapped back.
      */
     public void syncPositions(BulletPool pool, float bossX, float bossY, float spin,
             float[] ringInnerPx, float[] ringOuterPx, int wavesCap) {
+        if (arcPrelaunched) return;
         // Pre-compute cos/sin for each of the STAR_COUNT layers (40 trig calls total)
         // rather than recomputing per bullet (up to 1400 × 4 = 5600 calls per tick).
         float layerStep = (float) (Math.PI * 2.0 / STAR_COUNT);
@@ -318,7 +340,7 @@ public final class PentagramFormationRuntime {
      */
     public void launchDetachedOutward(BulletPool pool, float spin, float speed, int lifeTicks,
             float innerAngVel, float outerAngVel, int innerSplitCount, float innerSplitSpreadRad,
-            float innerSplitSpeedMul) {
+            float innerSplitSpeedMul, float outerArcSlope) {
         if (pool == null || count <= 0)
             return;
         int splitCount = Math.max(1, Math.min(5, innerSplitCount));
@@ -362,12 +384,122 @@ public final class PentagramFormationRuntime {
             if (dualMode) {
                 int sB = slotsB[i];
                 if (sB >= 0 && pool.isActive(sB)) {
-                    pool.setVx(sB, nwx * speed);
-                    pool.setVy(sB, nwy * speed);
+                    float vxB, vyB;
+                    if (outerArcSlope > 1e-6f) {
+                        float tlx = armTx[i];
+                        float tly = armTy[i];
+                        float rotRad = (float) Math.toRadians(outerArcSlope * (1f - armUOf[i]));
+                        float cr = (float) Math.cos(rotRad);
+                        float sr = (float) Math.sin(rotRad);
+                        float vlx = speed * (tlx * cr + tly * sr);
+                        float vly = speed * (-tlx * sr + tly * cr);
+                        vxB = vlx * ca - vly * sa;
+                        vyB = vlx * sa + vly * ca;
+                    } else {
+                        vxB = nwx * speed;
+                        vyB = nwy * speed;
+                    }
+                    pool.setVx(sB, vxB);
+                    pool.setVy(sB, vyB);
                     pool.setAngVel(sB, outerAngVel);
                     pool.setRemainingLife(sB, lifeTicks);
                 }
             }
+        }
+        detachReleasedClearState();
+    }
+
+    /**
+     * Begins the pre-arc phase: bullets fire at full {@code baseSpeed} along the arm tangent
+     * (zero sideways deviation). Stops kinematic sync. {@link #tickArcPrelaunch} gradually rotates
+     * the direction each tick; call {@link #launchArcSingleColor} once the delay expires.
+     */
+    public void prelaunchArcStraight(BulletPool pool, float spin, float baseSpeed, int lifeTicks) {
+        if (pool == null || count <= 0) return;
+        float layerStep = (float) (Math.PI * 2.0 / STAR_COUNT);
+        for (int i = 0; i < count; i++) {
+            int sA = slotsA[i];
+            if (sA < 0 || !pool.isActive(sA)) continue;
+            int layer = layerOf[i] & 0xFF;
+            float ang = spin + layer * layerStep;
+            float ca = (float) Math.cos(ang);
+            float sa = (float) Math.sin(ang);
+            float tlx = armTx[i];
+            float tly = armTy[i];
+            pool.setVx(sA, (tlx * ca - tly * sa) * baseSpeed);
+            pool.setVy(sA, (tlx * sa + tly * ca) * baseSpeed);
+            pool.setAngVel(sA, 0f);
+            pool.setRemainingLife(sA, lifeTicks);
+        }
+        arcPrelaunched = true;
+    }
+
+    /**
+     * Per-tick direction ramp during the pre-arc phase. Speed stays constant at {@code baseSpeed};
+     * the CW rotation from tangent grows as {@code curveDeg × (1-u) × (elapsed/total)²}
+     * (quadratic ease-in: starts straight, sideways deviation accelerates). Call every tick
+     * between prelaunch and the final arc redirect.
+     */
+    public void tickArcPrelaunch(BulletPool pool, float spin, float baseSpeed, float curveDeg,
+            int delayTicks, int ticksElapsed) {
+        if (!arcPrelaunched || pool == null || count <= 0) return;
+        float frac = delayTicks > 0 ? Math.min(1f, (float) ticksElapsed / delayTicks) : 1f;
+        float easedFrac = frac * frac;
+        float layerStep = (float) (Math.PI * 2.0 / STAR_COUNT);
+        for (int i = 0; i < count; i++) {
+            int sA = slotsA[i];
+            if (sA < 0 || !pool.isActive(sA)) continue;
+            int layer = layerOf[i] & 0xFF;
+            float ang = spin + layer * layerStep;
+            float ca = (float) Math.cos(ang);
+            float sa = (float) Math.sin(ang);
+            float tlx = armTx[i];
+            float tly = armTy[i];
+            float rotRad = (float) Math.toRadians(curveDeg * (1f - armUOf[i]) * easedFrac);
+            float cr = (float) Math.cos(rotRad);
+            float sr = (float) Math.sin(rotRad);
+            float vlx = baseSpeed * (tlx * cr + tly * sr);
+            float vly = baseSpeed * (-tlx * sr + tly * cr);
+            pool.setVx(sA, vlx * ca - vly * sa);
+            pool.setVy(sA, vlx * sa + vly * ca);
+        }
+    }
+
+    /**
+     * Single-colour arc dissolution: each slotsA bullet fires at constant {@code baseSpeed},
+     * with its direction rotated CW from the arm tangent by {@code curveDeg × (1-u)} degrees.
+     * u=1 (FIRST / far end) = hinge, fires exactly along the tangent.
+     * u=0 (V-tip end) = fires {@code curveDeg} degrees CW from tangent.
+     * All bullets share the same speed so none overtake each other.
+     * Released bullets keep flying; formation bookkeeping is cleared.
+     */
+    public void launchArcSingleColor(BulletPool pool, float spin, float baseSpeed, float curveDeg,
+            int lifeTicks, float angVel) {
+        if (pool == null || count <= 0)
+            return;
+        float layerStep = (float) (Math.PI * 2.0 / STAR_COUNT);
+        for (int i = 0; i < count; i++) {
+            int sA = slotsA[i];
+            if (sA < 0 || !pool.isActive(sA))
+                continue;
+            int layer = layerOf[i] & 0xFF;
+            float ang = spin + layer * layerStep;
+            float ca = (float) Math.cos(ang);
+            float sa = (float) Math.sin(ang);
+            float tlx = armTx[i];
+            float tly = armTy[i];
+            // Rotate arm tangent CW by curveDeg*(1-u) degrees
+            float rotRad = (float) Math.toRadians(curveDeg * (1f - armUOf[i]));
+            float cr = (float) Math.cos(rotRad);
+            float sr = (float) Math.sin(rotRad);
+            float vlx = baseSpeed * (tlx * cr + tly * sr);
+            float vly = baseSpeed * (-tlx * sr + tly * cr);
+            float nwx = vlx * ca - vly * sa;
+            float nwy = vlx * sa + vly * ca;
+            pool.setVx(sA, nwx);
+            pool.setVy(sA, nwy);
+            pool.setAngVel(sA, angVel);
+            pool.setRemainingLife(sA, lifeTicks);
         }
         detachReleasedClearState();
     }
@@ -382,5 +514,6 @@ public final class PentagramFormationRuntime {
         spawnLayerIndex = STAR_COUNT;
         spawnEdge = 0;
         spawnSample = 0;
+        arcPrelaunched = false;
     }
 }

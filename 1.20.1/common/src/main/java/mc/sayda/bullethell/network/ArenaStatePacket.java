@@ -65,6 +65,8 @@ public class ArenaStatePacket {
     public final boolean pocAutoCollect;
     /** Character movement speed (normal / focused). Synced so client prediction uses correct values. */
     public final float speedNormal, speedFocused;
+    /** Active boss texture override (empty = use default bossId texture). */
+    public final String bossTexture;
 
     private static final UUID ZERO_UUID = new UUID(0, 0);
 
@@ -150,6 +152,7 @@ public class ArenaStatePacket {
         this.pocAutoCollect = ctx.rules.pocAutoCollect;
         this.speedNormal = ps.speedNormal;
         this.speedFocused = ps.speedFocused;
+        this.bossTexture = ctx.getActiveBossTexture();
     }
 
     public static ArenaStatePacket stopped() {
@@ -162,7 +165,7 @@ public class ArenaStatePacket {
                 false, 0, 0, 0,
                 0, 0, 0,
                 16, 0.20f, true,
-                PlayerState2D.SPEED_NORMAL, PlayerState2D.SPEED_FOCUSED);
+                PlayerState2D.SPEED_NORMAL, PlayerState2D.SPEED_FOCUSED, "");
     }
 
     private ArenaStatePacket(boolean active, boolean spectating,
@@ -177,7 +180,7 @@ public class ArenaStatePacket {
             boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount,
             int grazeChain, int lifePieces, int bombPieces,
             int rank, float pocFraction, boolean pocAutoCollect,
-            float speedNormal, float speedFocused) {
+            float speedNormal, float speedFocused, String bossTexture) {
         this.active = active;
         this.spectating = spectating;
         this.playerX = px;
@@ -232,6 +235,7 @@ public class ArenaStatePacket {
         this.pocAutoCollect = pocAutoCollect;
         this.speedNormal = speedNormal;
         this.speedFocused = speedFocused;
+        this.bossTexture = bossTexture;
     }
 
     // ---------------------------------------------------------------- codec
@@ -294,6 +298,7 @@ public class ArenaStatePacket {
         buf.writeBoolean(pocAutoCollect);
         buf.writeFloat(speedNormal);
         buf.writeFloat(speedFocused);
+        buf.writeUtf(bossTexture);
     }
 
     @SuppressWarnings("null")
@@ -353,6 +358,7 @@ public class ArenaStatePacket {
         boolean pocAutoCollect = buf.readBoolean();
         float speedNormal = buf.readFloat();
         float speedFocused = buf.readFloat();
+        String bossTexture = buf.readUtf();
         return new ArenaStatePacket(true, spectating,
                 px, py, lives, bombs, graze, power, pIdx,
                 bx, by, hp, maxHp, phase, bossMoveDir,
@@ -365,6 +371,6 @@ public class ArenaStatePacket {
                 dbgGod, dTick, dCd, dBul,
                 grazeChain, lifePieces, bombPieces,
                 rank, pocFraction, pocAutoCollect,
-                speedNormal, speedFocused);
+                speedNormal, speedFocused, bossTexture);
     }
 }

@@ -156,7 +156,7 @@
       "spellName": "Floral Awakening",
       "spellDurationTicks": [0, 0, 0, 0],
       "movement": "SINE_WAVE",
-      "moveSpeed": 100,
+      "moveRange": 100,
       "music": "oriental_dark_flight",
       "attacks": [
         {
@@ -188,7 +188,7 @@
       "spellDurationTicks": [800, 600, 450, 300],
       "spellBonus": 50000,
       "movement": "CIRCLE",
-      "moveSpeed": 80,
+      "moveRange": 80,
       "attacks": [
         {
           "pattern": "SPIRAL",
@@ -257,7 +257,7 @@
           "bulletType": "LEAF",
           "arms": 16,
           "speed": 1.8,
-          "ringStartAngleRad": -1
+          "startRad": -1
         },
         {
           "pattern": "RING_OFFSET",
@@ -267,7 +267,7 @@
           "bulletType": "GOLD",
           "arms": 12,
           "speed": 2.4,
-          "ringStartAngleRad": 1
+          "startRad": 1
         },
         {
           "pattern": "AIMED",
@@ -288,7 +288,7 @@
       "spellName": "Final Bloom",
       "spellDurationTicks": [0, 0, 0, 0],
       "movement": "CIRCLE",
-      "moveSpeed": 120,
+      "moveRange": 120,
       "attacks": [
         {
           "pattern": "SPIRAL",

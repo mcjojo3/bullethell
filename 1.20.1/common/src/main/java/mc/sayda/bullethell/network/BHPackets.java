@@ -9,6 +9,7 @@ import mc.sayda.bullethell.Bullethell;
 import mc.sayda.bullethell.arena.ArenaContext;
 import mc.sayda.bullethell.arena.ArenaEndShareSnapshot;
 import mc.sayda.bullethell.arena.BulletHellManager;
+import mc.sayda.bullethell.arena.LastArenaRetryState;
 import mc.sayda.bullethell.arena.LastArenaShareState;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.arena.PlayerState2D;
@@ -269,19 +270,52 @@ public final class BHPackets {
             });
         });
 
-        // C2S: retry arena - restart with same stage/difficulty/character
+        // C2S: retry arena - restart using server-stored last run (client fields are ignored)
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, RETRY_ARENA, (buf, ctx) -> {
-            RetryArenaPacket pkt = RetryArenaPacket.decode(buf);
+            if (buf.readableBytes() > 0)
+                buf.skipBytes(buf.readableBytes());
             ctx.queue(() -> {
                 ServerPlayer player = (ServerPlayer) ctx.getPlayer();
                 if (player == null) return;
                 if (BulletHellManager.INSTANCE.hasArena(player.getUUID())) return;
-                DifficultyConfig diff;
-                try { diff = DifficultyConfig.valueOf(pkt.difficulty); }
-                catch (Exception e) { diff = DifficultyConfig.NORMAL; }
-                if (!pkt.stageId.isBlank() && !pkt.characterId.isBlank()) {
-                    startArena(player, diff, pkt.stageId, pkt.characterId, pkt.shotTypeOrdinal);
+
+                LastArenaRetryState.Params last = LastArenaRetryState.get(player.getUUID());
+                if (last == null || last.stageId().isBlank() || last.characterId().isBlank()) {
+                    player.sendSystemMessage(Component.literal(
+                            "[BulletHell] No finished run to retry yet."));
+                    return;
                 }
+                if (last.testMode()) {
+                    player.sendSystemMessage(Component.literal(
+                            "[BulletHell] Retry is not available in test mode."));
+                    return;
+                }
+
+                boolean debugBypass = BHDebugMode.isGodMode(player.getUUID());
+                if (!debugBypass && !CharacterUnlocks.isUnlockedFor(player, last.characterId(), last.difficulty())) {
+                    player.sendSystemMessage(Component.literal(
+                            "[BulletHell] Character '" + last.characterId() + "' is locked for "
+                                    + last.difficulty().name() + "."));
+                    return;
+                }
+                if (!debugBypass && !last.practice()
+                        && !BossProgression.canChallengeStage(player, last.stageId(), last.difficulty())) {
+                    String bossId;
+                    try {
+                        bossId = StageLoader.load(last.stageId()).bossId;
+                    } catch (Exception e) {
+                        bossId = "";
+                    }
+                    DifficultyConfig cap = BossProgression.maxAllowedDifficulty(player, bossId);
+                    String capText = (cap == null) ? "none" : cap.name();
+                    String why = BossProgression.requirementSummary(bossId);
+                    player.sendSystemMessage(Component.literal(
+                            "[BulletHell] " + last.stageId() + " is currently capped at " + capText + ". " + why));
+                    return;
+                }
+
+                startArena(player, last.difficulty(), last.stageId(), last.characterId(),
+                        last.shotTypeOrdinal(), last.practice());
             });
         });
 

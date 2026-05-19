@@ -10,11 +10,12 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
- * Runs one arena's simulation on a dedicated daemon thread at a fixed 50 ms wall-clock
- * rate, completely decoupled from Minecraft's main-thread tick loop.
+ * Runs one arena's simulation on a dedicated daemon thread, ticked once per
+ * MC server tick via {@link #submitTick()} called from {@code SERVER_POST}.
  *
  * Threading model
  * ---------------
@@ -33,25 +34,38 @@ public final class ArenaThread {
     private final ArenaContext ctx;
     private final UUID hostUuid;
     private final MinecraftServer server;
-    private final ScheduledExecutorService executor;
+    private final ExecutorService executor;
     private int syncTick = 0;
+    /**
+     * True while a tick task is already queued or running. Prevents unbounded
+     * task queue build-up when a tick takes longer than one MC server tick —
+     * the extra submitTick() calls are dropped rather than piling up and later
+     * bursting all at once (which causes the freeze→jump lag pattern).
+     */
+    private final java.util.concurrent.atomic.AtomicBoolean tickPending = new java.util.concurrent.atomic.AtomicBoolean(false);
+    /** Cached player-index map; rebuilt only when the participant set reference changes. */
+    private Map<UUID, Integer> cachedPIdxMap = null;
+    private java.util.Set<UUID> lastParticipants = null;
 
     public ArenaThread(ArenaContext ctx, UUID hostUuid, MinecraftServer server) {
         this.ctx = ctx;
         this.hostUuid = hostUuid;
         this.server = server;
-        this.executor = Executors.newSingleThreadScheduledExecutor(r -> {
+        this.executor = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "bh-arena-" + hostUuid.toString().substring(0, 8));
             t.setDaemon(true);
             return t;
         });
     }
 
-    public void start() {
-        // 25 ms initial delay: lets BHPackets.startArena() finish sendFullSync before the
-        // first tick reads arena state, avoiding a race on bullet/laser data.
-        executor.scheduleAtFixedRate(this::tick, 25L, 50L, TimeUnit.MILLISECONDS);
+    /** Called once from {@code SERVER_POST} each MC server tick. */
+    public void submitTick() {
+        if (executor.isShutdown()) return;
+        if (!tickPending.compareAndSet(false, true)) return;
+        executor.execute(() -> { tickPending.set(false); tick(); });
     }
+
+    public void start() {}
 
     public void stop() {
         executor.shutdownNow();
@@ -103,25 +117,16 @@ public final class ArenaThread {
         ctx.bullets.clearDirty();
         if (laserDirty) ctx.lasers.clearDirty();
 
-        Set<UUID> all = new LinkedHashSet<>(ctx.allParticipants());
+        // allParticipants() returns a cached unmodifiable set — no copy needed.
+        Set<UUID> all = ctx.allParticipants();
 
-        Map<UUID, Integer> pIdxMap = new HashMap<>();
-        if (ctx.playerUuid != null) pIdxMap.put(ctx.playerUuid, 1);
-        int coopCount = 2;
-        for (UUID cid : ctx.getCoopPlayers().keySet()) pIdxMap.put(cid, coopCount++);
-
-        Map<UUID, ArenaStatePacket> statePackets = new HashMap<>();
-        for (UUID pid : all)
-            statePackets.put(pid, new ArenaStatePacket(ctx, pid, pIdxMap.getOrDefault(pid, 1)));
-
-        Map<UUID, List<GameEvent>> personalEvents = new HashMap<>();
-        for (UUID pid : all) {
-            PlayerState2D ps2d = ctx.getPlayerState(pid);
-            if (ps2d == null) continue;
-            List<GameEvent> pe = new ArrayList<>();
-            GameEvent g;
-            while ((g = ps2d.personalEvents.poll()) != null) pe.add(g);
-            personalEvents.put(pid, pe);
+        // Rebuild pIdxMap only when participant membership changes (reference changes on join/leave).
+        if (all != lastParticipants) {
+            lastParticipants = all;
+            cachedPIdxMap = new HashMap<>();
+            if (ctx.playerUuid != null) cachedPIdxMap.put(ctx.playerUuid, 1);
+            int coopCount = 2;
+            for (UUID cid : ctx.getCoopPlayers().keySet()) cachedPIdxMap.put(cid, coopCount++);
         }
 
         Map<UUID, CoopPlayersSyncPacket> coopPackets = buildCoopPackets(all);
@@ -137,13 +142,18 @@ public final class ArenaThread {
             for (String sfx : attackSfx)
                 BHPackets.sendAttackActivationSfx(p, new AttackActivationSfxPacket(sfx));
 
-            List<GameEvent> pe = personalEvents.get(pid);
-            if (pe != null)
-                for (GameEvent g : pe) BHPackets.sendGameEvent(p, new GameEventPacket(g));
+            // Drain personal events inline — avoids per-tick HashMap + ArrayList allocation.
+            PlayerState2D ps2d = ctx.getPlayerState(pid);
+            if (ps2d != null) {
+                GameEvent g;
+                while ((g = ps2d.personalEvents.poll()) != null)
+                    BHPackets.sendGameEvent(p, new GameEventPacket(g));
+            }
 
+            int pIdx = cachedPIdxMap != null ? cachedPIdxMap.getOrDefault(pid, 1) : 1;
             if (deltaPacket != null) BHPackets.sendBulletDelta(p, deltaPacket);
             BHPackets.sendAllPlayerBullets(p, allBulletsPacket);
-            BHPackets.sendToPlayer(p, statePackets.get(pid));
+            BHPackets.sendToPlayer(p, new ArenaStatePacket(ctx, pid, pIdx));
             if (itemPacket  != null) BHPackets.sendItemSync(p, itemPacket);
             if (enemyPacket != null) BHPackets.sendEnemySync(p, enemyPacket);
             CoopPlayersSyncPacket cpp = coopPackets.get(pid);

@@ -42,6 +42,8 @@ public class EnemyPool {
     private final float[] prevY = new float[CAPACITY];
     private int activeCount = 0;
     private int freeSlotCursor = 0;
+    /** Compact list of active slot indices for O(activeCount) iteration. Unordered; maintained by spawn/deactivate. */
+    private final int[] activeSlots = new int[CAPACITY];
 
     // ---------------------------------------------------------------- tick
 
@@ -119,12 +121,22 @@ public class EnemyPool {
         data[b + F_ANG_VEL]  = angVel;
         data[b + F_ARC_LEFT] = arcTicks;
         active[slot] = true;
+        activeSlots[activeCount] = slot;
         activeCount++;
         return slot;
     }
 
     public void deactivate(int slot) {
-        if (active[slot]) { active[slot] = false; activeCount--; }
+        if (!active[slot]) return;
+        active[slot] = false;
+        // Swap-with-last to keep activeSlots compact.
+        for (int i = 0; i < activeCount; i++) {
+            if (activeSlots[i] == slot) {
+                activeSlots[i] = activeSlots[activeCount - 1];
+                break;
+            }
+        }
+        activeCount--;
     }
 
     // ---------------------------------------------------------------- setters
@@ -164,6 +176,8 @@ public class EnemyPool {
     public int     getAtkCd(int slot)    { return (int) data[slot * STRIDE + F_ATK_CD]; }
     public boolean isActive(int slot)    { return active[slot]; }
     public int     getActiveCount()      { return activeCount; }
+    /** Returns the slot index of the i-th active enemy (0 ≤ i &lt; getActiveCount()). Unordered. */
+    public int     getActiveSlot(int i)  { return activeSlots[i]; }
     public float   getPrevX(int slot)    { return prevX[slot]; }
     public float   getPrevY(int slot)    { return prevY[slot]; }
 
@@ -183,11 +197,15 @@ public class EnemyPool {
         System.arraycopy(d, 0, data, slot * STRIDE, STRIDE);
         if (isActive && !active[slot]) {
             active[slot] = true;
+            activeSlots[activeCount] = slot;
             activeCount++;
             prevX[slot] = d[F_X];
             prevY[slot] = d[F_Y];
         } else if (!isActive && active[slot]) {
             active[slot] = false;
+            for (int i = 0; i < activeCount; i++) {
+                if (activeSlots[i] == slot) { activeSlots[i] = activeSlots[activeCount - 1]; break; }
+            }
             activeCount--;
         }
     }

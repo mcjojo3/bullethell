@@ -162,7 +162,7 @@
       ],
       "spellBonus": 0,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "music": "faith_is_for_the_transient_people",
       "attacks": [
         {
@@ -173,52 +173,24 @@
           "pentagramRitualSpinSpeedDeg": 0,
           "bulletType": "BLUE_ORB",
           "ringBulletType": "NEEDLE",
-          "arms": [
-            6,
-            6,
-            6,
-            7
-          ],
-          "speed": 3,
-          "bulletLifetimeTicks": 300,
+          "arms": 16,
+          "speed": 8,
+          "pentagramArcCurveDeg": 50,
+          "pentagramArcCurveDelayTicks": 2,
+          "pentagramArcAngularVelocity": 0.01,
           "skipPentagramRitualFollowup": true
         },
         {
           "pattern": "ORB_C_ROW",
-          "cooldown": [
-            3,
-            2,
-            1,
-            0
-          ],
-          "minCooldown": [
-            1,
-            1,
-            0,
-            0
-          ],
+          "cooldown": [3,2,1,0],
+          "minCooldown": [1,1,0,0],
           "bulletType": "BLUE_ORB",
           "arms": 0,
-          "speed": 3,
-          "bulletLifetimeTicks": [
-            300,
-            250,
-            225,
-            200
-          ],
+          "speed": 8,
           "orbCRowRandomDirection": true,
-          "orbCRowSpacingScale": [
-            0.62,
-            0.61,
-            0.595,
-            0.58
-          ],
-          "orbCRowSpeedSlope": [
-            0.02,
-            0.02,
-            0.02,
-            0.02
-          ],
+          "orbCRowSpacing": 3.45,
+          "orbCRowSpeedSlope": -0.001,
+          "orbCRowDrift": 0.5,
           "randomHaloMinR": 38,
           "randomHaloMaxR": 98,
           "randomHaloJitter": 26
@@ -237,44 +209,46 @@
         200
       ],
       "spellBonus": 58000,
-      "movement": "CIRCLE",
-      "moveSpeed": 86,
+      "movement": "STATIC",
+      "bossPhaseAnchorY": 200,
+      "moveRange": 0,
       "music": "",
       "patternTempo": 1.0,
       "attacks": [
         {
           "pattern": "SPRINKLER",
           "everyTickWhilePhase": true,
-          "cooldown": 2,
+          "bounceCount": 1,
+          "cooldown": 1,
           "minCooldown": 1,
           "bulletType": "BLUE_LASER",
+          "bounceExcludeSides": ["bottom", "top"],
           "arms": 1,
-          "speed": 4.0,
-          "spawnOffsetX": 60,
-          "sprinklerAdvanceRad": 0.12,
-          "bulletLifetimeTicks": 230
+          "speed": 6,
+          "spawnOffsetX": 160,
+          "advanceRad": 0.1
         },
         {
           "pattern": "SPRINKLER",
           "everyTickWhilePhase": true,
-          "cooldown": 2,
+          "bounceCount": 1,
+          "cooldown": 1,
           "minCooldown": 1,
           "bulletType": "BLUE_LASER",
+          "bounceExcludeSides": ["bottom", "top"],
           "arms": 1,
-          "speed": 4.0,
-          "spawnOffsetX": -60,
-          "sprinklerAdvanceRad": -0.12,
-          "bulletLifetimeTicks": 230
+          "speed": 6,
+          "spawnOffsetX": -160,
+          "advanceRad": -0.1
         },
         {
           "pattern": "AIMED",
-          "cooldown": 16,
-          "minCooldown": 12,
-          "bulletType": "BLUE_ORB",
-          "arms": 3,
-          "speed": 2.9,
-          "spread": 0.14,
-          "bulletLifetimeTicks": 240
+          "cooldown": 10,
+          "minCooldown": 10,
+          "bulletType": "RED_ORB_LARGE",
+          "arms": 1,
+          "speed": 6.4,
+          "spread": 0.14
         }
       ]
     },
@@ -297,7 +271,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 128,
+      "moveRange": 128,
       "music": "",
       "attacks": [
         {
@@ -307,7 +281,7 @@
           "segmentVolleyIntervalTicks": [
             6,
             6,
-            6,
+            5,
             4
           ],
           "cooldown": 0,
@@ -316,26 +290,10 @@
           "arms": 8,
           "maxScaledArms": 8,
           "combCount": 8,
-          "speed": [
-            5.25,
-            5.25,
-            5.25,
-            4.0
-          ],
-          "sprinklerAdvanceRad": [
-            0.12,
-            0.12,
-            0.12,
-            0.15
-          ],
-          "sprinklerSpread": 0.02,
-          "sprinklerSpeedSlope": 0.01,
-          "bulletLifetimeTicks": [
-            205,
-            205,
-            205,
-            220
-          ]
+          "speed": 13,
+          "advanceRad": 0.17,
+          "spread": 0.02,
+          "sprinklerSpeedSlope": -0.01
         },
         {
           "pattern": "SPRINKLER",
@@ -344,7 +302,7 @@
           "segmentVolleyIntervalTicks": [
             6,
             6,
-            6,
+            5,
             4
           ],
           "cooldown": 0,
@@ -353,32 +311,16 @@
           "arms": 8,
           "maxScaledArms": 8,
           "combCount": 8,
-          "speed": [
-            5.25,
-            5.25,
-            5.25,
-            4.0
-          ],
-          "sprinklerAdvanceRad": [
-            -0.12,
-            -0.12,
-            -0.12,
-            -0.15
-          ],
-          "sprinklerSpread": 0.02,
-          "sprinklerSpeedSlope": -0.01,
-          "bulletLifetimeTicks": [
-            205,
-            205,
-            205,
-            220
-          ]
+          "speed": 13,
+          "advanceRad": -0.17,
+          "spread": 0.02,
+          "sprinklerSpeedSlope": 0.01
         }
       ]
     },
     {
-      "_note": "Sea Opening \u00abMoses's Miracle\u00bb: SEA_SPLIT curtain + STACK_FAN_VOLLEY (random annulus origin like ritual phase 4; stacked downward fan + stacked aimed ray; SEA_SPLIT lock).",
-      "hp": 2440,
+      "_note": "Sea Opening \u00abMoses's Miracle\u00bb: SEA_SPLIT curtain + STACK_FAN_VOLLEY; Sanae dashes to random positions and fires both patterns from there.",
+      "hp": 4000,
       "isSpellCard": true,
       "patternTempo": 1.0,
       "spellName": "Sea Opening \"Moses's Miracle\"",
@@ -389,27 +331,33 @@
         230
       ],
       "spellBonus": 76000,
-      "movement": "STATIC",
-      "moveSpeed": 0,
+      "movement": "DASH_TOP",
+      "bossPhaseAnchorX": 240,
+      "bossPhaseAnchorY": 110,
+      "dashTopMinX": 60,
+      "dashTopMaxX": 420,
+      "dashTopMinY": 80,
+      "dashTopMaxY": 230,
+      "dashTopDashTicks": 8,
+      "dashTopIntervalTicks": 4,
       "music": "",
       "attacks": [
         {
           "pattern": "SEA_SPLIT",
-          "cooldown": 5,
-          "minCooldown": 4,
+          "cooldown": 3,
+          "minCooldown": 3,
           "laserHalfWidth": 100,
           "laserRotateAdvanceRad": 0.05,
-          "arms": 24,
+          "arms": [24, 24, 26, 30],
           "maxScaledArms": 30,
-          "speed": 2.55,
-          "bulletType": "RIVER_LASER",
-          "bulletLifetimeTicks": 300
+          "speed": 6,
+          "bulletType": "RIVER_LASER"
         },
         {
           "pattern": "STACK_FAN_VOLLEY",
           "burstCount": 1,
-          "cooldown": 10,
-          "minCooldown": 18,
+          "cooldown": 16,
+          "minCooldown": 16,
           "bulletType": "BLUE_DAGGER",
           "ringBulletType": "RED_DAGGER",
           "rayStackDepth": 8,
@@ -419,12 +367,8 @@
             15.0,
             15.0
           ],
-          "speed": 4,
-          "spread": 0.4,
-          "bulletLifetimeTicks": 220,
-          "randomHaloMinR": 18,
-          "randomHaloMaxR": 98,
-          "randomHaloJitter": 26
+          "speed": 8,
+          "spread": 0.4
         }
       ]
     },
@@ -446,8 +390,7 @@
         0
       ],
       "spellBonus": 0,
-      "movement": "SINE_WAVE",
-      "moveSpeed": 128,
+      "movement": "STATIC",
       "music": "",
       "attacks": [
         {
@@ -457,36 +400,20 @@
           "segmentVolleyIntervalTicks": [
             6,
             6,
-            6,
-            6
+            5,
+            4
           ],
           "cooldown": 0,
           "minCooldown": 0,
           "bulletType": "BLUE_DAGGER",
           "segmentSyncGroup": "ns4_dual_sprinkler",
-          "sprinklerSpeedSlope": 0.01,
           "arms": 8,
           "maxScaledArms": 8,
           "combCount": 8,
-          "speed": [
-            5.25,
-            5.25,
-            5.25,
-            4.0
-          ],
-          "sprinklerAdvanceRad": [
-            0.12,
-            0.12,
-            0.12,
-            0.15
-          ],
-          "sprinklerSpread": 0.02,
-          "bulletLifetimeTicks": [
-            205,
-            205,
-            205,
-            220
-          ]
+          "speed": 14,
+          "advanceRad": 0.17,
+          "spread": 0.02,
+          "sprinklerSpeedSlope": 0.01
         },
         {
           "pattern": "SPRINKLER",
@@ -495,36 +422,21 @@
           "segmentVolleyIntervalTicks": [
             6,
             6,
-            6,
-            6
+            5,
+            4
           ],
           "cooldown": 0,
           "minCooldown": 0,
           "bulletType": "RED_DAGGER",
           "segmentSyncGroup": "ns4_dual_sprinkler",
-          "sprinklerSpeedSlope": -0.01,
           "arms": 8,
           "maxScaledArms": 8,
           "combCount": 8,
-          "speed": [
-            5.5,
-            5.5,
-            5.5,
-            4.25
-          ],
-          "sprinklerAdvanceRad": [
-            -0.12,
-            -0.12,
-            -0.12,
-            -0.15
-          ],
-          "sprinklerSpread": 0.02,
-          "bulletLifetimeTicks": [
-            205,
-            205,
-            205,
-            220
-          ]
+          "speed": 15,
+          "advanceRad": -0.17,
+          "startRad": 30,
+          "spread": 0.02,
+          "sprinklerSpeedSlope": -0.01
         }
       ]
     },
@@ -541,7 +453,7 @@
       ],
       "spellBonus": 72000,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "music": "",
       "attacks": [
         {
@@ -559,20 +471,11 @@
             6,
             6,
             6,
-            7
+            16
           ],
-          "speed": [
-            2.2,
-            2.28,
-            2.36,
-            2.45
-          ],
-          "bulletLifetimeTicks": [
-            190,
-            192,
-            196,
-            200
-          ],
+          "speed": 6.68,
+          "pentagramArcCurveDeg": 50,
+          "pentagramDualOuterReleaseAngularVelocity": 0.01,
           "pentagramDualInnerReleaseAngularVelocity": 0.022,
           "pentagramDualInnerSplitCount": 2,
           "pentagramDualInnerSplitSpreadRad": 0.11,
@@ -595,7 +498,7 @@
       ],
       "spellBonus": 80000,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "bossPhaseAnchorX": 240,
       "bossPhaseAnchorY": 300,
       "patternTempo": [
@@ -618,13 +521,8 @@
             19
           ],
           "maxScaledArms": 19,
-          "speed": [
-            2.0,
-            1.75,
-            1.25,
-            1.0
-          ],
-          "sprinklerAdvanceRad": 16,
+          "speed": 2,
+          "advanceRad": 16,
           "divineWindLayers": 16,
           "divineWindLayerSpacing": 16,
           "divineWindFreezeStaggerTicks": 3.5,
@@ -632,12 +530,6 @@
           "divineWindInwardFactor": 2.0,
           "divineWindCurveAngularVelocity": -0.028,
           "divineWindCurveTicks": 55,
-          "bulletLifetimeTicks": [
-            272,
-            260,
-            248,
-            236
-          ],
           "segmentDurationTicks": [
             24,
             25,
@@ -660,7 +552,7 @@
             1,
             1
           ],
-          "bulletType": "LARGE_ORB",
+          "bulletType": "BLUE_ORB_LARGE",
           "arms": [
             12,
             13,
@@ -668,19 +560,8 @@
             16
           ],
           "maxScaledArms": 16,
-          "speed": [
-            2.05,
-            2.15,
-            2.28,
-            2.42
-          ],
-          "bulletLifetimeTicks": [
-            200,
-            195,
-            190,
-            185
-          ],
-          "ringStartAngleRad": -1
+          "speed": 2.65,
+          "startRad": -1
         },
         {
           "pattern": "DIVINE_WIND",
@@ -694,13 +575,8 @@
             19
           ],
           "maxScaledArms": 19,
-          "speed": [
-            2.0,
-            1.75,
-            1.25,
-            1.0
-          ],
-          "sprinklerAdvanceRad": -16,
+          "speed": 2,
+          "advanceRad": -16,
           "divineWindLayers": 16,
           "divineWindLayerSpacing": 16,
           "divineWindFreezeStaggerTicks": 3.5,
@@ -708,12 +584,6 @@
           "divineWindInwardFactor": 2.0,
           "divineWindCurveAngularVelocity": 0.028,
           "divineWindCurveTicks": 55,
-          "bulletLifetimeTicks": [
-            272,
-            260,
-            248,
-            236
-          ],
           "segmentDurationTicks": [
             24,
             25,
@@ -736,7 +606,7 @@
             1,
             1
           ],
-          "bulletType": "LARGE_ORB",
+          "bulletType": "BLUE_ORB_LARGE",
           "arms": [
             12,
             13,
@@ -744,19 +614,8 @@
             16
           ],
           "maxScaledArms": 16,
-          "speed": [
-            2.05,
-            2.15,
-            2.28,
-            2.42
-          ],
-          "bulletLifetimeTicks": [
-            200,
-            195,
-            190,
-            185
-          ],
-          "ringStartAngleRad": -1
+          "speed": 2.65,
+          "startRad": -1
         }
       ]
     }

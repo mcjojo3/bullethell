@@ -8,7 +8,7 @@
     "Alternating nonspells are shared while spellcards are difficulty-gated.",
     "AIMED/SPREAD use bulletType KNIFE (knife.png); RING/SPIRAL/BOUNCE/RING_OFFSET knife walls use KUNAI (kunai.png, slightly smaller sprite, same hitbox).",
     "Balance pass: minCooldown + maxScaledArms on high-arm steps; spellDurationTicks ladder for E/N and H/L spell timers; see wiki/sakuya-th06-reconstruction.md.",
-    "Blueprint (PatternStep): bulletLifetimeTicks - RING/SPIRAL/RING_OFFSET 200, AIMED/SPREAD 220, BOUNCE 250. ringStartAngleRad -1 on RING_OFFSET (random), 0 on RING. bulletAngularVelocity/spawn offsets unused."
+    "Blueprint (PatternStep): bulletLifetimeTicks - RING/SPIRAL/RING_OFFSET 200, AIMED/SPREAD 220, BOUNCE 250. startRad -1 on RING_OFFSET (random), 0 on RING. bulletAngularVelocity/spawn offsets unused."
   ],
   "introDialog": [
     {
@@ -153,7 +153,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 115,
+      "moveRange": 115,
       "music": "flowering_night",
       "attacks": [
         {
@@ -165,8 +165,7 @@
           "arms": 6,
           "maxScaledArms": 10,
           "speed": 3.65,
-          "spread": 0.16,
-          "bulletLifetimeTicks": 220
+          "spread": 0.16
         },
         {
           "pattern": "AIMED",
@@ -177,8 +176,7 @@
           "arms": 4,
           "maxScaledArms": 8,
           "speed": 4.3,
-          "spread": 0.10,
-          "bulletLifetimeTicks": 220
+          "spread": 0.10
         },
         {
           "pattern": "RING_OFFSET",
@@ -189,8 +187,7 @@
           "arms": 9,
           "maxScaledArms": 14,
           "speed": 2.0,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
@@ -209,7 +206,7 @@
       ],
       "spellBonus": 52000,
       "movement": "SINE_WAVE",
-      "moveSpeed": 172,
+      "moveRange": 172,
       "music": "",
       "attacks": [
         {
@@ -221,8 +218,7 @@
           "arms": 7,
           "maxScaledArms": 11,
           "speed": 4.35,
-          "spread": 0.10,
-          "bulletLifetimeTicks": 220
+          "spread": 0.10
         },
         {
           "pattern": "AIMED",
@@ -233,8 +229,7 @@
           "arms": 5,
           "maxScaledArms": 9,
           "speed": 4.8,
-          "spread": 0.08,
-          "bulletLifetimeTicks": 220
+          "spread": 0.08
         },
         {
           "pattern": "SPREAD",
@@ -244,8 +239,7 @@
           "bulletType": "KNIFE",
           "arms": 4,
           "maxScaledArms": 9,
-          "speed": 5.2,
-          "bulletLifetimeTicks": 220
+          "speed": 5.2
         }
       ]
     },
@@ -264,11 +258,11 @@
       ],
       "spellBonus": 65000,
       "movement": "SINE_WAVE",
-      "moveSpeed": 96,
+      "moveRange": 96,
       "music": "",
       "attacks": [
         {
-          "pattern": "BOUNCE",
+          "pattern": "AIMED",
           "burstCount": 2,
           "burstInterval": 8,
           "cooldown": 46,
@@ -279,8 +273,7 @@
           "speed": 3.2,
           "spread": 0.10,
           "bounceCount": 2,
-          "bounceDamping": 0.95,
-          "bulletLifetimeTicks": 250
+          "bounceDamping": 0.95
         },
         {
           "pattern": "SPIRAL",
@@ -299,8 +292,7 @@
           "speed": 2.85,
           "speedMin": 2.65,
           "speedMax": 3.05,
-          "maxScaledArms": 7,
-          "bulletLifetimeTicks": 200
+          "maxScaledArms": 7
         },
         {
           "pattern": "RING_OFFSET",
@@ -316,8 +308,7 @@
           "speed": 1.78,
           "speedMin": 1.68,
           "speedMax": 1.88,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
@@ -334,7 +325,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 125,
+      "moveRange": 125,
       "music": "",
       "attacks": [
         {
@@ -346,8 +337,7 @@
           "arms": 6,
           "maxScaledArms": 10,
           "speed": 3.85,
-          "spread": 0.17,
-          "bulletLifetimeTicks": 220
+          "spread": 0.17
         },
         {
           "pattern": "RING_OFFSET",
@@ -358,8 +348,7 @@
           "arms": 10,
           "maxScaledArms": 15,
           "speed": 2.2,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         },
         {
           "pattern": "SPREAD",
@@ -369,8 +358,7 @@
           "bulletType": "KNIFE",
           "arms": 4,
           "maxScaledArms": 9,
-          "speed": 5.0,
-          "bulletLifetimeTicks": 220
+          "speed": 5.0
         }
       ]
     },
@@ -389,7 +377,7 @@
       ],
       "spellBonus": 62000,
       "movement": "CIRCLE",
-      "moveSpeed": 84,
+      "moveRange": 84,
       "music": "",
       "attacks": [
         {
@@ -401,8 +389,7 @@
           "arms": 14,
           "maxScaledArms": 18,
           "speed": 2.05,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         },
         {
           "pattern": "AIMED",
@@ -413,8 +400,7 @@
           "arms": 7,
           "maxScaledArms": 11,
           "speed": 4.05,
-          "spread": 0.16,
-          "bulletLifetimeTicks": 220
+          "spread": 0.16
         },
         {
           "pattern": "SPREAD",
@@ -424,8 +410,7 @@
           "bulletType": "KNIFE",
           "arms": 6,
           "maxScaledArms": 11,
-          "speed": 5.1,
-          "bulletLifetimeTicks": 220
+          "speed": 5.1
         },
         {
           "pattern": "RING_OFFSET",
@@ -436,8 +421,7 @@
           "arms": 9,
           "maxScaledArms": 14,
           "speed": 2.7,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
@@ -456,7 +440,7 @@
       ],
       "spellBonus": 78000,
       "movement": "CIRCLE",
-      "moveSpeed": 92,
+      "moveRange": 92,
       "music": "",
       "attacks": [
         {
@@ -469,8 +453,7 @@
           "maxScaledArms": 5,
           "speed": 4.9,
           "bulletScale": 1.48,
-          "hitboxScale": 0.76,
-          "bulletLifetimeTicks": 220
+          "hitboxScale": 0.76
         },
         {
           "pattern": "AIMED",
@@ -481,11 +464,10 @@
           "arms": 3,
           "maxScaledArms": 6,
           "speed": 4.45,
-          "spread": 0.20,
-          "bulletLifetimeTicks": 220
+          "spread": 0.20
         },
         {
-          "pattern": "BOUNCE",
+          "pattern": "AIMED",
           "cooldown": 14,
           "minCooldown": 11,
           "scalingProfile": "PRECISION",
@@ -495,8 +477,7 @@
           "speed": 3.9,
           "spread": 0.15,
           "bounceCount": 2,
-          "bounceDamping": 0.95,
-          "bulletLifetimeTicks": 250
+          "bounceDamping": 0.95
         },
         {
           "pattern": "SPREAD",
@@ -506,8 +487,7 @@
           "bulletType": "KNIFE",
           "arms": 6,
           "maxScaledArms": 11,
-          "speed": 5.3,
-          "bulletLifetimeTicks": 220
+          "speed": 5.3
         }
       ]
     },
@@ -524,7 +504,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 132,
+      "moveRange": 132,
       "music": "",
       "attacks": [
         {
@@ -536,8 +516,7 @@
           "arms": 7,
           "maxScaledArms": 11,
           "speed": 3.95,
-          "spread": 0.16,
-          "bulletLifetimeTicks": 220
+          "spread": 0.16
         },
         {
           "pattern": "RING_OFFSET",
@@ -548,8 +527,7 @@
           "arms": 11,
           "maxScaledArms": 16,
           "speed": 2.3,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         },
         {
           "pattern": "SPREAD",
@@ -559,8 +537,7 @@
           "bulletType": "KNIFE",
           "arms": 5,
           "maxScaledArms": 9,
-          "speed": 4.85,
-          "bulletLifetimeTicks": 220
+          "speed": 4.85
         }
       ]
     },
@@ -579,7 +556,7 @@
       ],
       "spellBonus": 86000,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "music": "",
       "attacks": [
         {
@@ -591,8 +568,7 @@
           "arms": 14,
           "maxScaledArms": 18,
           "speed": 2.2,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": 0
+          "startRad": 0
         },
         {
           "pattern": "AIMED",
@@ -603,11 +579,10 @@
           "arms": 6,
           "maxScaledArms": 10,
           "speed": 4.1,
-          "spread": 0.13,
-          "bulletLifetimeTicks": 220
+          "spread": 0.13
         },
         {
-          "pattern": "BOUNCE",
+          "pattern": "AIMED",
           "cooldown": 12,
           "minCooldown": 9,
           "scalingProfile": "PRECISION",
@@ -617,8 +592,7 @@
           "speed": 4.0,
           "spread": 0.15,
           "bounceCount": 1,
-          "bounceDamping": 0.96,
-          "bulletLifetimeTicks": 250
+          "bounceDamping": 0.96
         },
         {
           "pattern": "RING_OFFSET",
@@ -629,8 +603,7 @@
           "arms": 10,
           "maxScaledArms": 15,
           "speed": 2.55,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
@@ -649,7 +622,7 @@
       ],
       "spellBonus": 98000,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "music": "",
       "attacks": [
         {
@@ -663,12 +636,11 @@
           "speed": 2.35,
           "bulletScale": 1.22,
           "hitboxScale": 0.44,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": 0,
+          "startRad": 0,
           "bulletAngularVelocity": 0.004
         },
         {
-          "pattern": "BOUNCE",
+          "pattern": "AIMED",
           "cooldown": 11,
           "minCooldown": 8,
           "scalingProfile": "BURST",
@@ -681,7 +653,6 @@
           "bounceDamping": 0.94,
           "bulletScale": 1.2,
           "hitboxScale": 0.46,
-          "bulletLifetimeTicks": 250,
           "bulletAngularVelocity": -0.0035
         },
         {
@@ -693,8 +664,7 @@
           "arms": 7,
           "maxScaledArms": 11,
           "speed": 4.15,
-          "spread": 0.14,
-          "bulletLifetimeTicks": 220
+          "spread": 0.14
         },
         {
           "pattern": "RING_OFFSET",
@@ -705,8 +675,7 @@
           "arms": 12,
           "maxScaledArms": 17,
           "speed": 2.65,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
@@ -725,7 +694,7 @@
       ],
       "spellBonus": 105000,
       "movement": "CIRCLE",
-      "moveSpeed": 90,
+      "moveRange": 90,
       "music": "",
       "attacks": [
         {
@@ -737,8 +706,7 @@
           "arms": 6,
           "maxScaledArms": 10,
           "speed": 4.0,
-          "spread": 0.18,
-          "bulletLifetimeTicks": 220
+          "spread": 0.18
         },
         {
           "pattern": "AIMED",
@@ -749,11 +717,10 @@
           "arms": 6,
           "maxScaledArms": 10,
           "speed": 4.35,
-          "spread": 0.10,
-          "bulletLifetimeTicks": 220
+          "spread": 0.10
         },
         {
-          "pattern": "BOUNCE",
+          "pattern": "AIMED",
           "cooldown": 12,
           "minCooldown": 9,
           "scalingProfile": "BURST",
@@ -763,8 +730,7 @@
           "speed": 4.1,
           "spread": 0.16,
           "bounceCount": 1,
-          "bounceDamping": 0.95,
-          "bulletLifetimeTicks": 250
+          "bounceDamping": 0.95
         },
         {
           "pattern": "RING_OFFSET",
@@ -775,8 +741,7 @@
           "arms": 10,
           "maxScaledArms": 15,
           "speed": 2.7,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
@@ -795,7 +760,7 @@
       ],
       "spellBonus": 120000,
       "movement": "CIRCLE",
-      "moveSpeed": 102,
+      "moveRange": 102,
       "music": "",
       "attacks": [
         {
@@ -807,8 +772,7 @@
           "arms": 12,
           "maxScaledArms": 17,
           "speed": 2.95,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": 0
+          "startRad": 0
         },
         {
           "pattern": "SPREAD",
@@ -818,11 +782,10 @@
           "bulletType": "KNIFE",
           "arms": 10,
           "maxScaledArms": 15,
-          "speed": 5.35,
-          "bulletLifetimeTicks": 220
+          "speed": 5.35
         },
         {
-          "pattern": "BOUNCE",
+          "pattern": "AIMED",
           "cooldown": 10,
           "minCooldown": 6,
           "scalingProfile": "SPAM",
@@ -835,8 +798,7 @@
           "speed": 4.2,
           "spread": 0.18,
           "bounceCount": 2,
-          "bounceDamping": 0.94,
-          "bulletLifetimeTicks": 250
+          "bounceDamping": 0.94
         },
         {
           "pattern": "RING_OFFSET",
@@ -847,8 +809,7 @@
           "arms": 12,
           "maxScaledArms": 17,
           "speed": 2.4,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     }

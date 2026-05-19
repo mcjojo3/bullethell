@@ -4,7 +4,7 @@
   "_design_notes": [
     "TH06 ecldata2: Sub0-Sub4 eight-lane + ins_77(180f) pacing; Sub5 burst E2→L10; Sub29 Icicle (120f outer loop ins_3); Sub30 Hail; Sub31 Perfect Freeze layered ins_75 + ins_67; Sub32 Diamond ins_75 type5 + ins_121 overlay.",
     "Timing: 120f loop ≈40 mod ticks; 180f wait ≈60 mod ticks (wiki/time-and-units.md). ICE + ORB/GOLD for freeze/diamond reads (generic ORB + gold stars).",
-    "Blueprint (PatternStep): bulletLifetimeTicks matches PatternEngine defaults - RING/SPIRAL/DENSE 200, AIMED/SPREAD/LASER_BEAM 220, RAIN 230. AIMED_RING steps omit lifetime so aim uses 220 and ring 200. ringStartAngleRad: -1 = random ring start (RING_OFFSET / AIMED_RING ring), 0 = fixed. bulletAngularVelocity left 0 (straight); spawn offsets unused."
+    "Blueprint (PatternStep): bulletLifetimeTicks matches PatternEngine defaults - RING/SPIRAL/DENSE 200, AIMED/SPREAD/LASER_BEAM 220, RAIN 230. AIMED_RING steps omit lifetime so aim uses 220 and ring 200. startRad: -1 = random ring start (RING_OFFSET / AIMED_RING ring), 0 = fixed. bulletAngularVelocity left 0 (straight); spawn offsets unused."
   ],
   "introDialog": [
     {
@@ -149,7 +149,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 120,
+      "moveRange": 120,
       "music": [
         "adventure_of_the_lovestruck_tomboy",
         "beloved_tomboyish_girl"
@@ -163,8 +163,7 @@
           "bulletType": "ICE",
           "arms": 8,
           "speed": 2.1,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         },
         {
           "pattern": "SPIRAL",
@@ -174,8 +173,7 @@
           "armsDifficultyWeight": 0.72,
           "bulletType": "ICE",
           "arms": 8,
-          "speed": 2.3,
-          "bulletLifetimeTicks": 200
+          "speed": 2.3
         },
         {
           "pattern": "AIMED",
@@ -184,8 +182,7 @@
           "bulletType": "ICE",
           "arms": 5,
           "speed": 2.95,
-          "spread": 0.13,
-          "bulletLifetimeTicks": 220
+          "spread": 0.13
         }
       ]
     },
@@ -204,7 +201,7 @@
       ],
       "spellBonus": 50000,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "music": "",
       "attacks": [
         {
@@ -224,8 +221,7 @@
           "spreadMax": 0.08,
           "rainTop": -14,
           "rainWidth": 460,
-          "densityScale": 0.92,
-          "bulletLifetimeTicks": 230
+          "densityScale": 0.92
         },
         {
           "pattern": "LASER_BEAM",
@@ -233,8 +229,7 @@
           "minCooldown": 8,
           "bulletType": "ICE",
           "arms": 2,
-          "speed": 5.4,
-          "bulletLifetimeTicks": 220
+          "speed": 5.4
         },
         {
           "pattern": "AIMED",
@@ -242,8 +237,7 @@
           "bulletType": "ICE",
           "arms": 4,
           "speed": 3.35,
-          "spread": 0.07,
-          "bulletLifetimeTicks": 220
+          "spread": 0.07
         }
       ]
     },
@@ -262,7 +256,7 @@
       ],
       "spellBonus": 62000,
       "movement": "CIRCLE",
-      "moveSpeed": 88,
+      "moveRange": 88,
       "music": "",
       "attacks": [
         {
@@ -276,8 +270,7 @@
           "speed": 1.95,
           "speedMin": 1.8,
           "speedMax": 2.15,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": 0
+          "startRad": 0
         },
         {
           "pattern": "SPREAD",
@@ -285,8 +278,7 @@
           "scalingProfile": "BURST",
           "bulletType": "ICE",
           "arms": 9,
-          "speed": 4.0,
-          "bulletLifetimeTicks": 220
+          "speed": 4.0
         },
         {
           "pattern": "RING_OFFSET",
@@ -294,8 +286,7 @@
           "bulletType": "ICE",
           "arms": 12,
           "speed": 1.9,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": -1
+          "startRad": -1
         },
         {
           "pattern": "AIMED_RING",
@@ -307,7 +298,7 @@
           "ringArms": 14,
           "ringSpeed": 1.5,
           "ringBulletType": "DOT",
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
@@ -324,7 +315,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 140,
+      "moveRange": 140,
       "music": "",
       "attacks": [
         {
@@ -336,8 +327,7 @@
           "armsMin": 2,
           "armsMax": 10,
           "speed": 3.35,
-          "spread": 0.15,
-          "bulletLifetimeTicks": 220
+          "spread": 0.15
         },
         {
           "pattern": "RING",
@@ -345,8 +335,7 @@
           "bulletType": "ICE",
           "arms": 10,
           "speed": 2.3,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": 0
+          "startRad": 0
         },
         {
           "pattern": "AIMED_RING",
@@ -358,7 +347,7 @@
           "ringArms": 10,
           "ringSpeed": 1.6,
           "ringBulletType": "DOT",
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     },
@@ -375,7 +364,7 @@
       ],
       "spellBonus": 70000,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "music": "",
       "attacks": [
         {
@@ -388,8 +377,7 @@
           "arms": 7,
           "armsMin": 5,
           "armsMax": 9,
-          "speed": 3.85,
-          "bulletLifetimeTicks": 220
+          "speed": 3.85
         },
         {
           "pattern": "SPIRAL",
@@ -398,8 +386,7 @@
           "armsDifficultyWeight": 0.78,
           "bulletType": "ICE",
           "arms": 7,
-          "speed": 2.45,
-          "bulletLifetimeTicks": 200
+          "speed": 2.45
         },
         {
           "pattern": "DENSE_RING",
@@ -411,8 +398,7 @@
           "maxScaledArms": 16,
           "bulletScale": 1.15,
           "hitboxScale": 0.45,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": 0
+          "startRad": 0
         },
         {
           "pattern": "AIMED",
@@ -420,8 +406,7 @@
           "bulletType": "ICE",
           "arms": 5,
           "speed": 3.45,
-          "spread": 0.14,
-          "bulletLifetimeTicks": 220
+          "spread": 0.14
         }
       ]
     },
@@ -440,7 +425,7 @@
       ],
       "spellBonus": 90000,
       "movement": "CIRCLE",
-      "moveSpeed": 114,
+      "moveRange": 114,
       "music": "",
       "attacks": [
         {
@@ -449,8 +434,7 @@
           "scalingProfile": "BURST",
           "bulletType": "ICE",
           "arms": 8,
-          "speed": 4.6,
-          "bulletLifetimeTicks": 220
+          "speed": 4.6
         },
         {
           "pattern": "SPREAD",
@@ -458,8 +442,7 @@
           "scalingProfile": "BURST",
           "bulletType": "GOLD",
           "arms": 6,
-          "speed": 4.0,
-          "bulletLifetimeTicks": 220
+          "speed": 4.0
         },
         {
           "pattern": "AIMED",
@@ -467,8 +450,7 @@
           "bulletType": "ICE",
           "arms": 6,
           "speed": 3.7,
-          "spread": 0.17,
-          "bulletLifetimeTicks": 220
+          "spread": 0.17
         },
         {
           "pattern": "DENSE_RING",
@@ -478,8 +460,7 @@
           "arms": 16,
           "speed": 2.25,
           "maxScaledArms": 18,
-          "bulletLifetimeTicks": 200,
-          "ringStartAngleRad": 0
+          "startRad": 0
         },
         {
           "pattern": "AIMED_RING",
@@ -491,7 +472,7 @@
           "ringArms": 12,
           "ringSpeed": 1.7,
           "ringBulletType": "GOLD",
-          "ringStartAngleRad": -1
+          "startRad": -1
         }
       ]
     }

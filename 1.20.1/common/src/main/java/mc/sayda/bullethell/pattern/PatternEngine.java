@@ -556,14 +556,15 @@ public final class PatternEngine {
      * @param flightRad       radians; 0 = +X, {@code PI*0.5} = +Y (down in screen
      *                        space)
      * @param rowCount        how many bullets in the row (minimum {@code 1})
-     * @param rowSpacingScale multiply default spacing ({@code 1f} = legacy loose
-     *                        row; ~{@code 0.62f} = tight "comet")
+     * @param rowSpacingScale when {@code > 1.0}, direct arena-unit gap between
+     *                        bullets; otherwise a multiplier of the default spacing
      */
     public static void fireOrbCRowInDirection(BulletPool pool,
             float bx, float by, float flightRad,
             float speed, DifficultyConfig diff, BulletType type,
             float visScale, float hitScale, int lifetimeTicks,
-            java.util.Random rng, float curvScale, int rowCount, float rowSpacingScale, float rowSpeedSlope) {
+            java.util.Random rng, float curvScale, int rowCount, float rowSpacingScale,
+            float rowSpeedSlope, float driftAngVel) {
         int life = lifeOrDefault(lifetimeTicks, BullethellConfig.PATTERN_DEFAULT_LIFE_RING.get());
         float sp = speed * enemySpeed(diff);
         float base = flightRad;
@@ -572,15 +573,18 @@ public final class PatternEngine {
         float perp = base + (float) (Math.PI * 0.5);
         float pc = (float) Math.cos(perp);
         float ps = (float) Math.sin(perp);
-        float mul = Math.max(0.35f, rowSpacingScale);
-        float rowSpacing = Math.max(1.15f, 2.4f * Math.max(0.85f, visScale) * mul);
+        float defaultSpacing = Math.max(1.15f, 2.4f * Math.max(0.85f, visScale));
+        float rowSpacing = rowSpacingScale > 1.0f
+                ? rowSpacingScale
+                : Math.max(1.15f, defaultSpacing * Math.max(0.35f, rowSpacingScale));
         int count = Math.max(1, rowCount);
         float mid = (count - 1) * 0.5f;
+        float driftPerUnit = mid > 0f ? (float) Math.toRadians(driftAngVel) / mid : 0f;
         for (int i = 0; i < count; i++) {
             float k = i - mid;
             float ox = bx + pc * k * rowSpacing;
             float oy = by + ps * k * rowSpacing;
-            float curv = curvScale * k * 0.00055f;
+            float curv = curvScale * k * 0.00055f + driftPerUnit * k;
             if (rng != null)
                 curv += (rng.nextFloat() - 0.5f) * 0.0002f * curvScale;
             float spMul = 1f + k * rowSpeedSlope;
@@ -599,7 +603,7 @@ public final class PatternEngine {
             float visScale, float hitScale, int lifetimeTicks,
             java.util.Random rng, float curvScale, int rowCount) {
         fireOrbCRowInDirection(pool, bx, by, flightRad, speed, diff, type, visScale, hitScale,
-                lifetimeTicks, rng, curvScale, rowCount, 1f, 0f);
+                lifetimeTicks, rng, curvScale, rowCount, 1f, 0f, 0f);
     }
 
     /**
@@ -618,7 +622,7 @@ public final class PatternEngine {
             java.util.Random rng, float curvScale, int rowCount) {
         float base = (float) Math.atan2(ty - by, tx - bx);
         fireOrbCRowInDirection(pool, bx, by, base, speed, diff, type, visScale, hitScale,
-                lifetimeTicks, rng, curvScale, rowCount, 1f, 0f);
+                lifetimeTicks, rng, curvScale, rowCount, 1f, 0f, 0f);
     }
 
     /**

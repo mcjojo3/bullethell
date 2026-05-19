@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
  * Optional ECL-style tuning (applied when the boss runs this step; see {@link mc.sayda.bullethell.arena.ArenaContext}):
  * { "pattern": "RING", "cooldown": 30, "arms": 12, "speed": 2.2,
  *   "bulletLifetimeTicks": 200, "spawnOffsetX": 4, "spawnOffsetY": 0,
- *   "ringStartAngleRad": 0, "bulletAngularVelocity": 0.002 }
+ *   "startRad": 0, "bulletAngularVelocity": 0.002 }
  * Per-difficulty values use the same order as {@code
  * spellDurationTicks
  * }: {@code [EASY, NORMAL, HARD, LUNATIC]}.
@@ -122,7 +122,7 @@ public class PatternStep {
      * how often the boss fires this step - that is {@link #cooldown} and
      * {@link #minCooldown} (server
      * volley gap each cycle). For {@code SPRINKLER}, emitter rotation per shot is
-     * {@link #sprinklerAdvanceRad} per shot; to spray faster, lower
+     * {@link #advanceRad} per shot; to spray faster, lower
      * {@link #cooldown} / {@link #minCooldown}, not {@code speed}.
      */
     public float speed = 2.5f;
@@ -306,16 +306,23 @@ public class PatternStep {
     // ---- BOUNCE (AIMED fan with wall-reflecting bullets) ----
 
     /**
-     * Number of arena wall reflections allowed for {@code BOUNCE}.
-     * 0 means no bouncing (equivalent to AIMED behavior).
+     * Number of arena wall reflections allowed for {@code BOUNCE} and {@code SPRINKLER}.
+     * 0 = no bouncing (default). Set to 1+ to enable wall reflections.
      */
-    public int bounceCount = 1;
+    public int bounceCount = 0;
 
     /**
-     * Velocity retained after each bounce for {@code BOUNCE}.
+     * Velocity retained after each bounce for {@code BOUNCE} and {@code SPRINKLER}.
      * 1.0 = perfect reflection, 0.9 = slight damping.
      */
     public float bounceDamping = 0.96f;
+
+    /**
+     * Walls on which bouncing bullets die instead of reflecting.
+     * Valid values: {@code "left"}, {@code "right"}, {@code "top"}, {@code "bottom"}.
+     * Example: {@code ["bottom"]} kills bullets that reach the floor.
+     */
+    public String[] bounceExcludeSides = null;
 
     // ---- RAIN (random top-lane downward shower) ----
 
@@ -365,14 +372,7 @@ public class PatternStep {
 
     // ---- Laser-specific fields ----
 
-    /**
-     * Fan spread in radians between adjacent bullets for {@code LASER_BEAM} only
-     * (rapid aimed burst,
-     * not {@code LASER} / {@code LASER_ROTATING} LaserPool beams). If {@code < 0},
-     * engine uses default (~0.04 rad).
-     * TH06 needle stakes (e.g. Sub33) use ~π/100 (~0.031) class spreads in ECL.
-     */
-    public float laserBeamSpread = -1f;
+    // laserBeamSpread removed — LASER_BEAM now reads the shared "spread" field.
 
     /**
      * Half-width of the laser beam in arena units. Master Spark ≈ 30, thin laser ≈
@@ -491,10 +491,11 @@ public class PatternStep {
     public float orbCRowCurvatureScale = 0f;
 
     /**
-     * {@code ORB_C_ROW} only: row spacing tightness ({@code ~0.58} = ritual
-     * default); {@code <= 0} = use ritual default.
+     * {@code ORB_C_ROW} only: gap between adjacent bullets. When {@code > 1.0},
+     * used directly as arena units. When {@code ≤ 1.0}, treated as a multiplier of
+     * the default spacing (~2.4 arena units). {@code 0} = ritual default (~0.58×).
      */
-    public float orbCRowSpacingScale = 0f;
+    public float orbCRowSpacing = 0f;
 
     /**
      * {@code ORB_C_ROW} only: when true, each volley picks a random flight angle
@@ -509,6 +510,14 @@ public class PatternStep {
      * {@code 1 + (i - center) * orbCRowSpeedSlope}; {@code 0} = uniform row speed.
      */
     public float orbCRowSpeedSlope = 0f;
+
+    /**
+     * {@code ORB_C_ROW} only: drift rate in degrees/tick for the outermost (edge)
+     * bullet. Inner bullets receive proportionally smaller angular velocities so the
+     * row fans outward symmetrically. Positive = right-side bullets curve CW,
+     * left-side CCW. {@code 0} = no drift (default).
+     */
+    public float orbCRowDrift = 0f;
 
     /**
      * {@code STACK_FAN_VOLLEY} only: bullets per ray, laid out along flight
@@ -570,7 +579,7 @@ public class PatternStep {
      * angle (random or pattern-controlled). Any other negative value is treated
      * identically to {@code -1} — only {@code 0} or greater sets a fixed angle.
      */
-    public float ringStartAngleRad = -1f;
+    public float startRad = -1f;
 
     /**
      * Rotate bullet velocity by this many radians per tick before movement (TH
@@ -627,17 +636,10 @@ public class PatternStep {
      * negative = counter-clockwise. Good starting values: ±0.18-0.30 per shot with
      * {@link #everyTickWhilePhase} or cooldown 1-2.
      */
-    public float sprinklerAdvanceRad = 0.22f;
+    public float advanceRad = 0.22f;
 
-    /**
-     * {@code SPRINKLER} comb mode: when &gt; 0, each nozzle (see {@link #arms})
-     * fires a fan of
-     * {@link #combCount} bullets instead of a single bullet. Value = radians
-     * between adjacent
-     * bullets in the fan; total fan width = (combCount−1) × sprinklerSpread.
-     * 0 (default) = ring mode, one bullet per nozzle.
-     */
-    public float sprinklerSpread = 0f;
+    // sprinklerSpread removed — SPRINKLER comb mode is now triggered by combCount > 1
+    // and uses the shared "spread" field for fan width.
 
     /**
      * {@code SPRINKLER} ring mode only: spawn one arm per volley in order around
@@ -703,7 +705,7 @@ public class PatternStep {
     /**
      * {@code DIVINE_WIND} only: additional angular velocity (radians/tick) applied
      * to released bullets.
-     * Sign should usually oppose {@link #sprinklerAdvanceRad} to produce the
+     * Sign should usually oppose {@link #advanceRad} to produce the
      * characteristic C-shaped turn.
      */
     public float divineWindCurveAngularVelocity = 0.03f;
@@ -750,8 +752,30 @@ public class PatternStep {
     public float pentagramDualInnerSplitSpeedMul = 1f;
 
     /**
-     * {@code SPRINKLER} comb mode: bullets per nozzle when {@link #sprinklerSpread}
-     * &gt; 0.
+     * {@code PENTAGRAM_RITUAL} arc disassembly: CW rotation (degrees) applied to
+     * the arm tangent for the V-tip bullet (u=0). Bullets at u=1 (FIRST/hinge) fire
+     * straight along the arm; bullets closer to the tip are rotated up to this many
+     * degrees clockwise. All bullets travel at the same speed, so no overtaking.
+     * 0 = legacy edge-comb (default).
+     */
+    public float pentagramArcCurveDeg = 0f;
+
+    /**
+     * {@code PENTAGRAM_RITUAL} arc disassembly: angular velocity (radians/tick) applied
+     * to released bullets after the curve kicks in. 0 = no extra rotation (default).
+     */
+    public float pentagramArcAngularVelocity = 0f;
+
+    /**
+     * {@code PENTAGRAM_RITUAL} arc disassembly: ticks to fly straight (along arm tangent)
+     * before the CW arc rotation is applied. 0 = arc direction is set immediately at launch
+     * (default). Positive values create a brief outward straight-flight window before the
+     * comb diverges. {@link #bossSummonBeginTick} is extended by this value automatically.
+     */
+    public int pentagramArcCurveDelayTicks = 0;
+
+    /**
+     * {@code SPRINKLER} comb mode: bullets per nozzle when {@code combCount > 1}.
      * {@link #arms} controls how many evenly-spaced nozzles fire simultaneously;
      * this controls
      * how many bullets each nozzle fires in a fan. Default 1 (single bullet per
@@ -781,11 +805,11 @@ public class PatternStep {
     // ---- WORM_CIRCLE ----
 
     /**
-     * {@code WORM_CIRCLE} only: ticks the rings spin around the boss before all
-     * knives fire radially outward. Runs as a background formation — the attack
-     * rotation continues normally while spinning.
+     * {@code WORM_CIRCLE} only: ticks the rings orbit the boss before all knives
+     * fire. Runs as a background formation — the attack rotation continues normally
+     * while orbiting.
      */
-    public int spinTicks = 100;
+    public int orbitTicks = 100;
 
     /**
      * {@code WORM_CIRCLE} only: ring definitions. Each entry spawns one orbiting
@@ -793,4 +817,64 @@ public class PatternStep {
      * Uses {@link #speed} (after difficulty scaling) as the radial fire speed.
      */
     public WormCircleDef[] wormCircles = null;
+
+    // ---- RING_SPAWNER ----
+    // Rings fire from the boss in a downward cone (arms = ring count, speed = ring speed,
+    // bulletType = ring bullet, ringBulletType = child bullet). When all rings leave the
+    // playfield the children sweep left or right in a fanned half-circle.
+
+    /** Center fire angle in degrees. Default 90 = straight down. */
+    public float coneAngleDeg = 90f;
+    /** Half-angle of the cone in degrees (spread either side of center). */
+    public float coneHalfAngleDeg = 35f;
+    /** Ticks between child bullet spawns per ring while in flight. */
+    public int childSpawnIntervalTicks = 2;
+    /** Visual scale of child bullets (0 → 1). */
+    public float childBulletScale = 1f;
+    /** Hit-radius scale of child bullets (0 → 0.55 default for RING_SPAWNER). */
+    public float childHitboxScale = 0f;
+    /** Initial speed of children when the sweep activates. */
+    public float childSpeed = 5.0f;
+    /** Speed added per tick after activation (units/tick²). */
+    public float childAcceleration = 0.05f;
+    /** Degrees added per ring layer away from center when fanning the sweep. */
+    public float childFanDeg = 18f;
+
+    // ---- SHOTGUN (wide random downward burst with windup) ----
+
+    /**
+     * {@code SHOTGUN} only: ticks before the burst fires (charging pause).
+     * During this window {@code executeAttackAt} is called each volley but no
+     * bullets spawn. Default 20 (~1 s at 20 TPS).
+     */
+    public int shotgunWindupTicks = 20;
+
+    /**
+     * {@code SHOTGUN} only: total cycle length in ticks (windup + burst). The
+     * per-step counter wraps to 0 after this, restarting the windup. {@code 0}
+     * = {@link #shotgunWindupTicks} + 40.
+     */
+    public int shotgunCycleTicks = 0;
+
+    // shotgunConeHalfAngle removed — SHOTGUN now reads the shared "spread" field
+    // for the cone half-angle. Default spread (0.20) applies when not set explicitly.
+
+    /**
+     * When non-null, overrides the phase movement type for as long as this attack
+     * is the current step (e.g. "DASH_TOP", "STATIC"). Null = use phase default.
+     */
+    public String movementOverride = null;
+
+    /**
+     * When non-null, swaps the boss sprite to this texture id while this step is
+     * active (resolves to {@code textures/bosses/<id>.png}). Empty string = revert
+     * to the boss's default texture.
+     */
+    public String bossTexture = null;
+
+    /**
+     * Constant acceleration added to each spawned bullet's vy every tick (arena
+     * units/tick²). Positive = pulls downward. 0 = no gravity.
+     */
+    public float bulletGravity = 0f;
 }

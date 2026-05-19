@@ -159,15 +159,16 @@ public final class BulletTypeLoader {
 
         boolean homing = o.has("homing") && o.get("homing").getAsBoolean();
         boolean sakuyaBlade = o.has("sakuyaBlade") && o.get("sakuyaBlade").getAsBoolean();
+        int srcHeight = o.has("sourceHeight") ? o.get("sourceHeight").getAsInt() : 0;
 
-        return new BulletTypeData(color, radius, hitboxMul, texture, texScale, srcSize, baseAngle, tint, lineHit,
+        return new BulletTypeData(color, radius, hitboxMul, texture, texScale, srcSize, srcHeight, baseAngle, tint, lineHit,
                 lcLen, lcWid, lvLen, lvWid, homing, sakuyaBlade);
     }
 
     private static BulletTypeData hardcodedFallback(BulletType type) {
         return new BulletTypeData(
                 type.color, type.radius, type.hitboxCollisionMul,
-                null, 2.80f, 16, null, true, false,
+                null, 2.80f, 16, 0, null, true, false,
                 0f, 0f, 0f, 0f, false, false);
     }
 }

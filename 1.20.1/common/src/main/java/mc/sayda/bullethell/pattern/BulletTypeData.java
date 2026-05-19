@@ -23,8 +23,10 @@ public final class BulletTypeData {
      * Does not affect collision.
      */
     public final float textureScale;
-    /** Source PNG size in pixels (16 for all standard bullets, 32 for large orbs). */
+    /** Source PNG width in pixels (16 for standard bullets, 32 for large orbs, 64 for wide sprites). */
     public final int sourceSize;
+    /** Source PNG height in pixels. 0 = same as {@link #sourceSize} (square). Set for non-square sprites. */
+    public final int sourceHeight;
     /**
      * Rotation offset for directional sprites (degrees). {@code null} means the sprite is
      * non-directional and will always be drawn axis-aligned.
@@ -60,7 +62,7 @@ public final class BulletTypeData {
     public final boolean sakuyaBlade;
 
     public BulletTypeData(int color, float radius, float hitboxMul, String texture,
-            float textureScale, int sourceSize, Float baseAngleDeg,
+            float textureScale, int sourceSize, int sourceHeight, Float baseAngleDeg,
             boolean applyTint, boolean lineHit,
             float lineCollisionHalfLength, float lineCollisionHalfWidth,
             float lineVisualHalfLength, float lineVisualHalfWidth,
@@ -71,6 +73,7 @@ public final class BulletTypeData {
         this.texture = texture;
         this.textureScale = textureScale;
         this.sourceSize = sourceSize;
+        this.sourceHeight = sourceHeight;
         this.baseAngleDeg = baseAngleDeg;
         this.applyTint = applyTint;
         this.lineHit = lineHit;

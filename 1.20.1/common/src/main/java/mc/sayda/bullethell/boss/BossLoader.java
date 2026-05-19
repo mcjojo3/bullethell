@@ -249,7 +249,7 @@ public final class BossLoader {
         phase.spellDurationTicks = new int[]{0, 0, 0, 0};
         phase.spellBonus   = 0L;
         phase.movement     = "SINE_WAVE";
-        phase.moveSpeed    = 140f;
+        phase.moveRange    = 140f;
 
         PatternStep step  = new PatternStep();
         step.pattern      = "RING";

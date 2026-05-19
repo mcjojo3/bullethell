@@ -195,4 +195,9 @@ public class BulletHellManager {
     public Map<UUID, ArenaContext> getAll() {
         return arenas;
     }
+
+    /** Submits one tick to every active arena thread. Called from SERVER_POST each MC tick. */
+    public void tickAllArenas() {
+        for (ArenaThread thread : arenaThreads.values()) thread.submitTick();
+    }
 }

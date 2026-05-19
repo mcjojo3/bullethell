@@ -323,10 +323,13 @@ public final class BullethellConfig {
     public static final float DEF_BOSS_PHASE_SPEED_CAP = 0.22f;
     public static final float DEF_BOSS_PHASE_SPEED_PER_PHASE = 0.026f;
     /**
-     * Extra density multiplier when difficulty is Lunatic only (Hard uses enum
-     * alone).
+     * @deprecated No longer used — LUNATIC boss scaling is now raw-JSON baseline
+     *             (Option D). Kept only so existing config files don't break.
      */
+    @Deprecated
     public static final float DEF_BOSS_LUNATIC_DENSITY_EXTRA = 1.12f;
+    /** @deprecated See {@link #DEF_BOSS_LUNATIC_DENSITY_EXTRA}. */
+    @Deprecated
     public static final float DEF_BOSS_LUNATIC_SPEED_EXTRA = 1.10f;
     /** Clamp for ring-arm scaling vs density in AIMED_RING boss attacks. */
     public static final float DEF_BOSS_RING_DENSITY_CAP = 1.35f;
@@ -338,7 +341,11 @@ public final class BullethellConfig {
     public static Supplier<Float> BOSS_PHASE_DENSITY_PER_PHASE = () -> DEF_BOSS_PHASE_DENSITY_PER_PHASE;
     public static Supplier<Float> BOSS_PHASE_SPEED_CAP = () -> DEF_BOSS_PHASE_SPEED_CAP;
     public static Supplier<Float> BOSS_PHASE_SPEED_PER_PHASE = () -> DEF_BOSS_PHASE_SPEED_PER_PHASE;
+    /** @deprecated No longer read by boss scaling. Config key retained for backward compat. */
+    @Deprecated
     public static Supplier<Float> BOSS_LUNATIC_DENSITY_EXTRA = () -> DEF_BOSS_LUNATIC_DENSITY_EXTRA;
+    /** @deprecated See {@link #BOSS_LUNATIC_DENSITY_EXTRA}. */
+    @Deprecated
     public static Supplier<Float> BOSS_LUNATIC_SPEED_EXTRA = () -> DEF_BOSS_LUNATIC_SPEED_EXTRA;
     public static Supplier<Float> BOSS_RING_DENSITY_CAP = () -> DEF_BOSS_RING_DENSITY_CAP;
     public static Supplier<Integer> BOSS_RING_ARMS_MAX = () -> DEF_BOSS_RING_ARMS_MAX;

@@ -22,7 +22,7 @@ import java.util.List;
  *   "spellDurationTicks": [800, 600, 400, 200],
  *   "spellBonus": 50000,
  *   "movement": "SINE_WAVE",
- *   "moveSpeed": 140.0,
+ *   "moveRange": 140.0,
  *   "patternTempo": 1.25,
  *   "attacks": [ ... ],
  *   "byDifficulty": { "patternTempo": [1, 1, 1, 1.2] }
@@ -77,8 +77,8 @@ public class PhaseDefinition {
         return TierJson.pickInt(byDifficulty, "hp", difficultyOrdinal, hp);
     }
 
-    public float resolveMoveSpeed(int difficultyOrdinal) {
-        return TierJson.pickFloat(byDifficulty, "moveSpeed", difficultyOrdinal, moveSpeed);
+    public float resolveMoveRange(int difficultyOrdinal) {
+        return TierJson.pickFloat(byDifficulty, "moveRange", difficultyOrdinal, moveRange);
     }
 
     public float resolvePatternTempo(int difficultyOrdinal) {
@@ -134,8 +134,7 @@ public class PhaseDefinition {
     }
 
     public int resolveReposShootTicks(int difficultyOrdinal) {
-        int base = reposShootTicks != null ? reposShootTicks : 40;
-        return TierJson.pickInt(byDifficulty, "reposShootTicks", difficultyOrdinal, base);
+        return TierJson.pickInt(byDifficulty, "reposShootTicks", difficultyOrdinal, reposShootTicks);
     }
 
     public String resolveMovement(int difficultyOrdinal) {
@@ -147,15 +146,65 @@ public class PhaseDefinition {
 
     /**
      * Boss movement pattern during this phase.
-     * Valid values: "SINE_WAVE", "STATIC", "CIRCLE"
+     * Valid values: "SINE_WAVE", "STATIC", "CIRCLE", "REPOS_TOP", "DASH_TOP"
      */
     public String movement = "SINE_WAVE";
 
-    /**
-     * Optional override for this phase's REPOS_TOP shoot duration.
-     * If null, falls back to the boss's {@link MovementConfig#reposShootTicks}.
-     */
-    public Integer reposShootTicks = null;
+    // ---- REPOS_TOP params ----
+
+    /** Ticks the boss shoots before triggering a reposition dash. Default 160 (~8 s). */
+    public int reposShootTicks = 160;
+
+    /** Boss Y coordinate while in REPOS_TOP mode (arena units from top). Default 80. */
+    public float reposBossY = 80f;
+
+    /** Margin from each arena side used when reposMinX/reposMaxX are -1. Default 80. */
+    public float reposXMargin = 80f;
+
+    /** Explicit left bound for the random landing X. -1 = derive from reposXMargin. */
+    public float reposMinX = -1f;
+
+    /** Explicit right bound for the random landing X. -1 = derive from reposXMargin. */
+    public float reposMaxX = -1f;
+
+    /** Ticks for the horizontal dash to the new REPOS_TOP position. Default 25. */
+    public int reposDashTicks = 25;
+
+    /** Pause ticks after landing before shooting resumes. Default 10. */
+    public int reposBreathTicks = 10;
+
+    // ---- SINE_WAVE params ----
+
+    /** Angular frequency for SINE_WAVE horizontal oscillation (rad/tick). Default 0.018. */
+    public float swingSpeed = 0.018f;
+
+    // ---- CIRCLE params ----
+
+    /** Angular frequency for CIRCLE orbit (rad/tick). Default 0.018. */
+    public float orbitSpeed = 0.018f;
+
+    /** Vertical amplitude as a fraction of moveRange in CIRCLE mode. Default 0.35. */
+    public float orbitHeight = 0.35f;
+
+    // ---- DASH_TOP params ----
+
+    /** Left X bound for random DASH_TOP targets (arena units). Default 80. */
+    public float dashTopMinX = 80f;
+
+    /** Right X bound for random DASH_TOP targets (arena units). Default 400. */
+    public float dashTopMaxX = 400f;
+
+    /** Top Y bound for random DASH_TOP targets (arena units). Default 80. */
+    public float dashTopMinY = 80f;
+
+    /** Bottom Y bound for random DASH_TOP targets (arena units). Default 180. */
+    public float dashTopMaxY = 180f;
+
+    /** Ticks each DASH_TOP dash lasts (cubic ease-in-out). Default 10. */
+    public int dashTopDashTicks = 10;
+
+    /** Ticks to pause between DASH_TOP dashes; also controls shot frequency. Default 2. */
+    public int dashTopIntervalTicks = 2;
 
     /**
      * When true (default), difficulty multipliers from {@link DifficultyConfig} are
@@ -197,17 +246,18 @@ public class PhaseDefinition {
      * For SINE_WAVE: horizontal swing distance from centre.
      * For CIRCLE: orbit radius.
      */
-    public float moveSpeed = 140f;
+    public float moveRange = 140f;
 
     /**
      * Boss pattern timing multiplier for this phase ({@code 1} = default). Above
      * {@code 1} speeds up
      * attack rotation, burst gaps, laser telegraphs, and emitter angular advances
      * (e.g. SPRINKLER
-     * {@link mc.sayda.bullethell.boss.PatternStep#sprinklerAdvanceRad}); below
+     * {@link mc.sayda.bullethell.boss.PatternStep#advanceRad}); below
      * {@code 1} slows them.
      * Does <strong>not</strong> scale bullet travel
      * {@link mc.sayda.bullethell.boss.PatternStep#speed}.
+     * Also scales SPRINKLER emitter advance via {@link mc.sayda.bullethell.boss.PatternStep#advanceRad}.
      */
     public float patternTempo = 1f;
 
@@ -225,6 +275,13 @@ public class PhaseDefinition {
      * {@code "music"} field is an array. {@link #resolveMusic} picks randomly.
      */
     public List<String> musicPool = null;
+
+    /**
+     * When true, the attack index is NOT reset to 0 after each REPOS_TOP reposition.
+     * Lets the attack sequence advance continuously across repositions, e.g. so a
+     * CW→CCW alternating windmill pattern swaps direction each cycle.
+     */
+    public boolean keepAttackIndexOnRepos = false;
 
     /**
      * HP fraction (0-1) at which this phase ends early and the next phase declares.

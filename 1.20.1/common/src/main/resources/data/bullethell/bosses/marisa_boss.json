@@ -151,7 +151,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 100,
+      "moveRange": 100,
       "music": "love_coloured_master_spark",
       "attacks": [
         {
@@ -211,7 +211,7 @@
       ],
       "spellBonus": 50000,
       "movement": "CIRCLE",
-      "moveSpeed": 70,
+      "moveRange": 70,
       "music": "",
       "attacks": [
         {
@@ -291,7 +291,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 125,
+      "moveRange": 125,
       "music": "",
       "attacks": [
         {
@@ -351,7 +351,7 @@
       ],
       "spellBonus": 60000,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "music": "",
       "attacks": [
         {
@@ -435,7 +435,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 115,
+      "moveRange": 115,
       "music": "",
       "attacks": [
         {
@@ -487,7 +487,7 @@
       ],
       "spellBonus": 0,
       "movement": "SINE_WAVE",
-      "moveSpeed": 140,
+      "moveRange": 140,
       "music": "",
       "attacks": [
         {
@@ -547,7 +547,7 @@
       ],
       "spellBonus": 80000,
       "movement": "STATIC",
-      "moveSpeed": 0,
+      "moveRange": 0,
       "music": "",
       "attacks": [
         {
@@ -654,7 +654,7 @@
       ],
       "spellBonus": 80000,
       "movement": "CIRCLE",
-      "moveSpeed": 75,
+      "moveRange": 75,
       "music": "",
       "attacks": [
         {
@@ -724,7 +724,7 @@
       ],
       "spellBonus": 100000,
       "movement": "CIRCLE",
-      "moveSpeed": 90,
+      "moveRange": 90,
       "music": "",
       "attacks": [
         {

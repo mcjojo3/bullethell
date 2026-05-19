@@ -26,7 +26,7 @@ public class BulletPool {
     public static final float ARENA_H = 640f;
 
     /** Floats per bullet slot (enemy + player pools share layout). */
-    public static final int STRIDE = 13;
+    public static final int STRIDE = 14;
 
     /**
      * Default lifetime assigned when no explicit {@code bulletLifetimeTicks} is set in a pattern step.
@@ -64,8 +64,12 @@ public class BulletPool {
     public static final int F_PENDING_VY = 11;
     /** 1f = {@link mc.sayda.bullethell.arena.ArenaContext} applies homing steer; 0f = off. */
     public static final int F_PLAYER_HOMING = 12;
+    /** Constant downward acceleration added to {@link #F_VY} every tick. 0 = no gravity. */
+    public static final int F_GRAVITY = 13;
 
     private final int capacity;
+    /** Applied to F_GRAVITY of every bullet spawned until cleared. Arena thread only. */
+    private float pendingSpawnGravity = 0f;
     private final float[]   data;
     private final boolean[] active;
     private final boolean[] dirty;
@@ -117,6 +121,7 @@ public class BulletPool {
             applyAngularVelocity(data, b);
             data[b + F_X] += data[b + F_VX];
             data[b + F_Y] += data[b + F_VY];
+            data[b + F_VY] += data[b + F_GRAVITY];
             data[b + F_LIFE]--;
             if (data[b + F_LIFE] <= 0 || outOfBounds(data[b + F_X], data[b + F_Y])) {
                 deactivate(i);
@@ -148,6 +153,7 @@ public class BulletPool {
             applyAngularVelocity(data, b);
             data[b + F_X] += data[b + F_VX];
             data[b + F_Y] += data[b + F_VY];
+            data[b + F_VY] += data[b + F_GRAVITY];
             data[b + F_LIFE]--;
             if (data[b + F_LIFE] <= 0 || outOfBounds(data[b + F_X], data[b + F_Y])) {
                 deactivate(i);
@@ -206,6 +212,7 @@ public class BulletPool {
         data[b + F_VIS_SCALE] = visScale > 0.01f ? visScale : 1f;
         data[b + F_HIT_SCALE] = hitScale > 0.01f ? hitScale : 1f;
         data[b + F_ANG_VEL] = angVelRadPerTick;
+        data[b + F_GRAVITY] = pendingSpawnGravity;
         float homingVal;
         if (homingMode == HOMING_ON)
             homingVal = 1f;
@@ -270,6 +277,9 @@ public class BulletPool {
     /** Non-zero when this player bullet should be steered toward boss / nearest enemy. */
     public float   getPlayerHoming(int slot) { return data[slot * STRIDE + F_PLAYER_HOMING]; }
     public boolean isActive(int slot){ return active[slot]; }
+    public void    setGravity(int slot, float g) { if (slot >= 0 && slot < capacity && active[slot]) data[slot * STRIDE + F_GRAVITY] = g; }
+    /** Set gravity applied to every bullet spawned until this is called again with 0. Arena thread only. */
+    public void    setPendingSpawnGravity(float g) { pendingSpawnGravity = g; }
     public int     getActiveCount()  { return activeCount; }
     /** Previous-tick X for sub-tick interpolation in the renderer (client-side only). */
     public float   getPrevX(int slot) { return prevX[slot]; }
