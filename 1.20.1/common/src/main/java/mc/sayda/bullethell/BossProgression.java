@@ -20,7 +20,7 @@ import net.minecraft.advancements.Advancement;
  * Per-player boss clear progression + difficulty-gated challenge checks.
  *
  * Source of truth: Minecraft advancements ({@code bullethell:progression/<bossId>_<difficulty>}).
- * No scoreboard tags are written — advancements are the only persistent state.
+ * No scoreboard tags are written - advancements are the only persistent state.
  * Character unlock checks (CharacterUnlocks) use the identical advancement naming scheme
  * so beating a boss immediately unlocks the matching character at that difficulty.
  */

@@ -122,7 +122,7 @@
       },
       {
         "speaker": "BOSS",
-        "text": "Young or not, fate has always favored the Scarlet name. Come — show me your season.",
+        "text": "Young or not, fate has always favored the Scarlet name. Come - show me your season.",
         "delayTicks": 165
       }
     ]
@@ -381,7 +381,7 @@
       "music": "",
       "attacks": [
         {
-          "_note": "16 CW + 16 CCW worm instances — spin then fire a 32-petal flower of knife streams.",
+          "_note": "16 CW + 16 CCW worm instances - spin then fire a 32-petal flower of knife streams.",
           "pattern": "WORM_CIRCLE",
           "dynamicDifficulty": true,
           "orbitTicks": 35,
@@ -440,7 +440,7 @@
       "music": "",
       "attacks": [
         {
-          "_note": "CW windmill — nozzle A. Fires in sync with nozzle B to produce paired knives.",
+          "_note": "CW windmill - nozzle A. Fires in sync with nozzle B to produce paired knives.",
           "pattern": "SPRINKLER",
           "segmentSyncGroup": "cw",
           "segmentDurationTicks": 80,
@@ -455,7 +455,7 @@
           "startRad": 0.0
         },
         {
-          "_note": "CW windmill — nozzle B, offset by ~4 degrees to pair with nozzle A.",
+          "_note": "CW windmill - nozzle B, offset by ~4 degrees to pair with nozzle A.",
           "pattern": "SPRINKLER",
           "segmentSyncGroup": "cw",
           "segmentDurationTicks": 80,
@@ -470,7 +470,7 @@
           "startRad": 0.4
         },
         {
-          "_note": "CCW windmill — nozzle A, reverses direction with blue knives.",
+          "_note": "CCW windmill - nozzle A, reverses direction with blue knives.",
           "pattern": "SPRINKLER",
           "segmentSyncGroup": "ccw",
           "segmentDurationTicks": 80,
@@ -485,7 +485,7 @@
           "startRad": 0.0
         },
         {
-          "_note": "CCW windmill — nozzle B, paired with nozzle A.",
+          "_note": "CCW windmill - nozzle B, paired with nozzle A.",
           "pattern": "SPRINKLER",
           "segmentSyncGroup": "ccw",
           "segmentDurationTicks": 80,

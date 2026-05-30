@@ -17,7 +17,7 @@
   "description": "Miracle Orbs - jade option shots expand with power",
   "shotOptions": [
     {
-      "label": "A — Miracle Orbs",
+      "label": "A - Miracle Orbs",
       "description": "Main shots flanked by jade orbs and leaf option shots that grow with power; focused fires tight shots with divine spirit orbs.",
       "note": "Based on TH13 TD pl02a unfocused. 9 power tiers (thresholds: 8,16,32,48,64,80,96,128). fireRateTicks>0 = periodic option stream.",
       "unfocused": {
@@ -178,7 +178,7 @@
       }
     },
     {
-      "label": "B — Divine Wind",
+      "label": "B - Divine Wind",
       "description": "Homing divine spirit orbs from wide options; focused fires a concentrated spirit column.",
       "note": "Based on TH13 TD pl02a focused divine spirits. 9 power tiers (thresholds: 8,16,32,48,64,80,96,128).",
       "unfocused": {

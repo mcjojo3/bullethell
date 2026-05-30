@@ -20,7 +20,7 @@
     "Kanako Yasaka: Goddess of Wind and Rain, head deity of the Moriya Shrine on Youkai Mountain.",
     "Patterns draw from Mountain of Faith Stage 6: divine rings, onbashira column curtains, howling wind spirals.",
     "Aesthetic: Red and Blue orbs (divine duality), Golden stars (shrine radiance), Divine Spirits (godly essence).",
-    "Spellcard 2 references 'Native God — Omiwatari that God Walked' from The Grimoire of Marisa.",
+    "Spellcard 2 references 'Native God - Omiwatari that God Walked' from The Grimoire of Marisa.",
     "Final card echoes 'Divine Virtues of Wind God' (MoF Lunatic), the hardest attack in the fight."
   ],
   "introDialog": [
@@ -39,7 +39,7 @@
     "reimu": [
       {
         "speaker": "BOSS",
-        "text": "The Hakurei Shrine Maiden. Tell me — how has your faith been lately?",
+        "text": "The Hakurei Shrine Maiden. Tell me - how has your faith been lately?",
         "delayTicks": 160
       },
       {
@@ -78,12 +78,12 @@
       },
       {
         "speaker": "PLAYER",
-        "text": "Lady Kanako! I must prove my worth — please, don't hold back!",
+        "text": "Lady Kanako! I must prove my worth - please, don't hold back!",
         "delayTicks": 130
       },
       {
         "speaker": "BOSS",
-        "text": "Then I will give you the full measure of a god's blessing — and wrath.",
+        "text": "Then I will give you the full measure of a god's blessing - and wrath.",
         "delayTicks": 150
       }
     ],
@@ -129,7 +129,7 @@
       },
       {
         "speaker": "PLAYER",
-        "text": "I'm the strongest! I can take any wind — even a god's!",
+        "text": "I'm the strongest! I can take any wind - even a god's!",
         "delayTicks": 128
       },
       {
@@ -142,7 +142,7 @@
   "victoryDialog": "You withstood the wind and rain of a god. Take that faith with you when you descend.",
   "defeatDialog": "The mountain reclaims what it is owed. Rest here a while.",
   "victoryDialogByCharacter": {
-    "reimu": "The Hakurei bloodline remains unbroken. I grant you passage through my domain — this time.",
+    "reimu": "The Hakurei bloodline remains unbroken. I grant you passage through my domain - this time.",
     "marisa": "Your spark burned bright enough to scatter even my divine wind. I acknowledge it, ze.",
     "sanae": "You have surpassed your own god, Sanae. That is the finest miracle you have ever made.",
     "sakuya": "The maid stops even time and a divine gale. Report to your mistress: the mountain is stable.",
@@ -152,7 +152,7 @@
   "defeatDialogByCharacter": {
     "reimu": "The Hakurei god could not lend you enough faith today. Try visiting the mountain shrine next time.",
     "marisa": "Not even your spark can outshine a storm that births lightning. Return when you're ready.",
-    "sanae": "Faith is the beginning, Sanae — not the end. Come back when you've grown stronger.",
+    "sanae": "Faith is the beginning, Sanae - not the end. Come back when you've grown stronger.",
     "sakuya": "Precision falters before a wind with no fixed moment. Tell your mistress to look elsewhere.",
     "reisen": "The mountain is no place for a moon rabbit without her bearings. Find your way home.",
     "cirno": "Ice melts before the divine gale. Come back when the seasons have been kinder to you."
@@ -180,7 +180,7 @@
           "advanceRad": 2.80
         },
         {
-          "_note": "CCW rotating 3-arm BLUE_ORB_LARGE curtain — counter-spin creates diamond gaps",
+          "_note": "CCW rotating 3-arm BLUE_ORB_LARGE curtain - counter-spin creates diamond gaps",
           "pattern": "SPRINKLER",
           "cooldown": 0,
           "minCooldown": 0,
@@ -190,7 +190,7 @@
           "advanceRad": -1.40
         },
         {
-          "_note": "Fan-comb burst of GOLD every ~0.5s — aimed pressure fill",
+          "_note": "Fan-comb burst of GOLD every ~0.5s - aimed pressure fill",
           "pattern": "SPRINKLER",
           "cooldown": 100,
           "minCooldown": 100,
@@ -231,7 +231,7 @@
           "divineWindCurveTicks": 20
         },
         {
-          "_note": "Dense BLUE_ORB ring fires every tick — tightens gaps between DIVINE_WIND waves",
+          "_note": "Dense BLUE_ORB ring fires every tick - tightens gaps between DIVINE_WIND waves",
           "pattern": "RING_OFFSET",
           "everyTickWhilePhase": true,
           "cooldown": 5,
@@ -276,7 +276,7 @@
           "sweepAlternate": true
         },
         {
-          "_note": "Red shrine shots sweep R→L — counter-direction cuts off retreat",
+          "_note": "Red shrine shots sweep R→L - counter-direction cuts off retreat",
           "pattern": "SWEEP",
           "everyTickWhilePhase": true,
           "activeTicks": 20,
@@ -312,7 +312,7 @@
       "reposShootTicks": 40,
       "attacks": [
         {
-          "_note": "Rotating laser grid — arm count and warn time scale with difficulty",
+          "_note": "Rotating laser grid - arm count and warn time scale with difficulty",
           "pattern": "LASER_ROTATING",
           "cooldown": 180,
           "bulletType": "CYAN_LASER",
@@ -323,7 +323,7 @@
           "activeTicks": 28
         },
         {
-          "_note": "Large blue orbs every tick — fill the space between laser spokes",
+          "_note": "Large blue orbs every tick - fill the space between laser spokes",
           "pattern": "RING_OFFSET",
           "everyTickWhilePhase": true,
           "cooldown": 5,
@@ -336,7 +336,7 @@
           "bulletScale": 1.2
         },
         {
-          "_note": "Small red orbs every tick — faster, fills gaps left by large orbs",
+          "_note": "Small red orbs every tick - faster, fills gaps left by large orbs",
           "pattern": "RING_OFFSET",
           "everyTickWhilePhase": true,
           "cooldown": 5,
@@ -360,7 +360,7 @@
       "patternTempo": 220.0,
       "attacks": [
         {
-          "_note": "3-nozzle DIVINE_SPIRIT, each fires a 2-bullet fan — pillar of teal pairs",
+          "_note": "3-nozzle DIVINE_SPIRIT, each fires a 2-bullet fan - pillar of teal pairs",
           "pattern": "SPRINKLER",
           "cooldown": 0,
           "minCooldown": 0,
@@ -409,7 +409,7 @@
       "reposShootTicks": 35,
       "attacks": [
         {
-          "_note": "Wide rotating laser grid — lunatic has 32 spokes with only 8-tick warning",
+          "_note": "Wide rotating laser grid - lunatic has 32 spokes with only 8-tick warning",
           "pattern": "LASER_ROTATING",
           "cooldown": 150,
           "bulletType": "CYAN_LASER",
@@ -420,7 +420,7 @@
           "activeTicks": 30
         },
         {
-          "_note": "DIVINE_WIND between laser cycles — C-curl walls that force micro-dodging",
+          "_note": "DIVINE_WIND between laser cycles - C-curl walls that force micro-dodging",
           "pattern": "DIVINE_WIND",
           "cooldown": 35,
           "minCooldown": 22,
@@ -434,7 +434,7 @@
           "divineWindCurveTicks": 18
         },
         {
-          "_note": "Large red orbs every tick — no safe corner while dodging lasers",
+          "_note": "Large red orbs every tick - no safe corner while dodging lasers",
           "pattern": "RING_OFFSET",
           "everyTickWhilePhase": true,
           "cooldown": 5,
@@ -446,7 +446,7 @@
           "startRad": -0.8
         },
         {
-          "_note": "Blue orbs every tick offset from red — alternating layers block retreat",
+          "_note": "Blue orbs every tick offset from red - alternating layers block retreat",
           "pattern": "RING_OFFSET",
           "everyTickWhilePhase": true,
           "cooldown": 5,

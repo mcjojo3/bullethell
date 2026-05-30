@@ -122,7 +122,6 @@ public final class BHSounds {
             "spring_lane_colorful_path",
             "white_flag_of_usa_shrine",
 
-            "instinct_of_the_awakened_white_wolf_awakening_wolfs_instinct",
             "a_god_that_misses_people_romantic_fall",
             "akutagawa_ryuunosukes_kappa_candid_friend",
             "because_princess_inada_is_scolding_me",
@@ -142,7 +141,6 @@ public final class BHSounds {
             "the_youkai_mountain_mysterious_mountain",
             "tomorrow_will_be_special_yesterday_was_not",
 
-            "the_kappa_way_as_said_one_way_accelerator",
             "a_flower_studded_sake_dish_on_mt_ooe",
             "awakening_of_the_earth_spirits",
             "corpse_voyage_be_of_good_cheer",

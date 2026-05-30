@@ -1,6 +1,6 @@
 {
   "id": "kanako_stage",
-  "title": "Youkai Mountain — Path to the Divine Summit",
+  "title": "Youkai Mountain - Path to the Divine Summit",
   "stageMusic": "cemetery_of_onbashira_grave_of_being",
   "bossId": "kanako_boss",
   "nextStageId": "",
@@ -9,7 +9,7 @@
   },
   "waves": [
     {
-      "_comment": "Opening: Wind fairies descend from the mountain peak — blues from the left, yellows from the right.",
+      "_comment": "Opening: Wind fairies descend from the mountain peak - blues from the left, yellows from the right.",
       "spawnTick": 0,
       "enemies": [
         { "x": 80,  "y": -30, "vx": 0.5,  "vy": 3.2, "type": "BLUE_FAIRY" },

@@ -17,12 +17,12 @@
   "_design_notes": [
     "SA Stage 4 boss. Phase structure mirrors TH11 Subterranean Animism Stage 4.",
     "Test: /bullethell start satori_boss 1 LUNATIC",
-    "Reference: TH11 Stage 4 spell cards — Satori Komeiji, Palace of Earth Spirits."
+    "Reference: TH11 Stage 4 spell cards - Satori Komeiji, Palace of Earth Spirits."
   ],
   "introDialog": [
     {
       "speaker": "BOSS",
-      "text": "I know exactly what you are thinking. Every move you plan, every gap you see — I have already seen it. Still, please come ahead.",
+      "text": "I know exactly what you are thinking. Every move you plan, every gap you see - I have already seen it. Still, please come ahead.",
       "delayTicks": 185
     }
   ],
@@ -30,7 +30,7 @@
     "reimu": [
       {
         "speaker": "BOSS",
-        "text": "Shrine maiden. Your mind is a clean, direct thing — no scheming, no doubts. Just instinct.",
+        "text": "Shrine maiden. Your mind is a clean, direct thing - no scheming, no doubts. Just instinct.",
         "delayTicks": 165
       },
       {
@@ -115,7 +115,7 @@
     "yuuka": [
       {
         "speaker": "BOSS",
-        "text": "...You are very quiet in there. Not calm — just vast. Like trying to read an entire forest.",
+        "text": "...You are very quiet in there. Not calm - just vast. Like trying to read an entire forest.",
         "delayTicks": 175
       },
       {
@@ -135,17 +135,17 @@
   "victoryDialogByCharacter": {
     "reimu": "Pure instinct. No room for me to slip between the thoughts.",
     "marisa": "You really do just go forward without a plan. It is somehow effective.",
-    "sakuya": "A mind already living in the next moment — that is a genuine blind spot for me.",
+    "sakuya": "A mind already living in the next moment - that is a genuine blind spot for me.",
     "sanae": "Your faith really does fill the space where doubt would be. I see that now.",
     "cirno": "The strongest, indeed. I could not read confidence that absolute.",
     "yuuka": "A mind with no readable edges... I cannot predict what was never there to find."
   },
   "defeatDialogByCharacter": {
-    "reimu": "Instinct only gets you so far. Next time — think.",
+    "reimu": "Instinct only gets you so far. Next time - think.",
     "marisa": "The spark burned bright, but brightness alone cannot fill every gap.",
     "sakuya": "Even a clock shows where the hands will be. I am simply a very attentive observer.",
     "sanae": "Faith without practice has its limits. Come back when the two have merged.",
-    "cirno": "Strength is more than belief. But do keep believing — it suits you.",
+    "cirno": "Strength is more than belief. But do keep believing - it suits you.",
     "yuuka": "Even a boundless mind has a turning point. I simply found which flower it was."
   },
   "phases": [
@@ -218,7 +218,7 @@
       ]
     },
     {
-      "_note": "Spell 1: 'Recollection Terrifying Hypnotism' — dual curving ring layers with angular velocity + aimed. The expanding rings drift as they spread, creating the hypnotic illusion of rotation.",
+      "_note": "Spell 1: 'Recollection Terrifying Hypnotism' - dual curving ring layers with angular velocity + aimed. The expanding rings drift as they spread, creating the hypnotic illusion of rotation.",
       "hp": 2200,
       "isSpellCard": true,
       "spellName": "Recollection \"Terrifying Hypnotism\"",
@@ -380,7 +380,7 @@
       ]
     },
     {
-      "_note": "Spell 2: 'Recollection Cthugha's Flame' — fire rain from above + knife burst volleys. Represents the hellfire spirit she is reading the memory of.",
+      "_note": "Spell 2: 'Recollection Cthugha's Flame' - fire rain from above + knife burst volleys. Represents the hellfire spirit she is reading the memory of.",
       "hp": 2400,
       "isSpellCard": true,
       "spellName": "Recollection \"Cthugha's Flame\"",
@@ -472,7 +472,7 @@
       ]
     },
     {
-      "_note": "Nonspell 3: AIMED_RING — gold aimed shots each accompanied by a ring of small dots.",
+      "_note": "Nonspell 3: AIMED_RING - gold aimed shots each accompanied by a ring of small dots.",
       "hp": 1800,
       "isSpellCard": false,
       "spellName": "Nonspell 3",
@@ -552,7 +552,7 @@
       ]
     },
     {
-      "_note": "Spell 3: 'Recollection Non-Directional Laser' — two sets of rotating lasers (CW and CCW) with slow background rings. Mirrors SA4 laser spell.",
+      "_note": "Spell 3: 'Recollection Non-Directional Laser' - two sets of rotating lasers (CW and CCW) with slow background rings. Mirrors SA4 laser spell.",
       "hp": 2800,
       "isSpellCard": true,
       "spellName": "Recollection \"Non-Directional Laser\"",
@@ -646,7 +646,7 @@
       ]
     },
     {
-      "_note": "Final Spell: 'Recollection Rorschach in Danmaku' — dense symmetric spiral + expanding dense rings + aimed pressure. Boss anchored to centre. Signature SA4 finale.",
+      "_note": "Final Spell: 'Recollection Rorschach in Danmaku' - dense symmetric spiral + expanding dense rings + aimed pressure. Boss anchored to centre. Signature SA4 finale.",
       "hp": 3200,
       "isSpellCard": true,
       "spellName": "Recollection \"Rorschach in Danmaku\"",

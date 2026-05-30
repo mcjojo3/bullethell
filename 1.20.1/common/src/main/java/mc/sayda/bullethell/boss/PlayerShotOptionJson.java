@@ -7,7 +7,7 @@ import java.util.List;
  * tier.
  * <p>
  * <b>Schema:</b> {@link #unfocused} / {@link #focused} each have
- * {@link Mode#powerTiers} — index 0 = P0,
+ * {@link Mode#powerTiers} - index 0 = P0,
  * clamped by {@link mc.sayda.bullethell.arena.PlayerState2D#powerLevel()}. Each
  * tier is a list of
  * {@link Spawn}s fired together (spread = many entries). Per-spawn:

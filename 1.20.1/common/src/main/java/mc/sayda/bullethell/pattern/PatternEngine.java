@@ -10,7 +10,7 @@ import mc.sayda.bullethell.config.BullethellConfig;
  *
  * Each method receives a BulletPool and DifficultyConfig so patterns scale
  * across difficulties.
- * {@code lifetimeTicks} &le; 0 means no explicit lifetime — bullets are culled
+ * {@code lifetimeTicks} &le; 0 means no explicit lifetime - bullets are culled
  * by the arena
  * kill wall ({@link BulletPool#LIFE_KILL_WALL_ONLY}); {@code angVelRadPerTick}
  * rotates the

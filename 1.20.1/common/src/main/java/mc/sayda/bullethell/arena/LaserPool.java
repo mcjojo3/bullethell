@@ -77,7 +77,7 @@ public class LaserPool {
         for (int i = 0; i < CAPACITY; i++) {
             if (!active[i])
                 continue;
-            dirty = true; // timer state changed this tick — clients need the update
+            dirty = true; // timer state changed this tick - clients need the update
             int b = i * STRIDE;
             if (data[b + F_WARN] > 0) {
                 data[b + F_WARN]--;

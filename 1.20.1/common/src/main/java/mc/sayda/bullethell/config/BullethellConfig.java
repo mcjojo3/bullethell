@@ -323,7 +323,7 @@ public final class BullethellConfig {
     public static final float DEF_BOSS_PHASE_SPEED_CAP = 0.22f;
     public static final float DEF_BOSS_PHASE_SPEED_PER_PHASE = 0.026f;
     /**
-     * @deprecated No longer used — LUNATIC boss scaling is now raw-JSON baseline
+     * @deprecated No longer used - LUNATIC boss scaling is now raw-JSON baseline
      *             (Option D). Kept only so existing config files don't break.
      */
     @Deprecated

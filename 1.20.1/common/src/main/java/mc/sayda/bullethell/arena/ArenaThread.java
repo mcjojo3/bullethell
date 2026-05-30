@@ -38,7 +38,7 @@ public final class ArenaThread {
     private int syncTick = 0;
     /**
      * True while a tick task is already queued or running. Prevents unbounded
-     * task queue build-up when a tick takes longer than one MC server tick —
+     * task queue build-up when a tick takes longer than one MC server tick -
      * the extra submitTick() calls are dropped rather than piling up and later
      * bursting all at once (which causes the freeze→jump lag pattern).
      */
@@ -106,7 +106,7 @@ public final class ArenaThread {
         List<GameEvent> globalEvents = drain(ctx.pendingEvents);
         List<String> attackSfx     = drain(ctx.pendingAttackActivationSounds);
 
-        // All arena state is owned by this thread between ticks — safe to read.
+        // All arena state is owned by this thread between ticks - safe to read.
         BulletDeltaPacket       deltaPacket      = BHCommonEvents.buildBulletDelta(ctx);
         AllPlayerBulletsSyncPacket allBulletsPacket = AllPlayerBulletsSyncPacket.fromContext(ctx);
         boolean laserDirty = ctx.lasers.isDirty();
@@ -117,7 +117,7 @@ public final class ArenaThread {
         ctx.bullets.clearDirty();
         if (laserDirty) ctx.lasers.clearDirty();
 
-        // allParticipants() returns a cached unmodifiable set — no copy needed.
+        // allParticipants() returns a cached unmodifiable set - no copy needed.
         Set<UUID> all = ctx.allParticipants();
 
         // Rebuild pIdxMap only when participant membership changes (reference changes on join/leave).
@@ -132,7 +132,7 @@ public final class ArenaThread {
         Map<UUID, CoopPlayersSyncPacket> coopPackets = buildCoopPackets(all);
 
         for (UUID pid : all) {
-            // NetworkManager.sendToPlayer() routes through Netty — safe from this thread.
+            // NetworkManager.sendToPlayer() routes through Netty - safe from this thread.
             // playerList.getPlayer() is a non-synchronized HashMap read; null-checked below.
             ServerPlayer p = server.getPlayerList().getPlayer(pid);
             if (p == null) continue;
@@ -142,7 +142,7 @@ public final class ArenaThread {
             for (String sfx : attackSfx)
                 BHPackets.sendAttackActivationSfx(p, new AttackActivationSfxPacket(sfx));
 
-            // Drain personal events inline — avoids per-tick HashMap + ArrayList allocation.
+            // Drain personal events inline - avoids per-tick HashMap + ArrayList allocation.
             PlayerState2D ps2d = ctx.getPlayerState(pid);
             if (ps2d != null) {
                 GameEvent g;

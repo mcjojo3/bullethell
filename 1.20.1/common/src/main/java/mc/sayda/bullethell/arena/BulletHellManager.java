@@ -91,7 +91,7 @@ public class BulletHellManager {
     private void startThread(UUID hostUuid, ArenaContext ctx, MinecraftServer server) {
         if (server == null) {
             mc.sayda.bullethell.Bullethell.LOGGER.error(
-                    "[BulletHell] Cannot start arena thread for {} — MinecraftServer not available", hostUuid);
+                    "[BulletHell] Cannot start arena thread for {} - MinecraftServer not available", hostUuid);
             return;
         }
         ArenaThread thread = new ArenaThread(ctx, hostUuid, server);

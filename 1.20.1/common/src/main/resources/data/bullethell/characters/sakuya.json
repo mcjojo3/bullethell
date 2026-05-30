@@ -18,7 +18,7 @@
   "description": "Close range - time freeze",
   "shotOptions": [
     {
-      "label": "A — Illusion Sign",
+      "label": "A - Illusion Sign",
       "description": "Straight knife streams with periodic side options; focused time-freezes kunai for dense columns.",
       "note": "Based on TH7 PCB ply02a/ply02as. 9 power tiers. Side KNIFEs at offsetX=±24 fire periodically (fireRateTicks). Focused: all bullets have freezeTicks=3 (func_on_init=4 time-stop). KUNAI speed matches KNIFE in focused (speed=12), double speed in B shots.",
       "unfocused": {
@@ -188,7 +188,7 @@
       }
     },
     {
-      "label": "B — Killing Doll",
+      "label": "B - Killing Doll",
       "description": "Fast kunai columns alongside straight knives; focused layers angled kunai with dense knife streams.",
       "note": "Based on TH7 PCB ply02b/ply02bs. KUNAI fires at 2x speed (vy=-28) approximating TH7 speed=24. Side KUNAI from offsetX=±16. Angled KUNAI (vx=±5) appear at T4+.",
       "unfocused": {

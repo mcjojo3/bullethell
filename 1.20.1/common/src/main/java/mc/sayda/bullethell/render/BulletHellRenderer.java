@@ -1621,7 +1621,7 @@ public class BulletHellRenderer {
         blitTintedBulletRectFromDef(gfx, type, def, cx, cy, halfW, halfH, rotDeg);
     }
 
-    // Fast path: def already fetched — single BulletTypeLoader.get() per bullet per frame.
+    // Fast path: def already fetched - single BulletTypeLoader.get() per bullet per frame.
     private static void blitTintedBulletFromDef(GuiGraphics gfx, BulletType type, BulletTypeData def,
             int cx, int cy, int r, float rotDeg) {
         ResourceLocation texture = bulletTexture(type);
@@ -1829,7 +1829,7 @@ public class BulletHellRenderer {
         return sb.toString();
     }
 
-    // HUD stat string caches — recomputed only when source values change.
+    // HUD stat string caches - recomputed only when source values change.
     private static int prevLives = -1, prevLifePieces = -1;
     private static String cachedLivesStr = "♥ 0";
     private static int prevBombs = -1, prevBombPieces = -1;
@@ -1837,10 +1837,10 @@ public class BulletHellRenderer {
     // Co-op player score caches, indexed by playerIndex (1-based, slot 0 unused).
     private static final long[] prevCoopScores = new long[5];
     private static final String[] cachedCoopScoreStrs = {"", "", "", "", ""};
-    // Player marker labels — pIdx is 1-4.
+    // Player marker labels - pIdx is 1-4.
     private static final String[] PLAYER_LABELS = {"P0", "P1", "P2", "P3", "P4"};
 
-    // Spell name truncation cache — keyed on (spellName, maxW).
+    // Spell name truncation cache - keyed on (spellName, maxW).
     private static String cachedTruncSpell = "";
     private static String cachedTruncResult = "";
     private static int cachedTruncMaxW = -1;
@@ -1851,12 +1851,12 @@ public class BulletHellRenderer {
     private static String cachedNpTitleLine = "";
     private static String cachedNpArtistLine = "";
 
-    // Dialog body split cache — keyed on (bodyText, textW).
+    // Dialog body split cache - keyed on (bodyText, textW).
     private static String cachedSplitText = "";
     private static int cachedSplitW = -1;
     private static java.util.List<net.minecraft.util.FormattedCharSequence> cachedSplitLines = java.util.List.of();
 
-    // Charge bar label cache — holdFloor (0-3) × stockFloor (0-3).
+    // Charge bar label cache - holdFloor (0-3) × stockFloor (0-3).
     private static final String[][] CHARGE_LABELS = new String[4][4];
     static {
         for (int h = 0; h < 4; h++)

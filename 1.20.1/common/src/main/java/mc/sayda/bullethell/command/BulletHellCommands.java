@@ -560,7 +560,7 @@ public final class BulletHellCommands {
                 mc.sayda.bullethell.boss.CharacterLoader.invalidateAll();
                 mc.sayda.bullethell.boss.BossProgressionLoader.invalidate();
                 src.sendSuccess(() -> Component.literal(
-                                "[BulletHell] JSON caches cleared — boss, stage, character, wave, and progression files will reload on next use."),
+                                "[BulletHell] JSON caches cleared - boss, stage, character, wave, and progression files will reload on next use."),
                                 true);
                 return 1;
         }

@@ -10,14 +10,14 @@ package mc.sayda.bullethell.arena;
  *       its current position every {@code childSpawnIntervalTicks}.</li>
  *   <li>Once all rings leave the playfield, a sweep direction (randomly left
  *       or right) is chosen.  Each ring layer fans out by {@code childFanDeg}
- *       degrees from the center — center ring goes straight, outer rings angle
+ *       degrees from the center - center ring goes straight, outer rings angle
  *       progressively above or below it, forming a half-circle spread.</li>
  *   <li>After activation, children accelerate by {@code childAcceleration}
  *       units/tick each tick until they leave the playfield.</li>
  * </ol>
  *
  * Previous-wave children are left flying freely when {@link #init} is called
- * again — only in-flight rings are cleaned up.
+ * again - only in-flight rings are cleaned up.
  */
 public final class RingSpawnerRuntime {
 
@@ -29,7 +29,7 @@ public final class RingSpawnerRuntime {
     private final int[]     ringSpawnTimer = new int[MAX_RINGS];
     private final boolean[] ringActive     = new boolean[MAX_RINGS];
 
-    // Child tracking — direction stored at activation for acceleration
+    // Child tracking - direction stored at activation for acceleration
     private final int[]   childSlots   = new int[MAX_CHILDREN];
     private final int[]   childRingIdx = new int[MAX_CHILDREN];
     private final float[] childDx      = new float[MAX_CHILDREN];

@@ -8,7 +8,7 @@ import mc.sayda.bullethell.pattern.BulletType;
  * centre, orbit the boss for {@code orbitTicks}, then fire in the direction
  * knife 0 is facing (tangential to the orbit).  The remaining knives follow
  * sequentially, each firing from their own orbit position in the same
- * direction — creating a parallel stream (worm) per ring instance.
+ * direction - creating a parallel stream (worm) per ring instance.
  *
  * <p>Travel animation: the first third of {@code orbitTicks} is used to slide
  * knives outward from the boss centre to the orbit radius; the remainder is
@@ -82,7 +82,7 @@ public final class WormCircleRuntime {
                     // CCW (spd > 0): trailing knives behind in CCW direction.
                     // Both reach fire angle after |localAngle| / absSpeed ticks.
                     localAngle[r][i] = spd >= 0 ? -stepRad * i : stepRad * i;
-                    // Spawn at boss centre — will be animated outward during travel phase.
+                    // Spawn at boss centre - will be animated outward during travel phase.
                     slots[r][i] = pool.spawn(bossX, bossY, 0f, 0f, typeId,
                             BulletPool.LIFE_KILL_WALL_ONLY, vis, hit, 0f);
                 }

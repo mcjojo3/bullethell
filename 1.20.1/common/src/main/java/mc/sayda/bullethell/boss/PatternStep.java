@@ -165,7 +165,7 @@ public class PatternStep {
      * entry.
      * Any scalar field that holds a {@code [E,N,H,L]} array in JSON is
      * automatically
-     * promoted here at load time — no separate {@code *ByDifficulty} keys needed.
+     * promoted here at load time - no separate {@code *ByDifficulty} keys needed.
      */
     public JsonObject byDifficulty = null;
 
@@ -372,7 +372,7 @@ public class PatternStep {
 
     // ---- Laser-specific fields ----
 
-    // laserBeamSpread removed — LASER_BEAM now reads the shared "spread" field.
+    // laserBeamSpread removed - LASER_BEAM now reads the shared "spread" field.
 
     /**
      * Half-width of the laser beam in arena units. Master Spark ≈ 30, thin laser ≈
@@ -535,7 +535,7 @@ public class PatternStep {
     public float rayStackSpacing = 0f;
 
     /**
-     * Explicit bullet lifetime in mod ticks. 0 (default) = no timer — bullets are
+     * Explicit bullet lifetime in mod ticks. 0 (default) = no timer - bullets are
      * culled by the
      * arena kill wall when they travel off screen. Set a positive value only when
      * you need bullets
@@ -577,7 +577,7 @@ public class PatternStep {
      * Ring base angle in radians for {@code RING}, {@code RING_OFFSET},
      * {@code DENSE_RING}. Use {@code -1} (the default) to let the engine pick the
      * angle (random or pattern-controlled). Any other negative value is treated
-     * identically to {@code -1} — only {@code 0} or greater sets a fixed angle.
+     * identically to {@code -1} - only {@code 0} or greater sets a fixed angle.
      */
     public float startRad = -1f;
 
@@ -638,7 +638,7 @@ public class PatternStep {
      */
     public float advanceRad = 0.22f;
 
-    // sprinklerSpread removed — SPRINKLER comb mode is now triggered by combCount > 1
+    // sprinklerSpread removed - SPRINKLER comb mode is now triggered by combCount > 1
     // and uses the shared "spread" field for fan width.
 
     /**
@@ -806,7 +806,7 @@ public class PatternStep {
 
     /**
      * {@code WORM_CIRCLE} only: ticks the rings orbit the boss before all knives
-     * fire. Runs as a background formation — the attack rotation continues normally
+     * fire. Runs as a background formation - the attack rotation continues normally
      * while orbiting.
      */
     public int orbitTicks = 100;
@@ -856,7 +856,7 @@ public class PatternStep {
      */
     public int shotgunCycleTicks = 0;
 
-    // shotgunConeHalfAngle removed — SHOTGUN now reads the shared "spread" field
+    // shotgunConeHalfAngle removed - SHOTGUN now reads the shared "spread" field
     // for the cone half-angle. Default spread (0.20) applies when not set explicitly.
 
     /**

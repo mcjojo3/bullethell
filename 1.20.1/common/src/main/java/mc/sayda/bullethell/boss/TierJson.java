@@ -213,13 +213,13 @@ public final class TierJson {
         return fallback == null ? "" : fallback;
     }
 
-    // ---------------------------------------------------------------- boss load — promote scalar OR [E,N,H,L] arrays
+    // ---------------------------------------------------------------- boss load - promote scalar OR [E,N,H,L] arrays
 
     /**
      * For each phase: promote explicitly-listed scalar fields that hold a {@code [E,N,H,L]} array into their
      * {@code *ByDifficulty} backing field on {@link PhaseDefinition}.
      * For each pattern step: any field holding an array is promoted into the step's {@code byDifficulty}
-     * sub-object — fully generic, no field whitelist needed.
+     * sub-object - fully generic, no field whitelist needed.
      */
     public static void promoteUnionTierFieldsOnBoss(JsonObject root) {
         if (root == null || !root.has("phases") || !root.get("phases").isJsonArray())

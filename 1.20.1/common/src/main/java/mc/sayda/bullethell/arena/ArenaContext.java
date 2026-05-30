@@ -1586,7 +1586,7 @@ public class ArenaContext {
             float by = pb.getY(i);
             BulletType bt = BulletType.fromId(pb.getType(i));
             float bulletR = bt.getRadius() * pb.getHitScale(i) * bt.getHitboxMul();
-            // Iterate only live enemies via compact list — O(activeCount) instead of O(CAPACITY).
+            // Iterate only live enemies via compact list - O(activeCount) instead of O(CAPACITY).
             for (int jj = 0; jj < enemies.getActiveCount(); jj++) {
                 int j = enemies.getActiveSlot(jj);
                 float ex = enemies.getX(j);
@@ -1927,7 +1927,7 @@ public class ArenaContext {
 
     /**
      * Effective bullet density for boss patterns. LUNATIC = raw JSON (exactly 1.0,
-     * no phase creep — JSON is the ceiling). Lower difficulties scale down and
+     * no phase creep - JSON is the ceiling). Lower difficulties scale down and
      * creep upward toward the JSON ceiling as phases progress.
      */
     private float bossDensityMult(PatternStep step) {
@@ -2121,7 +2121,7 @@ public class ArenaContext {
                         dashTopTimer--;
                     }
                 } else {
-                    // Dashing — cubic ease-in-out
+                    // Dashing - cubic ease-in-out
                     if (dashTopTimer > 0) {
                         float frac = 1f - dashTopTimer / (float) phase.dashTopDashTicks;
                         float t = frac * frac * (3f - 2f * frac);
@@ -3563,7 +3563,7 @@ public class ArenaContext {
     }
 
     /**
-     * Restores {@code secondaryLifetimes} to initial values — called when the boss
+     * Restores {@code secondaryLifetimes} to initial values - called when the boss
      * repositions so burst secondaries replay each loop.
      */
     private void resetSecondaryLifetimes() {

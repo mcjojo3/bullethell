@@ -17,7 +17,7 @@
   "description": "Balanced - small hitbox",
   "shotOptions": [
     {
-      "label": "A — Homing Ofuda",
+      "label": "A - Homing Ofuda",
       "description": "Forward ofuda stream; side homing orbs track enemies. Focus fires tight ofudas with slow homing talismans ahead.",
       "note": "Based on TH7 PCB ply00a/ply00as. 9 power tiers (thresholds: 8,16,32,48,64,80,96,128). fireRateTicks>0 = periodic secondary stream.",
       "unfocused": {
@@ -161,7 +161,7 @@
       }
     },
     {
-      "label": "B — Spread Amulet",
+      "label": "B - Spread Amulet",
       "description": "Wide spread of fast amulets unfocused; focused stacks a dense forward column.",
       "unfocused": {
         "powerTiers": [

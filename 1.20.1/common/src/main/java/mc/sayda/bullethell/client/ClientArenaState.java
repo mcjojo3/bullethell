@@ -78,6 +78,10 @@ public class ClientArenaState {
     public int spellTimerTicks, spellTimerTotal;
     public int power;
     public int playerIndex = 1;
+    /** ms timestamp of the last ITEM_PICK_UP sound; prevents the same sound stacking on mass-collect bursts. */
+    private long lastPickupSfxMs = 0L;
+    /** Minimum gap between consecutive pickup sounds (ms). Two ticks at 20 Hz = 100 ms. */
+    private static final long PICKUP_SFX_COOLDOWN_MS = 20L;
 
     /**
      * Other players sharing this arena (excludes self). Updated each tick.
@@ -543,7 +547,13 @@ public class ClientArenaState {
         switch (ev) {
             case HIT -> BHSfx.play(BHSounds.DEATH::get);
             case ENEMY_KILL -> BHSfx.play(BHSounds.KILL::get);
-            case ITEM_PICK_UP -> BHSfx.play(BHSounds.PICK_UP::get, 0.35f);
+            case ITEM_PICK_UP -> {
+                long now = System.currentTimeMillis();
+                if (now - lastPickupSfxMs >= PICKUP_SFX_COOLDOWN_MS) {
+                    lastPickupSfxMs = now;
+                    BHSfx.play(BHSounds.PICK_UP::get, 0.35f);
+                }
+            }
             case ITEM_POWER_UP -> BHSfx.play(BHSounds.POWER_UP::get);
             case ITEM_ONE_UP, SCORE_EXTEND -> BHSfx.play(BHSounds.ONE_UP::get);
             default -> {

@@ -17,7 +17,7 @@
   "description": "Fast & Powerful",
   "shotOptions": [
     {
-      "label": "A — Magic Missile",
+      "label": "A - Magic Missile",
       "description": "Forward star stream with homing side orbs; orbs quicken and multiply with power. Focus: twin/triple streams plus a single backward-launched tracking orb.",
       "note": "Based on TH7 PCB ply01a/ply01as. 9 power tiers (thresholds: 8,16,32,48,64,80,96,128). Side option homing bullets approximated at offsetX=±24. Backward-start focused orb uses vy=+2 (speed=-2 at angle=-π/2 in source).",
       "unfocused": {
@@ -139,7 +139,7 @@
       }
     },
     {
-      "label": "B — Illusion Laser",
+      "label": "B - Illusion Laser",
       "description": "Spread of stars with homing side orbs unfocused; focused fires twin/triple streams plus a rapid center beam approximating the Illusion Laser.",
       "note": "Based on TH7 PCB ply01b/ply01bs. 9 power tiers. Side MARISA_ORB options approximate func_on_tick side familiars. Focused: center beam from offsetY=-24 approximates the focused laser (func_on_tick=5).",
       "unfocused": {

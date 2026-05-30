@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Builds and caches boss-unlock lookup tables from data already in each
  * {@link BossDefinition} (the {@code prerequisites} and {@code requirementSummary} fields).
  *
- * No separate JSON file is needed — calling {@link BossLoader#load} for every known boss
+ * No separate JSON file is needed - calling {@link BossLoader#load} for every known boss
  * ID is sufficient.  The cache is invalidated whenever {@link BossLoader#invalidateAll()}
  * is called (or explicitly via {@link #invalidate()}).
  */

@@ -31,7 +31,7 @@ public class BulletPool {
     /**
      * Default lifetime assigned when no explicit {@code bulletLifetimeTicks} is set in a pattern step.
      * At maximum normal bullet speed (~8 px/tick) a bullet covers the 480×640 arena plus the 128-unit
-     * kill-wall margin in under 120 ticks, so 3600 is effectively infinite — the {@link #outOfBounds}
+     * kill-wall margin in under 120 ticks, so 3600 is effectively infinite - the {@link #outOfBounds}
      * kill wall handles all culling.
      */
     public static final int LIFE_KILL_WALL_ONLY = 3600;
@@ -125,9 +125,11 @@ public class BulletPool {
             data[b + F_LIFE]--;
             if (data[b + F_LIFE] <= 0 || outOfBounds(data[b + F_X], data[b + F_Y])) {
                 deactivate(i);
-            } else {
-                dirty[i] = true;
             }
+            // Not marking dirty here: clientTick() mirrors physics exactly (same angVel, gravity,
+            // lifetime math), so no correction packet is needed for straight/curved motion.
+            // Meaningful changes (spawn, kill, bounce, velocity shift) are already marked dirty
+            // by spawn(), deactivate(), setVx/setVy, and the freeze-unfreeze path above.
         }
     }
 
@@ -303,8 +305,11 @@ public class BulletPool {
 
     public void setSlotData(int slot, float[] slotData, boolean isActive) {
         if (isActive && active[slot]) {
-            prevX[slot] = data[slot * STRIDE + F_X];
-            prevY[slot] = data[slot * STRIDE + F_Y];
+            // Use server's estimated previous position (current server pos minus server velocity)
+            // rather than the client-predicted position, which is 1 tick ahead of the server.
+            // Without this, prevX > currentX in the direction of travel → lerp goes backward → stutter.
+            prevX[slot] = slotData[F_X] - slotData[F_VX];
+            prevY[slot] = slotData[F_Y] - slotData[F_VY];
         }
         System.arraycopy(slotData, 0, data, slot * STRIDE, STRIDE);
         if (isActive && !active[slot]) {

@@ -33,7 +33,7 @@ public class BHSpawnStructurePiece extends StructurePiece {
     private final BlockPos origin;
     private final StructureTemplate template;
 
-    /** Used during world generation — loads the template immediately. */
+    /** Used during world generation - loads the template immediately. */
     public BHSpawnStructurePiece(StructureTemplateManager manager, ResourceLocation templateId, BlockPos origin) {
         super(BHStructures.BH_SPAWN_PIECE.get(), 0, computeBox(manager, templateId, origin));
         this.templateId = templateId;
@@ -46,7 +46,7 @@ public class BHSpawnStructurePiece extends StructurePiece {
         return BoundingBox.fromCorners(origin, origin.offset(size.getX() - 1, size.getY() - 1, size.getZ() - 1));
     }
 
-    /** NBT deserialization constructor — called by the registered {@code StructurePieceType}. */
+    /** NBT deserialization constructor - called by the registered {@code StructurePieceType}. */
     public BHSpawnStructurePiece(StructurePieceSerializationContext ctx, CompoundTag tag) {
         super(BHStructures.BH_SPAWN_PIECE.get(), tag);
         this.templateId = new ResourceLocation(tag.getString("BHTemplate"));

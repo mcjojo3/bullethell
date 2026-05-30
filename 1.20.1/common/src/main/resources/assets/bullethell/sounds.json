@@ -638,15 +638,6 @@
       }
     ]
   },
-  "instinct_of_the_awakened_white_wolf_awakening_wolfs_instinct": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/instinct_of_the_awakened_white_wolf_awakening_wolfs_instinct",
-        "stream": true
-      }
-    ]
-  },
   "a_god_that_misses_people_romantic_fall": {
     "category": "music",
     "sounds": [
@@ -805,15 +796,6 @@
     "sounds": [
       {
         "name": "bullethell:music/tomorrow_will_be_special_yesterday_was_not",
-        "stream": true
-      }
-    ]
-  },
-  "the_kappa_way_as_said_one_way_accelerator": {
-    "category": "music",
-    "sounds": [
-      {
-        "name": "bullethell:music/the_kappa_way_as_said_one_way_accelerator",
         "stream": true
       }
     ]

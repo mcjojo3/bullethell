@@ -91,7 +91,7 @@ public final class BHPackets {
     // ---------------------------------------------------------------- Registration
 
     public static void register() {
-        // C2S: player input every tick — queued to arena thread via pendingInputs
+        // C2S: player input every tick - queued to arena thread via pendingInputs
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, PLAYER_POS, (buf, ctx) -> {
             PlayerPos2DPacket pkt = PlayerPos2DPacket.decode(buf);
             ctx.queue(() -> {
@@ -146,7 +146,7 @@ public final class BHPackets {
                 UUID uuid = player.getUUID();
                 ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(uuid);
                 if (arena != null) {
-                    // forceGameOver() sets a volatile boolean — safe to call from any thread
+                    // forceGameOver() sets a volatile boolean - safe to call from any thread
                     arena.pendingInputs.offer(() -> arena.setParticipantPaused(uuid, false));
                     arena.forceGameOver();
                 } else if (BulletHellManager.INSTANCE.isInMatch(uuid)) {
