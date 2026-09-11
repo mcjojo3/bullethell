@@ -25,7 +25,7 @@ import java.util.List;
 public class CharacterSelectScreen extends Screen {
 
     static final int PORTRAIT_SIZE = 96;
-    static final int INFO_H = 38; // name + desc + stats rows
+    static final int INFO_H = 47; // name + 2 desc lines + stats row
     static final int BTN_H = 20;
     static final int BTN_PAD = 6;
     static final int CARD_W = PORTRAIT_SIZE + 16;
@@ -37,6 +37,8 @@ public class CharacterSelectScreen extends Screen {
     /** Pass-through for ESC → difficulty screen (unlock caps). */
     private final int maxAllowedDifficultyOrdinal;
     private final boolean practiceMode;
+    /** Lobby mode: report the pick back to the party instead of starting a run. */
+    private final boolean lobbyMode;
     private final List<CharacterDefinition> characters;
 
     private int selectedIndex = 0;
@@ -52,8 +54,20 @@ public class CharacterSelectScreen extends Screen {
         this(difficulty, stageId, maxAllowedDifficultyOrdinal, false);
     }
 
+    /** Picks a character for the party rather than starting a run. */
+    public static CharacterSelectScreen forLobby() {
+        return new CharacterSelectScreen(DifficultyConfig.NORMAL, "",
+                DifficultyConfig.LUNATIC.ordinal(), false, true);
+    }
+
     public CharacterSelectScreen(DifficultyConfig difficulty, String stageId, int maxAllowedDifficultyOrdinal, boolean practiceMode) {
+        this(difficulty, stageId, maxAllowedDifficultyOrdinal, practiceMode, false);
+    }
+
+    public CharacterSelectScreen(DifficultyConfig difficulty, String stageId, int maxAllowedDifficultyOrdinal,
+            boolean practiceMode, boolean lobbyMode) {
         super(Component.literal("Select Character"));
+        this.lobbyMode = lobbyMode;
         this.difficulty = difficulty;
         this.stageId = stageId;
         this.maxAllowedDifficultyOrdinal = maxAllowedDifficultyOrdinal;
@@ -156,8 +170,14 @@ public class CharacterSelectScreen extends Screen {
             int cx = bx + CARD_W / 2;
             int nameCol = unlocked ? (sel ? 0xFFFFDD00 : 0xFFCCCCCC) : 0xFF777777;
             gfx.drawCenteredString(font, ch.name, cx, infoY, nameCol);
-            gfx.drawCenteredString(font, ch.description, cx, infoY + font.lineHeight + 2,
-                    unlocked ? 0xFF8888AA : 0xFF555566);
+            int descCol = unlocked ? 0xFF8888AA : 0xFF555566;
+            int descMaxW = CARD_W - 8;
+            gfx.drawCenteredString(font, TextWrap.truncateOneLine(font, ch.description1, descMaxW),
+                    cx, infoY + font.lineHeight + 2, descCol);
+            if (ch.description2 != null && !ch.description2.isEmpty()) {
+                gfx.drawCenteredString(font, TextWrap.truncateOneLine(font, ch.description2, descMaxW),
+                        cx, infoY + font.lineHeight * 2 + 2, descCol);
+            }
             var pl = Minecraft.getInstance().player;
             int attrL = BHAttributes.extraLivesBonus(pl);
             int attrB = BHAttributes.extraBombsBonus(pl);
@@ -165,7 +185,7 @@ public class CharacterSelectScreen extends Screen {
             int dispBombs = Math.min(9, ch.startingBombs + attrB);
             String stats = "\u2665" + dispLives + "  \u2736" + dispBombs
                     + "  Spd:" + (int) ch.speedNormal;
-            gfx.drawCenteredString(font, stats, cx, infoY + font.lineHeight * 2 + 4,
+            gfx.drawCenteredString(font, stats, cx, infoY + font.lineHeight * 3 + 4,
                     unlocked ? 0xFF7799CC : 0xFF555566);
 
             if (sel && unlocked) {
@@ -228,12 +248,13 @@ public class CharacterSelectScreen extends Screen {
             return;
         BHSfx.playSelect();
         CharacterDefinition ch = characters.get(selectedIndex);
-        if (ch.shotTypeOptionCount() >= 2) {
-            Minecraft.getInstance().setScreen(ShotTypeSelectScreen.forSolo(difficulty, stageId,
-                    maxAllowedDifficultyOrdinal, ch.id, practiceMode));
+        if (lobbyMode) {
+            BHPackets.sendLobbyAction(
+                    mc.sayda.bullethell.network.LobbyActionPacket.setCharacter(ch.id));
+            Minecraft.getInstance().setScreen(new LobbyScreen());
             return;
         }
-        BHPackets.sendCharSelect(ch.id, difficulty, stageId, 0, practiceMode);
+        BHPackets.sendCharSelect(ch.id, difficulty, stageId, practiceMode);
         onClose();
     }
 

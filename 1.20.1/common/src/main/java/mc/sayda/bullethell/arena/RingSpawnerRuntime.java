@@ -21,6 +21,22 @@ package mc.sayda.bullethell.arena;
  */
 public final class RingSpawnerRuntime {
 
+    /**
+     * Seeded generator supplied by the owning arena. Falls back to a private instance
+     * only if never set, so this class is still usable standalone.
+     */
+    private java.util.Random random;
+
+    public void setRandom(java.util.Random random) {
+        this.random = random;
+    }
+
+    private java.util.Random rng() {
+        if (random == null) random = new java.util.Random();
+        return random;
+    }
+
+
     public static final int MAX_RINGS    = 32;
     public static final int MAX_CHILDREN = 512;
 
@@ -159,7 +175,7 @@ public final class RingSpawnerRuntime {
      * the acceleration phase.
      */
     private void sweepChildren(BulletPool pool) {
-        float baseAngle = (float) ((Math.random() < 0.5) ? 0 : Math.PI);
+        float baseAngle = (float) ((rng().nextFloat() < 0.5f) ? 0 : Math.PI);
 
         for (int i = 0; i < childCount; i++) {
             int slot = childSlots[i];

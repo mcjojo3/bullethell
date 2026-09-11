@@ -26,8 +26,8 @@ public class BHNpcRenderer extends HumanoidMobRenderer<BHNpc, PlayerModel<BHNpc>
 
     @Override
     public ResourceLocation getTextureLocation(BHNpc entity) {
-        String id = entity.getNpcId();
-        String texId = id.endsWith("_npc") ? id.substring(0, id.length() - 4) : id;
-        return new ResourceLocation("bullethell", "textures/entities/" + texId + ".png");
+        // Datapack-overridable; falls back to textures/entities/<id without "_npc">.png
+        return new ResourceLocation("bullethell",
+                mc.sayda.bullethell.boss.NpcLoader.load(entity.getNpcId()).resolveTexture());
     }
 }

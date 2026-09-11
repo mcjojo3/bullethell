@@ -140,7 +140,7 @@ public final class BossProgression {
     public static Map<String, Integer> snapshot(ServerPlayer player) {
         Map<String, Integer> out = new LinkedHashMap<>();
         Set<String> bosses = new LinkedHashSet<>(BossLoader.allBossIds());
-        for (String stageId : StageLoader.REGISTERED_IDS) {
+        for (String stageId : StageLoader.allStageIds()) {
             try {
                 bosses.add(StageLoader.load(stageId).bossId);
             } catch (Exception ignored) {

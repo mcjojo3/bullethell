@@ -2,6 +2,7 @@ package mc.sayda.bullethell;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
@@ -14,13 +15,14 @@ import net.minecraft.server.level.ServerPlayer;
 public final class CharacterUnlocks {
 
     private static final String ADV_PREFIX = "bullethell:progression/";
-    private static final String DEFAULT_CHAR_ID = "reimu";
+    /** Available to every player with no advancement required, on every difficulty. */
+    private static final Set<String> DEFAULT_UNLOCKED_CHAR_IDS = Set.of("reimu", "marisa");
 
     private CharacterUnlocks() {
     }
 
     private static int defaultMaxDifficultyOrdinal(String characterId) {
-        return DEFAULT_CHAR_ID.equals(characterId) ? DifficultyConfig.LUNATIC.ordinal() : -1;
+        return DEFAULT_UNLOCKED_CHAR_IDS.contains(characterId) ? DifficultyConfig.LUNATIC.ordinal() : -1;
     }
 
     private static String advancementId(String characterId, DifficultyConfig difficulty) {
@@ -109,7 +111,7 @@ public final class CharacterUnlocks {
     public static void setAdminUnlocked(ServerPlayer player, String characterId, boolean unlocked) {
         if (player == null || characterId == null || characterId.isBlank())
             return;
-        if (DEFAULT_CHAR_ID.equals(characterId)) {
+        if (DEFAULT_UNLOCKED_CHAR_IDS.contains(characterId)) {
             if (unlocked) {
                 grantThroughDifficulty(player, characterId, DifficultyConfig.LUNATIC);
             }
@@ -131,7 +133,7 @@ public final class CharacterUnlocks {
     /** Snapshot all registered characters -> max unlocked difficulty ordinal. */
     public static Map<String, Integer> snapshot(ServerPlayer player) {
         Map<String, Integer> out = new LinkedHashMap<>();
-        for (String id : CharacterLoader.REGISTERED_IDS) {
+        for (String id : CharacterLoader.allCharIds()) {
             out.put(id, getMaxUnlockedDifficultyOrdinal(player, id));
         }
         return out;

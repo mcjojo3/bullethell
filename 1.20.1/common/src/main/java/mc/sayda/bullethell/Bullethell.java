@@ -18,6 +18,7 @@ public class Bullethell {
     public static void init() {
         LOGGER.info("Bullethell (Common) Initializing...");
         BHGameRules.init();
+        mc.sayda.bullethell.data.BHData.register();
         BHPackets.register();
         BHCommonEvents.register();
         BHStructures.register();

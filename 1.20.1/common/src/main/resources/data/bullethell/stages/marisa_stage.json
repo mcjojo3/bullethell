@@ -1,9 +1,6 @@
 {
   "id": "marisa_stage",
   "title": "Bamboo Forest of the Full Moon",
-  "_design_notes": [
-    "marisa_stage: preamble + fairyRush shared catalog (IN-inspired pool)."
-  ],
   "stageMusic": "retribution_for_the_eternal_night_imperishable_night",
   "bossId": "marisa_boss",
   "rules": {
@@ -20,53 +17,6 @@
     "pointItemMaxValue": 800,
     "pointItemMinValue": 100,
     "cherrySystemEnabled": false,
-    "versusKillSendsBullets": false,
     "onKillDeathBurstCount": 0
-  },
-  "waves": [
-    {
-      "_comment": "Forest hush: two greens.",
-      "spawnTick": 0,
-      "enemies": [
-        {
-          "x": 180,
-          "y": -22,
-          "vx": 0.0,
-          "vy": 3.6,
-          "type": "GREEN_FAIRY",
-          "delayTicks": 0,
-          "pattern": "RING"
-        },
-        {
-          "x": 300,
-          "y": -22,
-          "vx": 0.0,
-          "vy": 3.6,
-          "type": "GREEN_FAIRY",
-          "delayTicks": 10,
-          "pattern": "RING"
-        }
-      ]
-    }
-  ],
-  "fairyRush": {
-    "catalogId": "default",
-    "slotCount": 38,
-    "startTick": 125,
-    "gapTicksStartMin": 72,
-    "gapTicksStartMax": 118,
-    "gapTicksEndMin": 24,
-    "gapTicksEndMax": 44,
-    "gapEasing": "SMOOTHSTEP",
-    "jitterTicks": 16,
-    "intensityStartLo": 0,
-    "intensityStartHi": 2,
-    "intensityEndLo": 3,
-    "intensityEndHi": 9,
-    "breatherEvery": 7,
-    "breatherExtraTicks": 72,
-    "breatherWaveId": "",
-    "shuffleSeed": null,
-    "noRepeatLast": 6
   }
 }

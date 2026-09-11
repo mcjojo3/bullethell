@@ -18,7 +18,6 @@ package mc.sayda.bullethell.boss;
  * deathResetspower=true, cherrySystemEnabled=true
  *
  * TH9 (PoFV) - itemDropEveryNthKill=1, pocAutoCollect=false,
- * versusKillSendsBullets=true
  * ─────────────────────────────────────────────────────────────────
  *
  * All fields have sensible defaults - omit any field in JSON to keep the
@@ -73,8 +72,6 @@ public class RulesetConfig {
                     pointItemMinValue = 25000;
                 if (scoreExtendEvery == null)
                     scoreExtendEvery = 10000000L;
-                if (forceControlScheme == null)
-                    forceControlScheme = "classic";
             }
             case TH7 -> {
                 if (itemDropEveryNthKill == null)
@@ -113,8 +110,6 @@ public class RulesetConfig {
                     bulletClearOnMaxPower = false;
                 if (bulletClearVacuum == null)
                     bulletClearVacuum = true;
-                if (versusKillSendsBullets == null)
-                    versusKillSendsBullets = true;
                 if (grazeScoringEnabled == null)
                     grazeScoringEnabled = false;
                 if (pointItemMaxValue == null)
@@ -123,8 +118,6 @@ public class RulesetConfig {
                     pointItemMinValue = 100000; // PoFV items are fixed value
                 if (scoreExtendEvery == null)
                     scoreExtendEvery = 10000000L;
-                if (forceControlScheme == null)
-                    forceControlScheme = "th9";
             }
             case TH8 -> {
                 if (itemDropEveryNthKill == null)
@@ -210,8 +203,6 @@ public class RulesetConfig {
             cherryShieldThreshold = 50000;
         if (cherryShieldDuration == null)
             cherryShieldDuration = 60;
-        if (versusKillSendsBullets == null)
-            versusKillSendsBullets = false;
         if (onKillDeathBurstCount == null)
             onKillDeathBurstCount = 0;
         if (onKillDeathBurstSpeed == null)
@@ -317,12 +308,6 @@ public class RulesetConfig {
     public Boolean bulletClearVacuum = null;
 
     /**
-     * If set, forces all participants to use this control scheme during the match.
-     * Useful for "Classic" or "PoFV" themed stages.
-     */
-    public String forceControlScheme = null;
-
-    /**
      * Whether grazing enemy bullets earns score / contributes to a chain.
      * Disable for a pure TH9 vs mode feel.
      */
@@ -367,17 +352,6 @@ public class RulesetConfig {
 
     /** Duration of the cherry shield in ticks after activation. */
     public Integer cherryShieldDuration = null;
-
-    // ---------------------------------------------------------------- versus mode
-    // (TH9 style)
-
-    /**
-     * When true, enemies killed during a combo chain send their bullets to the
-     * opponent's field (TH9 Phantasmagoria mode).
-     * Has no mechanical effect in single-player arenas currently; reserved for
-     * splitscreen.
-     */
-    public Boolean versusKillSendsBullets = null;
 
     // ---------------------------------------------------------------- on-kill
     // death burst

@@ -1,67 +1,10 @@
 {
   "id": "cirno_stage",
   "title": "Misty Lake - Ice Fairy Approach",
-  "_design_notes": [
-    "cirno_stage: inline preamble + fairyRush (shared fw_shared_* catalog, random ramp).",
-    "Wider early gaps than legacy waveRef ladder; patterns pool across bosses.",
-    "Prior boss_* templates archived under .archive/fairy_waves/."
-  ],
   "stageMusic": "lunate_elf",
   "bossId": "cirno_boss",
   "nextStageId": "sakuya_stage",
   "rules": {
     "preset": "TH6"
-  },
-  "waves": [
-    {
-      "_comment": "Preamble: light mist (three spaced blues).",
-      "spawnTick": 0,
-      "enemies": [
-        {
-          "x": 120,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 3.4,
-          "type": "BLUE_FAIRY",
-          "delayTicks": 0
-        },
-        {
-          "x": 240,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 3.5,
-          "type": "BLUE_FAIRY",
-          "delayTicks": 18
-        },
-        {
-          "x": 360,
-          "y": -20,
-          "vx": 0.0,
-          "vy": 3.4,
-          "type": "BLUE_FAIRY",
-          "delayTicks": 36
-        }
-      ]
-    }
-  ],
-  "fairyRush": {
-    "catalogId": "default",
-    "slotCount": 30,
-    "startTick": 110,
-    "gapTicksStartMin": 72,
-    "gapTicksStartMax": 118,
-    "gapTicksEndMin": 28,
-    "gapTicksEndMax": 50,
-    "gapEasing": "SMOOTHSTEP",
-    "jitterTicks": 16,
-    "intensityStartLo": 0,
-    "intensityStartHi": 2,
-    "intensityEndLo": 2,
-    "intensityEndHi": 7,
-    "breatherEvery": 6,
-    "breatherExtraTicks": 72,
-    "breatherWaveId": "",
-    "shuffleSeed": null,
-    "noRepeatLast": 6
   }
 }

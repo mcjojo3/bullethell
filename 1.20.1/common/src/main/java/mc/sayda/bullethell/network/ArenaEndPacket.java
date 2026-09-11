@@ -44,14 +44,12 @@ public final class ArenaEndPacket {
     public final String stageId;
     /** Difficulty name (EASY/NORMAL/HARD/LUNATIC) for retry. */
     public final String difficulty;
-    /** Shot type index for retry / display. */
-    public final int shotTypeOrdinal;
 
     public ArenaEndPacket(boolean won, String bossName, String bossId,
             String characterId, String characterName, String bossDialog,
             long score, long scoreCombined, int victoryXp, int lives, int bombs, int graze,
             int spellsCaptured, int spellsAttempted, float completionPercent,
-            String stageId, String difficulty, int shotTypeOrdinal) {
+            String stageId, String difficulty) {
         this.won = won;
         this.bossName = bossName != null ? bossName : "";
         this.bossId = bossId != null ? bossId : "";
@@ -69,7 +67,6 @@ public final class ArenaEndPacket {
         this.completionPercent = completionPercent;
         this.stageId = stageId != null ? stageId : "";
         this.difficulty = difficulty != null ? difficulty : "NORMAL";
-        this.shotTypeOrdinal = shotTypeOrdinal;
     }
 
     public void encode(FriendlyByteBuf buf) {
@@ -90,7 +87,6 @@ public final class ArenaEndPacket {
         buf.writeFloat(completionPercent);
         buf.writeUtf(stageId);
         buf.writeUtf(difficulty);
-        buf.writeByte(shotTypeOrdinal);
     }
 
     public static ArenaEndPacket decode(FriendlyByteBuf buf) {
@@ -111,9 +107,8 @@ public final class ArenaEndPacket {
         float completion = buf.readFloat();
         String stageId = buf.readUtf();
         String difficulty = buf.readUtf();
-        int shot = buf.readableBytes() > 0 ? (buf.readByte() & 0xFF) : 0;
         return new ArenaEndPacket(won, bossName, bossId, characterId, characterName,
                 bossDialog, score, scoreCombined, victoryXp, lives, bombs, graze, captured, attempted,
-                completion, stageId, difficulty, shot);
+                completion, stageId, difficulty);
     }
 }

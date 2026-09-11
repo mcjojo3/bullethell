@@ -1,6 +1,5 @@
 package mc.sayda.bullethell.pattern;
 
-import java.util.concurrent.ThreadLocalRandom;
 import mc.sayda.bullethell.arena.BulletPool;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.config.BullethellConfig;
@@ -24,6 +23,26 @@ import mc.sayda.bullethell.config.BullethellConfig;
 public final class PatternEngine {
 
     private PatternEngine() {
+    }
+
+    /**
+     * The arena's seeded generator for the thread currently ticking.
+     *
+     * PatternEngine is entirely static and its jitter is used deep inside ~40 fire
+     * methods, so threading a Random through every signature would be a huge mechanical
+     * diff for no gain. Binding it per-thread is safe here because one arena owns one
+     * thread: {@link ArenaContext#tick()} binds before it fires anything.
+     */
+    private static final ThreadLocal<java.util.Random> RNG =
+            ThreadLocal.withInitial(java.util.Random::new);
+
+    /** Called at the top of an arena tick so pattern jitter follows that arena's seed. */
+    public static void bind(java.util.Random random) {
+        if (random != null) RNG.set(random);
+    }
+
+    private static java.util.Random rng() {
+        return RNG.get();
     }
 
     /**
@@ -73,7 +92,7 @@ public final class PatternEngine {
             float angVelRadPerTick, float jitter) {
         int life = lifeOrDefault(lifetimeTicks, BullethellConfig.PATTERN_DEFAULT_LIFE_RING.get());
         float step = (float) (Math.PI * 2.0 / arms);
-        ThreadLocalRandom rng = ThreadLocalRandom.current();
+        java.util.Random rng = rng();
         for (int i = 0; i < arms; i++) {
             float angle = angleOffset + step * i;
             if (jitter > 1e-4f) {
@@ -147,7 +166,7 @@ public final class PatternEngine {
             float angVelRadPerTick, float jitter) {
         int life = lifeOrDefault(lifetimeTicks, BullethellConfig.PATTERN_DEFAULT_LIFE_AIMED.get());
         float halfSpread = spread * (count - 1) / 2f;
-        ThreadLocalRandom rng = ThreadLocalRandom.current();
+        java.util.Random rng = rng();
         for (int i = 0; i < count; i++) {
             float angle = baseAngle - halfSpread + spread * i;
             if (jitter > 1e-4f) {

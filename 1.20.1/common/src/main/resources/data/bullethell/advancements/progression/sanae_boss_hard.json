@@ -1,0 +1,19 @@
+{
+    "parent": "bullethell:progression/sanae_boss_normal",
+    "display": {
+        "icon": {
+            "item": "minecraft:diamond"
+        },
+        "title": "Sanae Cleared (Hard)",
+        "description": "Defeat Sanae on Hard or higher.",
+        "frame": "goal",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "clear": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

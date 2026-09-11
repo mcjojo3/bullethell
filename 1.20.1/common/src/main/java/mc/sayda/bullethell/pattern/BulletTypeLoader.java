@@ -43,27 +43,8 @@ public final class BulletTypeLoader {
 
     private static void load() {
         cache = new HashMap<>();
-
-        // Dev path takes priority
-        String devPath = BullethellConfig.TEST_DEV_PATH != null ? BullethellConfig.TEST_DEV_PATH.get() : null;
-        if (devPath != null && !devPath.isBlank()) {
-            Path p = Paths.get(devPath, "bullet_types.json");
-            if (Files.exists(p)) {
-                try (var reader = Files.newBufferedReader(p, StandardCharsets.UTF_8)) {
-                    parseInto(cache, JsonParser.parseReader(reader).getAsJsonObject());
-                    return;
-                } catch (Exception ignored) {}
-            }
-        }
-
-        // Classpath fallback
-        InputStream is = BulletTypeLoader.class.getClassLoader().getResourceAsStream(CLASSPATH_PATH);
-        if (is != null) {
-            try (is) {
-                parseInto(cache, JsonParser.parseReader(
-                        new InputStreamReader(is, StandardCharsets.UTF_8)).getAsJsonObject());
-            } catch (Exception ignored) {}
-        }
+        com.google.gson.JsonObject root = mc.sayda.bullethell.data.BHData.BULLET_TYPES.get();
+        if (root != null) parseInto(cache, root);
     }
 
     private static void parseInto(Map<BulletType, BulletTypeData> map, JsonObject root) {

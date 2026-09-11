@@ -22,3 +22,182 @@ dependencies {
 
     modCompileOnly "mezz.jei:jei-1.20.1-common-api:15.2.0.27"
 }
+
+// ---------------------------------------------------------------- content datagen
+//
+// Generates the per-boss progression advancements from the boss JSONs so adding a boss
+// does not mean hand-writing four more files. Output lands in src/main/resources (not a
+// build dir) so the files stay real and reviewable in git.
+//
+//   gradlew :1.20.1:common:generateAdvancements
+//
+// The difficulty tier icons encode the difficulty, not the boss, so they are fixed here.
+
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
+// ---------------------------------------------------------------- init-time content index
+//
+// Entity types and spawn eggs are registered at mod-init, long before any datapack or
+// ResourceManager exists, so the NPC list has to come off the classpath. Directory
+// enumeration is not available there: Forge serves mod resources from a SecureJar
+// "union:" filesystem where ClassLoader.getResources() on a folder finds nothing, and
+// Platform.findResource does not reach the common project resources in a dev run. That
+// is the actual, log-confirmed cause of "Registering 0 NPC entity types" on Forge.
+//
+// Reading one file by exact path always works - every loader, dev run or built jar. So
+// the list is baked at build time into a resource the mod reads that way. Adding an NPC
+// is still just dropping in a json; the index regenerates on every build, so it cannot
+// go stale the way a hand-maintained array could.
+
+def contentIndexOut = layout.buildDirectory.dir('generated/content-index')
+
+tasks.register('generateNpcIndex') {
+    group = 'bullethell'
+    description = 'Bake data/bullethell/npcs/*.json ids into an index read at mod init'
+
+    def npcDir = file('src/main/resources/data/bullethell/npcs')
+    inputs.dir npcDir
+    outputs.dir contentIndexOut
+
+    doLast {
+        def ids = (npcDir.listFiles() ?: new File[0])
+                .findAll { it.name.endsWith('.json') }
+                .collect { it.name - '.json' }
+                .sort()
+        def target = new File(contentIndexOut.get().asFile, 'data/bullethell/indexes/npcs.json')
+        target.parentFile.mkdirs()
+        target.write(JsonOutput.prettyPrint(JsonOutput.toJson([ids: ids])) + System.lineSeparator(), 'UTF-8')
+        logger.lifecycle("generateNpcIndex: ${ids.size()} npcs -> ${ids}")
+    }
+}
+
+// Hanging the srcDir off the task's own output provider carries the task dependency to
+// every consumer - processResources, sourcesJar and the loader subprojects alike - rather
+// than each having to remember it. Without this, a clean build races and sourcesJar fails.
+sourceSets.main.resources.srcDir(tasks.named('generateNpcIndex').map { contentIndexOut })
+
+tasks.register('generateAdvancements') {
+    group = 'bullethell'
+    description = 'Regenerate progression advancements from data/bullethell/bosses/*.json'
+
+    def resources = file('src/main/resources/data/bullethell')
+    def bossDir = new File(resources, 'bosses')
+    def advDir = new File(resources, 'advancements/progression')
+
+    inputs.dir bossDir
+    outputs.dir advDir
+
+    doLast {
+        def tiers = [
+            easy:    [icon: 'minecraft:iron_ingot',      frame: 'task',      suffix: 'or higher'],
+            normal:  [icon: 'minecraft:gold_ingot',      frame: 'goal',      suffix: 'or higher'],
+            hard:    [icon: 'minecraft:diamond',         frame: 'goal',      suffix: 'or higher'],
+            lunatic: [icon: 'minecraft:netherite_ingot', frame: 'challenge', suffix: null],
+        ]
+        def order = ['easy', 'normal', 'hard', 'lunatic']
+
+        advDir.mkdirs()
+        def slurper = new JsonSlurper()
+        def expected = ['root.json'] as Set
+        def written = 0
+
+        bossDir.listFiles()?.findAll { it.name.endsWith('.json') }?.sort { it.name }?.each { bossFile ->
+            def bossId = bossFile.name - '.json'
+            // Some boss files carry a UTF-8 BOM; strip it before parsing.
+            def boss = slurper.parseText(bossFile.getText('UTF-8').replaceFirst(/^\uFEFF/, ''))
+
+            // Advancement titles use the short name ("Flandre"), while boss.name is the
+            // full name ("Flandre Scarlet"). Allow an explicit override.
+            def shortName = boss.advancementName ?: (boss.name ?: bossId).toString().split(' ')[0]
+
+            order.eachWithIndex { diff, i ->
+                def tier = tiers[diff]
+                def parent = (i == 0)
+                    ? 'bullethell:progression/root'
+                    : "bullethell:progression/${bossId}_${order[i - 1]}"
+                def difficultyLabel = diff.capitalize()
+                def description = tier.suffix
+                    ? "Defeat ${shortName} on ${difficultyLabel} ${tier.suffix}."
+                    : "Defeat ${shortName} on ${difficultyLabel}."
+
+                def adv = [
+                    parent : parent,
+                    display: [
+                        icon            : [item: tier.icon],
+                        title           : "${shortName} Cleared (${difficultyLabel})".toString(),
+                        description     : description.toString(),
+                        frame           : tier.frame,
+                        show_toast      : true,
+                        announce_to_chat: true,
+                        hidden          : false,
+                    ],
+                    criteria: [clear: [trigger: 'minecraft:impossible']],
+                ]
+
+                def name = "${bossId}_${diff}.json".toString()
+                expected << name
+                new File(advDir, name).write(JsonOutput.prettyPrint(JsonOutput.toJson(adv)) + '\n', 'UTF-8')
+                written++
+            }
+        }
+
+        // Drop advancements for bosses that no longer exist.
+        def removed = 0
+        advDir.listFiles()?.findAll { it.name.endsWith('.json') && !expected.contains(it.name) }?.each {
+            logger.lifecycle("  stale, deleting: ${it.name}")
+            it.delete()
+            removed++
+        }
+
+        logger.lifecycle("generateAdvancements: wrote ${written}, removed ${removed} stale (root.json left alone)")
+    }
+}
+
+// Adds a spawn-egg lang entry for any NPC json that lacks one, so a brand-new NPC does
+// not show a raw translation key. Existing entries are never overwritten - the shipped
+// names use short forms ("Flandre Spawn Egg") while displayName is the full name.
+tasks.register('generateNpcLang') {
+    group = 'bullethell'
+    description = 'Add missing item.bullethell.<npc>_spawn_egg entries to en_us.json'
+
+    def npcDir = file('src/main/resources/data/bullethell/npcs')
+    def langFile = file('src/main/resources/assets/bullethell/lang/en_us.json')
+
+    inputs.dir npcDir
+    inputs.file langFile
+    outputs.file langFile
+
+    doLast {
+        def slurper = new JsonSlurper()
+        // LinkedHashMap keeps the existing hand-authored ordering.
+        def lang = new LinkedHashMap(slurper.parseText(langFile.getText('UTF-8').replaceFirst(/^\uFEFF/, '')))
+        def added = []
+
+        npcDir.listFiles()?.findAll { it.name.endsWith('.json') }?.sort { it.name }?.each { f ->
+            def npcId = f.name - '.json'
+            def key = "item.bullethell.${npcId}_spawn_egg".toString()
+            if (lang.containsKey(key)) return
+
+            def npc = slurper.parseText(f.getText('UTF-8').replaceFirst(/^\uFEFF/, ''))
+            def shortName = (npc.displayName ?: npcId).toString().split(' ')[0]
+            lang[key] = "${shortName} Spawn Egg".toString()
+            added << key
+        }
+
+        if (added.isEmpty()) {
+            logger.lifecycle('generateNpcLang: nothing missing')
+            return
+        }
+
+        def body = lang.collect { k, v -> '  ' + JsonOutput.toJson(k) + ': ' + JsonOutput.toJson(v) }.join(',\n')
+        langFile.write("{\n${body}\n}\n", 'UTF-8')
+        logger.lifecycle("generateNpcLang: added ${added.size()} -> ${added}")
+    }
+}
+
+tasks.register('generateContent') {
+    group = 'bullethell'
+    description = 'Regenerate all derived content files (advancements, npc lang, npc index)'
+    dependsOn 'generateAdvancements', 'generateNpcLang', 'generateNpcIndex'
+}

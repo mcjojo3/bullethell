@@ -2,13 +2,9 @@ package mc.sayda.bullethell.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
-import mc.sayda.bullethell.BHControlScheme;
-import mc.sayda.bullethell.BHControlSettings;
 import mc.sayda.bullethell.arena.LaserPool;
 import mc.sayda.bullethell.Bullethell;
 import mc.sayda.bullethell.arena.BulletPool;
-import mc.sayda.bullethell.arena.EnemyPool;
-import mc.sayda.bullethell.arena.EnemyType;
 import mc.sayda.bullethell.arena.GameEvent;
 import mc.sayda.bullethell.arena.ItemPool;
 import mc.sayda.bullethell.client.BHMusicManager;
@@ -140,57 +136,6 @@ public class BulletHellRenderer {
             new ResourceLocation(Bullethell.MODID, "textures/item/point_green.png"), // TYPE_POINT_GREEN
     };
 
-    // ---- Enemy textures (horizontal sprite sheets, 4 frames) --------------------
-    // Small colour variants: 160×40 (40×40 per frame). Police / warrior same
-    // layout.
-    // medium_fairy.png: 200×50 (50×50 × 4). large_fairy.png: 280×70 (70×70 × 4).
-    // PNG alpha is respected when drawing (blend enabled in the enemy pass).
-    private static final ResourceLocation[] ENEMY_TEXTURES = {
-            new ResourceLocation(Bullethell.MODID, "textures/enemies/blue_fairy.png"),
-            new ResourceLocation(Bullethell.MODID, "textures/enemies/red_fairy.png"),
-            new ResourceLocation(Bullethell.MODID, "textures/enemies/yellow_fairy.png"),
-            new ResourceLocation(Bullethell.MODID, "textures/enemies/green_fairy.png"),
-            new ResourceLocation(Bullethell.MODID, "textures/enemies/police_fairy.png"),
-            new ResourceLocation(Bullethell.MODID, "textures/enemies/warrior_fairy.png"),
-    };
-
-    private static final ResourceLocation MEDIUM_FAIRY_TEX = new ResourceLocation(Bullethell.MODID,
-            "textures/enemies/medium_fairy.png");
-    private static final ResourceLocation LARGE_FAIRY_TEX = new ResourceLocation(Bullethell.MODID,
-            "textures/enemies/large_fairy.png");
-
-    /**
-     * Ticks per frame on 4-wide idle strips; matches
-     * {@link #bossFrame(ClientArenaState)} (÷4 &amp; 3).
-     */
-    private static final int FAIRY_ANIM_TICKS_PER_FRAME = 4;
-    private static final int FAIRY_FRAMES = 4;
-    private static final int SMALL_FRAME = 40;
-    private static final int SMALL_SHEET_W = 160;
-    private static final int SMALL_SHEET_H = 40;
-    private static final int MED_FRAME = 50;
-    private static final int MED_SHEET_W = 200;
-    private static final int MED_SHEET_H = 50;
-    private static final int LARGE_FRAME = 70;
-    private static final int LARGE_SHEET_W = 280;
-    private static final int LARGE_SHEET_H = 70;
-
-    /**
-     * On-screen scale for all fairy sheet tiers vs base 12×scale. Hitboxes
-     * unchanged.
-     */
-    private static final float FAIRY_SCREEN_SCALE = 1.5f;
-
-    // Fallback tint colors per texture index (used when PNG is missing)
-    private static final int[] ENEMY_COLORS = {
-            0xFF88AAFF, // 0 blue
-            0xFFFF6666, // 1 red
-            0xFFFFDD44, // 2 yellow
-            0xFF66EE88, // 3 green
-            0xFF4466CC, // 4 police
-            0xFFCC9944, // 5 warrior
-    };
-
     public void render(GuiGraphics gfx, float partialTick) {
 
         int screenW = gfx.guiWidth();
@@ -203,10 +148,6 @@ public class BulletHellRenderer {
         // Ensure bullet types are loaded before we start accessing registry/sorting
         // buffers
         mc.sayda.bullethell.pattern.BulletType.ensureLoaded();
-
-        // Disable extrapolation during Time Stop to prevent visual jitter/lag
-        if (state.abilityType == 1)
-            partialTick = 0;
 
         // ---- Compute display rect (3:4, fills available height above indicator strip)
         // ----
@@ -306,28 +247,7 @@ public class BulletHellRenderer {
             renderPlayerMarker(gfx, px, py, cp.playerIndex(), false);
         }
 
-        // ---- 5. Enemies - partial-tick extrapolation ----
-        // Generous cull bounds so off-screen entrants are visible; mask is applied
-        // later. Blend on so sprite-sheet PNG alpha composites correctly.
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        for (int i = 0; i < EnemyPool.CAPACITY; i++) {
-            if (!state.enemies.isActive(i))
-                continue;
-            float ecx = state.enemies.getX(i), ecy = state.enemies.getY(i);
-            if (ecx < -64 || ecx > BulletPool.ARENA_W + 64 || ecy < -64 || ecy > BulletPool.ARENA_H + 64)
-                continue;
-            float epx2 = state.enemies.getPrevX(i), epy2 = state.enemies.getPrevY(i);
-            float ex = epx2 + (ecx - epx2) * partialTick;
-            float ey = epy2 + (ecy - epy2) * partialTick;
-            int typeId = state.enemies.getType(i);
-            int sex = ox + (int) (ex * sx);
-            int sey = oy + (int) (ey * sy);
-            renderEnemy(gfx, typeId, sex, sey, (sx + sy) * 0.5f, partialTick);
-        }
-        RenderSystem.disableBlend();
-
-        // ---- 5b. Laser beams (warning + active) ----
+        // ---- 5. Laser beams (warning + active) ----
         gfx.enableScissor(ox, oy, ox + dispW, oy + dispH);
         renderLasers(gfx, state, ox, oy, sx, sy, partialTick);
         gfx.disableScissor();
@@ -448,6 +368,9 @@ public class BulletHellRenderer {
         // ---- 8c. Screen FX tints ----
         renderFX(gfx, ox, oy, dispW, dispH);
 
+        // ---- 8c2. Character cut-in (bomb / boss spell card) ----
+        renderSplash(gfx, ox, oy, dispW, dispH, partialTick);
+
         // ---- 8d. Spell card declaration overlay (above FX, below HUD) ----
         if (state.declaring && !state.spellName.isEmpty()) {
             renderDeclaration(gfx, ox, oy, dispW, dispH, state.declarationFrame);
@@ -493,15 +416,7 @@ public class BulletHellRenderer {
             renderBossIndicator(gfx, state, bossScrX, ox, dispH + oy, dispW, screenW, phaseCol);
         }
 
-        // ---- 13. Charge Bar HUD (above indicator; PoFV gray + hold overlay) ----
-        renderChargeBar(gfx, ox, dispH + oy - 14, dispW, state);
-
-        // ---- 14. Master Spark Overlay ----
-        if (state.abilityType == 2 && state.abilityTicks > 0) {
-            renderMasterSparkEffect(gfx, ox, oy, sx, sy, dispH, state);
-        }
-
-        // ---- 15. Hardened Hitbox Pass (Absolute Top) ----
+        // ---- 13. Hardened Hitbox Pass (Absolute Top) ----
         if (showFocusDiamond) {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
@@ -759,11 +674,6 @@ public class BulletHellRenderer {
         if (fx.isActive(GameEvent.BOMB_USED)) {
             int alpha = (int) (fx.intensity(GameEvent.BOMB_USED) * 0x99);
             gfx.fill(ox, oy, ox + dw, oy + dh, (alpha << 24) | 0xFFFFFF);
-        }
-
-        if (fx.isActive(GameEvent.SKILL_USED)) {
-            int alpha = (int) (fx.intensity(GameEvent.SKILL_USED) * 0x77);
-            gfx.fill(ox, oy, ox + dw, oy + dh, (alpha << 24) | 0x00E0FF);
         }
 
         if (fx.isActive(GameEvent.SPELL_CAPTURED)) {
@@ -1746,56 +1656,41 @@ public class BulletHellRenderer {
         }
     }
 
-    // ---------------------------------------------------------------- enemy
-    // rendering
+    /** Splash source aspect is 400x500; height is sized to the arena and width follows. */
+    private static final float SPLASH_ASPECT = 400f / 500f;
+    /** Portrait height as a fraction of the arena height. */
+    private static final float SPLASH_HEIGHT_FRACTION = 0.72f;
 
     /**
-     * Renders a single enemy from horizontal sprite sheets (4 frames).
-     * Small fairies: 160×40 sheets; {@link EnemyType#medium}:
-     * {@code medium_fairy.png};
-     * {@link EnemyType#large}: shared {@code large_fairy.png} (colour hint from
-     * {@link EnemyType#textureIdx} is unused for the large sheet).
+     * Draws the bomb / spell-card cut-in. Player portraits enter from the left, boss
+     * portraits from the right; both keep drifting inward while they fade.
      */
-    private static void renderEnemy(GuiGraphics gfx, int typeId, int cx, int cy, float scale, float partialTick) {
-        EnemyType type = EnemyType.fromId(typeId);
-        ClientArenaState st = ClientArenaState.INSTANCE;
-        int frame = ((int) ((st.arenaAnimTick + partialTick) / (float) FAIRY_ANIM_TICKS_PER_FRAME))
-                & (FAIRY_FRAMES - 1);
+    private static void renderSplash(GuiGraphics gfx, int ox, int oy, int dispW, int dispH, float partialTick) {
+        mc.sayda.bullethell.client.SplashState splash = mc.sayda.bullethell.client.SplashState.INSTANCE;
+        if (!splash.isActive()) return;
 
-        float sizeMult = type.large ? (LARGE_FRAME / (float) SMALL_FRAME)
-                : type.medium ? (MED_FRAME / (float) SMALL_FRAME)
-                        : 1.0f;
-        int minHalf = type.large ? 14 : type.medium ? 10 : 8;
-        float baseHalf = Math.max(minHalf, 12f * sizeMult * scale);
-        int halfSz = (int) (baseHalf * FAIRY_SCREEN_SCALE);
-        int size = halfSz * 2;
-        int texIdx = type.textureIdx;
+        float alpha = splash.alpha(partialTick);
+        if (alpha <= 0f) return;
 
-        if (type.large) {
-            int u = frame * LARGE_FRAME;
-            gfx.blit(LARGE_FAIRY_TEX, cx - halfSz, cy - halfSz, size, size,
-                    u, 0f, LARGE_FRAME, LARGE_FRAME, LARGE_SHEET_W, LARGE_SHEET_H);
-            return;
-        }
-        if (type.medium) {
-            int u = frame * MED_FRAME;
-            gfx.blit(MEDIUM_FAIRY_TEX, cx - halfSz, cy - halfSz, size, size,
-                    u, 0f, MED_FRAME, MED_FRAME, MED_SHEET_W, MED_SHEET_H);
-            return;
-        }
+        int h = (int) (dispH * SPLASH_HEIGHT_FRACTION);
+        int w = (int) (h * SPLASH_ASPECT);
+        int y = oy + dispH - h;
 
-        if (texIdx >= 0 && texIdx < ENEMY_TEXTURES.length) {
-            int u = frame * SMALL_FRAME;
-            gfx.blit(Objects.requireNonNull(ENEMY_TEXTURES[texIdx]),
-                    cx - halfSz, cy - halfSz, size, size,
-                    u, 0f, SMALL_FRAME, SMALL_FRAME, SMALL_SHEET_W, SMALL_SHEET_H);
+        // 0 = fully off its own edge, 1 = fully arrived just inside the arena.
+        float p = splash.progress(partialTick);
+        int x;
+        if (splash.isFromLeft()) {
+            x = (int) (ox - w + p * w);
         } else {
-            int color = (texIdx >= 0 && texIdx < ENEMY_COLORS.length)
-                    ? ENEMY_COLORS[texIdx]
-                    : 0xFFAAAAAA;
-            gfx.fill(cx - halfSz, cy - halfSz, cx + halfSz, cy + halfSz, color);
-            gfx.fill(cx - 2, cy - 2, cx + 2, cy + 2, 0xCCFFFFFF);
+            x = (int) (ox + dispW - p * w);
         }
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
+        gfx.blit(splash.texture(), x, y, 0, 0f, 0f, w, h, w, h);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        RenderSystem.disableBlend();
     }
 
     // ---------------------------------------------------------------- helpers
@@ -1856,14 +1751,6 @@ public class BulletHellRenderer {
     private static int cachedSplitW = -1;
     private static java.util.List<net.minecraft.util.FormattedCharSequence> cachedSplitLines = java.util.List.of();
 
-    // Charge bar label cache - holdFloor (0-3) × stockFloor (0-3).
-    private static final String[][] CHARGE_LABELS = new String[4][4];
-    static {
-        for (int h = 0; h < 4; h++)
-            for (int s = 0; s < 4; s++)
-                CHARGE_LABELS[h][s] = h + "/" + s;
-    }
-
     private static String getLivesStr(ClientArenaState state) {
         int lives = state.player.lives;
         int pieces = state.lifePieces;
@@ -1918,54 +1805,7 @@ public class BulletHellRenderer {
         gfx.drawString(font, label, px - halfW, markerY - 10, color, true);
     }
 
-    private static void renderChargeBar(GuiGraphics gfx, int ox, int y, int dw, ClientArenaState state) {
-        if (BHControlSettings.get() == BHControlScheme.CLASSIC)
-            return;
-        int barW = dw / 2;
-        int bx = ox + (dw - barW) / 2;
-        final int maxMilli = 3000; // 3 levels (no L4)
-        int barH = 6;
 
-        gfx.fill(bx - 1, y - 1, bx + barW + 1, y + barH + 1, 0x88000000);
-
-        int stockW = (int) (barW * Math.min(1f, state.skillGauge / (float) maxMilli));
-        gfx.fill(bx, y, bx + stockW, y + barH, 0xFF505058);
-
-        int rawHoldW = (int) (barW * Math.min(1f, state.holdChargeGauge / (float) maxMilli));
-        int holdW = Math.min(stockW, rawHoldW);
-        int holdFloor = Math.min(3, state.holdChargeGauge / 1000);
-        int hiColor = holdFloor >= 3 ? 0xFFFF66FF
-                : holdFloor >= 2 ? 0xFF44FFFF
-                        : holdFloor >= 1 ? 0xFF66CCFF : 0xFF88AAFF;
-        if (holdW > 0)
-            gfx.fill(bx, y, bx + holdW, y + barH, 0xDD000000 | (hiColor & 0xFFFFFF));
-
-        gfx.vLine(bx + barW / 3, y - 1, y + barH + 1, 0xAAFFFFFF);
-        gfx.vLine(bx + 2 * barW / 3, y - 1, y + barH + 1, 0xAAFFFFFF);
-
-        Font font = Minecraft.getInstance().font;
-        int stockFloor = Math.min(3, state.chargeLevel);
-        // Held (X) / charge (gray stock)
-        String label = CHARGE_LABELS[holdFloor][stockFloor];
-        gfx.drawString(font, label, bx + barW + 4, y - 1, hiColor, true);
-    }
-
-    private static void renderMasterSparkEffect(GuiGraphics gfx, int ox, int oy, float sx, float sy, int dh,
-            ClientArenaState state) {
-        // Render beam at server-authoritative spawn location (stationary,
-        // non-following).
-        int bx = ox + (int) (state.abilityX * sx);
-        int by = oy + (int) (state.abilityY * sy);
-        int beamW = (int) (32 * sx);
-
-        // Pulsing white/blue beam
-        int alpha = 0xAA + (int) (Math.sin(state.bossAnimCounter * 0.5f) * 0x33);
-        int color = (alpha << 24) | 0x88CCFF;
-
-        // Beam fires upward from spawn point.
-        gfx.fill(bx - beamW, oy, bx + beamW, by, color);
-        gfx.fill(bx - beamW / 2, oy, bx + beamW / 2, by, 0xDDFFFFFF); // bright core
-    }
 
     private static int phaseColour(int phase) {
         return switch (phase) {

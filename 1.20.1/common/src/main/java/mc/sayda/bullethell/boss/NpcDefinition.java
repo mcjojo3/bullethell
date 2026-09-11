@@ -58,4 +58,52 @@ public class NpcDefinition {
      * Also suppresses vanilla sun-burn ignition for that NPC (not lava/campfires).
      */
     public boolean seeksShade = false;
+
+    // ------------------------------------------------------------ registration-time
+    // These are read from the mod jar at mod-init to build the entity type and spawn
+    // egg. A datapack can override every field above, but not these: registries are
+    // frozen before datapacks load.
+
+    /**
+     * Skin texture under {@code assets/bullethell/}. Empty uses the convention
+     * {@code textures/entities/<id without "_npc">.png}.
+     */
+    public String texture = "";
+
+    /** Spawn egg base colour, {@code "#RRGGBB"}. Empty = plain white. */
+    public String eggPrimaryColor = "";
+
+    /** Spawn egg spot colour, {@code "#RRGGBB"}. Empty = plain white. */
+    public String eggSecondaryColor = "";
+
+    /** Hitbox width in blocks. */
+    public float width = 0.6f;
+
+    /** Hitbox height in blocks. */
+    public float height = 1.95f;
+
+    /** Resolved skin texture path, applying the naming convention when unset. */
+    public String resolveTexture() {
+        if (texture != null && !texture.isBlank()) return texture;
+        String base = id.endsWith("_npc") ? id.substring(0, id.length() - 4) : id;
+        return "textures/entities/" + base + ".png";
+    }
+
+    public int resolveEggPrimary() {
+        return parseHexColor(eggPrimaryColor, 0xFFFFFF);
+    }
+
+    public int resolveEggSecondary() {
+        return parseHexColor(eggSecondaryColor, 0xFFFFFF);
+    }
+
+    private static int parseHexColor(String s, int fallback) {
+        if (s == null || s.isBlank()) return fallback;
+        String hex = s.startsWith("#") ? s.substring(1) : s;
+        try {
+            return Integer.parseInt(hex, 16);
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
 }

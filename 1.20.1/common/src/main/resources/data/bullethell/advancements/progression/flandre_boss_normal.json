@@ -1,0 +1,19 @@
+{
+    "parent": "bullethell:progression/flandre_boss_easy",
+    "display": {
+        "icon": {
+            "item": "minecraft:gold_ingot"
+        },
+        "title": "Flandre Cleared (Normal)",
+        "description": "Defeat Flandre on Normal or higher.",
+        "frame": "goal",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "clear": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

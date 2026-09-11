@@ -1,0 +1,19 @@
+{
+    "parent": "bullethell:progression/yuuka_boss_hard",
+    "display": {
+        "icon": {
+            "item": "minecraft:netherite_ingot"
+        },
+        "title": "Yuuka Cleared (Lunatic)",
+        "description": "Defeat Yuuka on Lunatic.",
+        "frame": "challenge",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "clear": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

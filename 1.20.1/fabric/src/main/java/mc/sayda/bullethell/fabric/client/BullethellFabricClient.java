@@ -13,14 +13,6 @@ public class BullethellFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         BullethellClient.init();
-        EntityRendererRegistry.register(BHEntities.MARISA_NPC.get(), BHNpcRenderer::new);
-        EntityRendererRegistry.register(BHEntities.REMILIA_NPC.get(), BHNpcRenderer::new);
-        EntityRendererRegistry.register(BHEntities.SAKUYA_NPC.get(), BHNpcRenderer::new);
-        EntityRendererRegistry.register(BHEntities.CIRNO_NPC.get(), BHNpcRenderer::new);
-        EntityRendererRegistry.register(BHEntities.SANAE_NPC.get(), BHNpcRenderer::new);
-        EntityRendererRegistry.register(BHEntities.FLANDRE_NPC.get(), BHNpcRenderer::new);
-        EntityRendererRegistry.register(BHEntities.SATORI_NPC.get(), BHNpcRenderer::new);
-        EntityRendererRegistry.register(BHEntities.YUUKA_NPC.get(), BHNpcRenderer::new);
-        EntityRendererRegistry.register(BHEntities.KANAKO_NPC.get(), BHNpcRenderer::new);
+        BHEntities.NPCS.values().forEach(npc -> EntityRendererRegistry.register(npc.get(), BHNpcRenderer::new));
     }
 }

@@ -1,103 +1,100 @@
 package mc.sayda.bullethell.entity;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import mc.sayda.bullethell.Bullethell;
+import mc.sayda.bullethell.boss.NpcDefinition;
+import mc.sayda.bullethell.data.BHClasspathScan;
+import mc.sayda.bullethell.data.BHJsonFiles;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
- * Registers all BulletHell NPC entity types via Architectury DeferredRegister.
- * Add new NPC entries here; spawn in-world via {@code /summon bullethell:<id>}
- * or the
- * matching spawn egg in the Bullet Hell NPCs creative tab
- * ({@link mc.sayda.bullethell.item.BHItems}).
+ * NPC entity types, one per {@code data/bullethell/npcs/<id>.json} found in the mod jar.
+ *
+ * There is no per-NPC code: adding the json is all that is required. The scan reads the
+ * jar rather than the datapack stack because entity registries are frozen before
+ * datapacks load, and registering a type the client's jar lacks would desync.
+ * Everything about an NPC's <em>behaviour</em> is still datapack-overridable via
+ * {@link mc.sayda.bullethell.boss.NpcLoader}.
  */
 public final class BHEntities {
 
-        public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Bullethell.MODID,
-                        Registries.ENTITY_TYPE);
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
+            DeferredRegister.create(Bullethell.MODID, Registries.ENTITY_TYPE);
 
-        /**
-         * Marisa Kirisame - the first challenge NPC.
-         * Hitbox: 0.6 × 1.95 (standard player width/height).
-         * Spawned via: {@code /summon bullethell:marisa_npc}
-         */
-        public static final RegistrySupplier<EntityType<BHNpc>> MARISA_NPC = ENTITY_TYPES.register("marisa_npc",
-                        () -> EntityType.Builder.<BHNpc>of(
-                                        (type, level) -> new BHNpc(type, level, "marisa_npc"),
-                                        MobCategory.MISC)
-                                        .sized(0.6f, 1.95f)
-                                        .clientTrackingRange(10)
-                                        .updateInterval(3)
-                                        .build("marisa_npc"));
-        public static final RegistrySupplier<EntityType<BHNpc>> REMILIA_NPC = ENTITY_TYPES.register("remilia_npc",
-                        () -> EntityType.Builder.<BHNpc>of(
-                                        (type, level) -> new BHNpc(type, level, "remilia_npc"),
-                                        MobCategory.MISC)
-                                        .sized(0.6f, 1.95f)
-                                        .clientTrackingRange(10)
-                                        .updateInterval(3)
-                                        .build("remilia_npc"));
-        public static final RegistrySupplier<EntityType<BHNpc>> SAKUYA_NPC = ENTITY_TYPES.register("sakuya_npc",
-                        () -> EntityType.Builder.<BHNpc>of(
-                                        (type, level) -> new BHNpc(type, level, "sakuya_npc"),
-                                        MobCategory.MISC)
-                                        .sized(0.6f, 1.95f)
-                                        .clientTrackingRange(10)
-                                        .updateInterval(3)
-                                        .build("sakuya_npc"));
-        public static final RegistrySupplier<EntityType<BHNpc>> CIRNO_NPC = ENTITY_TYPES.register("cirno_npc",
-                        () -> EntityType.Builder.<BHNpc>of(
-                                        (type, level) -> new BHNpc(type, level, "cirno_npc"),
-                                        MobCategory.MISC)
-                                        .sized(0.6f, 1.95f)
-                                        .clientTrackingRange(10)
-                                        .updateInterval(3)
-                                        .build("cirno_npc"));
-        public static final RegistrySupplier<EntityType<BHNpc>> SANAE_NPC = ENTITY_TYPES.register("sanae_npc",
-                        () -> EntityType.Builder.<BHNpc>of(
-                                        (type, level) -> new BHNpc(type, level, "sanae_npc"),
-                                        MobCategory.MISC)
-                                        .sized(0.6f, 1.95f)
-                                        .clientTrackingRange(10)
-                                        .updateInterval(3)
-                                        .build("sanae_npc"));
-        public static final RegistrySupplier<EntityType<BHNpc>> FLANDRE_NPC = ENTITY_TYPES.register("flandre_npc",
-                        () -> EntityType.Builder.<BHNpc>of(
-                                        (type, level) -> new BHNpc(type, level, "flandre_npc"),
-                                        MobCategory.MISC)
-                                        .sized(0.6f, 1.95f)
-                                        .clientTrackingRange(10)
-                                        .updateInterval(3)
-                                        .build("flandre_npc"));
-        public static final RegistrySupplier<EntityType<BHNpc>> YUUKA_NPC = ENTITY_TYPES.register("yuuka_npc",
-                        () -> EntityType.Builder.<BHNpc>of(
-                                        (type, level) -> new BHNpc(type, level, "yuuka_npc"),
-                                        MobCategory.MISC)
-                                        .sized(0.6f, 1.95f)
-                                        .clientTrackingRange(10)
-                                        .updateInterval(3)
-                                        .build("yuuka_npc"));
-        public static final RegistrySupplier<EntityType<BHNpc>> SATORI_NPC = ENTITY_TYPES.register("satori_npc",
-                        () -> EntityType.Builder.<BHNpc>of(
-                                        (type, level) -> new BHNpc(type, level, "satori_npc"),
-                                        MobCategory.MISC)
-                                        .sized(0.6f, 1.95f)
-                                        .clientTrackingRange(10)
-                                        .updateInterval(3)
-                                        .build("satori_npc"));
-        public static final RegistrySupplier<EntityType<BHNpc>> KANAKO_NPC = ENTITY_TYPES.register("kanako_npc",
-                        () -> EntityType.Builder.<BHNpc>of(
-                                        (type, level) -> new BHNpc(type, level, "kanako_npc"),
-                                        MobCategory.MISC)
-                                        .sized(0.6f, 1.95f)
-                                        .clientTrackingRange(10)
-                                        .updateInterval(3)
-                                        .build("kanako_npc"));
+    private static final Gson GSON = new GsonBuilder().create();
 
-        public static void register() {
-                ENTITY_TYPES.register();
+    /** npc id → entity type, in scan order. */
+    public static final Map<String, RegistrySupplier<EntityType<BHNpc>>> NPCS;
+
+    /** npc id → the jar-time definition used for registration (hitbox, egg colours). */
+    public static final Map<String, NpcDefinition> INIT_DEFS;
+
+    static {
+        Map<String, RegistrySupplier<EntityType<BHNpc>>> npcs = new LinkedHashMap<>();
+        Map<String, NpcDefinition> defs = new LinkedHashMap<>();
+
+        for (String id : BHClasspathScan.ids("npcs")) {
+            NpcDefinition def = readInitDef(id);
+            defs.put(id, def);
+            npcs.put(id, ENTITY_TYPES.register(id,
+                    () -> EntityType.Builder.<BHNpc>of(
+                            (type, level) -> new BHNpc(type, level, id),
+                            MobCategory.MISC)
+                            .sized(def.width, def.height)
+                            .clientTrackingRange(10)
+                            .updateInterval(3)
+                            .build(id)));
         }
+
+        NPCS = Collections.unmodifiableMap(npcs);
+        INIT_DEFS = Collections.unmodifiableMap(defs);
+        Bullethell.LOGGER.info("[BulletHell] Registering {} NPC entity types: {}", npcs.size(), npcs.keySet());
+    }
+
+    private BHEntities() {
+    }
+
+    /** Jar-time definition, never null. */
+    public static NpcDefinition initDef(String id) {
+        NpcDefinition def = INIT_DEFS.get(id);
+        return def != null ? def : fallback(id);
+    }
+
+    private static NpcDefinition readInitDef(String id) {
+        try {
+            JsonElement el = BHJsonFiles.readFromClasspath("npcs", id);
+            if (el != null && el.isJsonObject()) {
+                NpcDefinition def = GSON.fromJson(el, NpcDefinition.class);
+                if (def != null) {
+                    if (def.id == null || def.id.isBlank()) def.id = id;
+                    if (def.displayName == null || def.displayName.isBlank()) def.displayName = id;
+                    return def;
+                }
+            }
+        } catch (Exception e) {
+            Bullethell.LOGGER.error("[BulletHell] Bad npc json {} at init: {}", id, e.getMessage());
+        }
+        return fallback(id);
+    }
+
+    private static NpcDefinition fallback(String id) {
+        NpcDefinition def = new NpcDefinition();
+        def.id = id;
+        def.displayName = id;
+        return def;
+    }
+
+    public static void register() {
+        ENTITY_TYPES.register();
+    }
 }

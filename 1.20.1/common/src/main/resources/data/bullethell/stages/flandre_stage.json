@@ -1,9 +1,6 @@
 {
   "id": "flandre_stage",
   "title": "Scarlet Devil Mansion\nBasement \u2014 Extra",
-  "_design_notes": [
-    "flandre_stage: preamble + fairyRush shared catalog (Extra-length ramp)."
-  ],
   "stageMusic": "the_centennial_festival_for_magical_girls",
   "bossId": "flandre_boss",
   "nextStageId": "",
@@ -21,51 +18,6 @@
     "pointItemMaxValue": 800,
     "pointItemMinValue": 100,
     "cherrySystemEnabled": false,
-    "versusKillSendsBullets": false,
     "onKillDeathBurstCount": 0
-  },
-  "waves": [
-    {
-      "_comment": "Basement whisper: twin blues.",
-      "spawnTick": 0,
-      "enemies": [
-        {
-          "x": 160,
-          "y": -22,
-          "vx": 0.45,
-          "vy": 3.65,
-          "type": "BLUE_FAIRY",
-          "delayTicks": 0
-        },
-        {
-          "x": 320,
-          "y": -22,
-          "vx": -0.45,
-          "vy": 3.65,
-          "type": "BLUE_FAIRY",
-          "delayTicks": 16
-        }
-      ]
-    }
-  ],
-  "fairyRush": {
-    "catalogId": "default",
-    "slotCount": 55,
-    "startTick": 130,
-    "gapTicksStartMin": 72,
-    "gapTicksStartMax": 118,
-    "gapTicksEndMin": 16,
-    "gapTicksEndMax": 30,
-    "gapEasing": "SMOOTHSTEP",
-    "jitterTicks": 16,
-    "intensityStartLo": 0,
-    "intensityStartHi": 2,
-    "intensityEndLo": 6,
-    "intensityEndHi": 10,
-    "breatherEvery": 10,
-    "breatherExtraTicks": 48,
-    "breatherWaveId": "",
-    "shuffleSeed": null,
-    "noRepeatLast": 6
   }
 }

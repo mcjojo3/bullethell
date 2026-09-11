@@ -1,0 +1,19 @@
+{
+    "parent": "bullethell:progression/kanako_boss_normal",
+    "display": {
+        "icon": {
+            "item": "minecraft:diamond"
+        },
+        "title": "Kanako Cleared (Hard)",
+        "description": "Defeat Kanako on Hard or higher.",
+        "frame": "goal",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "clear": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

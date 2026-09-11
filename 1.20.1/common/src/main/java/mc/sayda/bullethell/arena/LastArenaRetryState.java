@@ -11,7 +11,6 @@ public final class LastArenaRetryState {
             String stageId,
             DifficultyConfig difficulty,
             String characterId,
-            int shotTypeOrdinal,
             boolean practice,
             boolean testMode) {}
 

@@ -284,8 +284,7 @@ public class ArenaEndScreen extends Screen {
             case BTN_OK -> Minecraft.getInstance().setScreen(null);
             case BTN_SHARE -> BHPackets.sendShareLastRun(); // Stay on screen
             case BTN_RETRY -> {
-                BHPackets.sendRetryArena(new RetryArenaPacket(data.stageId, data.difficulty, data.characterId,
-                        data.shotTypeOrdinal));
+                BHPackets.sendRetryArena(new RetryArenaPacket(data.stageId, data.difficulty, data.characterId));
                 Minecraft.getInstance().setScreen(null);
             }
         }

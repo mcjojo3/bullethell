@@ -2,7 +2,6 @@ package mc.sayda.bullethell.network;
 
 import dev.architectury.networking.NetworkManager;
 import io.netty.buffer.Unpooled;
-import mc.sayda.bullethell.BHControlSettings;
 import mc.sayda.bullethell.BossProgression;
 import mc.sayda.bullethell.CharacterUnlocks;
 import mc.sayda.bullethell.Bullethell;
@@ -11,22 +10,20 @@ import mc.sayda.bullethell.arena.ArenaEndShareSnapshot;
 import mc.sayda.bullethell.arena.BulletHellManager;
 import mc.sayda.bullethell.arena.LastArenaRetryState;
 import mc.sayda.bullethell.arena.LastArenaShareState;
+import mc.sayda.bullethell.arena.LobbySession;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.arena.PlayerState2D;
 import mc.sayda.bullethell.boss.BossLoader;
-import mc.sayda.bullethell.boss.CharacterDefinition;
 import mc.sayda.bullethell.boss.CharacterLoader;
-import mc.sayda.bullethell.boss.FairyWaveDefinition;
-import mc.sayda.bullethell.boss.FairyWaveLoader;
 import mc.sayda.bullethell.boss.StageDefinition;
 import mc.sayda.bullethell.boss.StageLoader;
 import mc.sayda.bullethell.debug.BHDebugMode;
-import mc.sayda.bullethell.pattern.BulletType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
@@ -47,34 +44,37 @@ public final class BHPackets {
     // ---------------------------------------------------------------- Packet IDs
 
     // S → C
+    public static final ResourceLocation DATA_SYNC         = id("data_sync");
+    public static final ResourceLocation LOBBY_STATE       = id("lobby_state");
     public static final ResourceLocation ARENA_STATE       = id("arena_state");
     public static final ResourceLocation BULLET_DELTA      = id("bullet_delta");
     public static final ResourceLocation BULLET_FULL       = id("bullet_full");
     public static final ResourceLocation ALL_PLAYER_BULLETS = id("all_player_bullets");
     public static final ResourceLocation ITEM_SYNC         = id("item_sync");
-    public static final ResourceLocation ENEMY_SYNC        = id("enemy_sync");
     public static final ResourceLocation COOP_SYNC         = id("coop_sync");
     public static final ResourceLocation LASER_SYNC        = id("laser_sync");
     public static final ResourceLocation GAME_EVENT        = id("game_event");
     public static final ResourceLocation ATTACK_ACTIVATION_SFX = id("attack_activation_sfx");
-    public static final ResourceLocation OPEN_CHAR_SELECT  = id("open_char_select");
-    public static final ResourceLocation OPEN_JOIN_SELECT  = id("open_join_select");
+    public static final ResourceLocation SPLASH             = id("splash");
     public static final ResourceLocation OPEN_CHALLENGE    = id("open_challenge");
-    public static final ResourceLocation CONTROL_SCHEME    = id("control_scheme");
     public static final ResourceLocation CHARACTER_UNLOCKS = id("character_unlocks");
     /** S → C | arena ended; carry stats + boss quote for the end overlay. */
     public static final ResourceLocation ARENA_END         = id("arena_end");
+    /** S → C | seed + run settings so the client can build its own copy of the fight. */
+    public static final ResourceLocation ARENA_START       = id("arena_start");
+    /** S → C | the boss changed phase; the resync barrier for client-side simulation. */
+    public static final ResourceLocation PHASE_TRANSITION  = id("phase_transition");
 
     // C → S
     public static final ResourceLocation PLAYER_POS        = id("player_pos");
     public static final ResourceLocation BOMB              = id("bomb");
-    public static final ResourceLocation SKILL             = id("skill");
+    public static final ResourceLocation REQUEST_DATA_SYNC = id("request_data_sync");
     public static final ResourceLocation SKIP_DIALOG       = id("skip_dialog");
     public static final ResourceLocation QUIT_ARENA        = id("quit_arena");
     public static final ResourceLocation PAUSE_STATE       = id("pause_state");
     public static final ResourceLocation CHAR_SELECT       = id("char_select");
-    public static final ResourceLocation JOIN_MATCH        = id("join_match");
     public static final ResourceLocation INVITE_PLAYER     = id("invite_player");
+    public static final ResourceLocation LOBBY_ACTION      = id("lobby_action");
     public static final ResourceLocation SHARE_LAST_RUN    = id("share_last_run");
     /** C → S | player requests a retry of the last arena. */
     public static final ResourceLocation RETRY_ARENA       = id("retry_arena");
@@ -83,6 +83,8 @@ public final class BHPackets {
     /** C → S | select / reload a boss in test mode. */
     public static final ResourceLocation TEST_SELECT       = id("test_select");
     public static final ResourceLocation TEST_CONTROL      = id("test_control");
+    /** C → S | one tick of results from a client-side simulation. */
+    public static final ResourceLocation ARENA_PROGRESS    = id("arena_progress");
 
     private static ResourceLocation id(String path) {
         return new ResourceLocation(Bullethell.MODID, path);
@@ -102,7 +104,7 @@ public final class BHPackets {
                 arena.pendingInputs.offer(() -> {
                     PlayerState2D ps = arena.getPlayerState(id);
                     if (ps == null) return;
-                    ps.focused = pkt.focused; ps.shooting = pkt.shooting; ps.isCharging = pkt.charging;
+                    ps.focused = pkt.focused; ps.shooting = pkt.shooting;
                     if (arena.canPlayerMove(id)) ps.move(pkt.dx, pkt.dy);
                 });
             });
@@ -114,17 +116,57 @@ public final class BHPackets {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
                 UUID id = sender.getUUID();
                 ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(id);
-                if (arena != null) arena.pendingInputs.offer(() -> arena.activateBomb(id));
+                if (arena == null) return;
+                if (arena.simulatesWorld)
+                    arena.pendingInputs.offer(() -> arena.activateBomb(id));
+                else
+                    // The bomber already ran it locally; all the server owes the others
+                    // is the cut-in, so they see who bombed.
+                    arena.pendingInputs.offer(() -> arena.relayBombSplash(id));
             });
         });
 
-        // C2S: skill (X release)
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, SKILL, (buf, ctx) -> {
+        // C2S: results of one tick of a client-side simulation. Replaces the bullet
+        // stream that used to go the other way.
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, ARENA_PROGRESS, (buf, ctx) -> {
+            ArenaProgressPacket pkt = ArenaProgressPacket.decode(buf);
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
+                if (sender == null) return;
                 UUID id = sender.getUUID();
                 ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(id);
-                if (arena != null) arena.pendingInputs.offer(() -> arena.activateSkill(id));
+                // Ignore progress from a context that is simulating for itself: that is a
+                // client reporting into a server that never handed out the sim.
+                if (arena == null || arena.simulatesWorld) return;
+                arena.pendingInputs.offer(() -> {
+                    // A client one phase behind is still shooting at the previous boss;
+                    // drop its damage rather than let it bleed into the new phase.
+                    if (pkt.phaseEpoch == arena.phaseEpoch)
+                        arena.applyRemoteDamage(pkt.bossDamage, id);
+                    arena.applyRemoteScore(id, pkt.scoreDelta);
+                    arena.applyRemoteProgress(id, pkt.x, pkt.y, pkt.lives, pkt.bombs, pkt.power,
+                            pkt.graze, pkt.grazeChain,
+                            pkt.lifePieces, pkt.bombPieces, pkt.invulnTicks);
+                });
+            });
+        });
+
+        // C2S: client asks for content data. Avoids the PLAYER_JOIN race on dedicated
+        // servers, where the join event can fire before the client can receive.
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, REQUEST_DATA_SYNC, (buf, ctx) -> {
+            ctx.queue(() -> {
+                ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
+                if (sender != null) sendDataSync(sender);
+            });
+        });
+
+        // C2S: every lobby action (character pick, ready, run settings, start, leave)
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, LOBBY_ACTION, (buf, ctx) -> {
+            LobbyActionPacket pkt = LobbyActionPacket.decode(buf);
+            ctx.queue(() -> {
+                ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
+                if (sender == null) return;
+                handleLobbyAction(sender, pkt);
             });
         });
 
@@ -195,78 +237,52 @@ public final class BHPackets {
                             "[BulletHell] " + pkt.stageId + " is currently capped at " + capText + ". " + why));
                     return;
                 }
-                startArena(player, pkt.difficulty, pkt.stageId, pkt.characterId, pkt.shotTypeOrdinal, pkt.practice);
+                startArena(player, pkt.difficulty, pkt.stageId, pkt.characterId, pkt.practice);
             });
         });
 
-        // C2S: join co-op match
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, JOIN_MATCH, (buf, ctx) -> {
-            JoinMatchPacket pkt = JoinMatchPacket.decode(buf);
-            ctx.queue(() -> {
-                ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
-                if (sender == null) return;
-                if (sender.getUUID().equals(pkt.hostUuid)) return;
-                if (BulletHellManager.INSTANCE.isInMatch(sender.getUUID())) return;
-                boolean debugBypass = BHDebugMode.isGodMode(sender.getUUID());
-                if (!debugBypass && !CharacterUnlocks.isUnlockedAny(sender, pkt.characterId)) {
-                    sender.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                            "[BulletHell] Character '" + pkt.characterId + "' is locked."));
-                    return;
-                }
 
-                CharacterDefinition charDef = CharacterLoader.load(pkt.characterId);
-                ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(pkt.hostUuid);
-
-                if (arena != null) {
-                    // Join active match immediately
-                    BulletHellManager.INSTANCE.joinMatch(sender.getUUID(), pkt.hostUuid, charDef, sender,
-                            pkt.shotTypeOrdinal);
-                    sendFullSync(sender, arena);
-                    int pIdx = 0;
-                    int c = 2;
-                    for (UUID cid : arena.getCoopPlayers().keySet()) {
-                        if (cid.equals(sender.getUUID())) { pIdx = c; break; }
-                        c++;
-                    }
-                    sendToPlayer(sender, new ArenaStatePacket(arena, sender.getUUID(), pIdx));
-                } else {
-                    // Mark as pending for when host starts
-                    BulletHellManager.INSTANCE.addPendingInvite(pkt.hostUuid,
-                            new BulletHellManager.ParticipantInfo(sender.getUUID(), charDef, pkt.shotTypeOrdinal));
-                    sender.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                            "[BulletHell] Accepted invitation. Waiting for host to start..."));
-                    ServerPlayer hostPlayer = sender.server.getPlayerList().getPlayer(pkt.hostUuid);
-                    if (hostPlayer != null) {
-                        hostPlayer.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                                "[BulletHell] " + sender.getName().getString() + " is ready to join."));
-                    }
-                }
-            });
-        });
-
-        // C2S: host invites specific player
+        // C2S: invite a player into the host's lobby (creating one if needed)
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, INVITE_PLAYER, (buf, ctx) -> {
             InvitePlayerPacket pkt = InvitePlayerPacket.decode(buf);
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
                 if (sender == null) return;
-                
-                // Remove old arena check - can invite from select screen
-                // if (!BulletHellManager.INSTANCE.hasArena(sender.getUUID())) return;
-                
+
                 ServerPlayer target = sender.server.getPlayerList().getPlayer(pkt.targetUuid);
                 if (target == null) {
-                    sender.sendSystemMessage(net.minecraft.network.chat.Component.literal("[BulletHell] Player is no longer online."));
+                    sender.sendSystemMessage(Component.literal("[BulletHell] Player is no longer online."));
                     return;
                 }
-                
+                if (target.getUUID().equals(sender.getUUID())) return;
                 if (BulletHellManager.INSTANCE.isInMatch(target.getUUID())) {
-                    sender.sendSystemMessage(net.minecraft.network.chat.Component.literal("[BulletHell] Player is already in an arena."));
+                    sender.sendSystemMessage(Component.literal("[BulletHell] Player is already in an arena."));
                     return;
                 }
-                
-                sendOpenJoinSelect(target, new OpenJoinSelectPacket(sender.getUUID(), sender.getName().getString()));
-                sender.sendSystemMessage(net.minecraft.network.chat.Component.literal("[BulletHell] Invite sent to " + target.getName().getString() + "."));
+                if (BulletHellManager.INSTANCE.isInMatch(sender.getUUID())) {
+                    // Mid-run join is not supported; the party has to form before the arena.
+                    sender.sendSystemMessage(Component.literal(
+                            "[BulletHell] You are already in an arena - leave it before inviting."));
+                    return;
+                }
+                if (BulletHellManager.INSTANCE.isInLobby(target.getUUID())) {
+                    sender.sendSystemMessage(Component.literal("[BulletHell] Player is already in a party."));
+                    return;
+                }
+
+                LobbySession lobby = BulletHellManager.INSTANCE.getOrCreateLobby(
+                        sender.getUUID(), sender.getName().getString(), "");
+                if (BulletHellManager.INSTANCE.joinLobby(sender.getUUID(), target.getUUID(),
+                        target.getName().getString()) == null) {
+                    sender.sendSystemMessage(Component.literal("[BulletHell] Could not invite right now."));
+                    return;
+                }
+
+                target.sendSystemMessage(Component.literal(
+                        "[BulletHell] " + sender.getName().getString() + " invited you to a party."));
+                sender.sendSystemMessage(Component.literal(
+                        "[BulletHell] Invited " + target.getName().getString() + "."));
+                broadcastLobby(sender.server, lobby);
             });
         });
 
@@ -314,12 +330,11 @@ public final class BHPackets {
                     return;
                 }
 
-                startArena(player, last.difficulty(), last.stageId(), last.characterId(),
-                        last.shotTypeOrdinal(), last.practice());
+                startArena(player, last.difficulty(), last.stageId(), last.characterId(), last.practice());
             });
         });
 
-        // C2S: test mode - select / reload boss, stage, or wave
+        // C2S: test mode - select / reload boss or stage
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, TEST_SELECT, (buf, ctx) -> {
             TestSelectPacket pkt = TestSelectPacket.decode(buf);
             ctx.queue(() -> {
@@ -328,10 +343,10 @@ public final class BHPackets {
                 ArenaContext current = BulletHellManager.INSTANCE.getArenaForPlayer(player.getUUID());
                 if (current == null || !current.testMode) return;
 
-                // Character refresh: restart arena with new character AND send updated shot list
+                // Character refresh: restart arena with the new character
                 if (pkt.testType == TestSelectPacket.TYPE_CHAR_REFRESH) {
                     String characterId = pkt.id.isBlank() ? current.characterId : pkt.id;
-                    restartTestArena(player, current, pkt, characterId, pkt.shotTypeOrdinal);
+                    restartTestArena(player, current, pkt, characterId);
                     return;
                 }
 
@@ -342,55 +357,37 @@ public final class BHPackets {
                 StageDefinition stage;
                 String currentBossId  = current.boss != null ? current.boss.id : "";
                 String currentStageId = "";
-                String currentWaveId  = "";
                 int phaseIdx = 0;
                 // Invalidate all caches so every edited JSON is picked up fresh
                 BossLoader.invalidateAll();
                 StageLoader.invalidateAll();
-                FairyWaveLoader.invalidateAll();
                 CharacterLoader.invalidateAll();
 
                 if (pkt.testType == TestSelectPacket.TYPE_STAGE) {
                     String stageId = pkt.id.isBlank() ? "cirno_stage" : pkt.id;
-                    stage = StageLoader.loadWithDevPath(stageId);
+                    stage = StageLoader.load(stageId);
                     currentStageId = stageId;
-                } else if (pkt.testType == TestSelectPacket.TYPE_WAVE) {
-                    String waveId = pkt.id.isBlank() ? "fw_shared_001" : pkt.id;
-                    FairyWaveDefinition waveDef = FairyWaveLoader.loadWithDevPath(waveId);
-                    stage = StageLoader.syntheticWaveOnly(waveId, waveDef != null ? waveDef.enemies : null);
-                    currentWaveId = waveId;
                 } else { // TYPE_BOSS
                     String bossId = pkt.id.isBlank()
                             ? (currentBossId.isBlank() ? "marisa_boss" : currentBossId) : pkt.id;
                     phaseIdx = Math.max(0, pkt.phaseIdx);
-                    BossLoader.loadWithDevPath(bossId);
+                    BossLoader.load(bossId);
                     stage = StageLoader.syntheticBossOnly(bossId);
                     currentBossId = bossId;
                 }
                 BulletHellManager.INSTANCE.stopArena(player.getUUID());
                 int startPhase = (pkt.testType == TestSelectPacket.TYPE_BOSS) ? phaseIdx + 1 : 0;
                 ArenaContext newCtx = BulletHellManager.INSTANCE.startArena(player, diff, stage, characterId, startPhase);
-                newCtx.hostShotTypeOrdinal = pkt.shotTypeOrdinal;
                 newCtx.testMode = true;
                 newCtx.player.power = PlayerState2D.MAX_POWER;
                 BHDebugMode.setGodMode(player.getUUID(), true);
                 sendFullSync(player, newCtx);
                 sendToPlayer(player, new ArenaStatePacket(newCtx, player.getUUID(), 1));
-                
-                // Build shot type list for new character
-                CharacterDefinition charDef = CharacterLoader.loadWithDevPath(characterId);
-                java.util.List<String> shotTypeLabels = new java.util.ArrayList<>();
-                if (charDef != null) {
-                    for (int i = 0; i < charDef.shotOptions.size(); i++) {
-                        shotTypeLabels.add(charDef.shotOptions.get(i).label);
-                    }
-                }
-                
+
                 sendTestModeOpen(player, new TestModeOpenPacket(
                         BossLoader.allBossIds(), StageLoader.allStageIds(),
-                        FairyWaveLoader.allWaveIds(), CharacterLoader.allCharIds(),
-                        shotTypeLabels,
-                        currentBossId, currentStageId, currentWaveId, characterId, pkt.shotTypeOrdinal,
+                        CharacterLoader.allCharIds(),
+                        currentBossId, currentStageId, characterId,
                         phaseIdx, diff.ordinal()));
             });
         });
@@ -442,34 +439,27 @@ public final class BHPackets {
         });
     }
 
-    private static void restartTestArena(ServerPlayer player, ArenaContext current, TestSelectPacket pkt, String characterId, int shotIdx) {
+    private static void restartTestArena(ServerPlayer player, ArenaContext current, TestSelectPacket pkt, String characterId) {
         DifficultyConfig diff = DifficultyConfig.fromId(pkt.difficultyOrdinal);
         String currentBossId  = current.boss != null ? current.boss.id : "";
         String currentStageId = "";
-        String currentWaveId  = "";
         int phaseIdx = 0;
         StageDefinition stage;
 
         // Invalidate all caches
         BossLoader.invalidateAll();
         StageLoader.invalidateAll();
-        FairyWaveLoader.invalidateAll();
         CharacterLoader.invalidateAll();
 
         if (pkt.testType == TestSelectPacket.TYPE_STAGE) {
             String stageId = pkt.id.isBlank() ? "cirno_stage" : pkt.id;
-            stage = StageLoader.loadWithDevPath(stageId);
+            stage = StageLoader.load(stageId);
             currentStageId = stageId;
-        } else if (pkt.testType == TestSelectPacket.TYPE_WAVE) {
-            String waveId = pkt.id.isBlank() ? "fw_shared_001" : pkt.id;
-            FairyWaveDefinition waveDef = FairyWaveLoader.loadWithDevPath(waveId);
-            stage = StageLoader.syntheticWaveOnly(waveId, waveDef != null ? waveDef.enemies : null);
-            currentWaveId = waveId;
         } else if (pkt.testType == TestSelectPacket.TYPE_BOSS || pkt.testType == TestSelectPacket.TYPE_CHAR_REFRESH) {
             String bossId = (pkt.testType == TestSelectPacket.TYPE_BOSS && !pkt.id.isBlank())
                     ? pkt.id : (currentBossId.isBlank() ? "marisa_boss" : currentBossId);
             phaseIdx = Math.max(0, pkt.phaseIdx);
-            BossLoader.loadWithDevPath(bossId);
+            BossLoader.load(bossId);
             stage = StageLoader.syntheticBossOnly(bossId);
             currentBossId = bossId;
         } else {
@@ -480,33 +470,167 @@ public final class BHPackets {
         BulletHellManager.INSTANCE.stopArena(player.getUUID());
         int startPhase = (pkt.testType == TestSelectPacket.TYPE_BOSS) ? phaseIdx + 1 : 0;
         ArenaContext newCtx = BulletHellManager.INSTANCE.startArena(player, diff, stage, characterId, startPhase);
-        newCtx.hostShotTypeOrdinal = shotIdx;
         newCtx.testMode = true;
         newCtx.player.power = PlayerState2D.MAX_POWER;
         BHDebugMode.setGodMode(player.getUUID(), true);
         sendFullSync(player, newCtx);
         sendToPlayer(player, new ArenaStatePacket(newCtx, player.getUUID(), 1));
-        
-        // Build shot type list
-        CharacterDefinition charDef = CharacterLoader.loadWithDevPath(characterId);
-        java.util.List<String> shotTypeLabels = new java.util.ArrayList<>();
-        if (charDef != null) {
-            for (int i = 0; i < charDef.shotOptions.size(); i++) {
-                shotTypeLabels.add(charDef.shotOptions.get(i).label);
-            }
-        }
-        
+
+
         sendTestModeOpen(player, new TestModeOpenPacket(
                 BossLoader.allBossIds(), StageLoader.allStageIds(),
-                FairyWaveLoader.allWaveIds(), CharacterLoader.allCharIds(),
-                shotTypeLabels,
-                currentBossId, currentStageId, currentWaveId, characterId, shotIdx,
+                CharacterLoader.allCharIds(),
+                currentBossId, currentStageId, characterId,
                 phaseIdx, diff.ordinal()));
     }
 
     // ---------------------------------------------------------------- Server → Client helpers
 
     private static FriendlyByteBuf buf() { return new FriendlyByteBuf(Unpooled.buffer()); }
+
+    /**
+     * Applies one lobby action. Host-only actions are checked here rather than trusted
+     * from the client, since any member could send them.
+     */
+    private static void handleLobbyAction(ServerPlayer sender, LobbyActionPacket pkt) {
+        LobbySession lobby = BulletHellManager.INSTANCE.getLobby(sender.getUUID());
+        if (lobby == null) return;
+        MinecraftServer server = sender.server;
+        LobbySession.Member self = lobby.get(sender.getUUID());
+        if (self == null) return;
+
+        switch (pkt.action) {
+            case LobbyActionPacket.SET_CHARACTER -> {
+                if (lobby.starting) return;
+                if (!CharacterUnlocks.isUnlockedAny(sender, pkt.text)
+                        && !BHDebugMode.isGodMode(sender.getUUID())) {
+                    sender.sendSystemMessage(Component.literal(
+                            "[BulletHell] Character \"" + pkt.text + "\" is locked."));
+                    return;
+                }
+                self.characterId = pkt.text;
+                broadcastLobby(server, lobby);
+            }
+            case LobbyActionPacket.SET_READY -> {
+                if (lobby.starting) return;
+                self.ready = pkt.value != 0;
+                broadcastLobby(server, lobby);
+            }
+            case LobbyActionPacket.SET_RUN -> {
+                if (lobby.starting || !lobby.isHost(sender.getUUID())) return;
+                lobby.stageId = pkt.text;
+                lobby.difficulty = DifficultyConfig.fromId(pkt.value);
+                // Changing the run invalidates everyone's consent to it.
+                for (LobbySession.Member m : lobby.members()) m.ready = false;
+                broadcastLobby(server, lobby);
+            }
+            case LobbyActionPacket.START -> {
+                if (!lobby.isHost(sender.getUUID())) return;
+                if (!lobby.canStart()) {
+                    sender.sendSystemMessage(Component.literal(
+                            "[BulletHell] Not everyone is ready (" + lobby.readyCount()
+                                    + "/" + lobby.size() + ")."));
+                    return;
+                }
+                startLobbyRun(server, lobby);
+            }
+            case LobbyActionPacket.LEAVE -> {
+                boolean wasHost = lobby.isHost(sender.getUUID());
+                BulletHellManager.INSTANCE.leaveLobby(sender.getUUID());
+                sendLobbyState(sender, LobbyStatePacket.closed());
+                if (wasHost) {
+                    // Host left: the party owns no settings any more, so it disbands.
+                    for (UUID member : lobby.memberIds()) {
+                        ServerPlayer p = server.getPlayerList().getPlayer(member);
+                        if (p == null) continue;
+                        p.sendSystemMessage(Component.literal("[BulletHell] The party was disbanded."));
+                        sendLobbyState(p, LobbyStatePacket.closed());
+                    }
+                } else {
+                    broadcastLobby(server, lobby);
+                }
+            }
+            default -> { }
+        }
+    }
+
+    /** Builds the arena, then joins every member before the first tick so nobody enters mid-phase. */
+    private static void startLobbyRun(MinecraftServer server, LobbySession lobby) {
+        lobby.starting = true;
+        broadcastLobby(server, lobby);
+
+        ServerPlayer host = server.getPlayerList().getPlayer(lobby.hostUuid);
+        if (host == null) {
+            lobby.starting = false;
+            return;
+        }
+        LobbySession.Member hostMember = lobby.get(lobby.hostUuid);
+        String hostCharacter = hostMember != null ? hostMember.characterId : "reimu";
+
+        BulletHellManager.INSTANCE.stopArena(lobby.hostUuid);
+        ArenaContext ctx = BulletHellManager.INSTANCE.startArena(
+                host, lobby.difficulty, lobby.stageId, hostCharacter);
+
+        // Every non-host member joins before the arena has ticked once.
+        for (LobbySession.Member m : lobby.members()) {
+            if (m.uuid.equals(lobby.hostUuid)) continue;
+            ServerPlayer p = server.getPlayerList().getPlayer(m.uuid);
+            if (p == null) continue;
+            BulletHellManager.INSTANCE.joinMatch(p.getUUID(), lobby.hostUuid,
+                    CharacterLoader.load(m.characterId), p);
+        }
+
+        // Close the lobby before syncing, so the client swaps the screen exactly once.
+        java.util.List<UUID> members = lobby.memberIds();
+        BulletHellManager.INSTANCE.closeLobby(lobby);
+
+        for (UUID member : members) {
+            ServerPlayer p = server.getPlayerList().getPlayer(member);
+            if (p == null) continue;
+            sendLobbyState(p, LobbyStatePacket.closed());
+            sendFullSync(p, ctx);
+            int pIdx = 1;
+            if (!member.equals(lobby.hostUuid)) {
+                int c = 2;
+                for (UUID cid : ctx.getCoopPlayers().keySet()) {
+                    if (cid.equals(member)) { pIdx = c; break; }
+                    c++;
+                }
+            }
+            sendToPlayer(p, new ArenaStatePacket(ctx, member, pIdx));
+        }
+    }
+
+    public static void sendSplash(ServerPlayer player, SplashPacket pkt) {
+        FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, SPLASH, b);
+    }
+
+    public static void sendLobbyState(ServerPlayer player, LobbyStatePacket pkt) {
+        FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, LOBBY_STATE, b);
+    }
+
+    /** Push the roster to every member, so nobody sees a stale party. */
+    public static void broadcastLobby(MinecraftServer server, LobbySession lobby) {
+        if (server == null || lobby == null) return;
+        LobbyStatePacket pkt = LobbyStatePacket.of(lobby);
+        for (UUID member : lobby.memberIds()) {
+            ServerPlayer p = server.getPlayerList().getPlayer(member);
+            if (p != null) sendLobbyState(p, pkt);
+        }
+    }
+
+    /** Push all content json to one player. */
+    public static void sendDataSync(ServerPlayer player) {
+        FriendlyByteBuf b = buf();
+        DataSyncPacket.fromCurrent().encode(b);
+        NetworkManager.sendToPlayer(player, DATA_SYNC, b);
+    }
+
+    /** Push all content json to everyone online (called after a datapack reload). */
+    public static void sendDataSyncToAll(net.minecraft.server.MinecraftServer server) {
+        if (server == null) return;
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) sendDataSync(p);
+    }
 
     public static void sendToPlayer(ServerPlayer player, ArenaStatePacket pkt) {
         FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, ARENA_STATE, b);
@@ -522,7 +646,6 @@ public final class BHPackets {
         FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, BULLET_FULL, b);
         // Send current laser state so joining players see active lasers immediately
         sendLaserSync(player, new LaserSyncPacket(ctx.lasers));
-        sendControlScheme(player, new ControlSchemePacket(BHControlSettings.serverGetPreference(player)));
     }
 
     public static void sendAllPlayerBullets(ServerPlayer player, AllPlayerBulletsSyncPacket pkt) {
@@ -531,10 +654,6 @@ public final class BHPackets {
 
     public static void sendItemSync(ServerPlayer player, ItemSyncPacket pkt) {
         FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, ITEM_SYNC, b);
-    }
-
-    public static void sendEnemySync(ServerPlayer player, EnemySyncPacket pkt) {
-        FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, ENEMY_SYNC, b);
     }
 
     public static void sendCoopSync(ServerPlayer player, CoopPlayersSyncPacket pkt) {
@@ -555,25 +674,10 @@ public final class BHPackets {
         NetworkManager.sendToPlayer(player, ATTACK_ACTIVATION_SFX, b);
     }
 
-    public static void sendOpenCharSelect(ServerPlayer player) {
-        sendCharacterUnlocks(player, new CharacterUnlockSyncPacket(CharacterUnlocks.snapshot(player)));
-        NetworkManager.sendToPlayer(player, OPEN_CHAR_SELECT, buf());
-    }
-
-    public static void sendOpenJoinSelect(ServerPlayer player, OpenJoinSelectPacket pkt) {
-        sendCharacterUnlocks(player, new CharacterUnlockSyncPacket(CharacterUnlocks.snapshot(player)));
-        FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, OPEN_JOIN_SELECT, b);
-    }
 
     public static void sendOpenChallenge(ServerPlayer player, OpenChallengePacket pkt) {
         sendCharacterUnlocks(player, new CharacterUnlockSyncPacket(CharacterUnlocks.snapshot(player)));
         FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, OPEN_CHALLENGE, b);
-    }
-
-    public static void sendControlScheme(ServerPlayer player, ControlSchemePacket pkt) {
-        FriendlyByteBuf b = buf();
-        pkt.encode(b);
-        NetworkManager.sendToPlayer(player, CONTROL_SCHEME, b);
     }
 
     public static void sendCharacterUnlocks(ServerPlayer player, CharacterUnlockSyncPacket pkt) {
@@ -588,23 +692,37 @@ public final class BHPackets {
         NetworkManager.sendToPlayer(player, ARENA_END, b);
     }
 
+    public static void sendArenaStart(ServerPlayer player, ArenaStartPacket pkt) {
+        FriendlyByteBuf b = buf();
+        pkt.encode(b);
+        NetworkManager.sendToPlayer(player, ARENA_START, b);
+    }
+
+    public static void sendPhaseTransition(ServerPlayer player, PhaseTransitionPacket pkt) {
+        FriendlyByteBuf b = buf();
+        pkt.encode(b);
+        NetworkManager.sendToPlayer(player, PHASE_TRANSITION, b);
+    }
+
     // ---------------------------------------------------------------- Client → Server helpers
 
     @Environment(EnvType.CLIENT)
-    public static void sendPlayerPos(float dx, float dy, boolean focused, boolean shooting, boolean charging) {
+    public static void sendArenaProgress(ArenaProgressPacket pkt) {
         FriendlyByteBuf b = buf();
-        new PlayerPos2DPacket(dx, dy, focused, shooting, charging).encode(b);
+        pkt.encode(b);
+        NetworkManager.sendToServer(ARENA_PROGRESS, b);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void sendPlayerPos(float dx, float dy, boolean focused, boolean shooting) {
+        FriendlyByteBuf b = buf();
+        new PlayerPos2DPacket(dx, dy, focused, shooting).encode(b);
         NetworkManager.sendToServer(PLAYER_POS, b);
     }
 
     @Environment(EnvType.CLIENT)
     public static void sendBomb() {
         NetworkManager.sendToServer(BOMB, buf());
-    }
-
-    @Environment(EnvType.CLIENT)
-    public static void sendSkill() {
-        NetworkManager.sendToServer(SKILL, buf());
     }
 
     @Environment(EnvType.CLIENT)
@@ -625,25 +743,29 @@ public final class BHPackets {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void sendCharSelect(String characterId, DifficultyConfig difficulty, String stageId,
-            int shotTypeOrdinal) {
-        sendCharSelect(characterId, difficulty, stageId, shotTypeOrdinal, false);
+    public static void sendLobbyAction(LobbyActionPacket pkt) {
+        FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToServer(LOBBY_ACTION, b);
+    }
+
+    /** C2S: ask the server for content data (see REQUEST_DATA_SYNC). */
+    @Environment(EnvType.CLIENT)
+    public static void sendRequestDataSync() {
+        NetworkManager.sendToServer(REQUEST_DATA_SYNC, buf());
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void sendCharSelect(String characterId, DifficultyConfig difficulty, String stageId) {
+        sendCharSelect(characterId, difficulty, stageId, false);
     }
 
     @Environment(EnvType.CLIENT)
     public static void sendCharSelect(String characterId, DifficultyConfig difficulty, String stageId,
-            int shotTypeOrdinal, boolean practice) {
+            boolean practice) {
         FriendlyByteBuf b = buf();
-        new CharacterSelectPacket(characterId, difficulty, stageId, shotTypeOrdinal, practice).encode(b);
+        new CharacterSelectPacket(characterId, difficulty, stageId, practice).encode(b);
         NetworkManager.sendToServer(CHAR_SELECT, b);
     }
 
-    @Environment(EnvType.CLIENT)
-    public static void sendJoinMatch(UUID hostUuid, String characterId, int shotTypeOrdinal) {
-        FriendlyByteBuf b = buf();
-        new JoinMatchPacket(hostUuid, characterId, shotTypeOrdinal).encode(b);
-        NetworkManager.sendToServer(JOIN_MATCH, b);
-    }
 
     @Environment(EnvType.CLIENT)
     public static void sendInvitePlayer(UUID targetUuid) {
@@ -671,20 +793,14 @@ public final class BHPackets {
     /** Start an arena for a player, send initial full sync + state. */
     public static void startArena(ServerPlayer player, DifficultyConfig diff,
                                    String stageId, String characterId) {
-        startArena(player, diff, stageId, characterId, 0);
+        startArena(player, diff, stageId, characterId, false);
     }
 
     public static void startArena(ServerPlayer player, DifficultyConfig diff,
-            String stageId, String characterId, int hostShotTypeOrdinal) {
-        startArena(player, diff, stageId, characterId, hostShotTypeOrdinal, false);
-    }
-
-    public static void startArena(ServerPlayer player, DifficultyConfig diff,
-            String stageId, String characterId, int hostShotTypeOrdinal, boolean practice) {
+            String stageId, String characterId, boolean practice) {
         BulletHellManager.INSTANCE.stopArena(player.getUUID());
         ArenaContext ctx = BulletHellManager.INSTANCE.startArena(
                 player, diff, stageId, characterId);
-        ctx.hostShotTypeOrdinal = Math.max(0, hostShotTypeOrdinal);
         ctx.practiceMode = practice;
         if (practice) {
             ctx.debugSkipToBossPhase(0);
@@ -692,76 +808,22 @@ public final class BHPackets {
             ctx.player.reachedMaxPowerInThisLife = true;
         }
 
-        // Apply forced control scheme if the stage rules dictate it
-        if (ctx.rules.forceControlScheme != null && !ctx.rules.forceControlScheme.isEmpty()) {
-            var forced = mc.sayda.bullethell.BHControlScheme.tryParse(ctx.rules.forceControlScheme);
-            forced.ifPresent(scheme -> sendControlScheme(player, new ControlSchemePacket(scheme)));
-        }
-
         sendFullSync(player, ctx);
         sendToPlayer(player, new ArenaStatePacket(ctx, player.getUUID(), 1));
 
-        // Auto-join pending participants
-        java.util.List<BulletHellManager.ParticipantInfo> pending = BulletHellManager.INSTANCE
-                .getAndClearPendingInvites(player.getUUID());
-        if (pending != null) {
-            for (BulletHellManager.ParticipantInfo info : pending) {
-                ServerPlayer p = player.server.getPlayerList().getPlayer(info.uuid());
-                if (p != null) {
-                    BulletHellManager.INSTANCE.joinMatch(p.getUUID(), player.getUUID(), info.charDef(), p,
-                            info.shotTypeOrdinal());
-                    sendFullSync(p, ctx);
-                    int pIdx = 0;
-                    int c = 2;
-                    for (UUID cid : ctx.getCoopPlayers().keySet()) {
-                        if (cid.equals(p.getUUID())) { pIdx = c; break; }
-                        c++;
-                    }
-                    sendToPlayer(p, new ArenaStatePacket(ctx, p.getUUID(), pIdx));
-                }
-            }
-        }
     }
 
     /**
      * Same as {@link #startArena(ServerPlayer, DifficultyConfig, String, String)} but with a
-     * resolved {@link StageDefinition} and optional 1-based boss phase skip (0 = play from waves).
+     * resolved {@link StageDefinition} and optional 1-based boss phase skip (0 = play from the start).
      */
     public static void startArena(ServerPlayer player, DifficultyConfig diff,
             StageDefinition stage, String characterId, int bossPhase1Based) {
-        startArena(player, diff, stage, characterId, bossPhase1Based, 0);
-    }
-
-    public static void startArena(ServerPlayer player, DifficultyConfig diff,
-            StageDefinition stage, String characterId, int bossPhase1Based, int hostShotTypeOrdinal) {
         BulletHellManager.INSTANCE.stopArena(player.getUUID());
         ArenaContext ctx = BulletHellManager.INSTANCE.startArena(player, diff, stage, characterId, bossPhase1Based);
-        ctx.hostShotTypeOrdinal = Math.max(0, hostShotTypeOrdinal);
         sendFullSync(player, ctx);
         sendToPlayer(player, new ArenaStatePacket(ctx, player.getUUID(), 1));
 
-        java.util.List<BulletHellManager.ParticipantInfo> pending = BulletHellManager.INSTANCE
-                .getAndClearPendingInvites(player.getUUID());
-        if (pending != null) {
-            for (BulletHellManager.ParticipantInfo info : pending) {
-                ServerPlayer p = player.server.getPlayerList().getPlayer(info.uuid());
-                if (p != null) {
-                    BulletHellManager.INSTANCE.joinMatch(p.getUUID(), player.getUUID(), info.charDef(), p,
-                            info.shotTypeOrdinal());
-                    sendFullSync(p, ctx);
-                    int pIdx = 0;
-                    int c = 2;
-                    for (UUID cid : ctx.getCoopPlayers().keySet()) {
-                        if (cid.equals(p.getUUID())) {
-                            pIdx = c;
-                            break;
-                        }
-                        c++;
-                    }
-                    sendToPlayer(p, new ArenaStatePacket(ctx, p.getUUID(), pIdx));
-                }
-            }
-        }
     }
 
     public static void startArena(ServerPlayer player, DifficultyConfig diff) {

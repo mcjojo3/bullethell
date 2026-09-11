@@ -1,0 +1,19 @@
+{
+    "parent": "bullethell:progression/marisa_boss_normal",
+    "display": {
+        "icon": {
+            "item": "minecraft:diamond"
+        },
+        "title": "Marisa Cleared (Hard)",
+        "description": "Defeat Marisa on Hard or higher.",
+        "frame": "goal",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "clear": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

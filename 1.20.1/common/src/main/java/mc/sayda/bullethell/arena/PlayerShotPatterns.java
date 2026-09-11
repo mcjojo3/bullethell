@@ -5,7 +5,6 @@ import mc.sayda.bullethell.boss.PlayerShotOptionJson;
 import mc.sayda.bullethell.pattern.BulletType;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Playable shot patterns come from {@link CharacterDefinition#shotOptions} in
@@ -26,16 +25,16 @@ public final class PlayerShotPatterns {
     /** Scales arena-units/tick velocities to approximate TH06 player shot speed on 20 tps arena. */
     private static final float SHOT_SPEED_SCALE = 1.92f;
 
-    public static void fire(PlayerState2D ps, BulletPool pb, CharacterDefinition def, int shotTypeIndex) {
-        fireFromData(ps, pb, def, shotTypeIndex);
+    public static void fire(PlayerState2D ps, BulletPool pb, CharacterDefinition def) {
+        fireFromData(ps, pb, def);
     }
 
     /**
      * Fires periodic spawns whose {@code fireRateTicks > 0} when {@code ps.shotTick % rate == 0}.
      * Called every tick while the player is shooting, independently of the main cooldown.
      */
-    public static void firePeriodic(PlayerState2D ps, BulletPool pb, CharacterDefinition def, int shotTypeIndex) {
-        List<PlayerShotOptionJson.Spawn> tier = resolveTier(ps, def, shotTypeIndex);
+    public static void firePeriodic(PlayerState2D ps, BulletPool pb, CharacterDefinition def) {
+        List<PlayerShotOptionJson.Spawn> tier = resolveTier(ps, def);
         if (tier == null) return;
         float px = ps.x;
         float py = ps.y - 4f;
@@ -46,8 +45,8 @@ public final class PlayerShotPatterns {
         }
     }
 
-    private static void fireFromData(PlayerState2D ps, BulletPool pb, CharacterDefinition def, int shotTypeIndex) {
-        List<PlayerShotOptionJson.Spawn> tier = resolveTier(ps, def, shotTypeIndex);
+    private static void fireFromData(PlayerState2D ps, BulletPool pb, CharacterDefinition def) {
+        List<PlayerShotOptionJson.Spawn> tier = resolveTier(ps, def);
         if (tier == null) return;
         float px = ps.x;
         float py = ps.y - 4f;
@@ -57,11 +56,8 @@ public final class PlayerShotPatterns {
         }
     }
 
-    private static List<PlayerShotOptionJson.Spawn> resolveTier(PlayerState2D ps, CharacterDefinition def, int shotTypeIndex) {
-        List<PlayerShotOptionJson> opts = def.shotOptions;
-        if (opts == null || opts.isEmpty()) return null;
-        int idx = Math.max(0, Math.min(shotTypeIndex, opts.size() - 1));
-        PlayerShotOptionJson opt = opts.get(idx);
+    private static List<PlayerShotOptionJson.Spawn> resolveTier(PlayerState2D ps, CharacterDefinition def) {
+        PlayerShotOptionJson opt = def.shot();
         if (opt == null) return null;
         PlayerShotOptionJson.Mode mode = ps.focused ? opt.focused : opt.unfocused;
         if (mode == null || mode.powerTiers == null || mode.powerTiers.isEmpty()) return null;

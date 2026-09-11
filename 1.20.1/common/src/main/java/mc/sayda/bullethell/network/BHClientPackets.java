@@ -1,13 +1,10 @@
 package mc.sayda.bullethell.network;
 
 import dev.architectury.networking.NetworkManager;
-import mc.sayda.bullethell.BHControlSettings;
 import mc.sayda.bullethell.client.ClientArenaState;
 import mc.sayda.bullethell.network.ArenaEndPacket;
 import mc.sayda.bullethell.client.CharacterUnlockClientState;
 import mc.sayda.bullethell.network.AllPlayerBulletsSyncPacket;
-import mc.sayda.bullethell.client.screen.JoinCharacterSelectScreen;
-import mc.sayda.bullethell.client.screen.LevelSelectScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -23,9 +20,55 @@ public final class BHClientPackets {
     private BHClientPackets() {}
 
     public static void register() {
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.DATA_SYNC, (buf, ctx) -> {
+            DataSyncPacket pkt = DataSyncPacket.decode(buf);
+            ctx.queue(pkt::apply);
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.LOBBY_STATE, (buf, ctx) -> {
+            LobbyStatePacket pkt = LobbyStatePacket.decode(buf);
+            ctx.queue(() -> {
+                mc.sayda.bullethell.client.ClientLobbyState.INSTANCE.apply(pkt);
+                Minecraft mc = Minecraft.getInstance();
+                if (pkt.closed) {
+                    // Only close the party screen; the arena packets that follow a start
+                    // will put up their own screen.
+                    if (mc.screen instanceof mc.sayda.bullethell.client.screen.LobbyScreen) {
+                        mc.setScreen(null);
+                    }
+                } else if (mc.screen instanceof mc.sayda.bullethell.client.screen.LobbyScreen lobbyScreen) {
+                    lobbyScreen.onLobbyUpdated();
+                } else {
+                    mc.setScreen(new mc.sayda.bullethell.client.screen.LobbyScreen());
+                }
+            });
+        });
+
+        // The server hands over the seed; from here the client runs its own fight.
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.ARENA_START, (buf, ctx) -> {
+            ArenaStartPacket pkt = ArenaStartPacket.decode(buf);
+            ctx.queue(() -> mc.sayda.bullethell.client.ClientArenaSim.INSTANCE.start(pkt));
+        });
+
+        // The one resync barrier: every client lands on the same phase here.
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.PHASE_TRANSITION, (buf, ctx) -> {
+            PhaseTransitionPacket pkt = PhaseTransitionPacket.decode(buf);
+            ctx.queue(() -> mc.sayda.bullethell.client.ClientArenaSim.INSTANCE.applyPhaseTransition(pkt));
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.SPLASH, (buf, ctx) -> {
+            SplashPacket pkt = SplashPacket.decode(buf);
+            ctx.queue(() -> mc.sayda.bullethell.client.SplashState.INSTANCE.playFromLeft(pkt.id));
+        });
+
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.ARENA_STATE, (buf, ctx) -> {
             ArenaStatePacket pkt = ArenaStatePacket.decode(buf);
-            ctx.queue(() -> ClientArenaState.INSTANCE.applyArenaState(pkt));
+            ctx.queue(() -> {
+                ClientArenaState.INSTANCE.applyArenaState(pkt);
+                // The HP bar should read the shared total, not this client's share of it.
+                if (pkt.active)
+                    mc.sayda.bullethell.client.ClientArenaSim.INSTANCE.applyAuthorityHp(pkt.bossHp, pkt.bossMaxHp);
+            });
         });
 
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.BULLET_DELTA, (buf, ctx) -> {
@@ -48,11 +91,6 @@ public final class BHClientPackets {
             ctx.queue(() -> ClientArenaState.INSTANCE.applyItemSync(pkt));
         });
 
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.ENEMY_SYNC, (buf, ctx) -> {
-            EnemySyncPacket pkt = EnemySyncPacket.decode(buf);
-            ctx.queue(() -> ClientArenaState.INSTANCE.applyEnemySync(pkt));
-        });
-
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.COOP_SYNC, (buf, ctx) -> {
             CoopPlayersSyncPacket pkt = CoopPlayersSyncPacket.decode(buf);
             ctx.queue(() -> ClientArenaState.INSTANCE.applyCoopSync(pkt));
@@ -65,7 +103,13 @@ public final class BHClientPackets {
 
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.GAME_EVENT, (buf, ctx) -> {
             GameEventPacket pkt = GameEventPacket.decode(buf);
-            ctx.queue(() -> ClientArenaState.INSTANCE.applyGameEvent(pkt));
+            ctx.queue(() -> {
+                ClientArenaState.INSTANCE.applyGameEvent(pkt);
+                // While simulating, the only extend that arrives as a packet is one another
+                // player earned for the party - the local sim has to actually apply it.
+                if (pkt.event == mc.sayda.bullethell.arena.GameEvent.SCORE_EXTEND)
+                    mc.sayda.bullethell.client.ClientArenaSim.INSTANCE.grantRelayedExtend();
+            });
         });
 
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.ATTACK_ACTIVATION_SFX, (buf, ctx) -> {
@@ -73,24 +117,10 @@ public final class BHClientPackets {
             ctx.queue(() -> ClientArenaState.INSTANCE.applyAttackActivationSfx(pkt));
         });
 
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.OPEN_CHAR_SELECT, (buf, ctx) -> {
-            ctx.queue(() -> Minecraft.getInstance().setScreen(new LevelSelectScreen()));
-        });
-
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.OPEN_JOIN_SELECT, (buf, ctx) -> {
-            OpenJoinSelectPacket pkt = OpenJoinSelectPacket.decode(buf);
-            ctx.queue(() -> Minecraft.getInstance().setScreen(new JoinCharacterSelectScreen(pkt.hostUuid, pkt.hostName)));
-        });
-
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.OPEN_CHALLENGE, (buf, ctx) -> {
             OpenChallengePacket pkt = OpenChallengePacket.decode(buf);
             ctx.queue(() -> Minecraft.getInstance().setScreen(
                     new mc.sayda.bullethell.client.screen.ChallengeScreen(pkt)));
-        });
-
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.CONTROL_SCHEME, (buf, ctx) -> {
-            ControlSchemePacket pkt = ControlSchemePacket.decode(buf);
-            ctx.queue(() -> BHControlSettings.applyFromNetwork(pkt.scheme));
         });
 
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.CHARACTER_UNLOCKS, (buf, ctx) -> {
@@ -113,25 +143,18 @@ public final class BHClientPackets {
                 state.testMode = true;
                 state.testBossIds.clear();  state.testBossIds.addAll(pkt.bossIds);
                 state.testStageIds.clear(); state.testStageIds.addAll(pkt.stageIds);
-                state.testWaveIds.clear();  state.testWaveIds.addAll(pkt.waveIds);
                 state.testCharIds.clear();  state.testCharIds.addAll(pkt.charIds);
-                state.testShotTypeIds.clear(); state.testShotTypeIds.addAll(pkt.shotTypeIds);
                 state.testCurrentBossId   = pkt.currentBossId;
                 state.testCurrentStageId  = pkt.currentStageId;
-                state.testCurrentWaveId   = pkt.currentWaveId;
                 if (!pkt.currentCharId.isEmpty()) state.testCurrentCharId = pkt.currentCharId;
-                state.testCurrentShotTypeIdx = pkt.currentShotTypeIdx;
                 state.testCurrentDifficulty = pkt.difficultyOrdinal;
                 // Sync selected indices to match current selections
                 for (int i = 0; i < pkt.bossIds.size(); i++)
                     if (pkt.bossIds.get(i).equals(pkt.currentBossId)) { state.testSelectedIdx = i; break; }
                 for (int i = 0; i < pkt.stageIds.size(); i++)
                     if (pkt.stageIds.get(i).equals(pkt.currentStageId)) { state.testStageSelectedIdx = i; break; }
-                for (int i = 0; i < pkt.waveIds.size(); i++)
-                    if (pkt.waveIds.get(i).equals(pkt.currentWaveId)) { state.testWaveSelectedIdx = i; break; }
                 for (int i = 0; i < pkt.charIds.size(); i++)
                     if (pkt.charIds.get(i).equals(pkt.currentCharId)) { state.testCharSelectedIdx = i; break; }
-                state.testShotTypeSelectedIdx = pkt.currentShotTypeIdx;
             });
         });
     }

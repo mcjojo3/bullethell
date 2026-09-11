@@ -46,6 +46,10 @@ public final class ArenaThread {
     /** Cached player-index map; rebuilt only when the participant set reference changes. */
     private Map<UUID, Integer> cachedPIdxMap = null;
     private java.util.Set<UUID> lastParticipants = null;
+    /** Participants already handed the seed, so each is bootstrapped exactly once. */
+    private final Set<UUID> simStarted = new HashSet<>();
+    /** Last phase epoch broadcast; a change is what triggers the resync barrier. */
+    private int lastSentEpoch = -1;
 
     public ArenaThread(ArenaContext ctx, UUID hostUuid, MinecraftServer server) {
         this.ctx = ctx;
@@ -103,19 +107,33 @@ public final class ArenaThread {
     // ---------------------------------------------------------------- packet building
 
     private void sendTick() {
+        // When the clients simulate, the world half of this packet set is exactly the
+        // traffic the rewrite exists to remove - none of it is built or sent.
+        boolean sendWorld = ctx.simulatesWorld;
+
         List<GameEvent> globalEvents = drain(ctx.pendingEvents);
         List<String> attackSfx     = drain(ctx.pendingAttackActivationSounds);
+        List<ArenaContext.SplashOrder> splashes = drain(ctx.pendingSplashes);
 
         // All arena state is owned by this thread between ticks - safe to read.
-        BulletDeltaPacket       deltaPacket      = BHCommonEvents.buildBulletDelta(ctx);
-        AllPlayerBulletsSyncPacket allBulletsPacket = AllPlayerBulletsSyncPacket.fromContext(ctx);
-        boolean laserDirty = ctx.lasers.isDirty();
+        BulletDeltaPacket       deltaPacket      = sendWorld ? BHCommonEvents.buildBulletDelta(ctx) : null;
+        AllPlayerBulletsSyncPacket allBulletsPacket = sendWorld ? AllPlayerBulletsSyncPacket.fromContext(ctx) : null;
+        boolean laserDirty = sendWorld && ctx.lasers.isDirty();
         LaserSyncPacket         laserPacket      = laserDirty ? new LaserSyncPacket(ctx.lasers) : null;
-        ItemSyncPacket          itemPacket       = (syncTick % 2 == 0) ? ItemSyncPacket.fromContext(ctx) : null;
-        EnemySyncPacket         enemyPacket      = EnemySyncPacket.fromContext(ctx);
+        ItemSyncPacket          itemPacket       = (sendWorld && syncTick % 2 == 0) ? ItemSyncPacket.fromContext(ctx) : null;
 
-        ctx.bullets.clearDirty();
-        if (laserDirty) ctx.lasers.clearDirty();
+        if (sendWorld) {
+            ctx.bullets.clearDirty();
+            if (laserDirty) ctx.lasers.clearDirty();
+        }
+
+        // A phase change is the one moment every simulating client is pulled back onto
+        // the same state, so it is broadcast the tick it happens.
+        PhaseTransitionPacket phasePacket = null;
+        if (!sendWorld && ctx.phaseEpoch != lastSentEpoch) {
+            lastSentEpoch = ctx.phaseEpoch;
+            phasePacket = PhaseTransitionPacket.fromContext(ctx);
+        }
 
         // allParticipants() returns a cached unmodifiable set - no copy needed.
         Set<UUID> all = ctx.allParticipants();
@@ -141,6 +159,12 @@ public final class ArenaThread {
                 BHPackets.sendGameEvent(p, new GameEventPacket(ge));
             for (String sfx : attackSfx)
                 BHPackets.sendAttackActivationSfx(p, new AttackActivationSfxPacket(sfx));
+            for (ArenaContext.SplashOrder splash : splashes) {
+                // A simulating client drew its own cut-in on the key press; sending it
+                // back would restart the animation a round trip later.
+                if (!sendWorld && pid.equals(splash.origin())) continue;
+                BHPackets.sendSplash(p, new SplashPacket(splash.characterId()));
+            }
 
             // Drain personal events inline - avoids per-tick HashMap + ArrayList allocation.
             PlayerState2D ps2d = ctx.getPlayerState(pid);
@@ -151,15 +175,37 @@ public final class ArenaThread {
             }
 
             int pIdx = cachedPIdxMap != null ? cachedPIdxMap.getOrDefault(pid, 1) : 1;
+
+            // Hand a newcomer the seed before any state, so their sim exists by the time
+            // the first ArenaStatePacket lands. Covers co-op joins as well as the host.
+            if (!sendWorld && simStarted.add(pid)) {
+                BHPackets.sendArenaStart(p, buildStartPacket(pid, pIdx));
+                // A fresh sim always starts on phase 0. Follow the seed with where the
+                // fight actually is, so a newcomer catches up instead of simulating a
+                // phase everyone else has finished. Ignored when it is already right.
+                BHPackets.sendPhaseTransition(p, PhaseTransitionPacket.fromContext(ctx));
+            }
+
             if (deltaPacket != null) BHPackets.sendBulletDelta(p, deltaPacket);
-            BHPackets.sendAllPlayerBullets(p, allBulletsPacket);
+            if (allBulletsPacket != null) BHPackets.sendAllPlayerBullets(p, allBulletsPacket);
+            if (phasePacket != null) BHPackets.sendPhaseTransition(p, phasePacket);
             BHPackets.sendToPlayer(p, new ArenaStatePacket(ctx, pid, pIdx));
             if (itemPacket  != null) BHPackets.sendItemSync(p, itemPacket);
-            if (enemyPacket != null) BHPackets.sendEnemySync(p, enemyPacket);
             CoopPlayersSyncPacket cpp = coopPackets.get(pid);
             if (cpp != null) BHPackets.sendCoopSync(p, cpp);
             if (laserPacket != null) BHPackets.sendLaserSync(p, laserPacket);
         }
+    }
+
+    private ArenaStartPacket buildStartPacket(UUID pid, int pIdx) {
+        PlayerState2D ps = ctx.getPlayerState(pid);
+        CharacterDefinition cd = CharacterLoader.load(ctx.getCharacterId(pid));
+        // The client rebuilds its player from the character definition, so the only
+        // extras it cannot derive are the attribute bonuses already baked in here.
+        int extraLives = ps != null ? Math.max(0, ps.lives - cd.startingLives) : 0;
+        int extraBombs = ps != null ? Math.max(0, ps.baseStartingBombs - cd.startingBombs) : 0;
+        return new ArenaStartPacket(ctx.seed, ctx.stage.id, ctx.getCharacterId(pid),
+                ctx.difficulty.ordinal(), extraLives, extraBombs, pIdx);
     }
 
     private Map<UUID, CoopPlayersSyncPacket> buildCoopPackets(Set<UUID> all) {

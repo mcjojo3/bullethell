@@ -23,7 +23,7 @@ public final class BHCreativeTabs {
             TABS.register("npc_spawn_eggs",
                     () -> CreativeTabRegistry.create(
                             Component.translatable("category.bullethell.npc_spawn_eggs"),
-                            () -> new ItemStack(BHItems.MARISA_NPC_SPAWN_EGG.get())));
+                            BHItems::tabIcon));
 
     public static final RegistrySupplier<CreativeModeTab> MUSIC_DISCS =
             TABS.register("music_discs",

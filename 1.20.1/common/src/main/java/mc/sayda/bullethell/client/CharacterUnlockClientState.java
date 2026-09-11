@@ -1,6 +1,7 @@
 package mc.sayda.bullethell.client;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import mc.sayda.bullethell.arena.DifficultyConfig;
@@ -10,7 +11,8 @@ public final class CharacterUnlockClientState {
 
     public static final CharacterUnlockClientState INSTANCE = new CharacterUnlockClientState();
 
-    private static final String DEFAULT_CHAR_ID = "reimu";
+    /** Kept in sync with {@code CharacterUnlocks.DEFAULT_UNLOCKED_CHAR_IDS} on the server. */
+    private static final Set<String> DEFAULT_UNLOCKED_CHAR_IDS = Set.of("reimu", "marisa");
     private final ConcurrentHashMap<String, Integer> maxDifficultyByCharacter = new ConcurrentHashMap<>();
 
     private CharacterUnlockClientState() {
@@ -18,19 +20,21 @@ public final class CharacterUnlockClientState {
     }
 
     private int defaultMax(String characterId) {
-        return DEFAULT_CHAR_ID.equals(characterId) ? DifficultyConfig.LUNATIC.ordinal() : -1;
+        return DEFAULT_UNLOCKED_CHAR_IDS.contains(characterId) ? DifficultyConfig.LUNATIC.ordinal() : -1;
     }
 
     public void resetToDefaults() {
         maxDifficultyByCharacter.clear();
-        maxDifficultyByCharacter.put(DEFAULT_CHAR_ID, DifficultyConfig.LUNATIC.ordinal());
+        for (String id : DEFAULT_UNLOCKED_CHAR_IDS)
+            maxDifficultyByCharacter.put(id, DifficultyConfig.LUNATIC.ordinal());
     }
 
     public void applyFromNetwork(Map<String, Integer> map) {
         maxDifficultyByCharacter.clear();
         if (map != null)
             maxDifficultyByCharacter.putAll(map);
-        maxDifficultyByCharacter.putIfAbsent(DEFAULT_CHAR_ID, DifficultyConfig.LUNATIC.ordinal());
+        for (String id : DEFAULT_UNLOCKED_CHAR_IDS)
+            maxDifficultyByCharacter.putIfAbsent(id, DifficultyConfig.LUNATIC.ordinal());
     }
 
     public int getMaxDifficultyOrdinal(String characterId) {

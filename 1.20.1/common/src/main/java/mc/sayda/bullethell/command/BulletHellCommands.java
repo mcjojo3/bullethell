@@ -8,8 +8,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import mc.sayda.bullethell.BHControlScheme;
-import mc.sayda.bullethell.BHControlSettings;
 import mc.sayda.bullethell.BullethellDataIndex;
 import mc.sayda.bullethell.CharacterUnlocks;
 import mc.sayda.bullethell.boss.CharacterLoader;
@@ -22,8 +20,6 @@ import mc.sayda.bullethell.boss.StageLoader;
 import mc.sayda.bullethell.debug.BHDebugMode;
 import mc.sayda.bullethell.network.TestModeOpenPacket;
 import mc.sayda.bullethell.network.BHPackets;
-import mc.sayda.bullethell.network.ControlSchemePacket;
-import mc.sayda.bullethell.network.OpenJoinSelectPacket;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -32,7 +28,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.advancements.Advancement;
-import mc.sayda.bullethell.boss.CharacterDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +45,9 @@ import java.util.concurrent.CompletableFuture;
  * starts a boss-only arena (no fairy waves). Phase: 0 = from beginning; ≥1 =
  * skip to that
  * boss phase (1-based).
- * /bullethell join &lt;playerName&gt; - join another player's active arena
+ * /bullethell join &lt;playerName&gt; - join another player's party
  * /bullethell stop - end own arena or leave a coop match
  * /bullethell status - print current arena stats to chat
- * /bullethell controls [&lt;th19|th9&gt;] - show saved layout, or set when a
  * scheme is given
  * /bullethell test - operator (perm 2+): dev arena + overlay; temporary god
  * mode lasts only while test arena is active.
@@ -78,7 +72,8 @@ public final class BulletHellCommands {
                 for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                         if (self != null && p.getUUID().equals(self))
                                 continue;
-                        if (BulletHellManager.INSTANCE.hasArena(p.getUUID()))
+                        // Parties form before the arena, so suggest anyone not already in one.
+                        if (!BulletHellManager.INSTANCE.isInMatch(p.getUUID()))
                                 names.add(p.getGameProfile().getName());
                 }
                 return SharedSuggestionProvider.suggest(names, builder);
@@ -238,16 +233,6 @@ public final class BulletHellCommands {
                                                         return 1;
                                                 }))
 
-                                // ---- controls: bare = show saved layout; <scheme> = set + S2C apply ----
-                                .then(Commands.literal("controls")
-                                                .executes(ctx -> controlsGet(ctx.getSource()))
-                                                .then(Commands.argument("scheme", StringArgumentType.word())
-                                                                .suggests((c, b) -> SharedSuggestionProvider
-                                                                                .suggest(BHControlScheme.allIds(), b))
-                                                                .executes(ctx -> controlsSet(ctx.getSource(),
-                                                                                StringArgumentType.getString(ctx,
-                                                                                                "scheme")))))
-
                                 // ---- test (operator) ----
                                 .then(Commands.literal("test")
                                                 .requires(src -> src.hasPermission(2))
@@ -318,8 +303,7 @@ public final class BulletHellCommands {
                                                                 .suggests((c, b) -> {
                                                                         List<String> suggestions = new ArrayList<>();
                                                                         suggestions.add("all");
-                                                                        suggestions.addAll(java.util.Arrays.asList(
-                                                                                        mc.sayda.bullethell.boss.CharacterLoader.REGISTERED_IDS));
+                                                                        suggestions.addAll(mc.sayda.bullethell.boss.CharacterLoader.allCharIds());
                                                                         return SharedSuggestionProvider
                                                                                         .suggest(suggestions, b);
                                                                 })
@@ -344,8 +328,7 @@ public final class BulletHellCommands {
                                                                                                 .suggest(
                                                                                         
                                                                                                        
-                                                                                                 java.util.Arrays.asList(
-                                                                                                                                CharacterLoader.REGISTERED_IDS),
+                                                                                                 CharacterLoader.allCharIds(),
                                                                                                                 b))
                                                                                 .executes(ctx -> charactersSetUnlocked(
                                                                                                 ctx.getSource(),
@@ -357,8 +340,7 @@ public final class BulletHellCommands {
                                                                                 StringArgumentType.word())
                                                                                 .suggests((c, b) -> SharedSuggestionProvider
                                                                                                 .suggest(
-                                                                                                                java.util.Arrays.asList(
-                                                                                                                                CharacterLoader.REGISTERED_IDS),
+                                                                                                                CharacterLoader.allCharIds(),
                                                                                                                 b))
                                                                                 .executes(ctx -> charactersSetUnlocked(
                                                                                                 ctx.getSource(),
@@ -369,9 +351,16 @@ public final class BulletHellCommands {
 
         // ---------------------------------------------------------------- helpers
 
+        /**
+         * Bare {@code /bullethell} and {@code /bullethell start}. There is no stage picker
+         * any more - stages belong to the NPCs - so this points the player at one rather
+         * than opening a screen. {@code /bullethell start <target>} still works.
+         */
         private static int start(CommandSourceStack src) throws CommandSyntaxException {
                 ServerPlayer player = src.getPlayerOrException();
-                BHPackets.sendOpenCharSelect(player);
+                player.sendSystemMessage(Component.literal(
+                                "[BulletHell] Find and talk to a character NPC to start a run, "
+                                                + "or use /bullethell start <stage> to jump straight in."));
                 return 1;
         }
 
@@ -459,37 +448,27 @@ public final class BulletHellCommands {
                         return 0;
                 }
 
-                BHPackets.sendOpenJoinSelect(joiner,
-                                new OpenJoinSelectPacket(host.getUUID(), host.getName().getString()));
-                return 1;
-        }
-
-        private static int controlsGet(CommandSourceStack src) throws CommandSyntaxException {
-                ServerPlayer player = src.getPlayerOrException();
-                BHControlScheme cur = BHControlSettings.serverGetPreference(player);
-                String id = cur.id();
-                player.sendSystemMessage(Component.literal(
-                                "[BulletHell] Current scheme: " + id + " - " + BHControlSettings.describe(cur)));
-                return 1;
-        }
-
-        private static int controlsSet(CommandSourceStack src, String raw) throws CommandSyntaxException {
-                ServerPlayer player = src.getPlayerOrException();
-                var parsed = BHControlScheme.tryParse(raw);
-                if (parsed.isEmpty()) {
-                        String id = BHControlSettings.serverGetPreferenceId(player.getUUID());
-                        player.sendSystemMessage(Component.literal(
-                                        "[BulletHell] Unknown scheme \"" + raw + "\". Current layout: " + id
-                                                        + ". Valid: " + String.join(", ", BHControlScheme.allIds())
-                                                        + "."));
+                if (BulletHellManager.INSTANCE.isInMatch(joiner.getUUID())) {
+                        joiner.sendSystemMessage(Component.literal(
+                                        "[BulletHell] Leave your current arena first."));
                         return 0;
                 }
-                BHControlScheme scheme = parsed.get();
-                BHControlSettings.serverSetPreference(player, scheme);
-                BHPackets.sendControlScheme(player, new ControlSchemePacket(scheme));
-                player.sendSystemMessage(Component.literal(
-                                "[BulletHell] Control layout set to " + scheme.id() + " - "
-                                                + BHControlSettings.describe(scheme)));
+                if (BulletHellManager.INSTANCE.isInMatch(host.getUUID())) {
+                        joiner.sendSystemMessage(Component.literal(
+                                        "[BulletHell] That player is already in a run - parties form before the arena starts."));
+                        return 0;
+                }
+
+                var lobby = BulletHellManager.INSTANCE.getOrCreateLobby(
+                                host.getUUID(), host.getName().getString(), "");
+                if (BulletHellManager.INSTANCE.joinLobby(host.getUUID(), joiner.getUUID(),
+                                joiner.getName().getString()) == null) {
+                        joiner.sendSystemMessage(Component.literal("[BulletHell] Could not join that party."));
+                        return 0;
+                }
+                host.sendSystemMessage(Component.literal(
+                                "[BulletHell] " + joiner.getName().getString() + " joined your party."));
+                BHPackets.broadcastLobby(src.getServer(), lobby);
                 return 1;
         }
 
@@ -502,7 +481,7 @@ public final class BulletHellCommands {
                 } catch (IllegalArgumentException e) {
                         diff = DifficultyConfig.NORMAL;
                 }
-                if (!BossLoader.resourceExists(bossId) && BossLoader.loadFromDevPath(bossId) == null) {
+                if (!BossLoader.resourceExists(bossId)) {
                         player.sendSystemMessage(Component.literal(
                                         "[BulletHell/Test] Boss \"" + bossId
                                                         + "\" not found in classpath or dev path."));
@@ -531,20 +510,10 @@ public final class BulletHellCommands {
                 BHPackets.sendToPlayer(player,
                                 new mc.sayda.bullethell.network.ArenaStatePacket(ctx, player.getUUID(), 1));
 
-                // Build shot type list for test mode from character definition
-                java.util.List<String> shotTypeLabels = new java.util.ArrayList<>();
-                CharacterDefinition charDef = CharacterLoader.loadWithDevPath(characterId);
-                if (charDef != null) {
-                        for (int i = 0; i < charDef.shotOptions.size(); i++) {
-                                shotTypeLabels.add(charDef.shotOptions.get(i).label);
-                        }
-                }
-
                 BHPackets.sendTestModeOpen(player, new TestModeOpenPacket(
                                 BossLoader.allBossIds(), StageLoader.allStageIds(),
-                                mc.sayda.bullethell.boss.FairyWaveLoader.allWaveIds(), CharacterLoader.allCharIds(),
-                                shotTypeLabels,
-                                bossId, "", "", characterId, 0,
+                                CharacterLoader.allCharIds(),
+                                bossId, "", characterId,
                                 phaseIdx, diff.ordinal()));
 
                 player.sendSystemMessage(Component.literal(
@@ -556,7 +525,6 @@ public final class BulletHellCommands {
         private static int reloadAllJson(CommandSourceStack src) {
                 BossLoader.invalidateAll();
                 StageLoader.invalidateAll();
-                mc.sayda.bullethell.boss.FairyWaveLoader.invalidateAll();
                 mc.sayda.bullethell.boss.CharacterLoader.invalidateAll();
                 mc.sayda.bullethell.boss.BossProgressionLoader.invalidate();
                 src.sendSuccess(() -> Component.literal(
@@ -568,7 +536,7 @@ public final class BulletHellCommands {
         private static int charactersSetUnlocked(CommandSourceStack src, String characterId, boolean unlock)
                         throws CommandSyntaxException {
                 ServerPlayer player = src.getPlayerOrException();
-                java.util.List<String> ids = java.util.Arrays.asList(CharacterLoader.REGISTERED_IDS);
+                java.util.List<String> ids = CharacterLoader.allCharIds();
                 if (!ids.contains(characterId)) {
                         player.sendSystemMessage(Component.literal(
                                         "[BulletHell] Unknown character \"" + characterId + "\". Valid: "
@@ -606,8 +574,7 @@ public final class BulletHellCommands {
 
         private static int unlockCharacter(CommandSourceStack src, String characterId) throws CommandSyntaxException {
                 ServerPlayer player = src.getPlayerOrException();
-                java.util.List<String> ids = java.util.Arrays
-                                .asList(mc.sayda.bullethell.boss.CharacterLoader.REGISTERED_IDS);
+                java.util.List<String> ids = CharacterLoader.allCharIds();
                 if (!ids.contains(characterId)) {
                         src.sendFailure(Component
                                         .literal("[BulletHell] Unknown character \"" + characterId + "\". Valid: all, "

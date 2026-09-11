@@ -1,7 +1,6 @@
 package mc.sayda.bullethell.boss;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Data class for a playable character loaded from
@@ -55,30 +54,6 @@ public class CharacterDefinition {
     /** Movement speed (arena units / tick) while holding focus (Shift). */
     public float speedFocused = 6.5f;
 
-    // TH19-style controls (Z shoot, X charge): passive build when X is not held.
-    /** Multiplier for passive charge while shooting (smaller = slower). */
-    public float chargeRateShooting = 1.0f;
-    /** Multiplier for passive charge while idle (not shooting). */
-    public float chargeRateIdle = 3.0f;
-    /**
-     * Extra multiplier while holding X after PoFV startup - scales how fast each
-     * level fills (see {@link #chargeSpeedFrames}).
-     */
-    public float chargeRateCharging = 5.0f;
-
-    /**
-     * Touhou 9 PoFV: frames to fill one charge level while holding X (after the
-     * 9-frame startup where the bar does not move). Wiki values, e.g. Reimu 25,
-     * Marisa 31.
-     */
-    public double chargeSpeedFrames = 31.0;
-
-    /**
-     * Touhou 9 PoFV: ticks after releasing a charge skill before a new charge can
-     * build (Lv.1 attack recovery). Reimu 41, Marisa 36, etc.
-     */
-    public int chargeDelayAfterSkill = 41;
-
     /** Lives (continues) at the start of a run. */
     public int startingLives = 3;
 
@@ -86,31 +61,21 @@ public class CharacterDefinition {
     public int startingBombs = 3;
 
     /**
-     * Short flavour text shown in the select screen below the character name.
-     * Keep to ≤40 characters so it fits without wrapping.
+     * Flavour text shown in the select screen below the character name, as two
+     * author-controlled lines rather than one string the screen wraps itself - the
+     * card is narrow enough that automatic wrapping broke on longer text. Keep each
+     * line to ~20 characters; {@code description2} may be left blank for a one-line
+     * description.
      */
-    public String description = "Balanced - small hitbox";
+    public String description1 = "Desc missing";
+    /** Second description line; blank for a one-line description. */
+    public String description2 = "";
 
     /**
-     * Legacy field kept for datapacks; playable patterns are {@link #shotOptions} in the character JSON.
-     */
-    public String shotStyle = "generic";
-
-    /**
-     * Touhou-style shot options (A/B, …). Parallel to optional {@link #shotTypeLabels}.
-     * Two or more non-blank entries enable the shot-type menu; otherwise index {@code 0} only.
-     */
-    public List<String> shotTypes;
-
-    /** Display strings for the shot-type menu; indices match {@link #shotTypes}. */
-    public List<String> shotTypeLabels;
-
-    /** Short flavour text per shot type for the shot select screen; indices match {@link #shotTypes}. */
-    public List<String> shotTypeDescriptions;
-
-    /**
-     * Shot layouts: define in {@code data/bullethell/characters/&lt;id&gt;.json}. If missing or empty,
-     * {@link CharacterLoader} uses {@link HardcodedPlayerShots}.
+     * The character's shot layout, defined in {@code data/bullethell/characters/&lt;id&gt;.json}.
+     * Each character has exactly one; the list shape is kept so a future redesign can
+     * reintroduce selectable types without a schema change. Only index {@code 0} is used.
+     * If missing or empty, {@link CharacterLoader} uses {@link HardcodedPlayerShots}.
      */
     public List<PlayerShotOptionJson> shotOptions;
 
@@ -118,73 +83,22 @@ public class CharacterDefinition {
         return shotOptions != null && !shotOptions.isEmpty();
     }
 
-    /**
-     * Resolves the pattern id for the given shot selection ({@code 0} = first type).
-     */
-    public String effectiveShotStyle(int shotTypeIndex) {
-        if (shotTypes != null && !shotTypes.isEmpty()) {
-            int idx = Math.max(0, Math.min(shotTypeIndex, shotTypes.size() - 1));
-            String s = shotTypes.get(idx);
-            if (s != null && !s.isBlank())
-                return s.trim().toLowerCase(Locale.ROOT);
-        }
-        return shotStyle == null ? "generic" : shotStyle.trim().toLowerCase(Locale.ROOT);
+    /** This character's shot layout, or {@code null} when none is defined. */
+    public PlayerShotOptionJson shot() {
+        return usesDataDrivenShots() ? shotOptions.get(0) : null;
     }
 
-    /** Number of shot types offered in the select UI ({@code 1} = skip the extra screen). */
-    public int shotTypeOptionCount() {
-        if (usesDataDrivenShots()) {
-            int n = shotOptions.size();
-            return n >= 2 ? n : 1;
-        }
-        if (shotTypes == null || shotTypes.isEmpty())
-            return 1;
-        int n = 0;
-        for (String s : shotTypes) {
-            if (s != null && !s.isBlank())
-                n++;
-        }
-        return n >= 2 ? n : 1;
+    /** Display label for the shot, e.g. on the character select screen. */
+    public String shotLabel() {
+        PlayerShotOptionJson o = shot();
+        return (o != null && o.label != null && !o.label.isBlank()) ? o.label : "";
     }
 
-    /** Label for the shot-type menu or stats; falls back to generic A/B text. */
-    public String shotTypeLabel(int shotTypeIndex) {
-        if (usesDataDrivenShots() && shotTypeIndex >= 0 && shotTypeIndex < shotOptions.size()) {
-            PlayerShotOptionJson o = shotOptions.get(shotTypeIndex);
-            if (o != null && o.label != null && !o.label.isBlank())
-                return o.label;
-        }
-        if (shotTypeLabels != null && shotTypeIndex >= 0 && shotTypeIndex < shotTypeLabels.size()) {
-            String l = shotTypeLabels.get(shotTypeIndex);
-            if (l != null && !l.isBlank())
-                return l;
-        }
-        if (shotTypeIndex <= 0)
-            return "Shot Type A";
-        if (shotTypeIndex == 1)
-            return "Shot Type B";
-        return "Shot Type " + (shotTypeIndex + 1);
+    /** Flavour text for the shot; empty when unset. */
+    public String shotDescription() {
+        PlayerShotOptionJson o = shot();
+        return (o != null && o.description != null) ? o.description : "";
     }
-
-    /** Description for the shot-type UI; empty when unset. */
-    public String shotTypeDescription(int shotTypeIndex) {
-        if (usesDataDrivenShots() && shotTypeIndex >= 0 && shotTypeIndex < shotOptions.size()) {
-            PlayerShotOptionJson o = shotOptions.get(shotTypeIndex);
-            if (o != null && o.description != null)
-                return o.description;
-        }
-        if (shotTypeDescriptions != null && shotTypeIndex >= 0 && shotTypeIndex < shotTypeDescriptions.size()) {
-            String d = shotTypeDescriptions.get(shotTypeIndex);
-            return d != null ? d : "";
-        }
-        return "";
-    }
-
-    /**
-     * When true, this character can move freely while time stop is active.
-     * Sakuya is the canonical example; all other characters are frozen.
-     */
-    public boolean immuneToTimeStop = false;
 
     /**
      * Volley interval in ticks when unfocused; {@code 0} = use

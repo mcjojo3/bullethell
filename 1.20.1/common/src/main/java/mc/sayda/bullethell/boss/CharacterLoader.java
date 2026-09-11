@@ -2,185 +2,92 @@ package mc.sayda.bullethell.boss;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import mc.sayda.bullethell.config.BullethellConfig;
+import com.google.gson.JsonObject;
+import mc.sayda.bullethell.data.BHData;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Loads and caches {@link CharacterDefinition} objects from JSON files
- * at {@code data/bullethell/characters/<id>.json}.
+ * Access to {@link CharacterDefinition}s.
  *
- * The registered character list is built from {@link #REGISTERED_IDS} so we
- * don't need directory scanning (not supported in JAR resources).
- * Add new character IDs here when you create their JSON + texture.
+ * Discovery, datapack overrides, dev-path layering and client sync are all handled by
+ * {@link BHData#CHARACTERS}; this class owns only the Gson binding and the defaults
+ * applied on top of it. Adding a character means adding
+ * {@code data/bullethell/characters/<id>.json} - there is no id list to update.
  */
 public final class CharacterLoader {
 
-    /**
-     * All character IDs available in this build.
-     * Order determines the display order on the select screen.
-     */
-    public static final String[] REGISTERED_IDS = { "reimu", "marisa", "sakuya", "sanae", "yuuka" };
-
     private static final Gson GSON = new GsonBuilder().create();
-    private static final Map<String, CharacterDefinition> CACHE = new ConcurrentHashMap<>();
-    private static final Map<String, Long> DEV_MOD_TIMES = new ConcurrentHashMap<>();
+
+    /** Classpath fallback for lookups that happen before any reload or sync. */
+    private static final Map<String, CharacterDefinition> FALLBACK_CACHE = new ConcurrentHashMap<>();
 
     private CharacterLoader() {
     }
 
-    /** Load a single character by ID (cached). */
+    // ---------------------------------------------------------------- parsing
+
+    /** Gson binding + defaults. Called by {@link BHData#CHARACTERS} for every discovered file. */
+    public static CharacterDefinition parse(String id, JsonObject root) {
+        CharacterDefinition def = GSON.fromJson(root, CharacterDefinition.class);
+        if (def == null) return null;
+        if (def.id == null || def.id.isBlank()) def.id = id;
+        resolveShotOptions(def);
+        return def;
+    }
+
+    // ---------------------------------------------------------------- access
+
+    /** Load a single character by ID. Never null - returns a visible fallback when missing. */
     public static CharacterDefinition load(String id) {
-        return CACHE.computeIfAbsent(id, CharacterLoader::readFromClasspath);
+        CharacterDefinition def = BHData.CHARACTERS.get(id);
+        if (def != null) return def;
+        return FALLBACK_CACHE.computeIfAbsent(id, CharacterLoader::loadFallback);
     }
 
-    /** Return all registered characters in display order. */
+    /** All characters in display order. */
     public static List<CharacterDefinition> loadAll() {
-        List<CharacterDefinition> result = new ArrayList<>();
-        for (String id : REGISTERED_IDS)
-            result.add(load(id));
-        return result;
-    }
-
-    public static void invalidate(String id) {
-        CACHE.remove(id);
-    }
-
-    public static void invalidateAll() {
-        CACHE.clear();
-    }
-
-    /**
-     * Returns {@code true} if the dev-path file for {@code id} has changed since
-     * the last call. Safe to poll every few server ticks.
-     */
-    public static boolean checkDevFileChanged(String id) {
-        String devPath = BullethellConfig.TEST_DEV_PATH.get();
-        if (devPath == null || devPath.isBlank()) return false;
-        Path file = Paths.get(devPath, "characters", id + ".json");
-        try {
-            long mtime = Files.getLastModifiedTime(file).toMillis();
-            Long prev = DEV_MOD_TIMES.get(id);
-            if (prev != null && mtime != prev) {
-                DEV_MOD_TIMES.put(id, mtime);
-                return true;
-            }
-            if (prev == null) DEV_MOD_TIMES.put(id, mtime);
-        } catch (Exception ignored) {}
-        return false;
-    }
-
-    // ---------------------------------------------------------------- dev-path
-    // support (test mode)
-
-    public static CharacterDefinition loadFromDevPath(String id) {
-        String devPath = BullethellConfig.TEST_DEV_PATH.get();
-        if (devPath == null || devPath.isBlank())
-            return null;
-        Path file = Paths.get(devPath, "characters", id + ".json");
-        if (!Files.exists(file))
-            return null;
-        try (java.io.Reader r = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            CharacterDefinition def = GSON.fromJson(r, CharacterDefinition.class);
-            if (def == null)
-                return null;
-            if (def.id == null)
-                def.id = id;
-            resolveShotOptions(def);
-            return def;
-        } catch (Exception e) {
-            System.err.println("[BulletHell/Test] Failed to parse dev character: " + id + " - " + e.getMessage());
-            return null;
-        }
-    }
-
-    public static CharacterDefinition loadWithDevPath(String id) {
-        String devPath = BullethellConfig.TEST_DEV_PATH.get();
-        if (devPath != null && !devPath.isBlank()) {
-            CharacterDefinition dev = loadFromDevPath(id);
-            if (dev != null) {
-                CACHE.put(id, dev);
-                return dev;
-            }
-        }
-        return load(id);
+        List<CharacterDefinition> all = BHData.CHARACTERS.all();
+        return all.isEmpty() ? new ArrayList<>() : all;
     }
 
     public static List<String> allCharIds() {
-        LinkedHashSet<String> ids = new LinkedHashSet<>();
-        String devPath = BullethellConfig.TEST_DEV_PATH.get();
-        if (devPath != null && !devPath.isBlank()) {
-            Path dir = Paths.get(devPath, "characters");
-            if (Files.isDirectory(dir)) {
-                try {
-                    Files.list(dir)
-                            .filter(p -> p.getFileName().toString().endsWith(".json"))
-                            .map(p -> p.getFileName().toString().replace(".json", ""))
-                            .sorted()
-                            .forEach(ids::add);
-                } catch (Exception ignored) {
-                }
-            }
-        }
-        Arrays.stream(REGISTERED_IDS).forEach(ids::add);
-        return new ArrayList<>(ids);
+        return BHData.CHARACTERS.ids();
+    }
+
+    public static void invalidate(String id) {
+        FALLBACK_CACHE.remove(id);
+    }
+
+    public static void invalidateAll() {
+        FALLBACK_CACHE.clear();
     }
 
     // ---------------------------------------------------------------- internal
 
-    private static CharacterDefinition readFromClasspath(String id) {
-        String path = "data/bullethell/characters/" + id + ".json";
-        InputStream is = CharacterLoader.class.getClassLoader().getResourceAsStream(path);
+    private static CharacterDefinition loadFallback(String id) {
+        CharacterDefinition def = BHData.CHARACTERS.parseFromClasspath(id);
+        if (def != null) return def;
 
-        if (is == null) {
-            System.err.println("[BulletHell] Character definition not found: " + path + " - using fallback");
-            return fallback(id);
-        }
-
-        try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-            CharacterDefinition def = GSON.fromJson(reader, CharacterDefinition.class);
-            if (def == null) {
-                System.err.println("[BulletHell] Null character definition: " + id);
-                return fallback(id);
-            }
-            if (def.id == null)
-                def.id = id;
-            resolveShotOptions(def);
-            return def;
-        } catch (Exception e) {
-            System.err.println("[BulletHell] Failed to parse character: " + path + " - " + e.getMessage());
-            return fallback(id);
-        }
+        System.err.println("[BulletHell] Character definition not found: " + id + " - using fallback");
+        CharacterDefinition missing = new CharacterDefinition();
+        missing.id = id;
+        missing.name = "??? (" + id + ")";
+        missing.description1 = "Missing character data";
+        resolveShotOptions(missing);
+        return missing;
     }
 
     /**
-     * If {@link CharacterDefinition#shotOptions} is null or empty after parsing the
-     * character JSON,
+     * If {@link CharacterDefinition#shotOptions} is null or empty after parsing,
      * fills it from {@link HardcodedPlayerShots} (green spread tiers).
      */
     private static void resolveShotOptions(CharacterDefinition def) {
         if (def.shotOptions != null && !def.shotOptions.isEmpty())
             return;
         def.shotOptions = HardcodedPlayerShots.genericCopy();
-    }
-
-    private static CharacterDefinition fallback(String id) {
-        CharacterDefinition def = new CharacterDefinition();
-        def.id = id;
-        def.name = "??? (" + id + ")";
-        def.description = "Missing character data";
-        resolveShotOptions(def);
-        return def;
     }
 }

@@ -1,0 +1,19 @@
+{
+    "parent": "bullethell:progression/remilia_boss_hard",
+    "display": {
+        "icon": {
+            "item": "minecraft:netherite_ingot"
+        },
+        "title": "Remilia Cleared (Lunatic)",
+        "description": "Defeat Remilia on Lunatic.",
+        "frame": "challenge",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "clear": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

@@ -53,7 +53,7 @@ public final class ArenaEndShareSnapshot {
         String charId = ctx.getCharacterId(pid);
         mc.sayda.bullethell.boss.CharacterDefinition cdef = CharacterLoader.load(charId);
         String charName = cdef.name;
-        String shotLabel = cdef.shotTypeLabel(ctx.getShotTypeOrdinal(pid));
+        String shotLabel = cdef.shotLabel();
         String bossName = (ctx.boss != null) ? ctx.boss.name : "";
         String endBossLine = resolveEndBossDialog(ctx, pid);
         return new ArenaEndShareSnapshot(

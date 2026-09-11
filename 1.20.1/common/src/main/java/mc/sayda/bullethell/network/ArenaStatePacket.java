@@ -20,10 +20,6 @@ public class ArenaStatePacket {
     public final float bossX, bossY;
     public final int bossHp, bossMaxHp, bossPhase;
     public final int bossMoveDir;
-    public final int skillGauge, chargeLevel, holdChargeGauge;
-    public final int abilityType, abilityTicks;
-    public final float abilityX, abilityY;
-    public final UUID abilityOwner;
     /** Local player's score. */
     public final long score;
     /** Sum of all co-op participants' scores (same as {@link #score} when alone). */
@@ -67,8 +63,12 @@ public class ArenaStatePacket {
     public final float speedNormal, speedFocused;
     /** Active boss texture override (empty = use default bossId texture). */
     public final String bossTexture;
-
-    private static final UUID ZERO_UUID = new UUID(0, 0);
+    /**
+     * True while a participant has the arena paused and the {@code globalPause} gamerule
+     * is holding the fight for everyone. A client simulating locally has to be told -
+     * it has no other way to know a different player opened a menu.
+     */
+    public final boolean globallyPaused;
 
     // ---------------------------------------------------------------- factory
 
@@ -91,29 +91,6 @@ public class ArenaStatePacket {
         this.bossMaxHp = ctx.bossMaxHp;
         this.bossPhase = ctx.bossPhase;
         this.bossMoveDir = ctx.getBossMoveDir();
-        this.skillGauge = ps.skillGauge;
-        this.chargeLevel = ps.chargeLevel;
-        this.holdChargeGauge = ps.holdChargeGauge;
-
-        if (ctx.timeStopTicks > 0) {
-            this.abilityType = 1;
-            this.abilityTicks = ctx.timeStopTicks;
-            this.abilityOwner = ctx.timeStopOwner;
-            this.abilityX = 0f;
-            this.abilityY = 0f;
-        } else if (ctx.masterSparkTicks > 0) {
-            this.abilityType = 2;
-            this.abilityTicks = ctx.masterSparkTicks;
-            this.abilityOwner = ctx.masterSparkOwner;
-            this.abilityX = ctx.masterSparkX;
-            this.abilityY = ctx.masterSparkY;
-        } else {
-            this.abilityType = 0;
-            this.abilityTicks = 0;
-            this.abilityOwner = ZERO_UUID;
-            this.abilityX = 0f;
-            this.abilityY = 0f;
-        }
 
         this.score = ctx.getScore(playerUuid);
         this.combinedScore = ctx.getCombinedScore();
@@ -153,25 +130,24 @@ public class ArenaStatePacket {
         this.speedNormal = ps.speedNormal;
         this.speedFocused = ps.speedFocused;
         this.bossTexture = ctx.getActiveBossTexture();
+        this.globallyPaused = ctx.isGloballyPaused();
     }
 
     public static ArenaStatePacket stopped() {
         return new ArenaStatePacket(false, false,
                 0f, 0f, 0, 0, 0, 0, 0,
                 0f, 0f, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0f, 0f, ZERO_UUID,
                 0L, 0L, 0, 0, "", "", false, false,
                 "reimu", "", "", false, "", "", 0, 0, 0, -1, -1,
                 false, 0, 0, 0,
                 0, 0, 0,
                 16, 0.20f, true,
-                PlayerState2D.SPEED_NORMAL, PlayerState2D.SPEED_FOCUSED, "");
+                PlayerState2D.SPEED_NORMAL, PlayerState2D.SPEED_FOCUSED, "", false);
     }
 
     private ArenaStatePacket(boolean active, boolean spectating,
             float px, float py, int lives, int bombs, int graze, int power, int pIdx,
             float bx, float by, int hp, int maxHp, int phase, int bossMoveDir,
-            int skillGauge, int chargeLevel, int holdChargeGauge, int abilityType, int abilityTicks, float abilityX, float abilityY, UUID abilityOwner,
             long score, long combinedScore, int timerTicks, int timerTotal, String musicTrackId,
             String spellName, boolean activeSpellCard, boolean declaring,
             String characterId, String bossId, String bossName, boolean bossIntroVisible,
@@ -180,7 +156,7 @@ public class ArenaStatePacket {
             boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount,
             int grazeChain, int lifePieces, int bombPieces,
             int rank, float pocFraction, boolean pocAutoCollect,
-            float speedNormal, float speedFocused, String bossTexture) {
+            float speedNormal, float speedFocused, String bossTexture, boolean globallyPaused) {
         this.active = active;
         this.spectating = spectating;
         this.playerX = px;
@@ -196,14 +172,6 @@ public class ArenaStatePacket {
         this.bossMaxHp = maxHp;
         this.bossPhase = phase;
         this.bossMoveDir = bossMoveDir;
-        this.skillGauge = skillGauge;
-        this.chargeLevel = chargeLevel;
-        this.holdChargeGauge = holdChargeGauge;
-        this.abilityType = abilityType;
-        this.abilityTicks = abilityTicks;
-        this.abilityX = abilityX;
-        this.abilityY = abilityY;
-        this.abilityOwner = abilityOwner;
         this.score = score;
         this.combinedScore = combinedScore;
         this.spellTimerTicks = timerTicks;
@@ -236,6 +204,7 @@ public class ArenaStatePacket {
         this.speedNormal = speedNormal;
         this.speedFocused = speedFocused;
         this.bossTexture = bossTexture;
+        this.globallyPaused = globallyPaused;
     }
 
     // ---------------------------------------------------------------- codec
@@ -259,14 +228,6 @@ public class ArenaStatePacket {
         buf.writeVarInt(bossMaxHp);
         buf.writeVarInt(bossPhase);
         buf.writeVarInt(bossMoveDir);
-        buf.writeVarInt(skillGauge);
-        buf.writeVarInt(chargeLevel);
-        buf.writeVarInt(holdChargeGauge);
-        buf.writeVarInt(abilityType);
-        buf.writeVarInt(abilityTicks);
-        buf.writeFloat(abilityX);
-        buf.writeFloat(abilityY);
-        buf.writeUUID(abilityOwner);
         buf.writeLong(score);
         buf.writeLong(combinedScore);
         buf.writeVarInt(spellTimerTicks);
@@ -299,6 +260,7 @@ public class ArenaStatePacket {
         buf.writeFloat(speedNormal);
         buf.writeFloat(speedFocused);
         buf.writeUtf(bossTexture);
+        buf.writeBoolean(globallyPaused);
     }
 
     @SuppressWarnings("null")
@@ -319,14 +281,6 @@ public class ArenaStatePacket {
         int maxHp = buf.readVarInt();
         int phase = buf.readVarInt();
         int bossMoveDir = buf.readVarInt();
-        int skillGauge = buf.readVarInt();
-        int chargeLevel = buf.readVarInt();
-        int holdChargeGauge = buf.readVarInt();
-        int abilityType = buf.readVarInt();
-        int abilityTicks = buf.readVarInt();
-        float abilityX = buf.readFloat();
-        float abilityY = buf.readFloat();
-        java.util.UUID abilityOwner = buf.readUUID();
         long score = buf.readLong();
         long combinedScore = buf.readLong();
         int timerTicks = buf.readVarInt();
@@ -359,10 +313,10 @@ public class ArenaStatePacket {
         float speedNormal = buf.readFloat();
         float speedFocused = buf.readFloat();
         String bossTexture = buf.readUtf();
+        boolean globallyPaused = buf.readBoolean();
         return new ArenaStatePacket(true, spectating,
                 px, py, lives, bombs, graze, power, pIdx,
                 bx, by, hp, maxHp, phase, bossMoveDir,
-                skillGauge, chargeLevel, holdChargeGauge, abilityType, abilityTicks, abilityX, abilityY, abilityOwner,
                 score, combinedScore, timerTicks, timerTotal,
                 musicTrackId, spellName, activeSpellCard, declaring,
                 characterId, bossId, bossName, bossIntroVisible,
@@ -371,6 +325,6 @@ public class ArenaStatePacket {
                 dbgGod, dTick, dCd, dBul,
                 grazeChain, lifePieces, bombPieces,
                 rank, pocFraction, pocAutoCollect,
-                speedNormal, speedFocused, bossTexture);
+                speedNormal, speedFocused, bossTexture, globallyPaused);
     }
 }

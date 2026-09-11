@@ -76,24 +76,18 @@ public class ArenaPlayScreen extends Screen {
                 if (state.testPage == TestModeHud.PAGE_CHAR) {
                     // Character selection: update locally and send refresh
                     state.testCurrentCharId = selected;
-                    state.testShotTypeIds.clear();
-                    state.testCurrentShotTypeIdx = 0;
                     // Send refresh and restart to apply new character immediately
                     BHPackets.sendTestSelect(new TestSelectPacket(
                             TestSelectPacket.TYPE_CHAR_REFRESH, selected, 0,
-                            state.testCurrentDifficulty, selected, state.testCurrentShotTypeIdx));
+                            state.testCurrentDifficulty, selected));
                 } else if (state.testPage == TestModeHud.PAGE_BOSS) {
                     BHPackets.sendTestSelect(new TestSelectPacket(
                             TestSelectPacket.TYPE_BOSS, selected, 0,
-                            state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
+                            state.testCurrentDifficulty, state.testCurrentCharId));
                 } else if (state.testPage == TestModeHud.PAGE_STAGE) {
                     BHPackets.sendTestSelect(new TestSelectPacket(
                             TestSelectPacket.TYPE_STAGE, selected, 0,
-                            state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
-                } else if (state.testPage == TestModeHud.PAGE_WAVE) {
-                    BHPackets.sendTestSelect(new TestSelectPacket(
-                            TestSelectPacket.TYPE_WAVE, selected, 0,
-                            state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
+                            state.testCurrentDifficulty, state.testCurrentCharId));
                 }
             }
             return true;
@@ -132,34 +126,30 @@ public class ArenaPlayScreen extends Screen {
                     String bossId = state.bossId.isEmpty() ? state.testCurrentBossId : state.bossId;
                     BHPackets.sendTestSelect(new TestSelectPacket(
                             TestSelectPacket.TYPE_BOSS, bossId, state.bossPhase,
-                            state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
+                            state.testCurrentDifficulty, state.testCurrentCharId));
                 } else if (state.testPage == TestModeHud.PAGE_STAGE) {
                     BHPackets.sendTestSelect(new TestSelectPacket(
                             TestSelectPacket.TYPE_STAGE, state.testCurrentStageId, 0,
-                            state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
-                } else if (state.testPage == TestModeHud.PAGE_WAVE) {
-                    BHPackets.sendTestSelect(new TestSelectPacket(
-                            TestSelectPacket.TYPE_WAVE, state.testCurrentWaveId, 0,
-                            state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
+                            state.testCurrentDifficulty, state.testCurrentCharId));
                 } else if (state.testPage == TestModeHud.PAGE_CHAR) {
                     String bossId = state.bossId.isEmpty() ? state.testCurrentBossId : state.bossId;
                     BHPackets.sendTestSelect(new TestSelectPacket(
                             TestSelectPacket.TYPE_BOSS, bossId, state.bossPhase,
-                            state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
+                            state.testCurrentDifficulty, state.testCurrentCharId));
                 }
                 return true;
             }
             if (key == GLFW.GLFW_KEY_PAGE_UP) {
                 BHPackets.sendTestSelect(new TestSelectPacket(
                         TestSelectPacket.TYPE_BOSS, state.bossId, state.bossPhase + 1,
-                        state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
+                        state.testCurrentDifficulty, state.testCurrentCharId));
                 return true;
             }
             if (key == GLFW.GLFW_KEY_PAGE_DOWN) {
                 int prev = Math.max(0, state.bossPhase - 1);
                 BHPackets.sendTestSelect(new TestSelectPacket(
                         TestSelectPacket.TYPE_BOSS, state.bossId, prev,
-                        state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
+                        state.testCurrentDifficulty, state.testCurrentCharId));
                 return true;
             }
             if (key == GLFW.GLFW_KEY_H) {
@@ -178,37 +168,11 @@ public class ArenaPlayScreen extends Screen {
                 if (state.testPage == TestModeHud.PAGE_STAGE) {
                     BHPackets.sendTestSelect(new TestSelectPacket(
                             TestSelectPacket.TYPE_STAGE, state.testCurrentStageId, 0,
-                            diff, state.testCurrentCharId, state.testCurrentShotTypeIdx));
-                } else if (state.testPage == TestModeHud.PAGE_WAVE) {
-                    BHPackets.sendTestSelect(new TestSelectPacket(
-                            TestSelectPacket.TYPE_WAVE, state.testCurrentWaveId, 0,
-                            diff, state.testCurrentCharId, state.testCurrentShotTypeIdx));
+                            diff, state.testCurrentCharId));
                 } else {
                     BHPackets.sendTestSelect(new TestSelectPacket(
                             TestSelectPacket.TYPE_BOSS, state.bossId, state.bossPhase,
-                            diff, state.testCurrentCharId, state.testCurrentShotTypeIdx));
-                }
-                return true;
-            }
-            // Shot type cycling with 5 (previous) and 6 (next)
-            if (key == GLFW.GLFW_KEY_5) {
-                if (!state.testShotTypeIds.isEmpty()) {
-                    state.testCurrentShotTypeIdx = (state.testCurrentShotTypeIdx - 1 + state.testShotTypeIds.size())
-                            % state.testShotTypeIds.size();
-                    // Immediate restart with new shot
-                    BHPackets.sendTestSelect(new TestSelectPacket(
-                            TestSelectPacket.TYPE_BOSS, state.bossId, state.bossPhase,
-                            state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
-                }
-                return true;
-            }
-            if (key == GLFW.GLFW_KEY_6) {
-                if (!state.testShotTypeIds.isEmpty()) {
-                    state.testCurrentShotTypeIdx = (state.testCurrentShotTypeIdx + 1) % state.testShotTypeIds.size();
-                    // Immediate restart with new shot
-                    BHPackets.sendTestSelect(new TestSelectPacket(
-                            TestSelectPacket.TYPE_BOSS, state.bossId, state.bossPhase,
-                            state.testCurrentDifficulty, state.testCurrentCharId, state.testCurrentShotTypeIdx));
+                            diff, state.testCurrentCharId));
                 }
                 return true;
             }

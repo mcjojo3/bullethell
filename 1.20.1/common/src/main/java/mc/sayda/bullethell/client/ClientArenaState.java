@@ -1,7 +1,6 @@
 package mc.sayda.bullethell.client;
 
 import mc.sayda.bullethell.arena.BulletPool;
-import mc.sayda.bullethell.arena.EnemyPool;
 import mc.sayda.bullethell.arena.ItemPool;
 import mc.sayda.bullethell.arena.LaserPool;
 import mc.sayda.bullethell.arena.PlayerState2D;
@@ -10,7 +9,6 @@ import mc.sayda.bullethell.network.ArenaStatePacket;
 import mc.sayda.bullethell.network.BulletDeltaPacket;
 import mc.sayda.bullethell.network.BulletFullSyncPacket;
 import mc.sayda.bullethell.network.CoopPlayersSyncPacket;
-import mc.sayda.bullethell.network.EnemySyncPacket;
 import mc.sayda.bullethell.arena.GameEvent;
 import mc.sayda.bullethell.network.AttackActivationSfxPacket;
 import mc.sayda.bullethell.network.GameEventPacket;
@@ -43,12 +41,22 @@ public class ClientArenaState {
 
     public boolean active = false;
 
-    public final BulletPool bullets = new BulletPool(BulletPool.ENEMY_CAPACITY);
-    public final BulletPool playerBullets = new BulletPool(BulletPool.PLAYER_CAPACITY);
-    public final ItemPool items = new ItemPool();
-    public final EnemyPool enemies = new EnemyPool();
+    /*
+     * Not final: when a local simulation is running these are rebound to point straight
+     * at the sim's own pools, so the renderer draws simulated bullets with no copying
+     * and no changes of its own. {@link #unbindSim} puts the packet-fed pools back.
+     */
+    public BulletPool bullets = new BulletPool(BulletPool.ENEMY_CAPACITY);
+    public BulletPool playerBullets = new BulletPool(BulletPool.PLAYER_CAPACITY);
+    public ItemPool items = new ItemPool();
+    public LaserPool lasers = new LaserPool();
     public final PlayerState2D player = new PlayerState2D();
-    public final LaserPool lasers = new LaserPool();
+
+    /** Pools owned by this class, kept aside while a sim is bound. */
+    private final BulletPool ownBullets = bullets;
+    private final BulletPool ownPlayerBullets = playerBullets;
+    private final ItemPool ownItems = items;
+    private final LaserPool ownLasers = lasers;
     /** Last input direction sent to server - used for sub-tick position extrapolation. */
     public float inputDx = 0f, inputDy = 0f;
     public boolean inputFocused = false;
@@ -59,18 +67,6 @@ public class ClientArenaState {
     /** Previous packet's boss position - used for sub-tick velocity extrapolation. */
     public float prevBossX = 0f, prevBossY = 0f;
     public int bossHp, bossMaxHp, bossPhase;
-
-    // PoFV: gray stock (skillGauge) + colored hold (holdChargeGauge); chargeLevel = floor(stock).
-    public int skillGauge = 0;
-    public int chargeLevel = 0;
-    public int holdChargeGauge = 0;
-
-    // Active Ability State
-    public int abilityType = 0; // 0=none, 1=timestop, 2=masterspark
-    public int abilityTicks = 0;
-    public float abilityX = 0f;
-    public float abilityY = 0f;
-    public java.util.UUID abilityOwner = new java.util.UUID(0, 0);
 
     public long score;
     /** Sum of all players' scores in co-op (equals {@link #score} when solo). */
@@ -115,6 +111,9 @@ public class ClientArenaState {
 
     /** Consecutive graze chain (resets on hit or timeout). */
     public int grazeChain = 0;
+
+    /** Server says the whole fight is held for a paused participant. */
+    public boolean globallyPaused = false;
 
     // ---- Cached formatted strings (recomputed only when the source value changes) ----
     private long cachedScore = Long.MIN_VALUE;
@@ -198,31 +197,23 @@ public class ClientArenaState {
 
     public boolean testMode = false;
     public boolean testHitboxVisible = false;
-    public int testPage = 0; // 0=BOSS, 1=STAGE, 2=WAVE, 3=CHAR, 4=SHOT
+    public int testPage = 0; // 0=BOSS, 1=STAGE, 2=CHAR
     // per-page ID lists
     public java.util.List<String> testBossIds  = new java.util.ArrayList<>();
     public java.util.List<String> testStageIds = new java.util.ArrayList<>();
-    public java.util.List<String> testWaveIds  = new java.util.ArrayList<>();
     public java.util.List<String> testCharIds  = new java.util.ArrayList<>();
-    public java.util.List<String> testShotTypeIds = new java.util.ArrayList<>();
     // current selection per page
     public String testCurrentBossId   = "";
     public String testCurrentStageId  = "";
-    public String testCurrentWaveId   = "";
     public String testCurrentCharId   = "reimu";
-    public int testCurrentShotTypeIdx = 0;
     public int testCurrentDifficulty  = 1; // DifficultyConfig.NORMAL ordinal
     // scroll + selected index per page
     public int testScrollOffset       = 0; // BOSS
     public int testSelectedIdx        = 0;
     public int testStageScrollOffset  = 0;
     public int testStageSelectedIdx   = 0;
-    public int testWaveScrollOffset   = 0;
-    public int testWaveSelectedIdx    = 0;
     public int testCharScrollOffset   = 0;
     public int testCharSelectedIdx    = 0;
-    public int testShotTypeScrollOffset = 0;
-    public int testShotTypeSelectedIdx  = 0;
 
     /**
      * Track ID for the current phase's music (empty = no music).
@@ -252,7 +243,7 @@ public class ClientArenaState {
 
     // --- boss sprite animation ---
     public int bossAnimCounter = 0;
-    /** Client-only: advances while {@link #active}; drives fairy sprite sheet frames during waves (not gated on boss). */
+    /** Client-only: advances while {@link #active} (not gated on boss). */
     public int arenaAnimTick = 0;
     /** -1 left, 0 idle, +1 right (server-authoritative). */
     public int bossMoveDir = 0;
@@ -295,7 +286,6 @@ public class ClientArenaState {
     public void applyArenaState(boolean pktActive, boolean pktSpectating, float playerX, float playerY,
             int lives, int bombs, int graze, int power, int pIdx,
             float bossX, float bossY, int bossHp, int bossMaxHp, int bossPhase, int bossMoveDir,
-            int skillGauge, int chargeLevel, int holdChargeGauge, int abilityType, int abilityTicks, float abilityX, float abilityY, java.util.UUID abilityOwner,
             long score, long combinedScore, int spellTimerTicks, int spellTimerTotal,
             String musicTrackId, String spellName, boolean activeSpellCard, boolean declaring,
             String characterId, String bossId, String bossName, boolean bossIntroVisible,
@@ -358,14 +348,6 @@ public class ClientArenaState {
         this.bossHp = bossHp;
         this.bossMaxHp = bossMaxHp;
         this.bossPhase = bossPhase;
-        this.skillGauge = skillGauge;
-        this.chargeLevel = chargeLevel;
-        this.holdChargeGauge = holdChargeGauge;
-        this.abilityType = abilityType;
-        this.abilityTicks = abilityTicks;
-        this.abilityX = abilityX;
-        this.abilityY = abilityY;
-        this.abilityOwner = abilityOwner;
         this.score = score;
         this.combinedScore = combinedScore;
         this.spellTimerTicks = spellTimerTicks;
@@ -398,6 +380,50 @@ public class ClientArenaState {
         this.bombPieces = bombPieces;
     }
 
+    // ---------------------------------------------------------------- local sim binding
+
+    /** Points the render pools at a local simulation's own pools. */
+    public void bindSim(BulletPool simBullets, BulletPool simPlayerBullets,
+            ItemPool simItems, LaserPool simLasers) {
+        this.bullets = simBullets;
+        this.playerBullets = simPlayerBullets;
+        this.items = simItems;
+        this.lasers = simLasers;
+        allPlayerBullets.clear();
+        allPlayerBullets.put(playerIndex, simPlayerBullets);
+        Arrays.fill(prevLocalPlayerBulletsActive, false);
+    }
+
+    /**
+     * Plays the shot sound if the local player fired since the last call. Packet mode
+     * works this out while unpacking the bullet sync; a local sim has no packet to hang
+     * it off, so it calls this each tick instead.
+     */
+    public void playShootSfxForNewBullets() {
+        BulletPool local = allPlayerBullets.get(playerIndex);
+        if (local == null) return;
+        boolean anyNew = false;
+        for (int i = 0; i < BulletPool.PLAYER_CAPACITY; i++) {
+            boolean now = local.isActive(i);
+            if (now && !prevLocalPlayerBulletsActive[i]) anyNew = true;
+            prevLocalPlayerBulletsActive[i] = now;
+        }
+        if (anyNew) BHSfx.play(BHSounds.SHOOT::get);
+    }
+
+    /** Restores the packet-fed pools. Safe to call when no sim was bound. */
+    public void unbindSim() {
+        this.bullets = ownBullets;
+        this.playerBullets = ownPlayerBullets;
+        this.items = ownItems;
+        this.lasers = ownLasers;
+        ownBullets.clearAll();
+        ownPlayerBullets.clearAll();
+        ownItems.clearAll();
+        ownLasers.clearAll();
+        allPlayerBullets.clear();
+    }
+
     public void applyPlayerBulletSync(float[][] allSlotData, boolean[] allActive) {
         for (int i = 0; i < BulletPool.PLAYER_CAPACITY; i++)
             playerBullets.setSlotData(i, allSlotData[i], allActive[i]);
@@ -407,18 +433,6 @@ public class ClientArenaState {
         items.clearAll();
         for (int j = 0; j < slots.length; j++)
             items.setSlotData(slots[j], data[j], true);
-    }
-
-    public void applyEnemySync(int[] slots, float[][] data) {
-        java.util.BitSet prevActive = new java.util.BitSet(EnemyPool.CAPACITY);
-        for (int i = 0; i < EnemyPool.CAPACITY; i++)
-            if (enemies.isActive(i)) prevActive.set(i);
-        for (int j = 0; j < slots.length; j++) {
-            enemies.setSlotData(slots[j], data[j], true);
-            prevActive.clear(slots[j]);
-        }
-        for (int i = prevActive.nextSetBit(0); i >= 0; i = prevActive.nextSetBit(i + 1))
-            enemies.deactivate(i);
     }
 
     public void applyCoopSync(List<Entry> entries) {
@@ -448,10 +462,10 @@ public class ClientArenaState {
     // overloads (single-argument, called from BHClientPackets)
 
     public void applyArenaState(ArenaStatePacket pkt) {
+        this.globallyPaused = pkt.active && pkt.globallyPaused;
         applyArenaState(pkt.active, pkt.spectating, pkt.playerX, pkt.playerY,
                 pkt.lives, pkt.bombs, pkt.graze, pkt.power, pkt.playerIndex,
                 pkt.bossX, pkt.bossY, pkt.bossHp, pkt.bossMaxHp, pkt.bossPhase, pkt.bossMoveDir,
-                pkt.skillGauge, pkt.chargeLevel, pkt.holdChargeGauge, pkt.abilityType, pkt.abilityTicks, pkt.abilityX, pkt.abilityY, pkt.abilityOwner,
                 pkt.score, pkt.combinedScore, pkt.spellTimerTicks, pkt.spellTimerTotal,
                 pkt.musicTrackId, pkt.spellName, pkt.activeSpellCard, pkt.declaring,
                 pkt.characterId, pkt.bossId, pkt.bossName, pkt.bossIntroVisible,
@@ -483,10 +497,6 @@ public class ClientArenaState {
 
     public void applyItemSync(ItemSyncPacket pkt) {
         applyItemSync(pkt.slots, pkt.data);
-    }
-
-    public void applyEnemySync(EnemySyncPacket pkt) {
-        applyEnemySync(pkt.slots, pkt.data);
     }
 
     public void applyCoopSync(CoopPlayersSyncPacket pkt) {
@@ -543,7 +553,11 @@ public class ClientArenaState {
     }
 
     public void applyGameEvent(GameEventPacket pkt) {
-        GameEvent ev = pkt.event;
+        applyGameEvent(pkt.event);
+    }
+
+    /** Same handling for an event raised by a local simulation instead of a packet. */
+    public void applyGameEvent(GameEvent ev) {
         switch (ev) {
             case HIT -> BHSfx.play(BHSounds.DEATH::get);
             case ENEMY_KILL -> BHSfx.play(BHSounds.KILL::get);
@@ -563,7 +577,11 @@ public class ClientArenaState {
     }
 
     public void applyAttackActivationSfx(AttackActivationSfxPacket pkt) {
-        BHSfx.play(BHSounds.resolveForActivationSfx(pkt.soundId));
+        applyAttackActivationSfx(pkt.soundId);
+    }
+
+    public void applyAttackActivationSfx(String soundId) {
+        BHSfx.play(BHSounds.resolveForActivationSfx(soundId));
     }
 
     // ---------------------------------------------------------------- animation
@@ -617,6 +635,8 @@ public class ClientArenaState {
     // ---------------------------------------------------------------- reset
 
     public void reset() {
+        // Before anything is cleared: hands the render pools back from the local sim.
+        ClientArenaSim.INSTANCE.stop();
         active = false;
         spectating = false;
         pendingEndOverlay = false;
@@ -625,17 +645,10 @@ public class ClientArenaState {
         debugPatternCooldown = 0;
         debugEnemyBulletCount = 0;
         grazeChain = 0;
+        globallyPaused = false;
         lifePieces = 0;
         bombPieces = 0;
         power = 0;
-        skillGauge = 0;
-        chargeLevel = 0;
-        holdChargeGauge = 0;
-        abilityType = 0;
-        abilityTicks = 0;
-        abilityX = 0f;
-        abilityY = 0f;
-        abilityOwner = new java.util.UUID(0, 0);
         currentMusicTrackId = "";
         characterId = "reimu";
         bossId = "";
@@ -665,22 +678,18 @@ public class ClientArenaState {
         testPage = 0;
         testBossIds.clear();
         testStageIds.clear();
-        testWaveIds.clear();
         testCharIds.clear();
         testCurrentBossId  = "";
         testCurrentStageId = "";
-        testCurrentWaveId  = "";
         testCurrentCharId  = "reimu";
         testCurrentDifficulty = 1;
         testScrollOffset      = 0; testSelectedIdx      = 0;
         testStageScrollOffset = 0; testStageSelectedIdx = 0;
-        testWaveScrollOffset  = 0; testWaveSelectedIdx  = 0;
         testCharScrollOffset  = 0; testCharSelectedIdx  = 0;
         bullets.clearAll();
         playerBullets.clearAll();
         allPlayerBullets.clear();
         items.clearAll();
-        enemies.clearAll();
         lasers.clearAll();
         coopPlayers.clear();
         Arrays.fill(prevLocalPlayerBulletsActive, false);

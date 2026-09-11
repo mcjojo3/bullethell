@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Server-side registry of all active ArenaContexts.
- * One context per participating player; multiple contexts = splitscreen /
- * multiplayer.
+ * One context per fight; co-op participants join the host's rather than
+ * getting their own.
  *
  * Co-op: a participant joins the host's arena. playerToMatch maps participant
  * UUID → host UUID.
@@ -27,8 +27,10 @@ public class BulletHellManager {
     private final Map<UUID, ArenaThread> arenaThreads = new ConcurrentHashMap<>();
     /** participant UUID → host UUID (not present for hosts themselves). */
     private final Map<UUID, UUID> playerToMatch = new ConcurrentHashMap<>();
-    /** host UUID → list of accepted participant info (pre-arena lobby). */
-    private final Map<UUID, List<ParticipantInfo>> pendingInvites = new ConcurrentHashMap<>();
+    /** lobby id → party waiting to start. */
+    private final Map<UUID, LobbySession> lobbies = new ConcurrentHashMap<>();
+    /** member UUID → lobby id. */
+    private final Map<UUID, UUID> playerToLobby = new ConcurrentHashMap<>();
 
     private volatile MinecraftServer minecraftServer;
 
@@ -37,7 +39,6 @@ public class BulletHellManager {
         if (this.minecraftServer == null) this.minecraftServer = server;
     }
 
-    public record ParticipantInfo(UUID uuid, mc.sayda.bullethell.boss.CharacterDefinition charDef, int shotTypeOrdinal) {}
 
     private BulletHellManager() {}
 
@@ -67,7 +68,8 @@ public class BulletHellManager {
     public ArenaContext startArena(ServerPlayer host, DifficultyConfig difficulty,
             String stageId, String characterId) {
         BHDebugMode.clear(host.getUUID());
-        ArenaContext ctx = new ArenaContext(host.getUUID(), difficulty, stageId, characterId, host);
+        ArenaContext ctx = new ArenaContext(host.getUUID(), difficulty, stageId, characterId,
+                mc.sayda.bullethell.entity.BHAttributes.bonusesFor(host));
         arenas.put(host.getUUID(), ctx);
         startThread(host.getUUID(), ctx, host.getServer());
         return ctx;
@@ -80,7 +82,8 @@ public class BulletHellManager {
     public ArenaContext startArena(ServerPlayer host, DifficultyConfig difficulty, StageDefinition stage,
             String characterId, int skipToBossPhase1Based) {
         BHDebugMode.clear(host.getUUID());
-        ArenaContext ctx = new ArenaContext(host.getUUID(), difficulty, stage, characterId, host);
+        ArenaContext ctx = new ArenaContext(host.getUUID(), difficulty, stage, characterId,
+                mc.sayda.bullethell.entity.BHAttributes.bonusesFor(host));
         if (skipToBossPhase1Based >= 1)
             ctx.debugSkipToBossPhase(skipToBossPhase1Based - 1);
         arenas.put(host.getUUID(), ctx);
@@ -93,6 +96,12 @@ public class BulletHellManager {
             mc.sayda.bullethell.Bullethell.LOGGER.error(
                     "[BulletHell] Cannot start arena thread for {} - MinecraftServer not available", hostUuid);
             return;
+        }
+        // With client-side simulation on, this context keeps only what the players share -
+        // boss HP, phase, score - and every client runs the bullets for itself.
+        if (mc.sayda.bullethell.BHGameRules.isClientSimEnabled(server)) {
+            ctx.simulatesWorld = false;
+            ctx.ownsPhaseTransitions = true;
         }
         ArenaThread thread = new ArenaThread(ctx, hostUuid, server);
         arenaThreads.put(hostUuid, thread);
@@ -124,10 +133,12 @@ public class BulletHellManager {
      * @param participant     joining player (for attribute bonuses)
      */
     public void joinMatch(UUID participantUuid, UUID hostUuid,
-            mc.sayda.bullethell.boss.CharacterDefinition charDef, ServerPlayer participant, int shotTypeOrdinal) {
+            mc.sayda.bullethell.boss.CharacterDefinition charDef, ServerPlayer participant) {
         ArenaContext ctx = arenas.get(hostUuid);
         if (ctx == null) return;
-        ctx.addCoopPlayer(participantUuid, charDef, participant, shotTypeOrdinal);
+        // Attribute reads happen here, on the main thread, not inside the arena.
+        ctx.addCoopPlayer(participantUuid, charDef,
+                mc.sayda.bullethell.entity.BHAttributes.bonusesFor(participant));
         playerToMatch.put(participantUuid, hostUuid);
         mc.sayda.bullethell.arena.PlayerState2D ps = ctx.getPlayerState(participantUuid);
         if (ps != null) ps.invulnTicks = mc.sayda.bullethell.arena.PlayerState2D.INVULN_TICKS;
@@ -146,18 +157,57 @@ public class BulletHellManager {
 
     // ---------------------------------------------------------------- lobby (pre-arena)
 
-    public void addPendingInvite(UUID hostUuid, ParticipantInfo info) {
-        pendingInvites.computeIfAbsent(hostUuid, k -> new ArrayList<>()).add(info);
+    /** Existing lobby for this player, or a fresh one with them as host. */
+    public LobbySession getOrCreateLobby(UUID hostUuid, String hostName, String stageId) {
+        LobbySession existing = getLobby(hostUuid);
+        if (existing != null) return existing;
+        LobbySession lobby = new LobbySession(hostUuid, hostName, stageId);
+        lobbies.put(lobby.id, lobby);
+        playerToLobby.put(hostUuid, lobby.id);
+        return lobby;
     }
 
-    public List<ParticipantInfo> getAndClearPendingInvites(UUID hostUuid) {
-        return pendingInvites.remove(hostUuid);
+    public LobbySession getLobby(UUID uuid) {
+        UUID lobbyId = playerToLobby.get(uuid);
+        return lobbyId != null ? lobbies.get(lobbyId) : null;
     }
 
-    public void removePendingInvite(UUID participantUuid) {
-        for (var list : pendingInvites.values()) {
-            list.removeIf(p -> p.uuid().equals(participantUuid));
+    public boolean isInLobby(UUID uuid) {
+        return playerToLobby.containsKey(uuid);
+    }
+
+    /** Adds a member to the host's lobby. Returns null when there is no such lobby. */
+    public LobbySession joinLobby(UUID hostUuid, UUID memberUuid, String memberName) {
+        LobbySession lobby = getLobby(hostUuid);
+        if (lobby == null || !lobby.isHost(hostUuid) || lobby.starting) return null;
+        lobby.add(memberUuid, memberName);
+        playerToLobby.put(memberUuid, lobby.id);
+        return lobby;
+    }
+
+    /**
+     * Removes one member. The lobby is disbanded when the host leaves or it empties,
+     * so a party never outlives the person who owns its settings.
+     *
+     * @return the affected lobby, so callers can notify whoever was in it
+     */
+    public LobbySession leaveLobby(UUID uuid) {
+        LobbySession lobby = getLobby(uuid);
+        if (lobby == null) return null;
+        playerToLobby.remove(uuid);
+        lobby.remove(uuid);
+        if (lobby.isHost(uuid) || lobby.isEmpty()) {
+            for (UUID member : lobby.memberIds()) playerToLobby.remove(member);
+            lobbies.remove(lobby.id);
         }
+        return lobby;
+    }
+
+    /** Drops the lobby once its run has begun. */
+    public void closeLobby(LobbySession lobby) {
+        if (lobby == null) return;
+        for (UUID member : lobby.memberIds()) playerToLobby.remove(member);
+        lobbies.remove(lobby.id);
     }
 
     // ---------------------------------------------------------------- query

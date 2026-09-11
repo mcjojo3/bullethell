@@ -1,20 +1,15 @@
 package mc.sayda.bullethell.boss;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Top-level definition of a full stage: pre-boss enemy waves, the boss fight,
- * music, and gameplay ruleset.
+ * Top-level definition of a full stage: the boss fight, music, and gameplay
+ * ruleset.
  *
  * Place JSON files at:
  *   {@code data/bullethell/stages/<id>.json}
  *
- * A stage proceeds as follows:
- *   1. Waves spawn in {@link #waves} order, driven by their {@code spawnTick}.
- *   2. Once all waves have spawned AND the enemy pool is empty, the boss fight
- *      begins, loading the {@link BossDefinition} identified by {@link #bossId}.
- *   3. The boss fight runs until defeated or the player runs out of lives.
+ * A stage opens on the boss intro dialogue, then runs the {@link BossDefinition}
+ * identified by {@link #bossId} until it is defeated or the player runs out of
+ * lives.
  *
  * The {@link RulesetConfig} embedded in this definition controls all tunable
  * gameplay mechanics so you can replicate TH6, TH7, or TH9 rules.
@@ -28,14 +23,14 @@ public class StageDefinition {
     public String title = "Stage ?";
 
     /**
-     * Music track ID played during the pre-boss wave section.
+     * Music track ID played over the boss intro dialogue.
      * Must match a key in {@code assets/bullethell/sounds.json}.
-     * Null or empty = no music during waves.
+     * Null or empty = no music until the first boss phase sets its own.
      */
     public String stageMusic = null;
 
     /**
-     * ID of the boss definition to load when all waves are cleared.
+     * ID of the boss definition to load.
      * Must match a file at {@code data/bullethell/bosses/<bossId>.json}.
      */
     public String bossId = "marisa_boss";
@@ -45,28 +40,6 @@ public class StageDefinition {
      * If set (non-empty), clearing this stage can immediately start that stage.
      */
     public String nextStageId = "";
-
-    /**
-     * Ticks to wait after the last wave clears before starting the boss intro
-     * dialogue (or boss fight if no intro dialogue is defined).
-     * Gives the player a brief breathing moment and cleans the screen.
-     * Default 120 ticks = 6 seconds.
-     */
-    public int bossIntroDelayTicks = 120;
-
-    /**
-     * Ordered list of enemy waves.  Waves are spawned when the stage tick
-     * reaches each wave's {@code spawnTick}.  Must be sorted by ascending
-     * {@code spawnTick}.
-     */
-    public List<WaveDefinition> waves = new ArrayList<>();
-
-    /**
-     * Optional procedural fairy-rush segment: random picks from
-     * {@code fairy_waves/catalog.json} with ramped intensity and spacing. When
-     * non-null, preamble waves should be inline only (no {@code waveRef} rows).
-     */
-    public FairyRushDefinition fairyRush = null;
 
     /**
      * Gameplay rules for this stage.  Controls drop patterns, PoC behaviour,

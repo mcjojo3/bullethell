@@ -35,26 +35,10 @@ public class BullethellForge {
     }
 
     private static void onEntityAttributes(EntityAttributeCreationEvent event) {
-        event.put(BHEntities.MARISA_NPC.get(), BHNpc.createAttributes().build());
-        event.put(BHEntities.REMILIA_NPC.get(), BHNpc.createAttributes().build());
-        event.put(BHEntities.SAKUYA_NPC.get(), BHNpc.createAttributes().build());
-        event.put(BHEntities.CIRNO_NPC.get(), BHNpc.createAttributes().build());
-        event.put(BHEntities.SANAE_NPC.get(), BHNpc.createAttributes().build());
-        event.put(BHEntities.FLANDRE_NPC.get(), BHNpc.createAttributes().build());
-        event.put(BHEntities.SATORI_NPC.get(), BHNpc.createAttributes().build());
-        event.put(BHEntities.YUUKA_NPC.get(), BHNpc.createAttributes().build());
-        event.put(BHEntities.KANAKO_NPC.get(), BHNpc.createAttributes().build());
+        BHEntities.NPCS.values().forEach(npc -> event.put(npc.get(), BHNpc.createAttributes().build()));
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(BHEntities.MARISA_NPC.get(), BHNpcRenderer::new);
-        event.registerEntityRenderer(BHEntities.REMILIA_NPC.get(), BHNpcRenderer::new);
-        event.registerEntityRenderer(BHEntities.SAKUYA_NPC.get(), BHNpcRenderer::new);
-        event.registerEntityRenderer(BHEntities.CIRNO_NPC.get(), BHNpcRenderer::new);
-        event.registerEntityRenderer(BHEntities.SANAE_NPC.get(), BHNpcRenderer::new);
-        event.registerEntityRenderer(BHEntities.FLANDRE_NPC.get(), BHNpcRenderer::new);
-        event.registerEntityRenderer(BHEntities.SATORI_NPC.get(), BHNpcRenderer::new);
-        event.registerEntityRenderer(BHEntities.YUUKA_NPC.get(), BHNpcRenderer::new);
-        event.registerEntityRenderer(BHEntities.KANAKO_NPC.get(), BHNpcRenderer::new);
+        BHEntities.NPCS.values().forEach(npc -> event.registerEntityRenderer(npc.get(), BHNpcRenderer::new));
     }
 }

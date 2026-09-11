@@ -27,8 +27,7 @@ import java.util.UUID;
 
 public class BHCommonEvents {
 
-    private record CarryState(int lives, int bombs, int graze, int power,
-            double storedChargeProgress, double holdChargeProgress) {
+    private record CarryState(int lives, int bombs, int graze, int power) {
     }
 
     public static void register() {
@@ -63,6 +62,7 @@ public class BHCommonEvents {
 
         PlayerEvent.PLAYER_JOIN.register(player -> {
             BossProgression.ensureRootAdvancement((ServerPlayer) player);
+            mc.sayda.bullethell.network.BHPackets.sendDataSync((ServerPlayer) player);
         });
 
         CommandRegistrationEvent.EVENT.register((dispatcher, registryAccess, environment) -> {
@@ -134,9 +134,7 @@ public class BHCommonEvents {
         for (UUID pid : ctx.allParticipants()) {
             var ps = ctx.getPlayerState(pid);
             if (ps != null) {
-                carry.put(pid, new CarryState(
-                        ps.lives, ps.bombs, ps.graze, ps.power,
-                        ps.storedChargeProgress, ps.holdChargeProgress));
+                carry.put(pid, new CarryState(ps.lives, ps.bombs, ps.graze, ps.power));
             }
         }
         java.util.List<UUID> partList = new java.util.ArrayList<>(ctx.allParticipants());
@@ -155,13 +153,11 @@ public class BHCommonEvents {
         }
 
         java.util.LinkedHashMap<UUID, String>  coopChars = new java.util.LinkedHashMap<>();
-        java.util.LinkedHashMap<UUID, Integer> coopShots = new java.util.LinkedHashMap<>();
         for (UUID pid : ctx.getCoopPlayers().keySet()) {
             coopChars.put(pid, ctx.getCharacterId(pid));
-            coopShots.put(pid, ctx.getShotTypeOrdinal(pid));
         }
 
-        BHPackets.startArena(host, ctx.difficulty, nextStageId, ctx.characterId, ctx.hostShotTypeOrdinal);
+        BHPackets.startArena(host, ctx.difficulty, nextStageId, ctx.characterId);
         ArenaContext nextCtx = BulletHellManager.INSTANCE.getArenaForPlayer(hostUuid);
         if (nextCtx == null) return true;
 
@@ -169,8 +165,7 @@ public class BHCommonEvents {
             ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
             if (p == null) continue;
             CharacterDefinition charDef = CharacterLoader.load(e.getValue());
-            BulletHellManager.INSTANCE.joinMatch(p.getUUID(), hostUuid, charDef, p,
-                    coopShots.getOrDefault(p.getUUID(), 0));
+            BulletHellManager.INSTANCE.joinMatch(p.getUUID(), hostUuid, charDef, p);
             BHPackets.sendFullSync(p, nextCtx);
             int pIdx = 0, c = 2;
             for (UUID cid : nextCtx.getCoopPlayers().keySet()) {
@@ -191,9 +186,6 @@ public class BHCommonEvents {
             var cs = e.getValue();
             ps.lives = cs.lives(); ps.bombs = cs.bombs(); ps.graze = cs.graze();
             ps.power = cs.power();
-            ps.storedChargeProgress = cs.storedChargeProgress();
-            ps.holdChargeProgress = Math.min(cs.holdChargeProgress(), cs.storedChargeProgress());
-            ps.syncChargePacketFields();
         }
 
         for (UUID pid : nextCtx.allParticipants()) {
@@ -253,7 +245,6 @@ public class BHCommonEvents {
                 stageId,
                 ctx.difficulty,
                 charId,
-                ctx.getShotTypeOrdinal(pid),
                 ctx.practiceMode,
                 ctx.testMode));
 
@@ -283,7 +274,7 @@ public class BHCommonEvents {
                 scoreSelf, scoreTeam, victoryXp, ps.lives, ps.bombs, ps.graze,
                 ctx.getSpellsCaptured(), ctx.getSpellsAttempted(),
                 (float) ctx.getCompletionPercentage(),
-                stageId, ctx.difficulty.name(), ctx.getShotTypeOrdinal(pid)));
+                stageId, ctx.difficulty.name()));
 
         if (ctx.stage != null && ctx.stage.rewards != null) {
             List<String> cmds = ctx.isWon()

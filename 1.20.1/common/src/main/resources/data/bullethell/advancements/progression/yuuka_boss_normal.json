@@ -1,0 +1,19 @@
+{
+    "parent": "bullethell:progression/yuuka_boss_easy",
+    "display": {
+        "icon": {
+            "item": "minecraft:gold_ingot"
+        },
+        "title": "Yuuka Cleared (Normal)",
+        "description": "Defeat Yuuka on Normal or higher.",
+        "frame": "goal",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "clear": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

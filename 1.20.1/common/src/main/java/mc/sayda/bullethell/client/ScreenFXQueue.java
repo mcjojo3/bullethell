@@ -27,7 +27,6 @@ public class ScreenFXQueue {
         DURATION.put(GameEvent.SPELL_CAPTURED, 60);
         DURATION.put(GameEvent.SPELL_FAILED, 25);
         DURATION.put(GameEvent.GRAZE_CHAIN, 8);
-        DURATION.put(GameEvent.SKILL_USED, 10);
         DURATION.put(GameEvent.BOSS_INTRO, 28); // white entrance flash
         DURATION.put(GameEvent.DEATH_BOMB, 16); // deathbomb cancel flash
     }

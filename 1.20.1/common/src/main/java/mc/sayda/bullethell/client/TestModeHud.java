@@ -32,11 +32,10 @@ public final class TestModeHud {
     // Page indices
     public static final int PAGE_BOSS  = 0;
     public static final int PAGE_STAGE = 1;
-    public static final int PAGE_WAVE  = 2;
-    public static final int PAGE_CHAR  = 3;
-    public static final int PAGE_COUNT = 4;
+    public static final int PAGE_CHAR  = 2;
+    public static final int PAGE_COUNT = 3;
 
-    private static final String[] TAB_LABELS = { "BOSS", "STAGE", "WAVE", "CHAR" };
+    private static final String[] TAB_LABELS = { "BOSS", "STAGE", "CHAR" };
 
     // Colours
     private static final int PANEL_BG    = 0xBB0A0A18;
@@ -99,7 +98,6 @@ public final class TestModeHud {
     public static List<String> getPageList(ClientArenaState s) {
         return switch (s.testPage) {
             case PAGE_STAGE -> s.testStageIds;
-            case PAGE_WAVE  -> s.testWaveIds;
             case PAGE_CHAR  -> s.testCharIds;
             default         -> s.testBossIds;
         };
@@ -108,7 +106,6 @@ public final class TestModeHud {
     public static int getPageScroll(ClientArenaState s) {
         return switch (s.testPage) {
             case PAGE_STAGE -> s.testStageScrollOffset;
-            case PAGE_WAVE  -> s.testWaveScrollOffset;
             case PAGE_CHAR  -> s.testCharScrollOffset;
             default         -> s.testScrollOffset;
         };
@@ -117,7 +114,6 @@ public final class TestModeHud {
     public static void setPageScroll(ClientArenaState s, int v) {
         switch (s.testPage) {
             case PAGE_STAGE -> s.testStageScrollOffset = v;
-            case PAGE_WAVE  -> s.testWaveScrollOffset  = v;
             case PAGE_CHAR  -> s.testCharScrollOffset  = v;
             default         -> s.testScrollOffset      = v;
         }
@@ -126,7 +122,6 @@ public final class TestModeHud {
     public static int getPageSelected(ClientArenaState s) {
         return switch (s.testPage) {
             case PAGE_STAGE -> s.testStageSelectedIdx;
-            case PAGE_WAVE  -> s.testWaveSelectedIdx;
             case PAGE_CHAR  -> s.testCharSelectedIdx;
             default         -> s.testSelectedIdx;
         };
@@ -135,7 +130,6 @@ public final class TestModeHud {
     public static void setPageSelected(ClientArenaState s, int v) {
         switch (s.testPage) {
             case PAGE_STAGE -> s.testStageSelectedIdx = v;
-            case PAGE_WAVE  -> s.testWaveSelectedIdx  = v;
             case PAGE_CHAR  -> s.testCharSelectedIdx  = v;
             default         -> s.testSelectedIdx      = v;
         }
@@ -144,7 +138,6 @@ public final class TestModeHud {
     public static String getPageCurrentId(ClientArenaState s) {
         return switch (s.testPage) {
             case PAGE_STAGE -> s.testCurrentStageId;
-            case PAGE_WAVE  -> s.testCurrentWaveId;
             case PAGE_CHAR  -> s.testCurrentCharId;
             default         -> s.testCurrentBossId;
         };
@@ -231,10 +224,6 @@ public final class TestModeHud {
         if (state.testPage == PAGE_CHAR) {
             // Character page: show current char selection and note
             row(gfx, font, x, y, "char", state.testCurrentCharId, RIGHT_W - 10); y += LH;
-            String shotLabel = state.testShotTypeIds.isEmpty() ? "(none)" :
-                    state.testCurrentShotTypeIdx >= 0 && state.testCurrentShotTypeIdx < state.testShotTypeIds.size() ?
-                    state.testShotTypeIds.get(state.testCurrentShotTypeIdx) : "(none)";
-            row(gfx, font, x, y, "shot", shotLabel, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "diff", DifficultyConfig.fromId(state.testCurrentDifficulty).name(), RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "boss", state.bossId.isEmpty() ? state.testCurrentBossId : state.bossId, RIGHT_W - 10); y += LH;
             y += 2;
@@ -247,31 +236,13 @@ public final class TestModeHud {
             row(gfx, font, x, y, "stage", stageId, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "diff", DifficultyConfig.fromId(state.testCurrentDifficulty).name(), RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "char", state.testCurrentCharId, RIGHT_W - 10); y += LH;
-            String shotLabel = state.testShotTypeIds.isEmpty() ? "(none)" :
-                    state.testCurrentShotTypeIdx >= 0 && state.testCurrentShotTypeIdx < state.testShotTypeIds.size() ?
-                            state.testShotTypeIds.get(state.testCurrentShotTypeIdx) : "(none)";
-            row(gfx, font, x, y, "shot", shotLabel, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "boss", state.bossId.isEmpty() ? "-" : state.bossId, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "phase", String.valueOf(state.bossPhase + 1), RIGHT_W - 10); y += LH;
-        } else if (state.testPage == PAGE_WAVE) {
-            String waveId = state.testCurrentWaveId.isEmpty() ? "(none)" : state.testCurrentWaveId;
-            row(gfx, font, x, y, "wave", waveId, RIGHT_W - 10); y += LH;
-            row(gfx, font, x, y, "diff", DifficultyConfig.fromId(state.testCurrentDifficulty).name(), RIGHT_W - 10); y += LH;
-            row(gfx, font, x, y, "char", state.testCurrentCharId, RIGHT_W - 10); y += LH;
-            String shotLabel = state.testShotTypeIds.isEmpty() ? "(none)" :
-                    state.testCurrentShotTypeIdx >= 0 && state.testCurrentShotTypeIdx < state.testShotTypeIds.size() ?
-                            state.testShotTypeIds.get(state.testCurrentShotTypeIdx) : "(none)";
-            row(gfx, font, x, y, "shot", shotLabel, RIGHT_W - 10); y += LH;
-            y += LH; // blank line where boss/phase would be
         } else { // BOSS
             String bossId = state.bossId.isEmpty() ? state.testCurrentBossId : state.bossId;
             row(gfx, font, x, y, "boss", bossId, RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "diff", DifficultyConfig.fromId(state.testCurrentDifficulty).name(), RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "char", state.testCurrentCharId, RIGHT_W - 10); y += LH;
-            String shotLabel = state.testShotTypeIds.isEmpty() ? "(none)" :
-                    state.testCurrentShotTypeIdx >= 0 && state.testCurrentShotTypeIdx < state.testShotTypeIds.size() ?
-                            state.testShotTypeIds.get(state.testCurrentShotTypeIdx) : "(none)";
-            row(gfx, font, x, y, "shot", shotLabel, RIGHT_W - 10); y += LH;
         }
 
         // Spell name

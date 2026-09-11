@@ -53,6 +53,17 @@ public final class BHAttributes {
     }
 
     /** Floored non-negative bonus from {@link #EXTRA_LIVES}. */
+    /**
+     * Reads both attribute bonuses into a plain value the arena can use without
+     * touching Minecraft types. Call on the main thread.
+     */
+    public static mc.sayda.bullethell.arena.PlayerBonuses bonusesFor(
+            @Nullable net.minecraft.world.entity.LivingEntity entity) {
+        if (entity == null) return mc.sayda.bullethell.arena.PlayerBonuses.NONE;
+        return new mc.sayda.bullethell.arena.PlayerBonuses(
+                extraLivesBonus(entity), extraBombsBonus(entity));
+    }
+
     public static int extraLivesBonus(@Nullable net.minecraft.world.entity.LivingEntity entity) {
         if (entity == null || !entity.getAttributes().hasAttribute(EXTRA_LIVES.get()))
             return 0;

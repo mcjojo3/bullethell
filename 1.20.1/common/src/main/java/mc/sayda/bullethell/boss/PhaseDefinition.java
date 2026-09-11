@@ -124,9 +124,13 @@ public class PhaseDefinition {
         return base;
     }
 
-    public String resolveMusic(int difficultyOrdinal) {
+    /**
+     * @param rng the arena's seeded generator, so a music pool resolves identically
+     *            everywhere the same seed is replayed
+     */
+    public String resolveMusic(int difficultyOrdinal, java.util.Random rng) {
         if (musicPool != null && !musicPool.isEmpty())
-            return musicPool.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(musicPool.size()));
+            return musicPool.get(rng.nextInt(musicPool.size()));
         String base = music != null ? music : "";
         if (TierJson.hasTierArray(byDifficulty, "music"))
             return TierJson.pickString(byDifficulty, "music", difficultyOrdinal, base);

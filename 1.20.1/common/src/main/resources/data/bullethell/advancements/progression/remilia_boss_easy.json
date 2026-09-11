@@ -1,0 +1,19 @@
+{
+    "parent": "bullethell:progression/root",
+    "display": {
+        "icon": {
+            "item": "minecraft:iron_ingot"
+        },
+        "title": "Remilia Cleared (Easy)",
+        "description": "Defeat Remilia on Easy or higher.",
+        "frame": "task",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "clear": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

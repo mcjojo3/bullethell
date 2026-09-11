@@ -2,5 +2,7 @@
   "id": "cirno_npc",
   "displayName": "Cirno",
   "challengeText": "You're up against the strongest! Let's see you dodge this!",
-  "stageId": "cirno_stage"
+  "stageId": "cirno_stage",
+  "eggPrimaryColor": "#58ADF4",
+  "eggSecondaryColor": "#BCF7FF"
 }

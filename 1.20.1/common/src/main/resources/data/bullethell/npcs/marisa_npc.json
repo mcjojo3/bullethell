@@ -2,5 +2,7 @@
   "id": "marisa_npc",
   "displayName": "Marisa Kirisame",
   "challengeText": "Ordinary magicians don't hold back, ze! Think you can survive my danmaku? Let's duel!",
-  "stageId": "marisa_stage"
+  "stageId": "marisa_stage",
+  "eggPrimaryColor": "#3A3332",
+  "eggSecondaryColor": "#EBD3D6"
 }

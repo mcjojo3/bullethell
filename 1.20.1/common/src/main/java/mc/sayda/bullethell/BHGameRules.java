@@ -12,6 +12,17 @@ public final class BHGameRules {
             GameRules.Category.PLAYER,
             GameRules.BooleanValue.create(true));
 
+    /**
+     * When true, each client simulates its own copy of the fight and the server keeps
+     * only shared truth (boss HP, phase, score). Cuts per-tick traffic from tens of
+     * kilobytes to tens of bytes, at the cost of each client seeing a slightly
+     * different bullet layout. Off by default until the sim is proven.
+     */
+    public static final GameRules.Key<GameRules.BooleanValue> CLIENT_SIM = GameRules.register(
+            "bulletHellClientSim",
+            GameRules.Category.MISC,
+            GameRules.BooleanValue.create(false));
+
     private BHGameRules() {
     }
 
@@ -21,5 +32,9 @@ public final class BHGameRules {
 
     public static boolean isGlobalPauseEnabled(MinecraftServer server) {
         return server != null && server.getGameRules().getBoolean(GLOBAL_PAUSE);
+    }
+
+    public static boolean isClientSimEnabled(MinecraftServer server) {
+        return server != null && server.getGameRules().getBoolean(CLIENT_SIM);
     }
 }

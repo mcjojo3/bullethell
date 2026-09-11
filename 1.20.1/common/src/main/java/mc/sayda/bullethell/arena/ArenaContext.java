@@ -7,29 +7,19 @@ import mc.sayda.bullethell.boss.CharacterDefinition;
 import mc.sayda.bullethell.boss.CharacterLoader;
 import mc.sayda.bullethell.debug.BHDebugMode;
 import mc.sayda.bullethell.entity.BHAttributes;
-import mc.sayda.bullethell.boss.FairyRushDefinition;
-import mc.sayda.bullethell.boss.FairyWaveCatalog;
-import mc.sayda.bullethell.boss.FairyWaveCatalogEntry;
-import mc.sayda.bullethell.boss.FairyWaveCatalogLoader;
-import mc.sayda.bullethell.boss.FairyWaveLoader;
 import mc.sayda.bullethell.boss.PatternStep;
 import mc.sayda.bullethell.boss.PhaseDefinition;
 import mc.sayda.bullethell.boss.TierJson;
 import mc.sayda.bullethell.boss.RulesetConfig;
 import mc.sayda.bullethell.boss.StageDefinition;
 import mc.sayda.bullethell.boss.StageLoader;
-import mc.sayda.bullethell.boss.WaveDefinition;
-import mc.sayda.bullethell.boss.WaveEnemy;
 import mc.sayda.bullethell.config.BullethellConfig;
 import mc.sayda.bullethell.pattern.BulletLineHit;
 import mc.sayda.bullethell.pattern.BulletType;
 import mc.sayda.bullethell.pattern.BulletTypeLoader;
 import mc.sayda.bullethell.pattern.PatternEngine;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,12 +32,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * All state for one bullet-hell session.
  *
  * Stage flow:
- * WAVES - pre-boss fairy waves spawn and attack; player can collect power items
+ * DIALOG_INTRO - pre-fight dialog
  * BOSS - boss fight driven by BossDefinition JSON
  *
  * Design rules:
  * - Every system takes ArenaContext - no static globals.
- * - Multiple ArenaContexts = splitscreen / Phantasmagoria mode.
+ * - One ArenaContext per fight; co-op participants share the host's.
  * - Stage structure, boss behaviour, and gameplay rules are fully JSON-driven.
  * - Spellcard-accurate HP bar: each boss phase owns its own HP pool.
  */
@@ -76,10 +66,9 @@ public class ArenaContext {
 
     // ---------------------------------------------------------------- subsystems
 
-    public final BulletPool bullets; // enemy + fairy bullets
+    public final BulletPool bullets; // boss + emitter bullets
     public final BulletPool playerBullets;
     public final ItemPool items;
-    public final EnemyPool enemies;
     public final PlayerState2D player;
     /**
      * Per-participant score (co-op: each player has their own chain / extends
@@ -93,57 +82,32 @@ public class ArenaContext {
     // machine
 
     public enum ArenaPhase {
-        WAVES, DIALOG_INTRO, BOSS
+        DIALOG_INTRO, BOSS
     }
 
-    public ArenaPhase arenaPhase = ArenaPhase.WAVES;
+    public ArenaPhase arenaPhase = ArenaPhase.DIALOG_INTRO;
 
-    // ---------------------------------------------------------------- scheduled
-    // enemy list
-    // (pre-expanded at init from all waves + waveRef templates, sorted by
-    // spawnTick)
-
-    /** Flat, time-sorted list of every enemy to spawn during the wave phase. */
-    private final List<ScheduledEnemy> scheduledEnemies = new ArrayList<>();
-    /** Index of the next entry in scheduledEnemies that hasn't spawned yet. */
-    private int nextScheduledIdx = 0;
-    /**
-     * Stage waves that pass {@link #waveAppliesToDifficulty(WaveDefinition)} (for
-     * HUD progress).
-     */
-    private int applicableWaveDefinitionCount = 0;
-    /**
-     * Per-slot attack pattern. Set when an enemy spawns; used by tickEnemyAI()
-     * to dispatch the correct firing logic. Sized to EnemyPool.CAPACITY.
-     */
-    private final EnemyPattern[] enemyPatternIds = new EnemyPattern[EnemyPool.CAPACITY];
-
-    /** Absolute tick counter from arena start (drives wave spawning). */
+    /** Absolute tick counter from arena start. */
     private int stageTick = 0;
-    /**
-     * Small-fairy kills only when large fairies use the classic always-drop rule.
-     */
-    private int smallEnemyKillCounter = 0;
-    /** Shared kill counter when large enemies also follow every-Nth drops. */
-    private int combinedDropKillCounter = 0;
-    /**
-     * Countdown ticks between last wave clearing and boss intro / BOSS phase.
-     * -1 = delay not yet triggered (waves not yet clear).
-     */
-    private int waveEndDelayLeft = -1;
-    /** Cyclic index into the normal (small-enemy) drop sequence. */
-    private int dropCycleIdx = 0;
-    /** Cyclic index into the large-enemy drop sequence. */
-    private int largeDropCycleIdx = 0;
-    /** Parsed drop cycle for small/normal enemies (POWER + POINT only). */
-    private final int[] dropCycle;
-    /** Parsed drop cycle for large enemies (may include FULL_POWER). */
-    private final int[] largeDropCycle;
 
     // ---------------------------------------------------------------- boss state
 
     public int bossPhase = 0;
     public int bossHp;
+
+    /**
+     * Bumped every time a boss phase actually starts. A simulating client compares it
+     * against the authority's value to tell a fresh transition from a repeat of one it
+     * already applied, so a late packet cannot restart a phase.
+     */
+    public int phaseEpoch = 0;
+
+    /**
+     * Boss damage dealt since the last {@link #consumeBossDamage()}. Only meaningful on
+     * a context that does not own phase transitions - it is what a simulating client
+     * ships to the authority instead of a stream of bullet positions.
+     */
+    private int bossDamageAccum = 0;
     public int bossMaxHp;
     public float bossX;
     public float bossY;
@@ -461,20 +425,6 @@ public class ArenaContext {
     public int phaseTransitionTimer = 0;
     public int pendingNextPhase = -1;
 
-    // TH19 Character Ability State
-    public int timeStopTicks = 0;
-    public UUID timeStopOwner = null;
-
-    /**
-     * Global master spark beam for simplicity (renderer handles multiple if needed)
-     */
-    public int masterSparkTicks = 0;
-    public UUID masterSparkOwner = null;
-    public float masterSparkX = 0f;
-    public float masterSparkY = 0f;
-    /** 1窶・: PoFV Illusion Laser scaling ({@link #tickMasterSpark}). */
-    private int masterSparkLevel = 0;
-
     // ---------------------------------------------------------------- init
     // dialog state
     private List<mc.sayda.bullethell.boss.DialogLine> activeDialog = null;
@@ -501,6 +451,19 @@ public class ArenaContext {
      * SFX ids (as in {@link mc.sayda.bullethell.boss.PatternStep#activationSound})
      * queued when an attack step fires.
      */
+    /**
+     * Character ids whose bomb cut-in should play, drained to clients each tick.
+     * Carries identity so co-op partners see the bomber's portrait, not their own.
+     */
+    public final Queue<SplashOrder> pendingSplashes = new ConcurrentLinkedQueue<>();
+
+    /**
+     * A queued character cut-in. {@code origin} is the player whose action caused it;
+     * a client simulating its own fight has already drawn that cut-in locally, so the
+     * server must not send it back to them.
+     */
+    public record SplashOrder(String characterId, UUID origin) {}
+
     public final Queue<String> pendingAttackActivationSounds = new ConcurrentLinkedQueue<>();
 
     /**
@@ -526,24 +489,16 @@ public class ArenaContext {
     private int spellsAttempted = 0;
     /** ID of the active character (from CharacterDefinition JSON). */
     public String characterId = "reimu";
-    /**
-     * Host's selected shot type (index into
-     * {@link mc.sayda.bullethell.boss.CharacterDefinition#shotOptions} or legacy
-     * {@code shotTypes}).
-     */
-    public int hostShotTypeOrdinal = 0;
 
     // ---------------------------------------------------------------- co-op
 
     /**
      * Additional players sharing this arena (not the host).
-     * Each has their own PlayerState2D and BulletPool; enemies/boss/items are
-     * shared.
+     * Each has their own PlayerState2D and BulletPool; boss/items are shared.
      */
     private final java.util.LinkedHashMap<UUID, PlayerState2D> coopPlayers = new java.util.LinkedHashMap<>();
     private final java.util.concurrent.ConcurrentHashMap<UUID, BulletPool> coopBullets = new java.util.concurrent.ConcurrentHashMap<>();
     private final java.util.LinkedHashMap<UUID, String> coopCharIds = new java.util.LinkedHashMap<>();
-    private final java.util.LinkedHashMap<UUID, Integer> coopShotTypeOrdinal = new java.util.LinkedHashMap<>();
     /** Participants currently holding the pause menu open. */
     private final java.util.LinkedHashSet<UUID> pausedParticipants = new java.util.LinkedHashSet<>();
     /** Cached participant set – rebuilt only when coopPlayers membership changes. */
@@ -560,14 +515,11 @@ public class ArenaContext {
 
     /** Add a co-op participant. Called when another player joins the match. */
     public void addCoopPlayer(UUID uuid, mc.sayda.bullethell.boss.CharacterDefinition charDef,
-            net.minecraft.world.entity.LivingEntity participantAttributes, int shotTypeOrdinal) {
-        // Entity-attribute reads must happen on the calling (MC main) thread.
-        int startLives = resolveStartingLives(charDef, participantAttributes);
-        int startBombs = resolveStartingBombs(charDef, participantAttributes);
+            PlayerBonuses participantBonuses) {
+        int startLives = resolveStartingLives(charDef, participantBonuses);
+        int startBombs = resolveStartingBombs(charDef, participantBonuses);
         PlayerState2D ps = new PlayerState2D(charDef.hitRadius, charDef.grazeRadius,
                 charDef.pickupRadius, charDef.speedNormal, charDef.speedFocused,
-                charDef.chargeRateShooting, charDef.chargeRateIdle, charDef.chargeRateCharging,
-                charDef.chargeSpeedFrames, charDef.chargeDelayAfterSkill,
                 startLives, startBombs);
         // Queue all map mutations to run on the arena thread, eliminating the cross-thread race.
         pendingInputs.offer(() -> {
@@ -575,8 +527,7 @@ public class ArenaContext {
             invalidateParticipantCaches();
             coopBullets.put(uuid, new BulletPool(BulletPool.PLAYER_CAPACITY));
             coopCharIds.put(uuid, charDef.id);
-            coopShotTypeOrdinal.put(uuid, Math.max(0, shotTypeOrdinal));
-            if (this.practiceMode) ps.power = PlayerState2D.MAX_POWER;
+            ps.power = this.practiceMode ? PlayerState2D.MAX_POWER : PlayerState2D.START_POWER;
             ScoreSystem ss = new ScoreSystem();
             ss.configureExtendsEvery(rules.scoreExtendEvery);
             scoreByPlayer.put(uuid, ss);
@@ -590,7 +541,6 @@ public class ArenaContext {
             invalidateParticipantCaches();
             coopBullets.remove(uuid);
             coopCharIds.remove(uuid);
-            coopShotTypeOrdinal.remove(uuid);
             scoreByPlayer.remove(uuid);
             pausedParticipants.remove(uuid);
             dialogScriptByPlayer.remove(uuid);
@@ -614,6 +564,10 @@ public class ArenaContext {
         return !pausedParticipants.isEmpty();
     }
 
+    public boolean isGloballyPaused() {
+        return globallyPaused;
+    }
+
     public void setGloballyPaused(boolean paused) {
         this.globallyPaused = paused;
     }
@@ -627,13 +581,6 @@ public class ArenaContext {
             return characterId;
         String id = coopCharIds.get(uuid);
         return id != null ? id : "reimu";
-    }
-
-    public int getShotTypeOrdinal(UUID uuid) {
-        if (uuid.equals(playerUuid))
-            return hostShotTypeOrdinal;
-        Integer v = coopShotTypeOrdinal.get(uuid);
-        return v != null ? v : 0;
     }
 
     /** All UUIDs participating in this arena (host + coop). */
@@ -721,19 +668,19 @@ public class ArenaContext {
 
     /** Start the default stage at NORMAL difficulty with Reimu. */
     public ArenaContext(UUID playerUuid, DifficultyConfig difficulty) {
-        this(playerUuid, difficulty, "marisa_stage", "reimu", null);
+        this(playerUuid, difficulty, "marisa_stage", "reimu", PlayerBonuses.NONE);
     }
 
     /** Start a specific stage with the default character. */
     public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, String stageId) {
-        this(playerUuid, difficulty, stageId, "reimu", null);
+        this(playerUuid, difficulty, stageId, "reimu", PlayerBonuses.NONE);
     }
 
     /**
      * Start a specific stage with a specific character (no attribute bonuses).
      */
     public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, String stageId, String characterId) {
-        this(playerUuid, difficulty, stageId, characterId, null);
+        this(playerUuid, difficulty, stageId, characterId, PlayerBonuses.NONE);
     }
 
     /**
@@ -743,32 +690,42 @@ public class ArenaContext {
      *                       {@code data/bullethell/stages/}
      * @param characterId    file name (without .json) under
      *                       {@code data/bullethell/characters/}
-     * @param hostAttributes host player for {@link BHAttributes} bonuses, or null
+     * @param hostBonuses    attribute bonuses already resolved for the host
      */
     public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, String stageId, String characterId,
-            net.minecraft.world.entity.LivingEntity hostAttributes) {
-        this(playerUuid, difficulty, StageLoader.load(stageId), characterId, hostAttributes);
+            PlayerBonuses hostBonuses) {
+        this(playerUuid, difficulty, StageLoader.load(stageId), characterId, hostBonuses);
     }
 
     /**
      * Same as
-     * {@link #ArenaContext(UUID, DifficultyConfig, String, String, net.minecraft.world.entity.LivingEntity)}
+     * {@link #ArenaContext(UUID, DifficultyConfig, String, String, PlayerBonuses)}
      * but with a pre-built {@link StageDefinition} (e.g. synthetic boss-only stage
      * from commands).
      */
     public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, StageDefinition stageDef, String characterId,
-            net.minecraft.world.entity.LivingEntity hostAttributes) {
+            PlayerBonuses hostBonuses) {
+        this(playerUuid, difficulty, stageDef, characterId, hostBonuses, System.nanoTime());
+    }
+
+    /**
+     * @param seed drives every random decision this arena makes. Passing the same seed
+     *             reproduces the same patterns, which is what lets a client simulate the
+     *             fight locally and stay broadly in step with the server.
+     */
+    public ArenaContext(UUID playerUuid, DifficultyConfig difficulty, StageDefinition stageDef, String characterId,
+            PlayerBonuses hostBonuses, long seed) {
         this.playerUuid = playerUuid;
         this.arenaId = ID_GEN.getAndIncrement();
         this.difficulty = difficulty;
         this.characterId = (characterId != null) ? characterId : "reimu";
-        this.seed = System.nanoTime();
+        this.seed = seed;
         this.random = new java.util.Random(seed);
+        this.ringSpawnerRuntime.setRandom(this.random);
         this.bullets = new BulletPool(BulletPool.ENEMY_CAPACITY);
         this.bullets.setOnBeforeWriteSlot(this::clearEnemyBulletSlotMeta);
         this.playerBullets = new BulletPool(BulletPool.PLAYER_CAPACITY);
         this.items = new ItemPool();
-        this.enemies = new EnemyPool();
         this.spellcard = new SpellcardTimer();
 
         // Load stage/rules first so startingLives/Bombs overrides are available
@@ -777,28 +734,21 @@ public class ArenaContext {
         // bosses/&lt;id&gt;.json) wins over cache;
         // otherwise classpath (rebuild to pick up edits under src/main/resources).
         BossLoader.invalidate(stage.bossId);
-        this.boss = BossLoader.loadWithDevPath(stage.bossId);
+        this.boss = BossLoader.load(stage.bossId);
         this.activeBossPhases = buildActiveBossPhases();
         this.rules = stage.rules;
-        this.dropCycle = parseDropCycle(rules.dropCyclePattern);
-        String largePattern = (rules.largeEnemyDropCyclePattern != null
-                && !rules.largeEnemyDropCyclePattern.isEmpty())
-                        ? rules.largeEnemyDropCyclePattern
-                        : rules.dropCyclePattern;
-        this.largeDropCycle = parseDropCycle(largePattern);
         this.scoreByPlayer.put(playerUuid, new ScoreSystem());
         this.scoreByPlayer.get(playerUuid).configureExtendsEvery(rules.scoreExtendEvery);
 
         // Apply character-specific stats; stage rules can override lives/bombs
         mc.sayda.bullethell.boss.CharacterDefinition charDef = mc.sayda.bullethell.boss.CharacterLoader
                 .load(this.characterId);
-        int startLives = resolveStartingLives(charDef, hostAttributes);
-        int startBombs = resolveStartingBombs(charDef, hostAttributes);
+        int startLives = resolveStartingLives(charDef, hostBonuses);
+        int startBombs = resolveStartingBombs(charDef, hostBonuses);
         player = new PlayerState2D(charDef.hitRadius, charDef.grazeRadius, charDef.pickupRadius,
                 charDef.speedNormal, charDef.speedFocused,
-                charDef.chargeRateShooting, charDef.chargeRateIdle, charDef.chargeRateCharging,
-                charDef.chargeSpeedFrames, charDef.chargeDelayAfterSkill,
                 startLives, startBombs);
+        player.power = PlayerState2D.START_POWER;
 
         // Boss position is set when BOSS phase begins
         this.bossX = BulletPool.ARENA_W / 2f;
@@ -806,13 +756,7 @@ public class ArenaContext {
         this.bossHp = 0;
         this.bossMaxHp = 0;
 
-        // Pre-expand all waves (including waveRef templates) into a flat sorted list
-        buildScheduledList();
-
-        // If no waves defined, go straight to dialog/boss
-        if (scheduledEnemies.isEmpty()) {
-            transitionToDialogOrBoss();
-        }
+        transitionToDialogOrBoss();
     }
 
     /**
@@ -826,18 +770,13 @@ public class ArenaContext {
         if (n == 0)
             return;
         int idx = Math.max(0, Math.min(phaseIndex0Based, n - 1));
-        scheduledEnemies.clear();
-        nextScheduledIdx = 0;
-        waveEndDelayLeft = -1;
         arenaPhase = ArenaPhase.BOSS;
         bossIntroVisible = false;
         bullets.clearAll();
         lasers.clearAll();
-        enemies.clearAll();
         bossTick = 0;
         bossX = BulletPool.ARENA_W / 2f;
         bossY = 100f;
-        resetAbilityStates();
         dialogScriptByPlayer.clear();
         dialogIndexByPlayer.clear();
         dialogTicksLeftByPlayer.clear();
@@ -852,19 +791,17 @@ public class ArenaContext {
      * {@link CharacterDefinition#startingLives};
      * then {@link BHAttributes#EXTRA_LIVES} on {@code player} adds on top.
      */
-    private int resolveStartingLives(CharacterDefinition charDef,
-            net.minecraft.world.entity.LivingEntity player) {
+    private int resolveStartingLives(CharacterDefinition charDef, PlayerBonuses bonuses) {
         int base = (rules.startingLives >= 0) ? rules.startingLives : charDef.startingLives;
-        return base + BHAttributes.extraLivesBonus(player);
+        return base + (bonuses != null ? bonuses.extraLives() : 0);
     }
 
     /**
      * Same as {@link #resolveStartingLives} for bombs; total is capped at 9.
      */
-    private int resolveStartingBombs(CharacterDefinition charDef,
-            net.minecraft.world.entity.LivingEntity player) {
+    private int resolveStartingBombs(CharacterDefinition charDef, PlayerBonuses bonuses) {
         int base = (rules.startingBombs >= 0) ? rules.startingBombs : charDef.startingBombs;
-        return Math.min(9, base + BHAttributes.extraBombsBonus(player));
+        return Math.min(9, base + (bonuses != null ? bonuses.extraBombs() : 0));
     }
 
     private void addArenaScore(long pts, UUID earnerUuid) {
@@ -903,131 +840,101 @@ public class ArenaContext {
 
     // ---------------------------------------------------------------- inner types
 
-    /** One pre-computed enemy spawn entry from the flat wave schedule. */
-    private static final class ScheduledEnemy {
-        final int spawnTick;
-        final WaveEnemy we;
-
-        ScheduledEnemy(int spawnTick, WaveEnemy we) {
-            this.spawnTick = spawnTick;
-            this.we = we;
-        }
-    }
-
     // ---------------------------------------------------------------- tick
 
     public void tick() {
         if (over)
             return;
+        // Bind this arena's seeded generator before anything fires, so pattern jitter
+        // is reproducible from the seed rather than thread-local.
+        PatternEngine.bind(random);
+
         if (globallyPaused)
             return;
         stageTick++;
 
-        boolean frozen = timeStopTicks > 0;
-        if (frozen) {
-            timeStopTicks--;
-            if (timeStopTicks == 0) {
-                resumeFrozenBullets();
-            }
-        }
+        // Sections 1-2 and 4-7 are world simulation; a thin authority context skips
+        // them and runs only the boss state machine in section 3.
+        if (simulatesWorld) {
 
-        // 1. World ticking (Frozen if Time Stop active)
-        if (!frozen) {
-            bullets.tick();
-            tickDivineWindCurves();
-            tickBouncingEnemyBullets();
-            enemies.tick();
-            items.tick();
-            for (ScoreSystem ss : scoreByPlayer.values()) {
-                ss.tick();
-            }
-
-            if (masterSparkTicks > 0) {
-                masterSparkTicks--;
-                tickMasterSpark();
-            }
-        } else {
-            // During time stop, Sakuya can still attract items and collect them
-            tickItemAttraction();
+        // 1. World ticking
+        bullets.tick();
+        tickDivineWindCurves();
+        tickBouncingEnemyBullets();
+        items.tick();
+        for (ScoreSystem ss : scoreByPlayer.values()) {
+            ss.tick();
         }
         tickAttractingItems();
 
-        // 2. Player Bullets + Homing (Always tick)
+        // 2. Player Bullets + Homing
         playerBullets.tick();
-        tickSpecialBullets(playerBullets, frozen);
         tickHomingBullets(playerBullets);
         for (BulletPool pb : coopBullets.values()) {
             pb.tick();
-            tickSpecialBullets(pb, frozen);
             tickHomingBullets(pb);
         }
 
+        } // end world simulation (part 1)
+
         // 3. Phase handling
-        if (arenaPhase == ArenaPhase.WAVES) {
-            if (!frozen)
-                tickStage();
-        } else if (arenaPhase == ArenaPhase.DIALOG_INTRO) {
+
+        if (arenaPhase == ArenaPhase.DIALOG_INTRO) {
             tickDialogIntro();
         } else {
-            if (!frozen) {
-                spellcard.tick();
-                if (spellcard.consumeSurvivalPhaseEnd())
-                    checkBossPhaseTransition(true);
-                bossTick++;
-                // Rank creeps up slowly during the boss fight (1 point per 2s); capped at 32.
-                if (bossTick % 40 == 0)
-                    rank = Math.min(32, rank + 1);
+            spellcard.tick();
+            if (spellcard.consumeSurvivalPhaseEnd())
+                checkBossPhaseTransition(true);
+            bossTick++;
+            // Rank creeps up slowly during the boss fight (1 point per 2s); capped at 32.
+            if (bossTick % 40 == 0)
+                rank = Math.min(32, rank + 1);
 
-                if (phaseTransitionTimer > 0) {
-                    phaseTransitionTimer--;
-                    float targetX = transitionTargetBossX();
-                    float targetY = transitionTargetBossY();
-                    bossX += (targetX - bossX) * 0.06f;
-                    bossY += (targetY - bossY) * 0.06f;
-                    if (phaseTransitionTimer == 0 && pendingNextPhase >= 0) {
-                        startBossPhase(pendingNextPhase);
-                        pendingNextPhase = -1;
-                    }
-                } else {
-                    tickBossAI();
+            if (phaseTransitionTimer > 0) {
+                phaseTransitionTimer--;
+                float targetX = transitionTargetBossX();
+                float targetY = transitionTargetBossY();
+                bossX += (targetX - bossX) * 0.06f;
+                bossY += (targetY - bossY) * 0.06f;
+                if (phaseTransitionTimer == 0 && pendingNextPhase >= 0) {
+                    startBossPhase(pendingNextPhase);
+                    pendingNextPhase = -1;
                 }
+            } else if (simulatesWorld) {
+                tickBossAI();
             }
+        }
+
+        if (!simulatesWorld) {
+            refreshDebugGodMode();
+            return;
         }
 
         // 4. Bullet & Laser Collisions (Unified for all phases/states)
-        if (arenaPhase != ArenaPhase.DIALOG_INTRO) {
-            // Player Bullets vs Enemies (Fairies/Minions)
-            checkPlayerBulletsVsEnemies(playerBullets, player);
+        //
+        // The boss absorbs player shots whenever it is on screen. Whether it *takes*
+        // damage is a separate question - during its entry, a phase change or a survival
+        // card it does not - but the shot is eaten either way. Skipping the pass entirely
+        // while invulnerable used to let homing shots reach the boss and keep seeking it,
+        // so they gathered on top of it and then all landed at once when it became
+        // vulnerable again.
+        if (bossAbsorbsShots()) {
+            boolean damageable = isBossDamageable();
+            checkPlayerBulletsVsBoss(playerUuid, playerBullets, player, damageable);
             for (var entry : coopPlayers.entrySet()) {
                 BulletPool pb = coopBullets.get(entry.getKey());
                 if (pb != null)
-                    checkPlayerBulletsVsEnemies(pb, entry.getValue());
-            }
-
-            // Player Bullets vs Boss
-            if (arenaPhase == ArenaPhase.BOSS && !currentBossPhase().resolveSurvival(difficulty.ordinal())) {
-                checkPlayerBulletsVsBoss(playerUuid, playerBullets, player);
-                for (var entry : coopPlayers.entrySet()) {
-                    BulletPool pb = coopBullets.get(entry.getKey());
-                    if (pb != null)
-                        checkPlayerBulletsVsBoss(entry.getKey(), pb, entry.getValue());
-                }
+                    checkPlayerBulletsVsBoss(entry.getKey(), pb, entry.getValue(), damageable);
             }
         }
 
-        // 5. Player Actions (Shots, Gauge, Skill Follow-ups)
+        // 5. Player Actions (Shots)
         tickPlayerShots(playerUuid, player, playerBullets);
-        if (!frozen)
-            tickSkillGauge(playerUuid, player);
-
         for (var e : coopPlayers.entrySet()) {
-            UUID cUuid = e.getKey();
             PlayerState2D cPs = e.getValue();
-            BulletPool cPb = coopBullets.get(cUuid);
-            if (!frozen)
-                tickSkillGauge(cUuid, cPs);
+            BulletPool cPb = coopBullets.get(e.getKey());
             if (cPb != null && cPs.lives >= 0) {
-                tickPlayerShots(cUuid, cPs, cPb);
+                tickPlayerShots(e.getKey(), cPs, cPb);
             }
         }
 
@@ -1055,6 +962,8 @@ public class ArenaContext {
         }
         if (player.invulnTicks > 0)
             player.invulnTicks--;
+        if (player.bombStartupTicks > 0 && --player.bombStartupTicks == 0)
+            resolveBomb(playerUuid);
         tickGrazeChain(player);
         // Death countdown + invuln tick for coop players
         for (var e : coopPlayers.entrySet()) {
@@ -1066,6 +975,8 @@ public class ArenaContext {
             }
             if (ps.invulnTicks > 0)
                 ps.invulnTicks--;
+            if (ps.bombStartupTicks > 0 && --ps.bombStartupTicks == 0)
+                resolveBomb(e.getKey());
             tickGrazeChain(ps);
         }
 
@@ -1136,552 +1047,6 @@ public class ArenaContext {
         return ritualStackCompleteAt;
     }
 
-    private void tickStage() {
-        tickEnemyAI();
-        tickWaves();
-        checkWavesComplete();
-    }
-
-    private void tickSkillGauge(UUID uuid, PlayerState2D ps) {
-        if (ps.lives < 0)
-            return;
-
-        // Disable skills entirely if the stage forces Classic (TH6) rules
-        if ("classic".equals(rules.forceControlScheme)) {
-            ps.storedChargeProgress = 0;
-            ps.holdChargeProgress = 0;
-            ps.syncChargePacketFields();
-            return;
-        }
-
-        // Also disable if the player individually chose Classic layout
-        if (mc.sayda.bullethell.BHControlSettings
-                .serverGetPreference(uuid) == mc.sayda.bullethell.BHControlScheme.CLASSIC) {
-            ps.storedChargeProgress = 0;
-            ps.holdChargeProgress = 0;
-            ps.syncChargePacketFields();
-            return;
-        }
-
-        // Sakuya's Time Stop pauses gauge build for everyone involved
-        if (timeStopTicks > 0)
-            return;
-
-        if (ps.chargeLockoutTicks > 0) {
-            ps.chargeLockoutTicks--;
-            ps.syncChargePacketFields();
-            return;
-        }
-
-        // Gray stock: passive only while X is not held (TH19: Z still shoots).
-        if (!ps.isCharging) {
-            float mult = ps.shooting ? ps.chargeRateShooting : ps.chargeRateIdle;
-            double passive = mult * (3.0 / 2000.0) * PlayerState2D.CHARGE_GLOBAL_SPEED_MULT;
-            ps.storedChargeProgress = Math.min(PlayerState2D.CHARGE_LEVEL_MAX,
-                    ps.storedChargeProgress + passive);
-        } else {
-            ps.chargeConsecutiveHoldTicks++;
-            // New press: restart colored hold meter (PoFV).
-            if (ps.chargeConsecutiveHoldTicks == 1)
-                ps.holdChargeProgress = 0.0;
-            // Touhou 9: first 9 frames of holding charge, the bar does not move.
-            if (ps.chargeConsecutiveHoldTicks > PlayerState2D.POFV_CHARGE_STARTUP_FRAMES
-                    && ps.holdChargeProgress < PlayerState2D.CHARGE_LEVEL_MAX) {
-                double per = (1.0 / ps.chargeSpeedFrames) * PlayerState2D.CHARGE_GLOBAL_SPEED_MULT;
-                ps.holdChargeProgress = Math.min(PlayerState2D.CHARGE_LEVEL_MAX,
-                        ps.holdChargeProgress + per);
-            }
-            // Hold cannot exceed stored stock (same bar, colored sits on gray).
-            ps.holdChargeProgress = Math.min(ps.holdChargeProgress, ps.storedChargeProgress);
-        }
-
-        if (!ps.isCharging)
-            ps.chargeConsecutiveHoldTicks = 0;
-
-        ps.syncChargePacketFields();
-    }
-
-    // ================================================================ WAVE PHASE
-
-    /**
-     * Pre-expand all stage waves (including waveRef templates) into a flat list
-     * sorted by absolute spawn tick. Called once in the constructor.
-     * Difficulty timing compression is baked in here so tickWaves() is trivial.
-     */
-    private void buildScheduledList() {
-        float mult = BullethellConfig.waveTimingMult(difficulty);
-        List<ScheduledEnemy> list = new ArrayList<>();
-        applicableWaveDefinitionCount = 0;
-        boolean procedural = stage.fairyRush != null;
-
-        for (WaveDefinition wave : stage.waves) {
-            if (!waveAppliesToDifficulty(wave))
-                continue;
-            if (procedural && wave.waveRef != null && !wave.waveRef.isEmpty()) {
-                System.err.println("[BulletHell] Stage " + stage.id
-                        + ": ignoring waveRef while fairyRush is active: " + wave.waveRef);
-                continue;
-            }
-            applicableWaveDefinitionCount++;
-            List<WaveEnemy> waveEnemies;
-            if (wave.waveRef != null && !wave.waveRef.isEmpty()) {
-                waveEnemies = FairyWaveLoader.load(wave.waveRef).enemies;
-            } else {
-                waveEnemies = wave.enemies;
-            }
-            int baseSpawnTick = (int) (wave.spawnTick / mult);
-            for (WaveEnemy we : waveEnemies) {
-                list.add(new ScheduledEnemy(baseSpawnTick + we.delayTicks, we));
-            }
-        }
-
-        if (procedural) {
-            applicableWaveDefinitionCount += Math.max(0, stage.fairyRush.slotCount);
-            appendProceduralFairyRush(list, mult, stage.fairyRush);
-        }
-
-        list.sort(Comparator.comparingInt(e -> e.spawnTick));
-        scheduledEnemies.addAll(list);
-    }
-
-    private static int scaleDesignerTicks(int ticks, float scale, int floor) {
-        int v = Math.round(ticks * scale);
-        return Math.max(floor, v);
-    }
-
-    private void appendProceduralFairyRush(List<ScheduledEnemy> list, float mult, FairyRushDefinition rush) {
-        FairyWaveCatalog cat = FairyWaveCatalogLoader.load();
-        List<FairyWaveCatalogEntry> pool = cat.entriesForSet(rush.catalogId);
-        if (pool.isEmpty()) {
-            System.err.println("[BulletHell] fairyRush: empty catalog set '" + rush.catalogId + "' for stage "
-                    + stage.id);
-            return;
-        }
-
-        java.util.Random pickRandom = rush.shuffleSeed != null
-                ? new java.util.Random(seed ^ rush.shuffleSeed.longValue())
-                : random;
-
-        int nSlots = Math.max(0, rush.slotCount);
-        int cursor = (int) (rush.startTick / mult);
-        Deque<String> recent = new ArrayDeque<>();
-
-        for (int slot = 0; slot < nSlots; slot++) {
-            float progress = nSlots <= 1 ? 1f : (slot / (float) (nSlots - 1));
-
-            if (rush.breatherEvery > 0 && slot > 0 && slot % rush.breatherEvery == 0) {
-                List<WaveEnemy> breath = breatherEnemies(rush);
-                int waveStart = cursor;
-                for (WaveEnemy we : breath) {
-                    list.add(new ScheduledEnemy(waveStart + we.delayTicks, we));
-                }
-                int maxDelay = maxEnemyDelayTicks(breath);
-                int hintDesigner = maxDelay + 12 + Math.max(0, rush.breatherExtraTicks);
-                hintDesigner = scaleDesignerTicks(hintDesigner, BullethellConfig.fairyRushDurationHintScale(difficulty),
-                        18);
-                int gapDesigner = pickGapDesigner(rush, progress, pickRandom);
-                gapDesigner = scaleDesignerTicks(gapDesigner, BullethellConfig.fairyRushGapBreathingScale(difficulty),
-                        4);
-                cursor = waveStart + (int) (hintDesigner / mult) + (int) (gapDesigner / mult);
-                continue;
-            }
-
-            int iLo = lerpInt(rush.intensityStartLo, rush.intensityEndLo, progress, rush.gapEasing);
-            int iHi = lerpInt(rush.intensityStartHi, rush.intensityEndHi, progress, rush.gapEasing);
-            if (iLo > iHi) {
-                int t = iLo;
-                iLo = iHi;
-                iHi = t;
-            }
-            // Shift catalog intensity window by difficulty (wave timing alone does not
-            // change which patterns spawn).
-            int ib = BullethellConfig.fairyRushIntensityBias(difficulty);
-            iLo = Math.max(0, Math.min(10, iLo + ib));
-            iHi = Math.max(0, Math.min(10, iHi + ib));
-            if (iLo > iHi) {
-                int t = iLo;
-                iLo = iHi;
-                iHi = t;
-            }
-
-            FairyWaveCatalogEntry entry = pickCatalogEntry(pool, iLo, iHi, pickRandom, recent, rush.noRepeatLast);
-            if (entry == null)
-                continue;
-
-            List<WaveEnemy> enemies = FairyWaveLoader.load(entry.id).enemies;
-            if (enemies == null || enemies.isEmpty())
-                continue;
-
-            int waveStart = cursor;
-            for (WaveEnemy we : enemies) {
-                list.add(new ScheduledEnemy(waveStart + we.delayTicks, we));
-            }
-
-            pushRecent(recent, entry.id, rush.noRepeatLast);
-
-            int hintDesigner = entry.durationHintTicks > 0
-                    ? entry.durationHintTicks
-                    : defaultDurationHintTicks(enemies);
-            hintDesigner = scaleDesignerTicks(hintDesigner, BullethellConfig.fairyRushDurationHintScale(difficulty),
-                    20);
-            int gapDesigner = pickGapDesigner(rush, progress, pickRandom);
-            gapDesigner = scaleDesignerTicks(gapDesigner, BullethellConfig.fairyRushGapBreathingScale(difficulty), 4);
-            cursor = waveStart + (int) (hintDesigner / mult) + (int) (gapDesigner / mult);
-        }
-    }
-
-    private static List<WaveEnemy> breatherEnemies(FairyRushDefinition rush) {
-        if (rush.breatherWaveId != null && !rush.breatherWaveId.isBlank()) {
-            List<WaveEnemy> from = FairyWaveLoader.load(rush.breatherWaveId).enemies;
-            if (from != null && !from.isEmpty()) {
-                return from;
-            }
-        }
-        WaveEnemy w = new WaveEnemy();
-        w.x = 240f;
-        w.y = -20f;
-        w.vx = 0f;
-        w.vy = 3.2f;
-        w.type = "YELLOW_FAIRY";
-        return List.of(w);
-    }
-
-    private static int maxEnemyDelayTicks(List<WaveEnemy> enemies) {
-        int m = 0;
-        for (WaveEnemy we : enemies) {
-            m = Math.max(m, we.delayTicks);
-        }
-        return m;
-    }
-
-    private static int defaultDurationHintTicks(List<WaveEnemy> enemies) {
-        return maxEnemyDelayTicks(enemies) + 22 + enemies.size() * 6;
-    }
-
-    private static float rushEase(float p, String easingRaw) {
-        float pClamped = Math.max(0f, Math.min(1f, p));
-        if (easingRaw != null && easingRaw.equalsIgnoreCase("LINEAR")) {
-            return pClamped;
-        }
-        return pClamped * pClamped * (3f - 2f * pClamped);
-    }
-
-    private static int lerpInt(int a, int b, float progress, String easingRaw) {
-        float t = rushEase(progress, easingRaw);
-        return Math.round(a + (b - a) * t);
-    }
-
-    private static int pickGapDesigner(FairyRushDefinition rush, float progress, java.util.Random pr) {
-        float t = rushEase(progress, rush.gapEasing);
-        float gmin = rush.gapTicksStartMin + (rush.gapTicksEndMin - rush.gapTicksStartMin) * t;
-        float gmax = rush.gapTicksStartMax + (rush.gapTicksEndMax - rush.gapTicksStartMax) * t;
-        int lo = Math.round(Math.min(gmin, gmax));
-        int hi = Math.round(Math.max(gmin, gmax));
-        if (hi < lo) {
-            int x = lo;
-            lo = hi;
-            hi = x;
-        }
-        int jitter = Math.max(0, rush.jitterTicks);
-        int base = lo + (jitter > 0 ? pr.nextInt(hi - lo + 1 + 2 * jitter) - jitter : pr.nextInt(hi - lo + 1));
-        return Math.max(4, base);
-    }
-
-    private boolean catalogEntryApplies(FairyWaveCatalogEntry e) {
-        return difficultyMatchesBounds(e.minDifficulty, e.maxDifficulty);
-    }
-
-    /**
-     * Effective pick weight (catalog row ﾃ・mild bias toward intense patterns on
-     * Hard+).
-     */
-    private float catalogPickWeight(FairyWaveCatalogEntry e) {
-        float w = Math.max(0.001f, e.weight);
-        w *= BullethellConfig.fairyCatalogIntensityWeightMultiplier(difficulty, e.intensity);
-        return w;
-    }
-
-    private FairyWaveCatalogEntry pickCatalogEntry(List<FairyWaveCatalogEntry> pool, int iLo, int iHi,
-            java.util.Random pr, Deque<String> recent, int noRepeatLast) {
-        int widen = 0;
-        while (widen <= 12) {
-            int lo = iLo - widen;
-            int hi = iHi + widen;
-            List<FairyWaveCatalogEntry> candidates = new ArrayList<>();
-            float weightSum = 0f;
-            for (FairyWaveCatalogEntry e : pool) {
-                if (!catalogEntryApplies(e))
-                    continue;
-                if (e.intensity < lo || e.intensity > hi)
-                    continue;
-                if (noRepeatLast > 0 && recent.contains(e.id))
-                    continue;
-                candidates.add(e);
-                weightSum += catalogPickWeight(e);
-            }
-            if (!candidates.isEmpty() && weightSum > 0f) {
-                float r = pr.nextFloat() * weightSum;
-                for (FairyWaveCatalogEntry e : candidates) {
-                    r -= catalogPickWeight(e);
-                    if (r <= 0f)
-                        return e;
-                }
-                return candidates.get(candidates.size() - 1);
-            }
-            widen++;
-        }
-        // Fallback: ignore no-repeat only
-        List<FairyWaveCatalogEntry> candidates = new ArrayList<>();
-        float weightSum = 0f;
-        for (FairyWaveCatalogEntry e : pool) {
-            if (!catalogEntryApplies(e))
-                continue;
-            candidates.add(e);
-            weightSum += catalogPickWeight(e);
-        }
-        if (candidates.isEmpty() || weightSum <= 0f)
-            return null;
-        float r = pr.nextFloat() * weightSum;
-        for (FairyWaveCatalogEntry e : candidates) {
-            r -= catalogPickWeight(e);
-            if (r <= 0f)
-                return e;
-        }
-        return candidates.get(candidates.size() - 1);
-    }
-
-    private static void pushRecent(Deque<String> recent, String id, int noRepeatLast) {
-        if (noRepeatLast <= 0)
-            return;
-        recent.addLast(id);
-        while (recent.size() > noRepeatLast) {
-            recent.removeFirst();
-        }
-    }
-
-    private void tickWaves() {
-        while (nextScheduledIdx < scheduledEnemies.size()) {
-            ScheduledEnemy se = scheduledEnemies.get(nextScheduledIdx);
-            if (stageTick < se.spawnTick)
-                break;
-            spawnScheduledEnemy(se.we);
-            nextScheduledIdx++;
-        }
-    }
-
-    private void spawnScheduledEnemy(WaveEnemy we) {
-        EnemyType type = enemyTypeByName(we.type);
-        int slot = enemies.spawn(we.x, we.y, we.vx, we.vy, we.angVel, we.arcTicks, type);
-        if (slot >= 0) {
-            EnemyPattern pattern;
-            if (we.pattern != null && !we.pattern.isEmpty()) {
-                pattern = EnemyPattern.fromName(we.pattern);
-            } else {
-                pattern = type.defaultPattern;
-            }
-            enemyPatternIds[slot] = pattern;
-        }
-    }
-
-    private void tickEnemyAI() {
-        for (int i = 0; i < EnemyPool.CAPACITY; i++) {
-            if (!enemies.isActive(i))
-                continue;
-
-            float ex = enemies.getX(i);
-            float ey = enemies.getY(i);
-
-            // Despawn if off-screen
-            if (ey > BulletPool.ARENA_H + 100
-                    || ey < -100
-                    || ex < -100
-                    || ex > BulletPool.ARENA_W + 100) {
-                enemies.deactivate(i);
-                continue;
-            }
-
-            // Don't fire while outside arena bounds - prevents invisible fairies from
-            // shooting
-            if (ex < 0 || ex > BulletPool.ARENA_W || ey < 0 || ey > BulletPool.ARENA_H)
-                continue;
-
-            // Attack AI - fire when cooldown hits 0
-            if (enemies.getAtkCd(i) == 0) {
-                EnemyType type = EnemyType.fromId(enemies.getType(i));
-
-                float effDens = BullethellConfig.effectiveDensityMult(difficulty);
-                int scaledCount = Math.max(1,
-                        Math.round(type.bulletCount * effDens * BullethellConfig.FAIRY_BULLET_COUNT_MULT.get()));
-                int scaledInterval = (int) (type.atkInterval / effDens);
-                scaledInterval = Math.round(scaledInterval * BullethellConfig.FAIRY_ATTACK_INTERVAL_MULT.get());
-                scaledInterval = Math.max(BullethellConfig.FAIRY_MIN_ATTACK_INTERVAL_TICKS.get(), scaledInterval);
-
-                EnemyPattern pat = enemyPatternIds[i];
-                if (pat == null)
-                    pat = type.defaultPattern;
-
-                switch (pat) {
-                    case AIMED: {
-                        // Cap small-fairy aimed fans; Lunatic allows one extra way over Hard.
-                        int aimedCap = BullethellConfig.fairyAimedBurstCap(difficulty);
-                        int aimed = Math.min(scaledCount, aimedCap);
-                        PatternEngine.fireAimed(bullets, ex, ey,
-                                player.x, player.y,
-                                aimed, type.bulletSpread,
-                                type.bulletSpeed, difficulty, BulletType.fromName("RICE"));
-                        enemies.setAtkCooldown(i, scaledInterval);
-                        break;
-                    }
-                    case RING: {
-                        // Uniform ring, random start angle each burst (TH6 barrier style)
-                        float ringStart = random.nextFloat() * (float) (Math.PI * 2);
-                        PatternEngine.fireRingOffset(bullets, ex, ey,
-                                scaledCount, type.bulletSpeed,
-                                difficulty, BulletType.fromName("BUBBLE"), ringStart);
-                        enemies.setAtkCooldown(i, scaledInterval);
-                        break;
-                    }
-                    case AIMED_RING: {
-                        // Aimed fan + slower outer ring (large fairy dual-threat)
-                        float ringStart = random.nextFloat() * (float) (Math.PI * 2);
-                        PatternEngine.fireAimedWithRing(bullets, ex, ey,
-                                player.x, player.y,
-                                scaledCount, type.bulletSpread, type.bulletSpeed,
-                                8, type.bulletSpeed * 0.6f,
-                                difficulty, BulletType.fromName("STAR"), BulletType.fromName("BUBBLE"), ringStart);
-                        enemies.setAtkCooldown(i, scaledInterval);
-                        break;
-                    }
-                    case SPREAD: {
-                        int spreadCap = BullethellConfig.fairySpreadBurstCap(difficulty);
-                        int spread = Math.min(scaledCount, spreadCap);
-                        PatternEngine.fireSpread(bullets, ex, ey,
-                                spread, type.bulletSpeed,
-                                difficulty, BulletType.fromName("STAR"));
-                        enemies.setAtkCooldown(i, scaledInterval);
-                        break;
-                    }
-                    case STREAM:
-                        // Rapid single bullet - danger from rate, not spread
-                        PatternEngine.fireAimed(bullets, ex, ey,
-                                player.x, player.y,
-                                1, 0f, type.bulletSpeed, difficulty, BulletType.fromName("RICE"));
-                        enemies.setAtkCooldown(i, Math.max(BullethellConfig.FAIRY_STREAM_COOLDOWN_MIN_TICKS.get(),
-                                scaledInterval / Math.max(1, BullethellConfig.FAIRY_STREAM_COOLDOWN_DIVISOR.get())));
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
-    /** Check player bullets (from any participant) hitting enemies. */
-    private void checkPlayerBulletsVsEnemies(BulletPool pb, PlayerState2D ps) {
-        if (enemies.getActiveCount() == 0) return;
-        for (int i = 0; i < pb.getCapacity(); i++) {
-            if (!pb.isActive(i))
-                continue;
-            float bx = pb.getX(i);
-            float by = pb.getY(i);
-            BulletType bt = BulletType.fromId(pb.getType(i));
-            float bulletR = bt.getRadius() * pb.getHitScale(i) * bt.getHitboxMul();
-            // Iterate only live enemies via compact list - O(activeCount) instead of O(CAPACITY).
-            for (int jj = 0; jj < enemies.getActiveCount(); jj++) {
-                int j = enemies.getActiveSlot(jj);
-                float ex = enemies.getX(j);
-                float ey = enemies.getY(j);
-                EnemyType type = EnemyType.fromId(enemies.getType(j));
-                float enemyR = type.hitRadius + 3f;
-                float combined = enemyR + bulletR;
-                float dx = bx - ex;
-                float dy = by - ey;
-                if (dx * dx + dy * dy <= combined * combined) {
-                    pb.deactivate(i);
-                    if (enemies.damage(j, fairyBulletDamage(ps)))
-                        killEnemy(j, ps);
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
-     * Kill an enemy: deactivate, award score, apply drop cycle.
-     * 
-     * @return the item pool slot that was spawned, or -1 if no item was dropped
-     */
-    private int killEnemy(int slot, PlayerState2D ps) {
-        float ex = enemies.getX(slot);
-        float ey = enemies.getY(slot);
-        EnemyType type = EnemyType.fromId(enemies.getType(slot));
-        enemies.deactivate(slot);
-
-        addArenaScore(type.scoreValue, uuidForPlayerState(ps));
-
-        pendingEvents.add(GameEvent.ENEMY_KILL);
-
-        ps.addStoredChargeProgress(30 * 3.0 / 2000.0);
-
-        // On-kill death burst (Lunatic-style)
-        if (rules.onKillDeathBurstCount > 0) {
-            PatternEngine.fireRing(bullets, ex, ey,
-                    rules.onKillDeathBurstCount, rules.onKillDeathBurstSpeed,
-                    difficulty, BulletType.fromName("RICE"));
-        }
-
-        // Item drops: TH6-style every-Nth small kill; large anchors always pay out
-        // by default so rhythm is not stolen by mid-wave heavies.
-        int n = rules.itemDropEveryNthKill < 1 ? 1 : rules.itemDropEveryNthKill;
-        boolean dropThisKill;
-        if (type.large && rules.largeEnemyAlwaysDrops) {
-            dropThisKill = true;
-        } else if (rules.largeEnemyAlwaysDrops) {
-            smallEnemyKillCounter++;
-            dropThisKill = (smallEnemyKillCounter % n == 0);
-        } else {
-            combinedDropKillCounter++;
-            dropThisKill = (combinedDropKillCounter % n == 0);
-        }
-
-        if (!dropThisKill) {
-            return -1;
-        }
-
-        // Rare bomb substitutes for the scheduled drop; does not advance P/Point
-        // cycles.
-        if (rules.bombDropChance > 0f && random.nextFloat() < rules.bombDropChance) {
-            return items.spawn(ex, ey, ItemPool.TYPE_BOMB);
-        }
-        if (type.large) {
-            int dropType = largeDropCycle[largeDropCycleIdx % largeDropCycle.length];
-            largeDropCycleIdx++;
-            return items.spawn(ex, ey, dropType);
-        }
-        int dropType = dropCycle[dropCycleIdx % dropCycle.length];
-        dropCycleIdx++;
-        return items.spawn(ex, ey, dropType);
-    }
-
-    /** Transition to BOSS phase once all waves have spawned and cleared. */
-    private void checkWavesComplete() {
-        if (nextScheduledIdx < scheduledEnemies.size())
-            return; // still enemies pending
-        if (enemies.getActiveCount() > 0)
-            return; // enemies still on screen
-
-        // First tick after clearing: wipe screen and start countdown
-        if (waveEndDelayLeft < 0) {
-            bullets.clearAll();
-            lasers.clearAll();
-            waveEndDelayLeft = Math.max(0, stage.bossIntroDelayTicks);
-        }
-        if (waveEndDelayLeft > 0) {
-            waveEndDelayLeft--;
-            return;
-        }
-        transitionToDialogOrBoss();
-    }
 
     private void transitionToDialogOrBoss() {
         dialogScriptByPlayer.clear();
@@ -1715,7 +1080,6 @@ public class ArenaContext {
 
     private void transitionToBoss() {
         boolean hadIntro = bossIntroVisible;
-        resetAbilityStates();
         arenaPhase = ArenaPhase.BOSS;
         dialogScriptByPlayer.clear();
         dialogIndexByPlayer.clear();
@@ -1724,13 +1088,12 @@ public class ArenaContext {
         bossIntroVisible = false;
         bullets.clearAll();
         lasers.clearAll();
-        enemies.clearAll();
         playerBullets.clearAll();
         for (BulletPool pb : coopBullets.values()) pb.clearAll();
         bossTick = 0;
         bossX = BulletPool.ARENA_W / 2f;
         // Smooth Y from dialog landing into the fight; snap when there was no dialog
-        if (hadIntro) {
+        if (hadIntro && simulatesWorld) {
             bossEntryFromY = bossY;
             bossEntryTimer = boss.fightEntryTicks;
             String phase0mvmt = activeBossPhases.isEmpty() ? "SINE_WAVE"
@@ -1786,6 +1149,8 @@ public class ArenaContext {
             }
         }
 
+        if (!ownsPhaseTransitions)
+            return; // the authority decides when dialog is done; wait for its packet
         if (dialogScriptByPlayer.isEmpty()) {
             transitionToBoss();
             return;
@@ -1974,10 +1339,6 @@ public class ArenaContext {
 
     private boolean phaseAppliesToDifficulty(PhaseDefinition phase) {
         return difficultyMatchesBounds(phase.minDifficulty, phase.maxDifficulty);
-    }
-
-    private boolean waveAppliesToDifficulty(WaveDefinition wave) {
-        return difficultyMatchesBounds(wave.minDifficulty, wave.maxDifficulty);
     }
 
     private boolean difficultyMatchesBounds(String minRaw, String maxRaw) {
@@ -2498,7 +1859,7 @@ public class ArenaContext {
                     float speedSlope = stepTF(step, "sprinklerSpeedSlope", step.sprinklerSpeedSlope);
                     float es = PatternEngine.enemySpeedScale(difficulty);
                     float nozzleStep = scaledArms > 1 ? (float) (Math.PI * 2.0 / scaledArms) : 0f;
-                    java.util.concurrent.ThreadLocalRandom combRng = java.util.concurrent.ThreadLocalRandom.current();
+                    java.util.Random combRng = this.random;
                     for (int n = 0; n < scaledArms; n++) {
                         float nozzleAngle = sa + nozzleStep * n;
                         float tx = bx + (float) Math.cos(nozzleAngle) * 100f;
@@ -2688,7 +2049,7 @@ public class ArenaContext {
                     float halfCone = sampledSpread;
                     if (halfCone <= 0f) halfCone = (float)(Math.PI / 3.0);
                     float es = PatternEngine.enemySpeedScale(difficulty);
-                    java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
+                    java.util.Random rng = this.random;
                     for (int i = 0; i < scaledArms; i++) {
                         float angle    = baseAngle + (rng.nextFloat() * 2f - 1f) * halfCone;
                         float shotSpd  = effSpeed * (0.75f + rng.nextFloat() * 0.5f) * es;
@@ -4073,10 +3434,43 @@ public class ArenaContext {
         }
     }
 
-    private void checkPlayerBulletsVsBoss(UUID shooterUuid, BulletPool pb, PlayerState2D ps) {
-        if (bossHp <= 0)
-            return;
-        int damage = bossBulletDamage(ps);
+    /**
+     * Whether the boss is on screen and should be eating player shots. True through the
+     * whole fight, and during the intro once the boss has started sliding in - shots
+     * should not pass through a sprite that is visibly there.
+     */
+    private boolean bossAbsorbsShots() {
+        if (arenaPhase == ArenaPhase.BOSS)
+            return true;
+        return arenaPhase == ArenaPhase.DIALOG_INTRO && bossIntroVisible;
+    }
+
+    /**
+     * Whether boss HP may move right now. Every window where the boss is deliberately
+     * untouchable lives here, so absorption and damage cannot drift apart again.
+     */
+    private boolean isBossDamageable() {
+        if (arenaPhase != ArenaPhase.BOSS || activeBossPhases.isEmpty())
+            return false;
+        if (bossHp <= 0 || bossEntryTimer > 0)
+            return false;
+        // Mid phase-change: HP belongs to the phase that just ended.
+        if (phaseTransitionTimer > 0 || pendingNextPhase >= 0)
+            return false;
+        return !currentBossPhase().resolveSurvival(difficulty.ordinal());
+    }
+
+    /**
+     * Consumes player shots that reach the boss.
+     *
+     * @param damageable when false the boss still eats the shot but loses no HP - an
+     *                   entry animation, a phase change or a survival card. The shot
+     *                   must vanish regardless, or homing fire accumulates on an
+     *                   untouchable boss.
+     */
+    private void checkPlayerBulletsVsBoss(UUID shooterUuid, BulletPool pb, PlayerState2D ps,
+            boolean damageable) {
+        int damage = damageable ? bossBulletDamage(ps) : 0;
 
         for (int i = 0; i < pb.getCapacity(); i++) {
             if (!pb.isActive(i))
@@ -4090,7 +3484,8 @@ public class ArenaContext {
             float dy = by - bossY;
             if (dx * dx + dy * dy <= combined * combined) {
                 pb.deactivate(i);
-                if (bossEntryTimer <= 0) {
+                if (damageable) {
+                    bossDamageAccum += Math.min(damage, bossHp);
                     bossHp = Math.max(0, bossHp - damage);
                     addArenaScore(damage * 8L, shooterUuid);
                     checkBossPhaseTransition();
@@ -4133,15 +3528,6 @@ public class ArenaContext {
         }
     }
 
-    /**
-     * Per-hit damage vs {@link EnemyPool} fairies from a single player shot bullet.
-     * 1-HP fairies die in one hit regardless - flat 2 keeps the formula simple and
-     * ensures medium/large fairies are cleared at a consistent rate across tiers.
-     */
-    private int fairyBulletDamage(PlayerState2D ps) {
-        return 2;
-    }
-
     private void checkBossPhaseTransition() {
         checkBossPhaseTransition(false);
     }
@@ -4152,6 +3538,14 @@ public class ArenaContext {
      *                     or breaking a survival spell with a bomb)
      */
     private void checkBossPhaseTransition(boolean ignoreHpGate) {
+        if (!ownsPhaseTransitions) {
+            // A simulating client must never advance the fight on its own. Floor the
+            // boss at 1 HP and silence it so the screen is already calm when the
+            // authority's transition lands, instead of taking hits from a dead boss.
+            bossHp = Math.max(bossHp, 1);
+            bossFireFrozen = true;
+            return;
+        }
         if (phaseTransitionTimer > 0 || pendingNextPhase >= 0)
             return; // already transitioning
         if (!ignoreHpGate) {
@@ -4249,29 +3643,199 @@ public class ArenaContext {
     }
 
     /**
-     * Scatter point items from the boss position when a phase is cleared.
+     * Scatter items from the boss position when a phase is cleared.
      * Spell capture also runs {@link #cancelBulletsIntoItems()} + item vacuum in
      * {@link #checkBossPhaseTransition(boolean)} (TH-style bonus collect).
-     * - NonSpell cleared 竊・4 point items scattered around boss
-     * - Spell captured 竊・8 point items at boss (extra to per-bullet spawns from
-     * cancel)
-     * - Spell failed 竊・nothing (no reward for failing the card)
+     * - NonSpell cleared - 4 point + 2 power
+     * - Spell captured - 8 point + 3 power (extra to per-bullet spawns from cancel)
+     * - Spell failed - nothing (no reward for failing the card)
      *
-     * Bosses NEVER drop power items, bombs, or 1-ups - those are fairy-only drops.
+     * Power is included because the fairy waves that used to supply it were removed.
+     * Bombs are not: they already reset to the starting stock on death
+     * ({@link #applyDeath}) and on each new stage, which is the TH refill model -
+     * spell cards within one fight are not stage boundaries.
      */
     private void dropBossPhaseItems(boolean isSpellCard, boolean captured) {
         if (isSpellCard && !captured)
             return;
-        int count = isSpellCard ? 8 : 4;
-        for (int i = 0; i < count; i++) {
+        int pointCount = isSpellCard ? 8 : 4;
+        int powerCount = isSpellCard ? 3 : 2;
+        for (int i = 0; i < pointCount; i++) {
             float ox = (random.nextFloat() - 0.5f) * 80f;
             float oy = (random.nextFloat() - 0.5f) * 40f;
             items.spawn(bossX + ox, bossY + oy, ItemPool.TYPE_POINT);
         }
+        for (int i = 0; i < powerCount; i++) {
+            float ox = (random.nextFloat() - 0.5f) * 80f;
+            float oy = (random.nextFloat() - 0.5f) * 40f;
+            items.spawn(bossX + ox, bossY + oy, ItemPool.TYPE_POWER_LARGE);
+        }
+    }
+
+    /**
+     * Whether this context simulates the world: bullets, patterns, collision, items.
+     *
+     * A client running its own copy of the fight has this on; the server running only
+     * shared truth has it off. Independent of {@link #ownsPhaseTransitions} because a
+     * client simulates everything yet decides nothing.
+     */
+    public boolean simulatesWorld = true;
+
+    /**
+     * Whether this context decides when a boss phase ends.
+     *
+     * Exactly one context per fight may own this, otherwise two simulations would
+     * advance the boss independently and diverge permanently.
+     */
+    public boolean ownsPhaseTransitions = true;
+
+    /**
+     * Drops straight into a phase on the authority's instruction, wiping the field the
+     * same way a natural transition does. This is the resync barrier for a client sim:
+     * however far two clients' bullet patterns have drifted, a phase change clears both.
+     */
+    // ------------------------------------------------------------ client-sim bridge
+
+    /** Boss damage since the last call, and resets the tally. */
+    public int consumeBossDamage() {
+        int d = bossDamageAccum;
+        bossDamageAccum = 0;
+        return d;
+    }
+
+    /**
+     * Applies damage a client reported. Only the authority should call this: it is the
+     * single place boss HP moves when the clients own the bullets.
+     */
+    public void applyRemoteDamage(int damage, UUID shooterUuid) {
+        if (damage <= 0 || !ownsPhaseTransitions) return;
+        if (arenaPhase != ArenaPhase.BOSS || bossEntryTimer > 0) return;
+        if (currentBossPhase().resolveSurvival(difficulty.ordinal())) return;
+        bossHp = Math.max(0, bossHp - damage);
+        checkBossPhaseTransition();
+    }
+
+    /**
+     * Ceiling on a single tick of reported score. Real play tops out two orders of
+     * magnitude below this even on a full-power spell capture, so it never clips honest
+     * play - it is there to stop a malformed or hostile packet running the total away.
+     * A client that owns its own simulation owns its own score by construction; this is
+     * a sanity bound, not a proof of honesty.
+     */
+    private static final long MAX_REPORTED_SCORE_PER_TICK = 20_000L;
+
+    /**
+     * Adds score a client earned in its local simulation - graze, pickups, captures and
+     * boss damage alike. Clamped, and only the authority accepts it.
+     */
+    public void applyRemoteScore(UUID earnerUuid, long delta) {
+        if (delta <= 0 || !ownsPhaseTransitions) return;
+        int extendsGranted = scoreSystemFor(earnerUuid)
+                .addScore(Math.min(delta, MAX_REPORTED_SCORE_PER_TICK));
+        if (extendsGranted <= 0) return;
+        // The earner already granted themselves the life in their own simulation, so
+        // applying it here would double the 1UP and be overwritten anyway. What the
+        // earner cannot do is hand a life to everyone else, which this rule requires -
+        // so the extend is relayed to the others and their sims apply it.
+        if (!rules.scoreExtendAwardAllCoopPlayers) return;
+        for (UUID participant : allParticipants()) {
+            if (participant.equals(earnerUuid)) continue;
+            PlayerState2D other = getPlayerState(participant);
+            if (other == null || other.lives < 0) continue;
+            for (int i = 0; i < extendsGranted; i++)
+                other.personalEvents.add(GameEvent.SCORE_EXTEND);
+        }
+    }
+
+    /**
+     * Mirrors a client's own view of its player into the authority, so co-op relay,
+     * the HUD and the end-of-run stats keep working while the client owns the sim.
+     * Score is taken as reported for display only - {@link #applyRemoteDamage} is what
+     * actually earns it, so a client cannot inflate the shared total by lying here.
+     */
+    public void applyRemoteProgress(UUID uuid, float x, float y, int lives, int bombs,
+            int power, int graze, int grazeChain, int lifePieces, int bombPieces, int invulnTicks) {
+        PlayerState2D ps = getPlayerState(uuid);
+        if (ps == null) return;
+        ps.x = x;
+        ps.y = y;
+        ps.lives = lives;
+        ps.bombs = bombs;
+        ps.power = power;
+        ps.graze = graze;
+        ps.grazeChain = grazeChain;
+        ps.lifePieces = lifePieces;
+        ps.bombPieces = bombPieces;
+        ps.invulnTicks = invulnTicks;
+        // applyDeath lives in the world-simulation half of tick(), which a thin
+        // authority never runs - so game over has to be recognised from what the
+        // clients report instead.
+        if (lives < 0 && allPlayersEliminated())
+            forceGameOver();
+    }
+
+    /**
+     * Overwrites boss HP from the authority. A simulating client calls this so its HP
+     * bar, and any pattern that reads HP, follow the shared fight rather than the
+     * fraction of the damage this one client happened to deal.
+     */
+    public void applyAuthorityHp(int hp, int maxHp) {
+        if (ownsPhaseTransitions || maxHp <= 0) return;
+        bossMaxHp = maxHp;
+        bossHp = Math.max(0, Math.min(hp, maxHp));
+        // The authority has ended the phase but its transition packet has not landed
+        // yet. Go quiet for that gap instead of shooting on a boss that is already dead.
+        if (bossHp == 0)
+            bossFireFrozen = true;
+    }
+
+    /**
+     * Queues a bomb cut-in for everyone except the bomber, who drew it the moment they
+     * pressed the key. Used instead of {@link #activateBomb} when the client owns the
+     * bomb, so the only thing that crosses the wire is "show this portrait".
+     */
+    public void relayBombSplash(UUID uuid) {
+        pendingSplashes.add(new SplashOrder(getCharacterId(uuid), uuid));
+        pendingEvents.add(GameEvent.BOMB_USED);
+    }
+
+    public void forcePhase(int phaseIndex, int hp, int maxHp, String musicId) {
+        forcePhase(phaseIndex, hp, maxHp, musicId, -1);
+    }
+
+    /**
+     * Drops this context onto a phase decided elsewhere. {@code epoch} adopts the
+     * authority's counter so a duplicate or reordered packet can be recognised and
+     * ignored rather than restarting the phase; pass {@code -1} to keep counting locally.
+     */
+    public void forcePhase(int phaseIndex, int hp, int maxHp, String musicId, int epoch) {
+        int n = activeBossPhases.size();
+        if (n == 0) return;
+        int idx = Math.max(0, Math.min(phaseIndex, n - 1));
+        if (arenaPhase != ArenaPhase.BOSS) {
+            // The authority finished dialog; catch up before adopting the phase.
+            transitionToBoss(); // leaves this context on phase 0
+        }
+        if (bossPhase != idx)
+            startBossPhase(idx);
+        // The HP floor a non-owning context applies also silences the boss; a real
+        // transition is exactly when that silence should lift.
+        bossFireFrozen = false;
+        phaseTransitionTimer = 0;
+        pendingNextPhase = -1;
+        if (maxHp > 0) {
+            bossMaxHp = maxHp;
+            bossHp = Math.max(0, Math.min(hp, maxHp));
+        }
+        if (musicId != null && !musicId.isBlank())
+            currentBossPhaseMusicId = musicId;
+        if (epoch >= 0)
+            phaseEpoch = epoch;
     }
 
     private void startBossPhase(int phaseIndex) {
         bossPhase = phaseIndex;
+        phaseEpoch++;
         attackIndex = 0;
         bossSegmentTicksRemaining = 0;
         bossSegmentVolleyCooldown = 0;
@@ -4311,7 +3875,7 @@ public class ArenaContext {
         bossMaxHp = phaseHp;
         // Resolve music once here so the random pick from a musicPool stays stable for
         // the whole phase.
-        currentBossPhaseMusicId = phase.resolveMusic(difficulty.ordinal());
+        currentBossPhaseMusicId = phase.resolveMusic(difficulty.ordinal(), random);
 
         sprinklerAngles.clear();
         sprinklerSeqArm.clear();
@@ -4376,11 +3940,10 @@ public class ArenaContext {
         ps.shotTick++;
 
         CharacterDefinition cd = CharacterLoader.load(getCharacterId(uuid));
-        int shotTypeIndex = getShotTypeOrdinal(uuid);
 
         // Periodic secondary shots (fireRateTicks > 0) fire on their own cadence every
         // tick.
-        PlayerShotPatterns.firePeriodic(ps, pb, cd, shotTypeIndex);
+        PlayerShotPatterns.firePeriodic(ps, pb, cd);
 
         if (ps.shotCooldown > 0) {
             ps.shotCooldown--;
@@ -4391,7 +3954,7 @@ public class ArenaContext {
         int cdF = cd.shotCooldownFocused > 0 ? cd.shotCooldownFocused : PlayerState2D.SHOT_COOLDOWN_FOCUSED;
         ps.shotCooldown = ps.focused ? cdF : cdN;
 
-        PlayerShotPatterns.fire(ps, pb, cd, shotTypeIndex);
+        PlayerShotPatterns.fire(ps, pb, cd);
     }
 
     private void checkEnemyBulletsVsPlayer(UUID uuid, PlayerState2D ps) {
@@ -4424,7 +3987,6 @@ public class ArenaContext {
                     return;
                 } else if (distSq <= grazeMax * grazeMax && rules.grazeScoringEnabled) {
                     ps.graze++;
-                    ps.addStoredChargeProgress(20 * 3.0 / 2000.0);
                     applyScoreExtends(scoreSystemFor(uuid).onGraze(rules.grazeScoreMultiplier), uuid);
                     ps.personalEvents.add(GameEvent.GRAZE);
                     if (ps.graze % 50 == 0)
@@ -4451,7 +4013,6 @@ public class ArenaContext {
                 ps.graze++;
                 ps.grazeChain++;
                 ps.grazeChainCooldown = PlayerState2D.GRAZE_CHAIN_TIMEOUT;
-                ps.addStoredChargeProgress(20 * 3.0 / 2000.0);
                 applyScoreExtends(scoreSystemFor(uuid).onGraze(rules.grazeScoreMultiplier), uuid);
                 ps.personalEvents.add(GameEvent.GRAZE);
                 if (ps.graze % 50 == 0)
@@ -4490,10 +4051,8 @@ public class ArenaContext {
                 return;
             }
 
-            // 2. Graze Check (build gauge)
+            // 2. Graze Check
             if (dist - ps.grazeRadius < hw) {
-                // Award small amount per tick while in beam vicinity
-                ps.addStoredChargeProgress(2 * 3.0 / 2000.0);
                 // Continuous laser graze event - throttled by sound engine usually
                 if (stageTick % 10 == 0)
                     ps.personalEvents.add(GameEvent.GRAZE);
@@ -4657,7 +4216,7 @@ public class ArenaContext {
                     addArenaScore(pointItemScoreAtHeight(itemY), u);
                     ps.personalEvents.add(GameEvent.ITEM_PICK_UP);
                 } else {
-                    // POWER_LARGE gives 500 pts (vs 200 for small chip) - rarer large-fairy drop
+                    // POWER_LARGE gives 500 pts (vs 200 for small chip) - rarer drop
                     applyScoreExtends(ss.addScore(500), u);
                     ps.power = Math.min(PlayerState2D.MAX_POWER, ps.power + 8);
                     if (ps.power >= PlayerState2D.MAX_POWER) {
@@ -4718,109 +4277,8 @@ public class ArenaContext {
     // ---------------------------------------------------------------- TH19
     // Abilities
 
-    public void activateSkill(UUID uuid) {
-        PlayerState2D ps = getPlayerState(uuid);
-        if (ps == null || ps.lives < 0)
-            return;
 
-        /*
-         * PoFV: colored hold bar picks release level; gray stock pays (level 竏・1)
-         * only for L2+; L1 never drains stock. Cast is capped by 1 + floor(stock).
-         */
-        int held = (int) Math.floor(ps.holdChargeProgress + 1e-9);
-        ps.holdChargeProgress = 0.0;
-        ps.chargeConsecutiveHoldTicks = 0;
-        if (held < 1) {
-            ps.syncChargePacketFields();
-            return;
-        }
 
-        int stockLevels = Math.min(PlayerState2D.CHARGE_LEVEL_MAX,
-                (int) Math.floor(ps.storedChargeProgress + 1e-9));
-        int maxCast = Math.min(PlayerState2D.CHARGE_LEVEL_MAX, 1 + stockLevels);
-        int castLevel = Math.min(held, maxCast);
-        int cost = castLevel - 1;
-        ps.storedChargeProgress = Math.max(0.0, ps.storedChargeProgress - cost);
-        ps.chargeLockoutTicks = ps.chargeDelayAfterSkill;
-        ps.syncChargePacketFields();
-
-        triggerCharacterSkill(uuid, ps, castLevel);
-        pendingEvents.add(GameEvent.SKILL_USED); // Use skill event for the distinct visual effect
-    }
-
-    /**
-     * TH09 PoFV-style charge attacks (Reimu / Marisa / Sakuya) and TH19-inspired
-     * Sanae miracles. {@code level} is 1窶・ from the hold meter + stock rules.
-     */
-    private void triggerCharacterSkill(UUID uuid, PlayerState2D ps, int level) {
-        String cid = getCharacterId(uuid);
-
-        switch (cid) {
-            case "marisa" -> {
-                // PoFV: Illusion Laser - thin forward laser; stronger levels last longer
-                // and hit harder (still one shared beam for networking simplicity).
-                masterSparkOwner = uuid;
-                masterSparkX = ps.x;
-                masterSparkY = Math.max(0f, ps.y - 32f);
-                masterSparkLevel = Math.min(3, Math.max(1, level));
-                masterSparkTicks = switch (masterSparkLevel) {
-                    case 1 -> 12;
-                    case 2 -> 14; // deliberately below half of L3 so 2ﾃ有2 < 1ﾃ有3 for same stock
-                    default -> 26;
-                };
-            }
-            case "sakuya" -> {
-                // PoFV: L1 Jack the Ripper (knife stream); L2 denser volley + radial burst;
-                // L3 Private Square窶都tyle time stop + knife ring for resume wave.
-                if (level >= 3) {
-                    timeStopTicks = 60;
-                    timeStopOwner = uuid;
-                    fireSakuyaKnifeRing(uuid, ps, 20);
-                } else if (level >= 2) {
-                    fireSakuyaJackRipper(uuid, ps, 18, 0.12f);
-                    PatternEngine.fireRing(getBulletPool(uuid), ps.x, ps.y, 14, 3.4f, difficulty,
-                            BulletType.fromName("KNIFE"));
-                } else {
-                    fireSakuyaJackRipper(uuid, ps, 10, 0.08f);
-                }
-            }
-            case "reimu" -> {
-                // PoFV: L1 Hakurei Ofuda; L2 Yin-Yang Sign (dual rings + ofudas); L3
-                // Dream Seal (denser rings + more homing ofudas).
-                fireReimuChargeAttack(uuid, ps, level);
-            }
-            case "sanae" -> {
-                // TH19-style: miracle bullet erase + wind/blessing burst (wiki page sparse).
-                fireSanaeMiracle(uuid, ps, level);
-            }
-            case "yuuka" -> {
-                // PoFV: L1 Leaf ring; L2 Denser Leaf + Jade rings; L3 Master Spark + dense rings
-                fireYuukaChargeAttack(uuid, ps, level);
-            }
-            default -> {
-            }
-        }
-    }
-
-    /** PoFV Hakurei Ofuda / Yin-Yang Sign / Dream Seal approximations. */
-    private void fireReimuChargeAttack(UUID uuid, PlayerState2D ps, int level) {
-        BulletPool pb = getBulletPool(uuid);
-        float px = ps.x;
-        float py = ps.y - 8f;
-        if (level <= 1) {
-            fireHomingOrbs(ps, pb, 4);
-            return;
-        }
-        if (level == 2) {
-            PatternEngine.fireRing(pb, px, py, 12, 3.6f, difficulty, BulletType.fromName("RICE"));
-            PatternEngine.fireRing(pb, px, py, 10, 2.3f, difficulty, BulletType.fromName("STAR"));
-            fireHomingOrbs(ps, pb, 5);
-            return;
-        }
-        PatternEngine.fireRing(pb, px, py, 18, 4.0f, difficulty, BulletType.fromName("RICE"));
-        PatternEngine.fireRing(pb, px, py, 16, 2.6f, difficulty, BulletType.fromName("DOT"));
-        fireHomingOrbs(ps, pb, 10);
-    }
 
     private void fireHomingOrbs(PlayerState2D ps, BulletPool pb, int count) {
         for (int i = 0; i < count; i++) {
@@ -4834,136 +4292,10 @@ public class ArenaContext {
         }
     }
 
-    /**
-     * PoFV Jack the Ripper: knives aimed toward boss (or upward in wave phases).
-     */
-    private void fireSakuyaJackRipper(UUID uuid, PlayerState2D ps, int count, float spread) {
-        BulletPool pb = getBulletPool(uuid);
-        float tx = bossMaxHp > 0 ? bossX : ps.x;
-        float ty = bossMaxHp > 0 ? bossY : ps.y - 220f;
-        float base = (float) Math.atan2(ty - ps.y, tx - ps.x);
-        for (int i = 0; i < count; i++) {
-            float ang = base + (i - (count - 1) / 2f) * spread;
-            float sp = 11.5f * BullethellConfig.effectiveSpeedMult(difficulty);
-            pb.spawn(ps.x, ps.y, (float) Math.cos(ang) * sp, (float) Math.sin(ang) * sp,
-                    BulletType.fromName("KNIFE").getId(), 140);
-        }
-    }
 
-    /**
-     * Ring of knives used with Sakuya L3 time stop (launches when time resumes).
-     */
-    private void fireSakuyaKnifeRing(UUID uuid, PlayerState2D ps, int count) {
-        BulletPool pb = getBulletPool(uuid);
-        float step = (float) (Math.PI * 2.0 / count);
-        for (int i = 0; i < count; i++) {
-            float ang = step * i;
-            float dist = 22f + random.nextFloat() * 8f;
-            float kx = ps.x + (float) Math.cos(ang) * dist;
-            float ky = ps.y + (float) Math.sin(ang) * dist;
-            pb.spawn(kx, ky, 0f, -12f, BulletType.fromName("KNIFE").getId(), 120);
-        }
-    }
 
-    /** TH19-inspired: bullet miracle + outward wind (stars / bubbles). */
-    private void fireSanaeMiracle(UUID uuid, PlayerState2D ps, int level) {
-        float cx = ps.x;
-        float cy = ps.y;
-        if (level <= 1) {
-            clearBulletsInRadius(cx, cy, 72f, ps);
-            PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 10, 3.2f, difficulty,
-                    BulletType.fromName("BUBBLE"));
-            return;
-        }
-        if (level == 2) {
-            clearBulletsInRadius(cx, cy, 115f, ps);
-            PatternEngine.fireSpiral(getBulletPool(uuid), cx, cy - 6f, 0f, 10, 3.6f, difficulty,
-                    BulletType.fromName("STAR"));
-            PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 12, 2.8f, difficulty,
-                    BulletType.fromName("BUBBLE"));
-            return;
-        }
-        clearBulletsInRadius(cx, cy, 200f, ps);
-        PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 22, 4.2f, difficulty, BulletType.fromName("STAR"));
-        PatternEngine.fireRing(getBulletPool(uuid), cx, cy - 6f, 16, 3.0f, difficulty, BulletType.fromName("BUBBLE"));
-    }
 
-    private void fireYuukaChargeAttack(UUID uuid, PlayerState2D ps, int level) {
-        BulletPool pb = getBulletPool(uuid);
-        float px = ps.x;
-        float py = ps.y - 8f;
-        if (level <= 1) {
-            PatternEngine.fireRing(pb, px, py, 12, 3.6f, difficulty, BulletType.fromName("LEAF"));
-            return;
-        }
-        if (level == 2) {
-            PatternEngine.fireRing(pb, px, py, 16, 4.0f, difficulty, BulletType.fromName("LEAF"));
-            PatternEngine.fireRing(pb, px, py, 12, 2.8f, difficulty, BulletType.fromName("JADE"));
-            return;
-        }
-        
-        // Level 3: Master Spark (Twin Spark vibe) + dense rings
-        masterSparkOwner = uuid;
-        masterSparkX = ps.x;
-        masterSparkY = Math.max(0f, ps.y - 32f);
-        masterSparkLevel = 3;
-        masterSparkTicks = 26;
-        
-        PatternEngine.fireRing(pb, px, py, 20, 4.5f, difficulty, BulletType.fromName("JADE"));
-        PatternEngine.fireRing(pb, px, py, 18, 3.2f, difficulty, BulletType.fromName("LEAF"));
-    }
 
-    private void tickMasterSpark() {
-        // PoFV Illusion Laser: vertical beam; width and damage scale with charge level.
-        int lv = masterSparkLevel > 0 ? masterSparkLevel : 3;
-        float hw = switch (lv) {
-            case 1 -> 15f;
-            case 2 -> 19f;
-            default -> 34f;
-        };
-        int enemyDmg = switch (lv) {
-            case 1 -> 3;
-            case 2 -> 3;
-            default -> 6;
-        };
-        int bossDmg = switch (lv) {
-            case 1 -> 6;
-            case 2 -> 7;
-            default -> 14;
-        };
-        float x = masterSparkX;
-        float y = masterSparkY;
-
-        PlayerState2D ownerPs = getPlayerState(masterSparkOwner);
-
-        for (int i = 0; i < EnemyPool.CAPACITY; i++) {
-            if (!enemies.isActive(i))
-                continue;
-            float dist = getLaserDistance(enemies.getX(i), enemies.getY(i), x, y, -1.570796f, false);
-            if (dist >= 0 && dist < hw) {
-                if (enemies.damage(i, enemyDmg))
-                    killEnemy(i, ownerPs != null ? ownerPs : player);
-            }
-        }
-
-        if (bossMaxHp > 0 && !currentBossPhase().resolveSurvival(difficulty.ordinal())) {
-            float dist = getLaserDistance(bossX, bossY, x, y, -1.570796f, false);
-            if (dist >= 0 && dist < hw) {
-                bossHp = Math.max(0, bossHp - bossDmg);
-                if (bossHp == 0)
-                    checkBossPhaseTransition();
-            }
-        }
-
-        for (int i = 0; i < bullets.getCapacity(); i++) {
-            if (!bullets.isActive(i))
-                continue;
-            float dist = getLaserDistance(bullets.getX(i), bullets.getY(i), x, y, -1.570796f, false);
-            if (dist >= 0 && dist < hw) {
-                bullets.deactivate(i);
-            }
-        }
-    }
 
     private void tickHomingBullets(BulletPool pb) {
         for (int i = 0; i < pb.getCapacity(); i++) {
@@ -4978,21 +4310,6 @@ public class ArenaContext {
             if (bossMaxHp > 0) {
                 tx = bossX;
                 ty = bossY;
-            } else {
-                // Find nearest enemy
-                float bestD2 = 200 * 200; // max detection range
-                for (int ei = 0; ei < EnemyPool.CAPACITY; ei++) {
-                    if (!enemies.isActive(ei))
-                        continue;
-                    float dx = enemies.getX(ei) - bx;
-                    float dy = enemies.getY(ei) - by;
-                    float d2 = dx * dx + dy * dy;
-                    if (d2 < bestD2) {
-                        bestD2 = d2;
-                        tx = enemies.getX(ei);
-                        ty = enemies.getY(ei);
-                    }
-                }
             }
 
             if (tx != -1) {
@@ -5016,12 +4333,6 @@ public class ArenaContext {
         }
     }
 
-    private void tickItemAttraction() {
-        // When time is stopped, things don't move, but Sakuya can still attract items
-        for (var ps : getAllPlayerStates()) {
-            checkItemAttraction(ps);
-        }
-    }
 
     private void checkItemAttraction(PlayerState2D ps) {
         float r2 = pickupRadiusMultiplier() * ps.pickupRadius;
@@ -5056,15 +4367,6 @@ public class ArenaContext {
     /** Radius within which all enemy bullets are cleared on player death. */
     private static final float DEATH_CLEAR_RADIUS = 110f;
 
-    private void resetAbilityStates() {
-        timeStopTicks = 0;
-        timeStopOwner = null;
-        masterSparkTicks = 0;
-        masterSparkOwner = null;
-        masterSparkX = 0f;
-        masterSparkY = 0f;
-        masterSparkLevel = 0;
-    }
 
     private void applyDeath(UUID uuid) {
         PlayerState2D ps = getPlayerState(uuid);
@@ -5115,11 +4417,12 @@ public class ArenaContext {
                         anyoneAlive = true;
             }
             if (!anyoneAlive) {
-                resetAbilityStates();
-            }
+                    }
 
-            clearBulletsInRadius(ps.x, ps.y, DEATH_CLEAR_RADIUS, null);
+            clearBulletsInRadius(ps.x, ps.y, DEATH_CLEAR_RADIUS);
             ps.deathPendingTicks = 0;
+            // Drop any cut-in still in flight so it cannot resolve onto the respawn.
+            ps.bombStartupTicks = 0;
             ps.invulnTicks = PlayerState2D.INVULN_TICKS;
         } else {
             ps.lives = -1; // eliminated
@@ -5129,28 +4432,18 @@ public class ArenaContext {
     }
 
     /**
-     * Deactivate every enemy bullet whose centre is within {@code radius} of (cx,
-     * cy).
+     * Deactivate every enemy bullet whose centre is within {@code radius} of (cx, cy).
      */
-    /**
-     * @param gaugeRecipient if non-null, PoFV-style charge is awarded for each
-     *                       bullet cleared (Sanae skill).
-     */
-    private void clearBulletsInRadius(float cx, float cy, float r, PlayerState2D gaugeRecipient) {
+    private void clearBulletsInRadius(float cx, float cy, float r) {
         float r2 = r * r;
-        int count = 0;
         for (int i = 0; i < bullets.getCapacity(); i++) {
             if (!bullets.isActive(i))
                 continue;
             float dx = bullets.getX(i) - cx;
             float dy = bullets.getY(i) - cy;
-            if (dx * dx + dy * dy <= r2) {
+            if (dx * dx + dy * dy <= r2)
                 bullets.deactivate(i);
-                count++;
-            }
         }
-        if (gaugeRecipient != null && count > 0)
-            gaugeRecipient.addStoredChargeProgress(count * (2 * 3.0 / 2000.0));
     }
 
     /**
@@ -5177,48 +4470,65 @@ public class ArenaContext {
         }
     }
 
-    /** Activate a bomb for the specified participant. */
+    /**
+     * Ticks from pressing bomb to the effect landing: the cut-in slide plus its slow
+     * drift, so the screen wipes just as the portrait begins to fade rather than while
+     * it is still arriving. Keep equal to {@code SplashState.SLIDE_TICKS + DRIFT_TICKS}
+     * (10 + 10); this class stays free of client code, so the two cannot share a constant.
+     */
+    public static final int BOMB_STARTUP_TICKS = 20;
+
+    /**
+     * Commits the bomb immediately - stock spent, invulnerable, pending death cancelled -
+     * but holds the actual effect until {@link #resolveBomb} fires at the end of the
+     * cut-in. Pressing bomb has to save you on the frame you press it; the screen wipe
+     * is what waits for the portrait.
+     */
     public void activateBomb(UUID uuid) {
         PlayerState2D ps = getPlayerState(uuid);
         if (ps == null)
             return;
+        if (ps.bombStartupTicks > 0)
+            return; // already mid cut-in
         boolean dbg = BHDebugMode.isGodMode(uuid);
         if (!dbg && ps.bombs <= 0)
             return;
+
         boolean isDeathBomb = ps.deathPendingTicks > 0;
         if (!dbg)
             ps.bombs--;
         else
             ps.bombs = 9;
+
+        // The death-bomb window is why this cannot wait for the animation.
+        ps.deathPendingTicks = 0;
+        ps.invulnTicks = Math.max(ps.invulnTicks, BOMB_STARTUP_TICKS + PlayerState2D.INVULN_TICKS);
+
+        ps.bombStartupTicks = BOMB_STARTUP_TICKS;
+
+        if (isDeathBomb)
+            pendingEvents.add(GameEvent.DEATH_BOMB);
+        pendingEvents.add(GameEvent.BOMB_USED);
+        pendingSplashes.add(new SplashOrder(getCharacterId(uuid), uuid));
+    }
+
+    /** The bomb effect itself, once the cut-in has played. */
+    private void resolveBomb(UUID uuid) {
+        PlayerState2D ps = getPlayerState(uuid);
+        if (ps == null)
+            return;
+
         // Convert bullets to low-value white items (TH-authentic; bomb clears all
         // threats but rewards little)
         cancelBulletsIntoItems(ItemPool.TYPE_POINT_GREEN);
         lasers.clearAll();
-        // Kill all small (non-large) enemies; mark their drops as attracted toward the
-        // player
-        for (int i = 0; i < EnemyPool.CAPACITY; i++) {
-            if (!enemies.isActive(i))
-                continue;
-            EnemyType eType = EnemyType.fromId(enemies.getType(i));
-            if (!eType.large) {
-                int itemSlot = killEnemy(i, ps);
-                if (itemSlot >= 0)
-                    items.setAttracting(itemSlot, true);
-            }
-        }
         if (arenaPhase == ArenaPhase.BOSS) {
             spellcard.fail();
             if (currentBossPhase().resolveSurvival(difficulty.ordinal()))
                 checkBossPhaseTransition(true);
         }
-        if (ps.deathPendingTicks > 0)
-            ps.deathPendingTicks = 0;
 
         attractAllCollectibleItems();
-
-        if (isDeathBomb)
-            pendingEvents.add(GameEvent.DEATH_BOMB);
-        pendingEvents.add(GameEvent.BOMB_USED);
 
         // Bomb use lowers rank slightly (reward for difficult situation)
         rank = Math.max(0, rank - 2);
@@ -5283,93 +4593,16 @@ public class ArenaContext {
      * Used by ArenaStatePacket.
      */
     public String getCurrentMusicTrackId() {
-        if (arenaPhase == ArenaPhase.WAVES) {
+        // Stage music covers the intro dialog; phase music takes over at fight start.
+        if (arenaPhase == ArenaPhase.DIALOG_INTRO && currentBossPhaseMusicId.isEmpty()) {
             return (stage.stageMusic != null) ? stage.stageMusic : "";
         }
         return currentBossPhaseMusicId;
     }
 
-    /**
-     * Parse the drop cycle string from rules into an int[] of ItemPool type
-     * constants.
-     */
-    private static int[] parseDropCycle(String pattern) {
-        if (pattern == null || pattern.isBlank()) {
-            return new int[] { ItemPool.TYPE_POWER, ItemPool.TYPE_POINT };
-        }
-        String[] parts = pattern.split(",");
-        int[] result = new int[parts.length];
-        for (int i = 0; i < parts.length; i++) {
-            result[i] = switch (parts[i].trim().toUpperCase()) {
-                case "POWER" -> ItemPool.TYPE_POWER;
-                case "POINT" -> ItemPool.TYPE_POINT;
-                case "FULL_POWER" -> ItemPool.TYPE_FULL_POWER;
-                case "ONE_UP" -> ItemPool.TYPE_ONE_UP;
-                case "BOMB" -> ItemPool.TYPE_BOMB;
-                case "POWER_LARGE" -> ItemPool.TYPE_POWER_LARGE;
-                default -> ItemPool.TYPE_POINT;
-            };
-        }
-        return result;
-    }
 
-    private static EnemyType enemyTypeByName(String name) {
-        if (name == null)
-            return EnemyType.BLUE_FAIRY;
-        try {
-            return EnemyType.valueOf(name.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return EnemyType.BLUE_FAIRY;
-        }
-    }
 
-    /** Handles special bullet logic like Sakuya's knives freezing. */
-    private void tickSpecialBullets(BulletPool pb, boolean frozen) {
-        if (!frozen)
-            return;
-        for (int i = 0; i < pb.getCapacity(); i++) {
-            if (!pb.isActive(i))
-                continue;
-            if (isSakuyaBladeBullet(pb.getType(i))) {
-                float cvx = pb.getVx(i), cvy = pb.getVy(i);
-                if (cvx != 0f || cvy != 0f) {
-                    pb.setPendingVx(i, cvx);
-                    pb.setPendingVy(i, cvy);
-                    pb.setVx(i, 0f);
-                    pb.setVy(i, 0f);
-                }
-            }
-        }
-    }
 
-    /** Restores velocity to knives when time resumes. */
-    private void resumeFrozenBullets() {
-        resumeFrozenPool(playerBullets);
-        for (BulletPool pb : coopBullets.values()) {
-            resumeFrozenPool(pb);
-        }
-    }
-
-    private void resumeFrozenPool(BulletPool pb) {
-        for (int i = 0; i < pb.getCapacity(); i++) {
-            if (pb.isActive(i) && isSakuyaBladeBullet(pb.getType(i))) {
-                float pvx = pb.getPendingVx(i);
-                float pvy = pb.getPendingVy(i);
-                if (pvx == 0f && pvy == 0f)
-                    pvy = -12f;
-                pb.setVx(i, pvx);
-                pb.setVy(i, pvy);
-            }
-        }
-    }
-
-    /**
-     * Kunai + knife share the same hit profile; both participate in Sakuya time
-     * stop.
-     */
-    private static boolean isSakuyaBladeBullet(int typeId) {
-        return BulletType.fromId(typeId).isSakuyaBlade();
-    }
 
     private static BulletType bulletTypeByName(String name) {
         if (name == null)
@@ -5391,17 +4624,8 @@ public class ArenaContext {
         return won;
     }
 
-    /**
-     * @return true if time is currently frozen by Sakuya.
-     */
-    public boolean isTimeStopped() {
-        return timeStopTicks > 0;
-    }
-
     public boolean canPlayerMove(UUID uuid) {
-        if (timeStopTicks <= 0)
-            return true;
-        return mc.sayda.bullethell.boss.CharacterLoader.load(getCharacterId(uuid)).immuneToTimeStop;
+        return true;
     }
 
     public int getSpellsCaptured() {
@@ -5412,31 +4636,20 @@ public class ArenaContext {
         return spellsAttempted;
     }
 
-    /**
-     * Calculates the total completion percentage of the stage.
-     * Combines wave progress and boss phase progress into a single 0-100 value.
-     */
-
+    /** Total completion percentage of the stage, derived from boss phase progress. */
     public float getCompletionPercentage() {
-        int totalWaves = Math.max(0, applicableWaveDefinitionCount);
         int totalPhases = activeBossPhases.size();
-        int totalSteps = totalWaves + totalPhases;
-        if (totalSteps == 0)
+        if (totalPhases == 0)
             return 100.0f;
 
         float stepsDone = 0;
-        if (arenaPhase == ArenaPhase.WAVES) {
-            stepsDone = scheduledEnemies.isEmpty() ? 0
-                    : (float) nextScheduledIdx / scheduledEnemies.size() * totalWaves;
-        } else if (arenaPhase == ArenaPhase.DIALOG_INTRO) {
-            stepsDone = totalWaves;
-        } else if (arenaPhase == ArenaPhase.BOSS) {
+        if (arenaPhase == ArenaPhase.BOSS) {
             float phaseProgress = 1.0f - (bossMaxHp > 0 ? (float) bossHp / bossMaxHp : 0f);
-            stepsDone = totalWaves + bossPhase + phaseProgress;
+            stepsDone = bossPhase + phaseProgress;
         } else if (won) {
-            stepsDone = totalSteps;
+            stepsDone = totalPhases;
         }
 
-        return Math.min(100.0f, (stepsDone / totalSteps) * 100.0f);
+        return Math.min(100.0f, (stepsDone / totalPhases) * 100.0f);
     }
 }

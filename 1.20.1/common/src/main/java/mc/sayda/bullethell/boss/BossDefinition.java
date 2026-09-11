@@ -25,8 +25,8 @@ public class BossDefinition {
     public String name = "Unknown Boss";
 
     /**
-     * Optional intro dialogue shown after all waves clear and before the fight
-     * begins.  Lines are auto-advanced by their {@code delayTicks} value.
+     * Optional intro dialogue shown before the fight begins.
+     * Lines are auto-advanced by their {@code delayTicks} value.
      * Leave empty to skip straight to phase 0.
      */
     public List<DialogLine> introDialog = new ArrayList<>();

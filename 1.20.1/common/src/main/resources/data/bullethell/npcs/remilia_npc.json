@@ -3,5 +3,7 @@
   "displayName": "Remilia Scarlet",
   "challengeText": "The mistress of the Scarlet Devil Mansion graces you with her presence! Shall we dance in this night, human?",
   "stageId": "remilia_stage",
-  "seeksShade": true
+  "seeksShade": true,
+  "eggPrimaryColor": "#FFA3A3",
+  "eggSecondaryColor": "#9D9BDA"
 }

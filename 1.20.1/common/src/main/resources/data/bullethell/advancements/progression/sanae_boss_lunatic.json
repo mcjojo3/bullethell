@@ -1,0 +1,19 @@
+{
+    "parent": "bullethell:progression/sanae_boss_hard",
+    "display": {
+        "icon": {
+            "item": "minecraft:netherite_ingot"
+        },
+        "title": "Sanae Cleared (Lunatic)",
+        "description": "Defeat Sanae on Lunatic.",
+        "frame": "challenge",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "clear": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

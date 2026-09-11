@@ -12,7 +12,7 @@ import java.util.function.IntConsumer;
  *
  * Capacity is configurable - use ENEMY_CAPACITY for boss bullets
  * and PLAYER_CAPACITY for player shots (raised for dense spread patterns
- * on fairy-heavy stages so spawn() rarely fails when many shots are alive).
+ * on dense stages so spawn() rarely fails when many shots are alive).
  */
 public class BulletPool {
 

@@ -21,11 +21,6 @@ public final class ForgeBullethellConfig {
         }
 
         public static final class Common {
-                public final ForgeConfigSpec.DoubleValue waveTimingEasy;
-                public final ForgeConfigSpec.DoubleValue waveTimingNormal;
-                public final ForgeConfigSpec.DoubleValue waveTimingHard;
-                public final ForgeConfigSpec.DoubleValue waveTimingLunatic;
-
                 public final ForgeConfigSpec.DoubleValue diffSpeedTunerEasy;
                 public final ForgeConfigSpec.DoubleValue diffSpeedTunerNormal;
                 public final ForgeConfigSpec.DoubleValue diffSpeedTunerHard;
@@ -34,31 +29,6 @@ public final class ForgeBullethellConfig {
                 public final ForgeConfigSpec.DoubleValue diffDensityTunerNormal;
                 public final ForgeConfigSpec.DoubleValue diffDensityTunerHard;
                 public final ForgeConfigSpec.DoubleValue diffDensityTunerLunatic;
-
-                public final ForgeConfigSpec.IntValue fairyMinAttackIntervalTicks;
-                public final ForgeConfigSpec.IntValue fairyAimedBurstCap;
-                public final ForgeConfigSpec.IntValue fairyAimedBurstCapLunatic;
-                public final ForgeConfigSpec.IntValue fairySpreadBurstCap;
-                public final ForgeConfigSpec.IntValue fairySpreadBurstCapLunatic;
-                public final ForgeConfigSpec.IntValue fairyStreamCooldownDivisor;
-                public final ForgeConfigSpec.IntValue fairyStreamCooldownMinTicks;
-                public final ForgeConfigSpec.DoubleValue fairyBulletCountMult;
-                public final ForgeConfigSpec.DoubleValue fairyAttackIntervalMult;
-
-                public final ForgeConfigSpec.DoubleValue fairyRushGapBreathingEasy;
-                public final ForgeConfigSpec.DoubleValue fairyRushGapBreathingNormal;
-                public final ForgeConfigSpec.DoubleValue fairyRushGapBreathingHard;
-                public final ForgeConfigSpec.DoubleValue fairyRushGapBreathingLunatic;
-                public final ForgeConfigSpec.DoubleValue fairyRushDurationHintEasy;
-                public final ForgeConfigSpec.DoubleValue fairyRushDurationHintNormal;
-                public final ForgeConfigSpec.DoubleValue fairyRushDurationHintHard;
-                public final ForgeConfigSpec.DoubleValue fairyRushDurationHintLunatic;
-                public final ForgeConfigSpec.IntValue fairyRushIntensityBiasEasy;
-                public final ForgeConfigSpec.IntValue fairyRushIntensityBiasNormal;
-                public final ForgeConfigSpec.IntValue fairyRushIntensityBiasHard;
-                public final ForgeConfigSpec.IntValue fairyRushIntensityBiasLunatic;
-                public final ForgeConfigSpec.IntValue fairyCatalogIntensityThreshold;
-                public final ForgeConfigSpec.DoubleValue fairyCatalogIntensityBoostPerStep;
 
                 public final ForgeConfigSpec.DoubleValue bossPhaseDensityCap;
                 public final ForgeConfigSpec.DoubleValue bossPhaseDensityPerPhase;
@@ -91,22 +61,6 @@ public final class ForgeBullethellConfig {
                 public final ForgeConfigSpec.ConfigValue<String> testDevPath;
 
                 Common(ForgeConfigSpec.Builder builder) {
-                        builder.push("WaveTiming");
-                        waveTimingEasy = builder
-                                        .comment("Designer-tick divisor for the baked wave schedule on Easy (stage spawn ticks and procedural gaps). Higher = more compression / waves spawn sooner in arena time; not the same as bullet density.")
-                                        .defineInRange("easy", BullethellConfig.DEF_WAVE_TIMING_EASY, 0.05D, 10.0D);
-                        waveTimingNormal = builder
-                                        .comment("Same as easy, for Normal difficulty.")
-                                        .defineInRange("normal", BullethellConfig.DEF_WAVE_TIMING_NORMAL, 0.05D, 10.0D);
-                        waveTimingHard = builder
-                                        .comment("Same as easy, for Hard difficulty.")
-                                        .defineInRange("hard", BullethellConfig.DEF_WAVE_TIMING_HARD, 0.05D, 10.0D);
-                        waveTimingLunatic = builder
-                                        .comment("Same as easy, for Lunatic difficulty.")
-                                        .defineInRange("lunatic", BullethellConfig.DEF_WAVE_TIMING_LUNATIC, 0.05D,
-                                                        10.0D);
-                        builder.pop();
-
                         builder.push("DifficultyTuning");
                         diffSpeedTunerEasy = builder
                                         .comment("Multiplier on DifficultyConfig.speedMult for Easy (bullet speed scaling).")
@@ -124,7 +78,7 @@ public final class ForgeBullethellConfig {
                                                         BullethellConfig.DEF_DIFFICULTY_SPEED_TUNER_LUNATIC, 0.25D,
                                                         4.0D);
                         diffDensityTunerEasy = builder
-                                        .comment("Multiplier on DifficultyConfig.densityMult (fairy bullet counts, attack cadence, boss density).")
+                                        .comment("Multiplier on DifficultyConfig.densityMult (bullet counts, attack cadence, boss density).")
                                         .defineInRange("density_tuner_easy",
                                                         BullethellConfig.DEF_DIFFICULTY_DENSITY_TUNER_EASY, 0.25D,
                                                         4.0D);
@@ -140,96 +94,6 @@ public final class ForgeBullethellConfig {
                                         .defineInRange("density_tuner_lunatic",
                                                         BullethellConfig.DEF_DIFFICULTY_DENSITY_TUNER_LUNATIC, 0.25D,
                                                         4.0D);
-                        builder.pop();
-
-                        builder.push("FairyEnemyAi");
-                        fairyMinAttackIntervalTicks = builder
-                                        .comment("Floor on ticks between fairy/wave-enemy attack bursts after difficulty scaling.")
-                                        .defineInRange("min_attack_interval_ticks",
-                                                        BullethellConfig.DEF_FAIRY_MIN_ATTACK_INTERVAL_TICKS, 3, 60);
-                        fairyAimedBurstCap = builder
-                                        .comment("Max aimed bullets per burst for small fairies (Easy-Hard).")
-                                        .defineInRange("aimed_burst_cap", BullethellConfig.DEF_FAIRY_AIMED_BURST_CAP, 1,
-                                                        16);
-                        fairyAimedBurstCapLunatic = builder
-                                        .defineInRange("aimed_burst_cap_lunatic",
-                                                        BullethellConfig.DEF_FAIRY_AIMED_BURST_CAP_LUNATIC, 1, 16);
-                        fairySpreadBurstCap = builder
-                                        .defineInRange("spread_burst_cap", BullethellConfig.DEF_FAIRY_SPREAD_BURST_CAP,
-                                                        1, 16);
-                        fairySpreadBurstCapLunatic = builder
-                                        .defineInRange("spread_burst_cap_lunatic",
-                                                        BullethellConfig.DEF_FAIRY_SPREAD_BURST_CAP_LUNATIC, 1, 16);
-                        fairyStreamCooldownDivisor = builder
-                                        .comment("STREAM pattern: cooldown = max(min_ticks, scaledInterval / divisor).")
-                                        .defineInRange("stream_cooldown_divisor",
-                                                        BullethellConfig.DEF_FAIRY_STREAM_COOLDOWN_DIVISOR, 1, 12);
-                        fairyStreamCooldownMinTicks = builder
-                                        .defineInRange("stream_cooldown_min_ticks",
-                                                        BullethellConfig.DEF_FAIRY_STREAM_COOLDOWN_MIN_TICKS, 1, 40);
-                        fairyBulletCountMult = builder
-                                        .comment("Extra multiplier on per-burst bullet count (after density).")
-                                        .defineInRange("bullet_count_mult",
-                                                        BullethellConfig.DEF_FAIRY_BULLET_COUNT_MULT, 0.25D, 4.0D);
-                        fairyAttackIntervalMult = builder
-                                        .comment("Multiplier on ticks between bursts (>1 = slower fairy fire).")
-                                        .defineInRange("attack_interval_mult",
-                                                        BullethellConfig.DEF_FAIRY_ATTACK_INTERVAL_MULT, 0.25D, 4.0D);
-                        builder.pop();
-
-                        builder.push("FairyRush");
-                        fairyRushGapBreathingEasy = builder
-                                        .comment("Scales procedural inter-wave rest gap (catalog gap curve).")
-                                        .defineInRange("gap_breathing_easy",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_GAP_BREATHING_EASY, 0.05D,
-                                                        2.0D);
-                        fairyRushGapBreathingNormal = builder
-                                        .defineInRange("gap_breathing_normal",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_GAP_BREATHING_NORMAL, 0.05D,
-                                                        2.0D);
-                        fairyRushGapBreathingHard = builder
-                                        .defineInRange("gap_breathing_hard",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_GAP_BREATHING_HARD, 0.05D,
-                                                        2.0D);
-                        fairyRushGapBreathingLunatic = builder
-                                        .defineInRange("gap_breathing_lunatic",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_GAP_BREATHING_LUNATIC, 0.05D,
-                                                        2.0D);
-                        fairyRushDurationHintEasy = builder
-                                        .defineInRange("duration_hint_easy",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_DURATION_HINT_EASY, 0.05D,
-                                                        2.0D);
-                        fairyRushDurationHintNormal = builder
-                                        .defineInRange("duration_hint_normal",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_DURATION_HINT_NORMAL, 0.05D,
-                                                        2.0D);
-                        fairyRushDurationHintHard = builder
-                                        .defineInRange("duration_hint_hard",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_DURATION_HINT_HARD, 0.05D,
-                                                        2.0D);
-                        fairyRushDurationHintLunatic = builder
-                                        .defineInRange("duration_hint_lunatic",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_DURATION_HINT_LUNATIC, 0.05D,
-                                                        2.0D);
-                        fairyRushIntensityBiasEasy = builder
-                                        .defineInRange("intensity_bias_easy",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_INTENSITY_BIAS_EASY, -5, 5);
-                        fairyRushIntensityBiasNormal = builder
-                                        .defineInRange("intensity_bias_normal",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_INTENSITY_BIAS_NORMAL, -5, 5);
-                        fairyRushIntensityBiasHard = builder
-                                        .defineInRange("intensity_bias_hard",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_INTENSITY_BIAS_HARD, -5, 5);
-                        fairyRushIntensityBiasLunatic = builder
-                                        .defineInRange("intensity_bias_lunatic",
-                                                        BullethellConfig.DEF_FAIRY_RUSH_INTENSITY_BIAS_LUNATIC, -5, 5);
-                        fairyCatalogIntensityThreshold = builder
-                                        .defineInRange("catalog_intensity_threshold",
-                                                        BullethellConfig.DEF_FAIRY_CATALOG_INTENSITY_THRESHOLD, 0, 10);
-                        fairyCatalogIntensityBoostPerStep = builder
-                                        .defineInRange("catalog_intensity_boost_per_step",
-                                                        BullethellConfig.DEF_FAIRY_CATALOG_INTENSITY_BOOST_PER_STEP,
-                                                        0.0D, 0.5D);
                         builder.pop();
 
                         builder.push("BossDifficulty");
@@ -301,7 +165,7 @@ public final class ForgeBullethellConfig {
 
                         builder.push("Combat");
                         globalEnemyBulletSpeedMult = builder
-                                        .comment("Multiplier on enemy/fairy/boss bullet speed after difficulty scaling (global slow-mo for patterns).")
+                                        .comment("Multiplier on enemy/boss bullet speed after difficulty scaling (global slow-mo for patterns).")
                                         .defineInRange("global_enemy_bullet_speed_mult",
                                                         BullethellConfig.DEF_GLOBAL_ENEMY_BULLET_SPEED_MULT, 0.25D,
                                                         2.0D);
@@ -354,11 +218,6 @@ public final class ForgeBullethellConfig {
 
         public static void apply() {
                 Common c = COMMON;
-                BullethellConfig.WAVE_TIMING_EASY = () -> c.waveTimingEasy.get().floatValue();
-                BullethellConfig.WAVE_TIMING_NORMAL = () -> c.waveTimingNormal.get().floatValue();
-                BullethellConfig.WAVE_TIMING_HARD = () -> c.waveTimingHard.get().floatValue();
-                BullethellConfig.WAVE_TIMING_LUNATIC = () -> c.waveTimingLunatic.get().floatValue();
-
                 BullethellConfig.DIFFICULTY_SPEED_TUNER_EASY = () -> c.diffSpeedTunerEasy.get().floatValue();
                 BullethellConfig.DIFFICULTY_SPEED_TUNER_NORMAL = () -> c.diffSpeedTunerNormal.get().floatValue();
                 BullethellConfig.DIFFICULTY_SPEED_TUNER_HARD = () -> c.diffSpeedTunerHard.get().floatValue();
@@ -367,36 +226,6 @@ public final class ForgeBullethellConfig {
                 BullethellConfig.DIFFICULTY_DENSITY_TUNER_NORMAL = () -> c.diffDensityTunerNormal.get().floatValue();
                 BullethellConfig.DIFFICULTY_DENSITY_TUNER_HARD = () -> c.diffDensityTunerHard.get().floatValue();
                 BullethellConfig.DIFFICULTY_DENSITY_TUNER_LUNATIC = () -> c.diffDensityTunerLunatic.get().floatValue();
-
-                BullethellConfig.FAIRY_MIN_ATTACK_INTERVAL_TICKS = c.fairyMinAttackIntervalTicks::get;
-                BullethellConfig.FAIRY_AIMED_BURST_CAP = c.fairyAimedBurstCap::get;
-                BullethellConfig.FAIRY_AIMED_BURST_CAP_LUNATIC = c.fairyAimedBurstCapLunatic::get;
-                BullethellConfig.FAIRY_SPREAD_BURST_CAP = c.fairySpreadBurstCap::get;
-                BullethellConfig.FAIRY_SPREAD_BURST_CAP_LUNATIC = c.fairySpreadBurstCapLunatic::get;
-                BullethellConfig.FAIRY_STREAM_COOLDOWN_DIVISOR = c.fairyStreamCooldownDivisor::get;
-                BullethellConfig.FAIRY_STREAM_COOLDOWN_MIN_TICKS = c.fairyStreamCooldownMinTicks::get;
-                BullethellConfig.FAIRY_BULLET_COUNT_MULT = () -> c.fairyBulletCountMult.get().floatValue();
-                BullethellConfig.FAIRY_ATTACK_INTERVAL_MULT = () -> c.fairyAttackIntervalMult.get().floatValue();
-
-                BullethellConfig.FAIRY_RUSH_GAP_BREATHING_EASY = () -> c.fairyRushGapBreathingEasy.get().floatValue();
-                BullethellConfig.FAIRY_RUSH_GAP_BREATHING_NORMAL = () -> c.fairyRushGapBreathingNormal.get()
-                                .floatValue();
-                BullethellConfig.FAIRY_RUSH_GAP_BREATHING_HARD = () -> c.fairyRushGapBreathingHard.get().floatValue();
-                BullethellConfig.FAIRY_RUSH_GAP_BREATHING_LUNATIC = () -> c.fairyRushGapBreathingLunatic.get()
-                                .floatValue();
-                BullethellConfig.FAIRY_RUSH_DURATION_HINT_EASY = () -> c.fairyRushDurationHintEasy.get().floatValue();
-                BullethellConfig.FAIRY_RUSH_DURATION_HINT_NORMAL = () -> c.fairyRushDurationHintNormal.get()
-                                .floatValue();
-                BullethellConfig.FAIRY_RUSH_DURATION_HINT_HARD = () -> c.fairyRushDurationHintHard.get().floatValue();
-                BullethellConfig.FAIRY_RUSH_DURATION_HINT_LUNATIC = () -> c.fairyRushDurationHintLunatic.get()
-                                .floatValue();
-                BullethellConfig.FAIRY_RUSH_INTENSITY_BIAS_EASY = c.fairyRushIntensityBiasEasy::get;
-                BullethellConfig.FAIRY_RUSH_INTENSITY_BIAS_NORMAL = c.fairyRushIntensityBiasNormal::get;
-                BullethellConfig.FAIRY_RUSH_INTENSITY_BIAS_HARD = c.fairyRushIntensityBiasHard::get;
-                BullethellConfig.FAIRY_RUSH_INTENSITY_BIAS_LUNATIC = c.fairyRushIntensityBiasLunatic::get;
-                BullethellConfig.FAIRY_CATALOG_INTENSITY_THRESHOLD = c.fairyCatalogIntensityThreshold::get;
-                BullethellConfig.FAIRY_CATALOG_INTENSITY_BOOST_PER_STEP = () -> c.fairyCatalogIntensityBoostPerStep
-                                .get().floatValue();
 
                 BullethellConfig.BOSS_PHASE_DENSITY_CAP = () -> c.bossPhaseDensityCap.get().floatValue();
                 BullethellConfig.BOSS_PHASE_DENSITY_PER_PHASE = () -> c.bossPhaseDensityPerPhase.get().floatValue();

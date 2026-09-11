@@ -1,0 +1,19 @@
+{
+    "parent": "bullethell:progression/marisa_boss_hard",
+    "display": {
+        "icon": {
+            "item": "minecraft:netherite_ingot"
+        },
+        "title": "Marisa Cleared (Lunatic)",
+        "description": "Defeat Marisa on Lunatic.",
+        "frame": "challenge",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "clear": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

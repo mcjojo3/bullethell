@@ -11,8 +11,8 @@ public enum GameEvent {
     ITEM_PICKUP,    // item collected
     SPELL_CAPTURED, // spellcard cleared without dying/bombing
     SPELL_FAILED,   // spellcard timer expired or player died during spell
-    SKILL_USED,     // character special ability activated (non-bomb)
-    ENEMY_KILL,     // fairy / wave enemy destroyed (SFX for all clients)
+    ENEMY_KILL,     // no current producer - the wave enemies that fired it were removed
+                    // pending a redesign; client SFX handler is still wired up
     ITEM_POWER_UP,  // full power or bomb item collected (distinct power-up SFX)
     ITEM_ONE_UP,    // 1-up item collected
     ITEM_PICK_UP,   // point item or small P power chip
