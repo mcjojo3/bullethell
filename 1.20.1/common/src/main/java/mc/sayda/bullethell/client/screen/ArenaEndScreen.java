@@ -6,6 +6,7 @@ import mc.sayda.bullethell.client.ClientArenaState;
 import mc.sayda.bullethell.network.ArenaEndPacket;
 import mc.sayda.bullethell.network.BHPackets;
 import mc.sayda.bullethell.network.RetryArenaPacket;
+import mc.sayda.bullethell.network.RetryVotePacket;
 import mc.sayda.bullethell.render.BulletHellRenderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -48,6 +49,15 @@ public class ArenaEndScreen extends Screen {
     private int phaseTick = 0;
     private int selectedBtn = BTN_OK;
 
+    // ---- co-op retry vote ----
+    /** Votes so far and how many the run needs; a total of 1 is an ordinary solo retry. */
+    private int retryVotes = 0;
+    private int retryTotal;
+    /** This player has asked for the rematch and is waiting on the rest of the party. */
+    private boolean retryWaiting = false;
+    /** The rematch is starting - closing now must not be read as backing out. */
+    private boolean retryStarting = false;
+
     // ---- button layout (computed in init) ----
     private int btnY;
     private final int[] btnX = new int[BTN_COUNT];
@@ -58,6 +68,7 @@ public class ArenaEndScreen extends Screen {
         super(Component.empty());
         this.data = data;
         this.phase = data.bossDialog.isBlank() ? Phase.STATS : Phase.DIALOG;
+        this.retryTotal = data.retryPartySize;
     }
 
     // Arena rendering stays active while this screen is open
@@ -69,10 +80,12 @@ public class ArenaEndScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        String[] labels = { "  OK  ", " SHARE ", " RETRY " };
+        String[] labels = labels();
         int totalW = 0;
         for (int i = 0; i < BTN_COUNT; i++) {
-            btnW[i] = font.width(labels[i]) + 16;
+            // Retry is sized for the widest vote label it could ever show, so the row
+            // does not shift under the cursor as votes come in.
+            btnW[i] = font.width(i == BTN_RETRY ? widestRetryLabel() : labels[i]) + 16;
             totalW += btnW[i];
         }
         int gap = 16;
@@ -195,7 +208,7 @@ public class ArenaEndScreen extends Screen {
         }
 
         // ---- Buttons ----
-        String[] labels = { "  OK  ", " SHARE ", " RETRY " };
+        String[] labels = labels();
         for (int i = 0; i < BTN_COUNT; i++) {
             boolean sel = (i == selectedBtn);
             boolean hover = mouseX >= btnX[i] && mouseX < btnX[i] + btnW[i]
@@ -214,8 +227,13 @@ public class ArenaEndScreen extends Screen {
         }
 
         // ---- Key hint ----
-        gfx.drawCenteredString(font, "\u2190 / \u2192  navigate     Enter / Z  confirm",
-                width / 2, btnY + BTN_H + 8, 0x55FFFFFF);
+        if (retryWaiting) {
+            gfx.drawCenteredString(font, "Waiting for the rest of the party...",
+                    width / 2, btnY + BTN_H + 8, 0xAAFFE600);
+        } else {
+            gfx.drawCenteredString(font, "\u2190 / \u2192  navigate     Enter / Z  confirm",
+                    width / 2, btnY + BTN_H + 8, 0x55FFFFFF);
+        }
     }
 
     // ---------------------------------------------------------------- input
@@ -284,16 +302,63 @@ public class ArenaEndScreen extends Screen {
             case BTN_OK -> Minecraft.getInstance().setScreen(null);
             case BTN_SHARE -> BHPackets.sendShareLastRun(); // Stay on screen
             case BTN_RETRY -> {
+                if (retryWaiting) return; // already asked; the party is what we are waiting on
                 BHPackets.sendRetryArena(new RetryArenaPacket(data.stageId, data.difficulty, data.characterId));
-                Minecraft.getInstance().setScreen(null);
+                if (retryTotal > 1) {
+                    // The rematch belongs to everyone who played, so stay put until they agree.
+                    retryWaiting = true;
+                } else {
+                    Minecraft.getInstance().setScreen(null);
+                }
             }
         }
+    }
+
+    // ---------------------------------------------------------------- retry vote
+
+    /** Server update on the party's retry vote; drives the RETRY button's label. */
+    public void applyRetryVote(RetryVotePacket pkt) {
+        switch (pkt.state) {
+            case RetryVotePacket.STATE_STARTED -> {
+                retryStarting = true;
+                Minecraft.getInstance().setScreen(null);
+            }
+            case RetryVotePacket.STATE_SOLO -> {
+                // The party broke up; the button restarts this player's run on its own.
+                retryTotal = 1;
+                retryVotes = 0;
+                retryWaiting = false;
+            }
+            default -> {
+                retryVotes = pkt.votes;
+                retryTotal = pkt.total;
+            }
+        }
+    }
+
+    private String[] labels() {
+        return new String[] { "  OK  ", " SHARE ", retryLabel() };
+    }
+
+    private String retryLabel() {
+        if (retryTotal <= 1 || retryVotes <= 0) return " RETRY ";
+        return " RETRY (" + retryVotes + "/" + retryTotal + ") ";
+    }
+
+    private String widestRetryLabel() {
+        return data.retryPartySize <= 1 ? " RETRY "
+                : " RETRY (" + data.retryPartySize + "/" + data.retryPartySize + ") ";
     }
 
     // ---------------------------------------------------------------- cleanup
 
     @Override
     public void removed() {
+        // Leaving the results screen calls off a party retry: better that the others get
+        // their solo button back than wait on a vote that is never coming.
+        if (data.retryPartySize > 1 && !retryStarting)
+            BHPackets.sendRetryArena(RetryArenaPacket.cancel());
+
         ClientArenaState state = ClientArenaState.INSTANCE;
         state.pendingEndOverlay = false;
         BHScaleManager.restoreOriginalScale();

@@ -9,10 +9,15 @@ import mc.sayda.bullethell.arena.DifficultyConfig;
 /** Client mirror of server-side character unlock progression. */
 public final class CharacterUnlockClientState {
 
+    /**
+     * Kept in sync with {@code CharacterUnlocks.DEFAULT_UNLOCKED_CHAR_IDS} on the server.
+     * Must be declared before {@link #INSTANCE}: static fields initialise in textual
+     * order, and the constructor reads this set.
+     */
+    private static final Set<String> DEFAULT_UNLOCKED_CHAR_IDS = Set.of("reimu", "marisa");
+
     public static final CharacterUnlockClientState INSTANCE = new CharacterUnlockClientState();
 
-    /** Kept in sync with {@code CharacterUnlocks.DEFAULT_UNLOCKED_CHAR_IDS} on the server. */
-    private static final Set<String> DEFAULT_UNLOCKED_CHAR_IDS = Set.of("reimu", "marisa");
     private final ConcurrentHashMap<String, Integer> maxDifficultyByCharacter = new ConcurrentHashMap<>();
 
     private CharacterUnlockClientState() {

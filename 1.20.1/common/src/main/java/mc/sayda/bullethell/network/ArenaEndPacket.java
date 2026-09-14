@@ -44,12 +44,17 @@ public final class ArenaEndPacket {
     public final String stageId;
     /** Difficulty name (EASY/NORMAL/HARD/LUNATIC) for retry. */
     public final String difficulty;
+    /**
+     * How many players were in the finished run. Above 1 the retry button collects a
+     * vote from the whole party instead of restarting on its own.
+     */
+    public final int retryPartySize;
 
     public ArenaEndPacket(boolean won, String bossName, String bossId,
             String characterId, String characterName, String bossDialog,
             long score, long scoreCombined, int victoryXp, int lives, int bombs, int graze,
             int spellsCaptured, int spellsAttempted, float completionPercent,
-            String stageId, String difficulty) {
+            String stageId, String difficulty, int retryPartySize) {
         this.won = won;
         this.bossName = bossName != null ? bossName : "";
         this.bossId = bossId != null ? bossId : "";
@@ -67,6 +72,7 @@ public final class ArenaEndPacket {
         this.completionPercent = completionPercent;
         this.stageId = stageId != null ? stageId : "";
         this.difficulty = difficulty != null ? difficulty : "NORMAL";
+        this.retryPartySize = Math.max(1, retryPartySize);
     }
 
     public void encode(FriendlyByteBuf buf) {
@@ -87,6 +93,7 @@ public final class ArenaEndPacket {
         buf.writeFloat(completionPercent);
         buf.writeUtf(stageId);
         buf.writeUtf(difficulty);
+        buf.writeVarInt(retryPartySize);
     }
 
     public static ArenaEndPacket decode(FriendlyByteBuf buf) {
@@ -107,8 +114,9 @@ public final class ArenaEndPacket {
         float completion = buf.readFloat();
         String stageId = buf.readUtf();
         String difficulty = buf.readUtf();
+        int retryPartySize = buf.readVarInt();
         return new ArenaEndPacket(won, bossName, bossId, characterId, characterName,
                 bossDialog, score, scoreCombined, victoryXp, lives, bombs, graze, captured, attempted,
-                completion, stageId, difficulty);
+                completion, stageId, difficulty, retryPartySize);
     }
 }

@@ -202,6 +202,9 @@ public class BulletPool {
 
     public int spawn(float x, float y, float vx, float vy, int type, int life,
                      float visScale, float hitScale, float angVelRadPerTick, int freezeTicks, int homingMode) {
+        // A random type (randomOf in bullet_types.json) settles on its concrete type here,
+        // the one place every bullet passes through.
+        type = mc.sayda.bullethell.pattern.BulletType.resolveSpawnId(type);
         int slot = nextFreeSlot();
         if (slot == -1) return -1;
         if (onBeforeWriteSlot != null)
@@ -236,8 +239,12 @@ public class BulletPool {
             data[b + F_PENDING_VY] = 0f;
             data[b + F_FREEZE_REMAINING] = 0f;
         }
-        prevX[slot] = x;
-        prevY[slot] = y;
+        // Render as if already one step into its flight: interpolating from prev == current
+        // would hold the bullet still at its spawn point for a whole tick, then snap into
+        // motion. Render-only - collision never reads prev. Zero while frozen, so a frozen
+        // bullet still stays put.
+        prevX[slot] = x - data[b + F_VX];
+        prevY[slot] = y - data[b + F_VY];
         active[slot] = true;
         dirty[slot]  = true;
         activeCount++;
@@ -315,8 +322,10 @@ public class BulletPool {
         if (isActive && !active[slot]) {
             active[slot] = true;
             activeCount++;
-            prevX[slot] = slotData[F_X];
-            prevY[slot] = slotData[F_Y];
+            // Same rule as above and as spawn(): a bullet first seen here is already in
+            // flight, so render it from one step back rather than frozen for a tick.
+            prevX[slot] = slotData[F_X] - slotData[F_VX];
+            prevY[slot] = slotData[F_Y] - slotData[F_VY];
         } else if (!isActive && active[slot]) {
             active[slot] = false;
             activeCount--;

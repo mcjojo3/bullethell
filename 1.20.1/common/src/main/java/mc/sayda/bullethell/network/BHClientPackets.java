@@ -38,6 +38,10 @@ public final class BHClientPackets {
                     }
                 } else if (mc.screen instanceof mc.sayda.bullethell.client.screen.LobbyScreen lobbyScreen) {
                     lobbyScreen.onLobbyUpdated();
+                } else if (mc.screen instanceof mc.sayda.bullethell.client.screen.CharacterSelectScreen
+                        || mc.screen instanceof mc.sayda.bullethell.client.screen.InvitePlayerScreen) {
+                    // A party sub-screen: someone else readying up must not pull this player
+                    // out of it. The party screen re-reads the state when they return.
                 } else {
                     mc.setScreen(new mc.sayda.bullethell.client.screen.LobbyScreen());
                 }
@@ -133,6 +137,15 @@ public final class BHClientPackets {
             ctx.queue(() -> {
                 mc.sayda.bullethell.client.ClientArenaState.INSTANCE.pendingEndOverlay = true;
                 Minecraft.getInstance().setScreen(new mc.sayda.bullethell.client.screen.ArenaEndScreen(pkt));
+            });
+        });
+
+        // Where the party's retry vote stands; the end screen reads it out on its button.
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, BHPackets.RETRY_VOTE, (buf, ctx) -> {
+            RetryVotePacket pkt = RetryVotePacket.decode(buf);
+            ctx.queue(() -> {
+                if (Minecraft.getInstance().screen instanceof mc.sayda.bullethell.client.screen.ArenaEndScreen end)
+                    end.applyRetryVote(pkt);
             });
         });
 

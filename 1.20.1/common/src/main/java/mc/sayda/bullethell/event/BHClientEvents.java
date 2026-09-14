@@ -156,6 +156,8 @@ public class BHClientEvents {
             state.inputDy = dy;
             state.inputFocused = focused;
             state.updateAnimation(dx);
+            // Co-op sprites lean from their own movement, not the local player's.
+            state.updateCoopAnimations();
 
             // Advance client-predicted position one tick ahead of server authority
             if (state.active && !state.spectating && !simming) {
@@ -205,6 +207,7 @@ public class BHClientEvents {
         return screen instanceof mc.sayda.bullethell.client.screen.DifficultySelectScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.CharacterSelectScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.ChallengeScreen ||
+               screen instanceof mc.sayda.bullethell.client.screen.PlayModeScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.ArenaPlayScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.ArenaQuitScreen ||
                screen instanceof mc.sayda.bullethell.client.screen.ArenaEndScreen ||

@@ -1,6 +1,5 @@
 package mc.sayda.bullethell.client.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import mc.sayda.bullethell.client.BHSfx;
 import mc.sayda.bullethell.network.BHPackets;
 import net.fabricmc.api.EnvType;
@@ -14,8 +13,10 @@ import org.lwjgl.glfw.GLFW;
 @Environment(EnvType.CLIENT)
 public class ArenaQuitScreen extends Screen {
 
+    private static final String[] OPTIONS = {"Resume", "Quit Arena"};
+
     private final Screen parent;
-    private int selectedIndex = 0; // 0=No, 1=Invite, 2=Yes
+    private int selectedIndex = 0; // 0=Resume, 1=Quit
     private boolean pauseClaimed = true;
 
     public ArenaQuitScreen(Screen parent) {
@@ -40,15 +41,11 @@ public class ArenaQuitScreen extends Screen {
 
         gfx.drawString(font, prompt, cx - promptW / 2, cy, 0xFFFFFFFF, true);
 
-        // Render options
-        String[] options = {"Resume", "Invite Player", "Quit Arena"};
-        int[] yPos = {cy + 30, cy + 50, cy + 70};
-
-        for (int i = 0; i < options.length; i++) {
-            String opt = options[i];
+        for (int i = 0; i < OPTIONS.length; i++) {
+            String opt = OPTIONS[i];
             int optW = font.width(opt);
             int optX = cx - optW / 2;
-            int optY = yPos[i];
+            int optY = cy + 30 + i * 20;
 
             boolean sel = (i == selectedIndex);
             gfx.drawString(font, opt, optX, optY, sel ? 0xFFFFFF00 : 0xFF888888, true);
@@ -68,13 +65,11 @@ public class ArenaQuitScreen extends Screen {
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
         if (key == GLFW.GLFW_KEY_UP) {
-            selectedIndex--;
-            if (selectedIndex < 0) selectedIndex = 2;
+            selectedIndex = (selectedIndex + OPTIONS.length - 1) % OPTIONS.length;
             BHSfx.playSelect();
             return true;
         } else if (key == GLFW.GLFW_KEY_DOWN) {
-            selectedIndex++;
-            if (selectedIndex > 2) selectedIndex = 0;
+            selectedIndex = (selectedIndex + 1) % OPTIONS.length;
             BHSfx.playSelect();
             return true;
         } else if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER || key == GLFW.GLFW_KEY_Z) {
@@ -92,10 +87,7 @@ public class ArenaQuitScreen extends Screen {
         if (selectedIndex == 0) {
             BHSfx.playBack();
             cancel();
-        } else if (selectedIndex == 1) {
-            BHSfx.playSelect();
-            Minecraft.getInstance().setScreen(new InvitePlayerScreen(this));
-        } else if (selectedIndex == 2) {
+        } else {
             BHSfx.playSelect();
             releasePause();
             BHPackets.sendQuitArena();
@@ -118,11 +110,8 @@ public class ArenaQuitScreen extends Screen {
     @Override
     public void removed() {
         // Leaving this screen by other means (e.g. arena ended) should not lock pause.
-        if (pauseClaimed) {
-            var next = Minecraft.getInstance().screen;
-            if (!(next instanceof InvitePlayerScreen) && !(next instanceof ArenaQuitScreen)) {
-                releasePause();
-            }
+        if (pauseClaimed && !(Minecraft.getInstance().screen instanceof ArenaQuitScreen)) {
+            releasePause();
         }
         super.removed();
     }

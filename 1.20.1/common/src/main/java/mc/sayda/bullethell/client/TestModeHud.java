@@ -295,7 +295,9 @@ public final class TestModeHud {
         if (state.active) {
             row(gfx, font, x, y, "lives",  String.valueOf(state.player.lives), RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "bombs",  String.valueOf(state.player.bombs), RIGHT_W - 10); y += LH;
-            row(gfx, font, x, y, "power",  String.valueOf(state.power),        RIGHT_W - 10); y += LH;
+            row(gfx, font, x, y, "power",
+                    state.power + "/" + mc.sayda.bullethell.arena.PlayerState2D.MAX_POWER,
+                    RIGHT_W - 10); y += LH;
             row(gfx, font, x, y, "graze",  String.valueOf(state.player.graze), RIGHT_W - 10); y += LH;
             int godColor = state.debugGodMode ? 0xFF44FF88 : 0xFFFF4444;
             gfx.drawString(font, "godmode: ", x, y, TEXT_DIM, false);

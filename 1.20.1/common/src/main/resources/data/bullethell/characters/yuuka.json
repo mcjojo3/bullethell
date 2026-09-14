@@ -16,7 +16,7 @@
   "shotOptions": [
     {
       "label": "A \u2014 Flower Barrage",
-      "description": "Tight forward fan of jade shots; side leaf streams at higher power. Focus fires a dense forward column.",
+      "description": "Tight forward fan of sunflowers; side leaf streams at higher power. Focus fires a dense sunflower column flanked by leaves that converge on the target, crowned by a large bloom at high power.",
       "note": "Based on TH9 PoFV Yuuka shot type 1. 3-way narrow fan (\u00b110deg), speed 12.",
       "unfocused": {
         "powerTiers": [
@@ -735,7 +735,7 @@
             {
               "bulletType": "SUNFLOWER",
               "homing": false,
-              "offsetX": -12,
+              "offsetX": -6,
               "offsetY": 0,
               "vx": 0,
               "vy": -19,
@@ -748,7 +748,7 @@
             {
               "bulletType": "SUNFLOWER",
               "homing": false,
-              "offsetX": -4,
+              "offsetX": 0,
               "offsetY": 0,
               "vx": 0,
               "vy": -19,
@@ -761,7 +761,7 @@
             {
               "bulletType": "SUNFLOWER",
               "homing": false,
-              "offsetX": 4,
+              "offsetX": 6,
               "offsetY": 0,
               "vx": 0,
               "vy": -19,
@@ -772,33 +772,35 @@
               "freezeTicks": 0
             },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": 12,
+              "offsetX": -18,
               "offsetY": 0,
-              "vx": 0,
+              "vx": 0.78,
               "vy": -19,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
-            }
-          ],
-          [
+              "freezeTicks": 0,
+              "fireRateTicks": 4
+            },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": -16,
+              "offsetX": 18,
               "offsetY": 0,
-              "vx": 0,
-              "vy": -20,
+              "vx": -0.78,
+              "vy": -19,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
-            },
+              "freezeTicks": 0,
+              "fireRateTicks": 4
+            }
+          ],
+          [
             {
               "bulletType": "SUNFLOWER",
               "homing": false,
@@ -839,33 +841,35 @@
               "freezeTicks": 0
             },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": 16,
+              "offsetX": -18,
               "offsetY": 0,
-              "vx": 0,
+              "vx": 0.82,
               "vy": -20,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
-            }
-          ],
-          [
+              "freezeTicks": 0,
+              "fireRateTicks": 3
+            },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": -16,
+              "offsetX": 18,
               "offsetY": 0,
-              "vx": 0,
-              "vy": -21,
+              "vx": -0.82,
+              "vy": -20,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
-            },
+              "freezeTicks": 0,
+              "fireRateTicks": 3
+            }
+          ],
+          [
             {
               "bulletType": "SUNFLOWER",
               "homing": false,
@@ -906,33 +910,63 @@
               "freezeTicks": 0
             },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": 16,
+              "offsetX": -18,
               "offsetY": 0,
-              "vx": 0,
+              "vx": 0.86,
               "vy": -21,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
-            }
-          ],
-          [
+              "freezeTicks": 0,
+              "fireRateTicks": 3
+            },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": -16,
+              "offsetX": 18,
               "offsetY": 0,
-              "vx": 0,
-              "vy": -22,
+              "vx": -0.86,
+              "vy": -21,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
+              "freezeTicks": 0,
+              "fireRateTicks": 3
             },
+            {
+              "bulletType": "LEAF",
+              "homing": false,
+              "offsetX": -28,
+              "offsetY": 0,
+              "vx": 1.34,
+              "vy": -21,
+              "lifetime": 60,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 8
+            },
+            {
+              "bulletType": "LEAF",
+              "homing": false,
+              "offsetX": 28,
+              "offsetY": 0,
+              "vx": -1.34,
+              "vy": -21,
+              "lifetime": 60,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 8
+            }
+          ],
+          [
             {
               "bulletType": "SUNFLOWER",
               "homing": false,
@@ -973,33 +1007,63 @@
               "freezeTicks": 0
             },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": 16,
+              "offsetX": -18,
               "offsetY": 0,
-              "vx": 0,
+              "vx": 0.9,
               "vy": -22,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
-            }
-          ],
-          [
+              "freezeTicks": 0,
+              "fireRateTicks": 3
+            },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": -16,
+              "offsetX": 18,
               "offsetY": 0,
-              "vx": 0,
-              "vy": -23,
+              "vx": -0.9,
+              "vy": -22,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
+              "freezeTicks": 0,
+              "fireRateTicks": 3
             },
+            {
+              "bulletType": "LEAF",
+              "homing": false,
+              "offsetX": -28,
+              "offsetY": 0,
+              "vx": 1.4,
+              "vy": -22,
+              "lifetime": 60,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 6
+            },
+            {
+              "bulletType": "LEAF",
+              "homing": false,
+              "offsetX": 28,
+              "offsetY": 0,
+              "vx": -1.4,
+              "vy": -22,
+              "lifetime": 60,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 6
+            }
+          ],
+          [
             {
               "bulletType": "SUNFLOWER",
               "homing": false,
@@ -1040,33 +1104,77 @@
               "freezeTicks": 0
             },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": 16,
+              "offsetX": -18,
               "offsetY": 0,
-              "vx": 0,
+              "vx": 0.94,
               "vy": -23,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
-            }
-          ],
-          [
+              "freezeTicks": 0,
+              "fireRateTicks": 3
+            },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": -16,
+              "offsetX": 18,
               "offsetY": 0,
-              "vx": 0,
-              "vy": -24,
+              "vx": -0.94,
+              "vy": -23,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
+              "freezeTicks": 0,
+              "fireRateTicks": 3
             },
+            {
+              "bulletType": "LEAF",
+              "homing": false,
+              "offsetX": -28,
+              "offsetY": 0,
+              "vx": 1.46,
+              "vy": -23,
+              "lifetime": 60,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 5
+            },
+            {
+              "bulletType": "LEAF",
+              "homing": false,
+              "offsetX": 28,
+              "offsetY": 0,
+              "vx": -1.46,
+              "vy": -23,
+              "lifetime": 60,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 5
+            },
+            {
+              "bulletType": "SUNFLOWER_LARGE",
+              "homing": false,
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -24,
+              "lifetime": 64,
+              "visScale": 1.3,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 8
+            }
+          ],
+          [
             {
               "bulletType": "SUNFLOWER",
               "homing": false,
@@ -1107,17 +1215,74 @@
               "freezeTicks": 0
             },
             {
-              "bulletType": "SUNFLOWER",
+              "bulletType": "LEAF",
               "homing": false,
-              "offsetX": 16,
+              "offsetX": -18,
               "offsetY": 0,
-              "vx": 0,
+              "vx": 0.98,
               "vy": -24,
               "lifetime": 60,
               "visScale": 1.0,
               "hitScale": 2.75,
               "angularVelocity": 0,
-              "freezeTicks": 0
+              "freezeTicks": 0,
+              "fireRateTicks": 3
+            },
+            {
+              "bulletType": "LEAF",
+              "homing": false,
+              "offsetX": 18,
+              "offsetY": 0,
+              "vx": -0.98,
+              "vy": -24,
+              "lifetime": 60,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 3
+            },
+            {
+              "bulletType": "LEAF",
+              "homing": false,
+              "offsetX": -28,
+              "offsetY": 0,
+              "vx": 1.53,
+              "vy": -24,
+              "lifetime": 60,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 4
+            },
+            {
+              "bulletType": "LEAF",
+              "homing": false,
+              "offsetX": 28,
+              "offsetY": 0,
+              "vx": -1.53,
+              "vy": -24,
+              "lifetime": 60,
+              "visScale": 1.0,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 4
+            },
+            {
+              "bulletType": "SUNFLOWER_LARGE",
+              "homing": false,
+              "offsetX": 0,
+              "offsetY": 0,
+              "vx": 0,
+              "vy": -26,
+              "lifetime": 64,
+              "visScale": 1.5,
+              "hitScale": 2.75,
+              "angularVelocity": 0,
+              "freezeTicks": 0,
+              "fireRateTicks": 6
             }
           ]
         ]

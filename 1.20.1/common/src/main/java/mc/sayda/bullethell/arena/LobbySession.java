@@ -10,12 +10,12 @@ import java.util.UUID;
 /**
  * A party waiting to start a run together.
  *
- * The host owns the run settings (stage + difficulty); every member owns their own
- * character choice and ready flag. Nothing here simulates - the arena is built from
- * this only once {@link #canStart()} holds and the host presses start.
+ * The stage comes from the NPC challenge the host opened the party from; the host owns
+ * the difficulty, and every member owns their own character choice and ready flag.
+ * Nothing here simulates - the arena is built from this only once {@link #canStart()}
+ * holds and the host presses start.
  *
- * Replaces the old invisible pending-invite list: members can see each other, see what
- * is about to be played, and opt in explicitly.
+ * Members can see each other, see what is about to be played, and opt in explicitly.
  */
 public final class LobbySession {
 
@@ -24,6 +24,12 @@ public final class LobbySession {
         public String name;
         public String characterId = "";
         public boolean ready;
+        /**
+         * Highest difficulty this member has unlocked the party's stage on, or {@code -1}
+         * when they cannot play it at all. Recomputed by the server whenever the roster or
+         * stage changes, since only the server can read advancements.
+         */
+        public int maxDifficultyOrdinal = -1;
 
         Member(UUID uuid, String name) {
             this.uuid = uuid;
@@ -36,11 +42,29 @@ public final class LobbySession {
         }
     }
 
+    /**
+     * Someone asking to be let in, waiting on the host. Deliberately not a member: the
+     * start checks only ever look at {@link #members}, so an unanswered request can never
+     * hold up or sneak into a run.
+     */
+    public static final class PendingJoin {
+        public final UUID uuid;
+        public final String name;
+
+        PendingJoin(UUID uuid, String name) {
+            this.uuid = uuid;
+            this.name = name;
+        }
+    }
+
     public final UUID id = UUID.randomUUID();
     public final UUID hostUuid;
 
     /** Insertion-ordered so the roster is stable on screen; host is always first. */
     private final Map<UUID, Member> members = new LinkedHashMap<>();
+
+    /** Insertion-ordered too, so the list does not reshuffle while the host reads it. */
+    private final Map<UUID, PendingJoin> pendingJoins = new LinkedHashMap<>();
 
     public String stageId;
     public DifficultyConfig difficulty = DifficultyConfig.NORMAL;
@@ -91,12 +115,44 @@ public final class LobbySession {
         return hostUuid.equals(uuid);
     }
 
+    // ---------------------------------------------------------------- join requests
+
+    public void addPendingJoin(UUID uuid, String name) {
+        if (!members.containsKey(uuid)) pendingJoins.put(uuid, new PendingJoin(uuid, name));
+    }
+
+    /** Removes and returns the request, so it can only be answered once. */
+    public PendingJoin takePendingJoin(UUID uuid) {
+        return pendingJoins.remove(uuid);
+    }
+
+    public void removePendingJoin(UUID uuid) {
+        pendingJoins.remove(uuid);
+    }
+
+    /** Live view - callers may prune it. */
+    public Collection<PendingJoin> pendingJoins() {
+        return pendingJoins.values();
+    }
+
     // ---------------------------------------------------------------- start gate
 
-    /** Everyone has picked a character and pressed ready. */
+    /**
+     * Highest difficulty every member can play the stage on - the party is only as far
+     * along as its least-progressed member. {@code -1} if anyone cannot play it at all.
+     */
+    public int partyCapOrdinal() {
+        if (members.isEmpty()) return -1;
+        int cap = Integer.MAX_VALUE;
+        for (Member m : members.values()) cap = Math.min(cap, m.maxDifficultyOrdinal);
+        return cap;
+    }
+
+    /** Everyone has picked a character, pressed ready, and unlocked the chosen difficulty. */
     public boolean canStart() {
         if (starting || members.isEmpty()) return false;
         if (stageId == null || stageId.isBlank()) return false;
+        if (difficulty.ordinal() > partyCapOrdinal()) return false;
         for (Member m : members.values()) {
             if (!m.isReady()) return false;
         }

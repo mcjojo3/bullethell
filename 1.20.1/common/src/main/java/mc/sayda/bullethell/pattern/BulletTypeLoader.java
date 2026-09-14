@@ -1,15 +1,10 @@
 package mc.sayda.bullethell.pattern;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import mc.sayda.bullethell.config.BullethellConfig;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +17,6 @@ import java.util.Map;
  */
 public final class BulletTypeLoader {
 
-    private static final String CLASSPATH_PATH = "data/bullethell/bullet_types.json";
     private static Map<BulletType, BulletTypeData> cache = null;
 
     private BulletTypeLoader() {}
@@ -48,15 +42,20 @@ public final class BulletTypeLoader {
     }
 
     private static void parseInto(Map<BulletType, BulletTypeData> map, JsonObject root) {
-        // First, handle all keys in the JSON to allow for new dynamic types
+        // Register every key before parsing any entry, so an entry's randomOf can name
+        // types defined further down the file.
         for (String key : root.keySet()) {
             try {
                 BulletType type = BulletType.fromName(key);
                 if (type.name.equals("ORB") && !key.equalsIgnoreCase("ORB")) {
-                    // It's a new type: register it with default values first, 
-                    // parseEntry will overwrite with JSON values.
-                    type = BulletType.register(key, 0xFFFFFFFF, 4.0f, 1.0f);
+                    // A new type: register it with defaults; parseEntry fills in the JSON values.
+                    BulletType.register(key, 0xFFFFFFFF, 4.0f, 1.0f);
                 }
+            } catch (Exception ignored) {}
+        }
+        for (String key : root.keySet()) {
+            try {
+                BulletType type = BulletType.fromName(key);
                 map.put(type, parseEntry(root.getAsJsonObject(key), type));
             } catch (Exception ignored) {}
         }
@@ -143,13 +142,31 @@ public final class BulletTypeLoader {
         int srcHeight = o.has("sourceHeight") ? o.get("sourceHeight").getAsInt() : 0;
 
         return new BulletTypeData(color, radius, hitboxMul, texture, texScale, srcSize, srcHeight, baseAngle, tint, lineHit,
-                lcLen, lcWid, lvLen, lvWid, homing, sakuyaBlade);
+                lcLen, lcWid, lvLen, lvWid, homing, sakuyaBlade, parseRandomOf(o, t));
+    }
+
+    /**
+     * Resolves {@code "randomOf"} names to type ids. Unknown names and the type itself are
+     * skipped rather than spawning as the ORB fallback or recursing.
+     */
+    private static int[] parseRandomOf(JsonObject o, BulletType self) {
+        if (!o.has("randomOf") || !o.get("randomOf").isJsonArray()) return new int[0];
+        JsonArray names = o.getAsJsonArray("randomOf");
+        int[] ids = new int[names.size()];
+        int n = 0;
+        for (JsonElement el : names) {
+            String name = el.getAsString();
+            BulletType pick = BulletType.fromName(name);
+            if (!pick.name.equalsIgnoreCase(name) || pick == self) continue;
+            ids[n++] = pick.getId();
+        }
+        return Arrays.copyOf(ids, n);
     }
 
     private static BulletTypeData hardcodedFallback(BulletType type) {
         return new BulletTypeData(
                 type.color, type.radius, type.hitboxCollisionMul,
                 null, 2.80f, 16, 0, null, true, false,
-                0f, 0f, 0f, 0f, false, false);
+                0f, 0f, 0f, 0f, false, false, new int[0]);
     }
 }

@@ -69,6 +69,8 @@ public class ArenaStatePacket {
      * it has no other way to know a different player opened a menu.
      */
     public final boolean globallyPaused;
+    /** Who has it paused, comma-separated; empty when nobody has. */
+    public final String pausedBy;
 
     // ---------------------------------------------------------------- factory
 
@@ -131,6 +133,7 @@ public class ArenaStatePacket {
         this.speedFocused = ps.speedFocused;
         this.bossTexture = ctx.getActiveBossTexture();
         this.globallyPaused = ctx.isGloballyPaused();
+        this.pausedBy = ctx.pausedByNames();
     }
 
     public static ArenaStatePacket stopped() {
@@ -142,7 +145,7 @@ public class ArenaStatePacket {
                 false, 0, 0, 0,
                 0, 0, 0,
                 16, 0.20f, true,
-                PlayerState2D.SPEED_NORMAL, PlayerState2D.SPEED_FOCUSED, "", false);
+                PlayerState2D.SPEED_NORMAL, PlayerState2D.SPEED_FOCUSED, "", false, "");
     }
 
     private ArenaStatePacket(boolean active, boolean spectating,
@@ -156,7 +159,8 @@ public class ArenaStatePacket {
             boolean debugGodMode, int debugArenaTick, int debugPatternCooldown, int debugEnemyBulletCount,
             int grazeChain, int lifePieces, int bombPieces,
             int rank, float pocFraction, boolean pocAutoCollect,
-            float speedNormal, float speedFocused, String bossTexture, boolean globallyPaused) {
+            float speedNormal, float speedFocused, String bossTexture, boolean globallyPaused,
+            String pausedBy) {
         this.active = active;
         this.spectating = spectating;
         this.playerX = px;
@@ -205,6 +209,7 @@ public class ArenaStatePacket {
         this.speedFocused = speedFocused;
         this.bossTexture = bossTexture;
         this.globallyPaused = globallyPaused;
+        this.pausedBy = pausedBy != null ? pausedBy : "";
     }
 
     // ---------------------------------------------------------------- codec
@@ -261,6 +266,7 @@ public class ArenaStatePacket {
         buf.writeFloat(speedFocused);
         buf.writeUtf(bossTexture);
         buf.writeBoolean(globallyPaused);
+        buf.writeUtf(pausedBy);
     }
 
     @SuppressWarnings("null")
@@ -314,6 +320,7 @@ public class ArenaStatePacket {
         float speedFocused = buf.readFloat();
         String bossTexture = buf.readUtf();
         boolean globallyPaused = buf.readBoolean();
+        String pausedBy = buf.readUtf();
         return new ArenaStatePacket(true, spectating,
                 px, py, lives, bombs, graze, power, pIdx,
                 bx, by, hp, maxHp, phase, bossMoveDir,
@@ -325,6 +332,6 @@ public class ArenaStatePacket {
                 dbgGod, dTick, dCd, dBul,
                 grazeChain, lifePieces, bombPieces,
                 rank, pocFraction, pocAutoCollect,
-                speedNormal, speedFocused, bossTexture, globallyPaused);
+                speedNormal, speedFocused, bossTexture, globallyPaused, pausedBy);
     }
 }

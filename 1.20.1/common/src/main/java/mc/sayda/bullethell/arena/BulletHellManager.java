@@ -31,6 +31,14 @@ public class BulletHellManager {
     private final Map<UUID, LobbySession> lobbies = new ConcurrentHashMap<>();
     /** member UUID → lobby id. */
     private final Map<UUID, UUID> playerToLobby = new ConcurrentHashMap<>();
+    /** recipient UUID → their latest unanswered party request; a newer one replaces it. */
+    private final Map<UUID, PartyRequest> partyRequests = new ConcurrentHashMap<>();
+
+    /**
+     * A party invite (a host asks a player in) or join request (a player asks a host to
+     * let them in), waiting for {@code to} to accept or deny.
+     */
+    public record PartyRequest(UUID from, UUID to, UUID hostUuid, boolean joinRequest, long expiresAtMs) {}
 
     private volatile MinecraftServer minecraftServer;
 
@@ -201,6 +209,23 @@ public class BulletHellManager {
             lobbies.remove(lobby.id);
         }
         return lobby;
+    }
+
+    // ---------------------------------------------------------------- party requests
+
+    public void putPartyRequest(PartyRequest request) {
+        partyRequests.put(request.to(), request);
+    }
+
+    /** Removes and returns the recipient's pending request; null when none, or it expired. */
+    public PartyRequest takePartyRequest(UUID recipient) {
+        PartyRequest request = partyRequests.remove(recipient);
+        return (request != null && request.expiresAtMs() >= System.currentTimeMillis()) ? request : null;
+    }
+
+    /** Forgets every request to or from this player, e.g. when they disconnect. */
+    public void dropPartyRequests(UUID player) {
+        partyRequests.values().removeIf(r -> r.from().equals(player) || r.to().equals(player));
     }
 
     /** Drops the lobby once its run has begun. */

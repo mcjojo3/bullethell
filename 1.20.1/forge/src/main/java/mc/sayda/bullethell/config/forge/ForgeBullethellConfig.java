@@ -59,6 +59,7 @@ public final class ForgeBullethellConfig {
                 public final ForgeConfigSpec.DoubleValue victoryXpMultLunatic;
 
                 public final ForgeConfigSpec.ConfigValue<String> testDevPath;
+                public final ForgeConfigSpec.BooleanValue allowMultiplayer;
 
                 Common(ForgeConfigSpec.Builder builder) {
                         builder.push("DifficultyTuning");
@@ -177,6 +178,12 @@ public final class ForgeBullethellConfig {
                                         .define("testDevPath", BullethellConfig.DEF_TEST_DEV_PATH);
                         builder.pop();
 
+                        builder.push("Multiplayer");
+                        allowMultiplayer = builder
+                                        .comment("When false, parties are disabled: accepting an NPC challenge goes straight to a solo run, and party invites and join requests are refused.")
+                                        .define("allowMultiplayer", BullethellConfig.DEF_ALLOW_MULTIPLAYER);
+                        builder.pop();
+
                         builder.push("VictoryXp");
                         victoryXpBase = builder
                                         .comment("Flat XP before sqrt(score) term.")
@@ -257,5 +264,6 @@ public final class ForgeBullethellConfig {
                 BullethellConfig.VICTORY_XP_MULT_LUNATIC = c.victoryXpMultLunatic::get;
 
                 BullethellConfig.TEST_DEV_PATH = c.testDevPath::get;
+                BullethellConfig.ALLOW_MULTIPLAYER = c.allowMultiplayer::get;
         }
 }

@@ -38,8 +38,6 @@ public class DifficultySelectScreen extends Screen {
     private final int maxAllowedDifficultyOrdinal;
     private final boolean practiceMode;
 
-    /** Lobby mode: push the choice to the party instead of walking on to character select. */
-    private final boolean lobbyMode;
     private int selectedIndex = 1;
 
     private int cardStartX;
@@ -53,19 +51,8 @@ public class DifficultySelectScreen extends Screen {
         this(stageId, maxAllowedDifficultyOrdinal, false);
     }
 
-    /** Host commits the party's stage + difficulty in one step. */
-    public static DifficultySelectScreen forLobby(String stageId) {
-        return new DifficultySelectScreen(stageId, DifficultyConfig.LUNATIC.ordinal(), false, true);
-    }
-
     public DifficultySelectScreen(String stageId, int maxAllowedDifficultyOrdinal, boolean practiceMode) {
-        this(stageId, maxAllowedDifficultyOrdinal, practiceMode, false);
-    }
-
-    public DifficultySelectScreen(String stageId, int maxAllowedDifficultyOrdinal, boolean practiceMode,
-            boolean lobbyMode) {
         super(Component.literal("Select Difficulty"));
-        this.lobbyMode = lobbyMode;
         this.stageId = stageId;
         this.maxAllowedDifficultyOrdinal = maxAllowedDifficultyOrdinal;
         this.practiceMode = practiceMode;
@@ -111,7 +98,7 @@ public class DifficultySelectScreen extends Screen {
         addRenderableWidget(Button.builder(
                 Component.literal("SHARE LAST RUN"),
                 btn -> BHPackets.sendShareLastRun())
-                .pos(width / 2 - 60, height - 32)
+                .pos(width / 2 - 60, height - 40)
                 .size(120, 20)
                 .build());
     }
@@ -197,15 +184,6 @@ public class DifficultySelectScreen extends Screen {
         if (!isAllowed(selectedIndex))
             return;
         BHSfx.playSelect();
-        // Stage selection now lives on the NPCs, so a host in a party commits the party
-        // run here - the challenge they accepted becomes everyone's.
-        var lobby = mc.sayda.bullethell.client.ClientLobbyState.INSTANCE;
-        if (lobbyMode || (lobby.active && lobby.isSelfHost())) {
-            BHPackets.sendLobbyAction(mc.sayda.bullethell.network.LobbyActionPacket
-                    .setRun(stageId, DIFFS[selectedIndex].ordinal()));
-            Minecraft.getInstance().setScreen(new LobbyScreen());
-            return;
-        }
         Minecraft.getInstance().setScreen(new CharacterSelectScreen(DIFFS[selectedIndex], stageId, maxAllowedDifficultyOrdinal, practiceMode));
     }
 

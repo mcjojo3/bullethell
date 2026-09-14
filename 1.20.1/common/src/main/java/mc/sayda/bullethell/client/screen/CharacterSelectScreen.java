@@ -54,9 +54,14 @@ public class CharacterSelectScreen extends Screen {
         this(difficulty, stageId, maxAllowedDifficultyOrdinal, false);
     }
 
-    /** Picks a character for the party rather than starting a run. */
+    /**
+     * Picks a character for the party rather than starting a run. Locks are judged at the
+     * party's current difficulty - the same check the server makes when the run starts.
+     */
     public static CharacterSelectScreen forLobby() {
-        return new CharacterSelectScreen(DifficultyConfig.NORMAL, "",
+        var lobby = mc.sayda.bullethell.client.ClientLobbyState.INSTANCE;
+        DifficultyConfig difficulty = DifficultyConfig.fromId(Math.max(0, lobby.difficultyOrdinal));
+        return new CharacterSelectScreen(difficulty, lobby.stageId,
                 DifficultyConfig.LUNATIC.ordinal(), false, true);
     }
 
@@ -112,17 +117,11 @@ public class CharacterSelectScreen extends Screen {
             addRenderableWidget(b);
         }
 
-        int bottomY = height - 40;
+        // Inviting happens in the party screen; multiplayer starts from the NPC challenge.
         addRenderableWidget(Button.builder(
                 Component.literal("SHARE LAST RUN"),
                 btn -> BHPackets.sendShareLastRun())
-                .pos(width / 2 - 130, bottomY)
-                .size(120, 20)
-                .build());
-        addRenderableWidget(Button.builder(
-                Component.literal("INVITE PLAYER"),
-                btn -> Minecraft.getInstance().setScreen(new InvitePlayerScreen(this)))
-                .pos(width / 2 + 10, bottomY)
+                .pos(width / 2 - 60, height - 40)
                 .size(120, 20)
                 .build());
     }
@@ -262,7 +261,9 @@ public class CharacterSelectScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             BHSfx.playBack();
-            Minecraft.getInstance().setScreen(new DifficultySelectScreen(stageId, maxAllowedDifficultyOrdinal, practiceMode));
+            Minecraft.getInstance().setScreen(lobbyMode
+                    ? new LobbyScreen()
+                    : new DifficultySelectScreen(stageId, maxAllowedDifficultyOrdinal, practiceMode));
             return true;
         }
         if (keyCode == 263 && selectedIndex > 0) {

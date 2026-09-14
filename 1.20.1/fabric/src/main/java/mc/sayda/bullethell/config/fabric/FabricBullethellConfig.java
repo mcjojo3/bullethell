@@ -116,6 +116,9 @@ public final class FabricBullethellConfig {
 
         TestModeJson tm = root.test_mode != null ? root.test_mode : new TestModeJson();
         BullethellConfig.TEST_DEV_PATH = () -> tm.test_dev_path;
+
+        MultiplayerJson mp = root.multiplayer != null ? root.multiplayer : new MultiplayerJson();
+        BullethellConfig.ALLOW_MULTIPLAYER = () -> mp.allow_multiplayer;
     }
 
     public static final class CommonJson {
@@ -126,6 +129,7 @@ public final class FabricBullethellConfig {
         public CombatJson combat = new CombatJson();
         public VictoryXpJson victory_xp = new VictoryXpJson();
         public TestModeJson test_mode = new TestModeJson();
+        public MultiplayerJson multiplayer = new MultiplayerJson();
     }
 
     public static final class DifficultyTuningJson {
@@ -179,5 +183,9 @@ public final class FabricBullethellConfig {
 
     public static final class TestModeJson {
         public String test_dev_path = BullethellConfig.DEF_TEST_DEV_PATH;
+    }
+
+    public static final class MultiplayerJson {
+        public boolean allow_multiplayer = BullethellConfig.DEF_ALLOW_MULTIPLAYER;
     }
 }

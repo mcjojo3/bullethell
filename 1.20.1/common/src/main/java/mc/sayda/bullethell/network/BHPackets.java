@@ -6,10 +6,7 @@ import mc.sayda.bullethell.BossProgression;
 import mc.sayda.bullethell.CharacterUnlocks;
 import mc.sayda.bullethell.Bullethell;
 import mc.sayda.bullethell.arena.ArenaContext;
-import mc.sayda.bullethell.arena.ArenaEndShareSnapshot;
 import mc.sayda.bullethell.arena.BulletHellManager;
-import mc.sayda.bullethell.arena.LastArenaRetryState;
-import mc.sayda.bullethell.arena.LastArenaShareState;
 import mc.sayda.bullethell.arena.LobbySession;
 import mc.sayda.bullethell.arena.DifficultyConfig;
 import mc.sayda.bullethell.arena.PlayerState2D;
@@ -78,6 +75,8 @@ public final class BHPackets {
     public static final ResourceLocation SHARE_LAST_RUN    = id("share_last_run");
     /** C → S | player requests a retry of the last arena. */
     public static final ResourceLocation RETRY_ARENA       = id("retry_arena");
+    /** S → C | where a co-op party's retry vote stands, for the RETRY button's label. */
+    public static final ResourceLocation RETRY_VOTE        = id("retry_vote");
     /** S → C | opens test-mode overlay with boss list and current selection. */
     public static final ResourceLocation TEST_MODE_OPEN    = id("test_mode_open");
     /** C → S | select / reload a boss in test mode. */
@@ -166,7 +165,7 @@ public final class BHPackets {
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
                 if (sender == null) return;
-                handleLobbyAction(sender, pkt);
+                PartyHandler.handleAction(sender, pkt);
             });
         });
 
@@ -189,7 +188,8 @@ public final class BHPackets {
                 ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(uuid);
                 if (arena != null) {
                     // forceGameOver() sets a volatile boolean - safe to call from any thread
-                    arena.pendingInputs.offer(() -> arena.setParticipantPaused(uuid, false));
+                    // Quitting clears any hold this player had; the name is only used while paused.
+                    arena.pendingInputs.offer(() -> arena.setParticipantPaused(uuid, false, ""));
                     arena.forceGameOver();
                 } else if (BulletHellManager.INSTANCE.isInMatch(uuid)) {
                     BulletHellManager.INSTANCE.leaveMatch(uuid);
@@ -204,9 +204,11 @@ public final class BHPackets {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
                 if (sender == null) return;
                 UUID id = sender.getUUID();
+                // Read here on the main thread - the offer below runs on the arena thread.
+                String name = sender.getGameProfile().getName();
                 ArenaContext arena = BulletHellManager.INSTANCE.getArenaForPlayer(id);
                 if (arena != null)
-                    arena.pendingInputs.offer(() -> arena.setParticipantPaused(id, pkt.paused));
+                    arena.pendingInputs.offer(() -> arena.setParticipantPaused(id, pkt.paused, name));
             });
         });
 
@@ -237,100 +239,31 @@ public final class BHPackets {
                             "[BulletHell] " + pkt.stageId + " is currently capped at " + capText + ". " + why));
                     return;
                 }
+                // Going solo from inside a party: leave it rather than hold a slot open.
+                if (PartyHandler.leave(player.server, player.getUUID()))
+                    player.sendSystemMessage(Component.literal("[BulletHell] You left your party to play solo."));
                 startArena(player, pkt.difficulty, pkt.stageId, pkt.characterId, pkt.practice);
             });
         });
 
 
-        // C2S: invite a player into the host's lobby (creating one if needed)
+        // C2S: invite a player into the host's party. They have to accept.
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, INVITE_PLAYER, (buf, ctx) -> {
             InvitePlayerPacket pkt = InvitePlayerPacket.decode(buf);
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
-                if (sender == null) return;
-
-                ServerPlayer target = sender.server.getPlayerList().getPlayer(pkt.targetUuid);
-                if (target == null) {
-                    sender.sendSystemMessage(Component.literal("[BulletHell] Player is no longer online."));
-                    return;
-                }
-                if (target.getUUID().equals(sender.getUUID())) return;
-                if (BulletHellManager.INSTANCE.isInMatch(target.getUUID())) {
-                    sender.sendSystemMessage(Component.literal("[BulletHell] Player is already in an arena."));
-                    return;
-                }
-                if (BulletHellManager.INSTANCE.isInMatch(sender.getUUID())) {
-                    // Mid-run join is not supported; the party has to form before the arena.
-                    sender.sendSystemMessage(Component.literal(
-                            "[BulletHell] You are already in an arena - leave it before inviting."));
-                    return;
-                }
-                if (BulletHellManager.INSTANCE.isInLobby(target.getUUID())) {
-                    sender.sendSystemMessage(Component.literal("[BulletHell] Player is already in a party."));
-                    return;
-                }
-
-                LobbySession lobby = BulletHellManager.INSTANCE.getOrCreateLobby(
-                        sender.getUUID(), sender.getName().getString(), "");
-                if (BulletHellManager.INSTANCE.joinLobby(sender.getUUID(), target.getUUID(),
-                        target.getName().getString()) == null) {
-                    sender.sendSystemMessage(Component.literal("[BulletHell] Could not invite right now."));
-                    return;
-                }
-
-                target.sendSystemMessage(Component.literal(
-                        "[BulletHell] " + sender.getName().getString() + " invited you to a party."));
-                sender.sendSystemMessage(Component.literal(
-                        "[BulletHell] Invited " + target.getName().getString() + "."));
-                broadcastLobby(sender.server, lobby);
+                if (sender != null) PartyHandler.invite(sender, pkt.targetUuid);
             });
         });
 
-        // C2S: retry arena - restart using server-stored last run (client fields are ignored)
+        // C2S: retry arena - restarts from the server's own record of the run. A co-op run
+        // belongs to everyone who played it, so PartyHandler collects a vote first.
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, RETRY_ARENA, (buf, ctx) -> {
-            if (buf.readableBytes() > 0)
-                buf.skipBytes(buf.readableBytes());
+            RetryArenaPacket pkt = RetryArenaPacket.decode(buf);
             ctx.queue(() -> {
                 ServerPlayer player = (ServerPlayer) ctx.getPlayer();
                 if (player == null) return;
-                if (BulletHellManager.INSTANCE.hasArena(player.getUUID())) return;
-
-                LastArenaRetryState.Params last = LastArenaRetryState.get(player.getUUID());
-                if (last == null || last.stageId().isBlank() || last.characterId().isBlank()) {
-                    player.sendSystemMessage(Component.literal(
-                            "[BulletHell] No finished run to retry yet."));
-                    return;
-                }
-                if (last.testMode()) {
-                    player.sendSystemMessage(Component.literal(
-                            "[BulletHell] Retry is not available in test mode."));
-                    return;
-                }
-
-                boolean debugBypass = BHDebugMode.isGodMode(player.getUUID());
-                if (!debugBypass && !CharacterUnlocks.isUnlockedFor(player, last.characterId(), last.difficulty())) {
-                    player.sendSystemMessage(Component.literal(
-                            "[BulletHell] Character '" + last.characterId() + "' is locked for "
-                                    + last.difficulty().name() + "."));
-                    return;
-                }
-                if (!debugBypass && !last.practice()
-                        && !BossProgression.canChallengeStage(player, last.stageId(), last.difficulty())) {
-                    String bossId;
-                    try {
-                        bossId = StageLoader.load(last.stageId()).bossId;
-                    } catch (Exception e) {
-                        bossId = "";
-                    }
-                    DifficultyConfig cap = BossProgression.maxAllowedDifficulty(player, bossId);
-                    String capText = (cap == null) ? "none" : cap.name();
-                    String why = BossProgression.requirementSummary(bossId);
-                    player.sendSystemMessage(Component.literal(
-                            "[BulletHell] " + last.stageId() + " is currently capped at " + capText + ". " + why));
-                    return;
-                }
-
-                startArena(player, last.difficulty(), last.stageId(), last.characterId(), last.practice());
+                PartyHandler.retry(player, pkt.cancel);
             });
         });
 
@@ -422,19 +355,7 @@ public final class BHPackets {
             ShareLastRunPacket.decode(buf);
             ctx.queue(() -> {
                 ServerPlayer sender = (ServerPlayer) ctx.getPlayer();
-                if (sender == null)
-                    return;
-                ArenaEndShareSnapshot snap = LastArenaShareState.get(sender.getUUID());
-                if (snap == null) {
-                    sender.sendSystemMessage(Component.literal("[BulletHell] No finished run to share yet."));
-                    return;
-                }
-                String who = sender.getGameProfile().getName();
-                for (ServerPlayer target : sender.server.getPlayerList().getPlayers()) {
-                    target.sendSystemMessage(Component.literal("[BulletHell] " + who + " shared a run:"));
-                    for (var line : snap.buildLines())
-                        target.sendSystemMessage(line);
-                }
+                if (sender != null) PartyHandler.shareLastRun(sender);
             });
         });
     }
@@ -487,119 +408,6 @@ public final class BHPackets {
     // ---------------------------------------------------------------- Server → Client helpers
 
     private static FriendlyByteBuf buf() { return new FriendlyByteBuf(Unpooled.buffer()); }
-
-    /**
-     * Applies one lobby action. Host-only actions are checked here rather than trusted
-     * from the client, since any member could send them.
-     */
-    private static void handleLobbyAction(ServerPlayer sender, LobbyActionPacket pkt) {
-        LobbySession lobby = BulletHellManager.INSTANCE.getLobby(sender.getUUID());
-        if (lobby == null) return;
-        MinecraftServer server = sender.server;
-        LobbySession.Member self = lobby.get(sender.getUUID());
-        if (self == null) return;
-
-        switch (pkt.action) {
-            case LobbyActionPacket.SET_CHARACTER -> {
-                if (lobby.starting) return;
-                if (!CharacterUnlocks.isUnlockedAny(sender, pkt.text)
-                        && !BHDebugMode.isGodMode(sender.getUUID())) {
-                    sender.sendSystemMessage(Component.literal(
-                            "[BulletHell] Character \"" + pkt.text + "\" is locked."));
-                    return;
-                }
-                self.characterId = pkt.text;
-                broadcastLobby(server, lobby);
-            }
-            case LobbyActionPacket.SET_READY -> {
-                if (lobby.starting) return;
-                self.ready = pkt.value != 0;
-                broadcastLobby(server, lobby);
-            }
-            case LobbyActionPacket.SET_RUN -> {
-                if (lobby.starting || !lobby.isHost(sender.getUUID())) return;
-                lobby.stageId = pkt.text;
-                lobby.difficulty = DifficultyConfig.fromId(pkt.value);
-                // Changing the run invalidates everyone's consent to it.
-                for (LobbySession.Member m : lobby.members()) m.ready = false;
-                broadcastLobby(server, lobby);
-            }
-            case LobbyActionPacket.START -> {
-                if (!lobby.isHost(sender.getUUID())) return;
-                if (!lobby.canStart()) {
-                    sender.sendSystemMessage(Component.literal(
-                            "[BulletHell] Not everyone is ready (" + lobby.readyCount()
-                                    + "/" + lobby.size() + ")."));
-                    return;
-                }
-                startLobbyRun(server, lobby);
-            }
-            case LobbyActionPacket.LEAVE -> {
-                boolean wasHost = lobby.isHost(sender.getUUID());
-                BulletHellManager.INSTANCE.leaveLobby(sender.getUUID());
-                sendLobbyState(sender, LobbyStatePacket.closed());
-                if (wasHost) {
-                    // Host left: the party owns no settings any more, so it disbands.
-                    for (UUID member : lobby.memberIds()) {
-                        ServerPlayer p = server.getPlayerList().getPlayer(member);
-                        if (p == null) continue;
-                        p.sendSystemMessage(Component.literal("[BulletHell] The party was disbanded."));
-                        sendLobbyState(p, LobbyStatePacket.closed());
-                    }
-                } else {
-                    broadcastLobby(server, lobby);
-                }
-            }
-            default -> { }
-        }
-    }
-
-    /** Builds the arena, then joins every member before the first tick so nobody enters mid-phase. */
-    private static void startLobbyRun(MinecraftServer server, LobbySession lobby) {
-        lobby.starting = true;
-        broadcastLobby(server, lobby);
-
-        ServerPlayer host = server.getPlayerList().getPlayer(lobby.hostUuid);
-        if (host == null) {
-            lobby.starting = false;
-            return;
-        }
-        LobbySession.Member hostMember = lobby.get(lobby.hostUuid);
-        String hostCharacter = hostMember != null ? hostMember.characterId : "reimu";
-
-        BulletHellManager.INSTANCE.stopArena(lobby.hostUuid);
-        ArenaContext ctx = BulletHellManager.INSTANCE.startArena(
-                host, lobby.difficulty, lobby.stageId, hostCharacter);
-
-        // Every non-host member joins before the arena has ticked once.
-        for (LobbySession.Member m : lobby.members()) {
-            if (m.uuid.equals(lobby.hostUuid)) continue;
-            ServerPlayer p = server.getPlayerList().getPlayer(m.uuid);
-            if (p == null) continue;
-            BulletHellManager.INSTANCE.joinMatch(p.getUUID(), lobby.hostUuid,
-                    CharacterLoader.load(m.characterId), p);
-        }
-
-        // Close the lobby before syncing, so the client swaps the screen exactly once.
-        java.util.List<UUID> members = lobby.memberIds();
-        BulletHellManager.INSTANCE.closeLobby(lobby);
-
-        for (UUID member : members) {
-            ServerPlayer p = server.getPlayerList().getPlayer(member);
-            if (p == null) continue;
-            sendLobbyState(p, LobbyStatePacket.closed());
-            sendFullSync(p, ctx);
-            int pIdx = 1;
-            if (!member.equals(lobby.hostUuid)) {
-                int c = 2;
-                for (UUID cid : ctx.getCoopPlayers().keySet()) {
-                    if (cid.equals(member)) { pIdx = c; break; }
-                    c++;
-                }
-            }
-            sendToPlayer(p, new ArenaStatePacket(ctx, member, pIdx));
-        }
-    }
 
     public static void sendSplash(ServerPlayer player, SplashPacket pkt) {
         FriendlyByteBuf b = buf(); pkt.encode(b); NetworkManager.sendToPlayer(player, SPLASH, b);
@@ -690,6 +498,12 @@ public final class BHPackets {
         FriendlyByteBuf b = buf();
         pkt.encode(b);
         NetworkManager.sendToPlayer(player, ARENA_END, b);
+    }
+
+    public static void sendRetryVote(ServerPlayer player, RetryVotePacket pkt) {
+        FriendlyByteBuf b = buf();
+        pkt.encode(b);
+        NetworkManager.sendToPlayer(player, RETRY_VOTE, b);
     }
 
     public static void sendArenaStart(ServerPlayer player, ArenaStartPacket pkt) {

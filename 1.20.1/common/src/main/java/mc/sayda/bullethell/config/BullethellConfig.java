@@ -220,4 +220,15 @@ public final class BullethellConfig {
      */
     public static final String DEF_TEST_DEV_PATH = "";
     public static java.util.function.Supplier<String> TEST_DEV_PATH = () -> DEF_TEST_DEV_PATH;
+
+    // ---- Multiplayer ----
+
+    /**
+     * Whether parties are allowed. When false, accepting an NPC challenge skips the
+     * singleplayer / multiplayer choice and goes straight to a solo run, and the server
+     * refuses to open parties or pass on invites and join requests. The server's value
+     * is the one that counts - it travels to the client with each challenge.
+     */
+    public static final boolean DEF_ALLOW_MULTIPLAYER = true;
+    public static java.util.function.Supplier<Boolean> ALLOW_MULTIPLAYER = () -> DEF_ALLOW_MULTIPLAYER;
 }

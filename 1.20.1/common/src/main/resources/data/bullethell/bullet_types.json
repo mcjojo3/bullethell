@@ -388,5 +388,62 @@
     "texture": "sunflower_large",
     "textureScale": 2.70,
     "sourceSize": 32
+  },
+  "STAR_RED": {
+    "color": "#FF4040FF",
+    "radius": 4.0,
+    "hitboxMul": 0.76,
+    "texture": "star_5",
+    "textureScale": 2.80
+  },
+  "STAR_ORANGE": {
+    "color": "#FF9A2EFF",
+    "radius": 4.0,
+    "hitboxMul": 0.76,
+    "texture": "star_5",
+    "textureScale": 2.80
+  },
+  "STAR_YELLOW": {
+    "color": "#FFE34DFF",
+    "radius": 4.0,
+    "hitboxMul": 0.76,
+    "texture": "star_5",
+    "textureScale": 2.80
+  },
+  "STAR_GREEN": {
+    "color": "#5CE65CFF",
+    "radius": 4.0,
+    "hitboxMul": 0.76,
+    "texture": "star_5",
+    "textureScale": 2.80
+  },
+  "STAR_BLUE": {
+    "color": "#4D8CFFFF",
+    "radius": 4.0,
+    "hitboxMul": 0.76,
+    "texture": "star_5",
+    "textureScale": 2.80
+  },
+  "STAR_TURQUOISE": {
+    "color": "#3DE8D8FF",
+    "radius": 4.0,
+    "hitboxMul": 0.76,
+    "texture": "star_5",
+    "textureScale": 2.80
+  },
+  "STAR_PURPLE": {
+    "color": "#B25CFFFF",
+    "radius": 4.0,
+    "hitboxMul": 0.76,
+    "texture": "star_5",
+    "textureScale": 2.80
+  },
+  "STAR_RAINBOW": {
+    "color": "#FFFFFFFF",
+    "radius": 4.0,
+    "hitboxMul": 0.76,
+    "texture": "star_5",
+    "textureScale": 2.80,
+    "randomOf": ["STAR_RED", "STAR_ORANGE", "STAR_YELLOW", "STAR_GREEN", "STAR_BLUE", "STAR_TURQUOISE", "STAR_PURPLE"]
   }
 }

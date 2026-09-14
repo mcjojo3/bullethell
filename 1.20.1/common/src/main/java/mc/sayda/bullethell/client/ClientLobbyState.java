@@ -21,6 +21,8 @@ public final class ClientLobbyState {
     public int difficultyOrdinal = 1;
     public boolean starting;
     public final List<LobbyStatePacket.Member> members = new ArrayList<>();
+    /** Join requests waiting on the host; empty for everyone else. */
+    public final List<LobbyStatePacket.Pending> pending = new ArrayList<>();
 
     private ClientLobbyState() {}
 
@@ -36,6 +38,8 @@ public final class ClientLobbyState {
         starting = pkt.starting;
         members.clear();
         members.addAll(pkt.members);
+        pending.clear();
+        pending.addAll(pkt.pending);
     }
 
     public void reset() {
@@ -45,6 +49,7 @@ public final class ClientLobbyState {
         difficultyOrdinal = 1;
         starting = false;
         members.clear();
+        pending.clear();
     }
 
     public boolean isSelfHost() {
@@ -76,5 +81,13 @@ public final class ClientLobbyState {
 
     public boolean allReady() {
         return !members.isEmpty() && readyCount() == members.size();
+    }
+
+    /** Highest difficulty everyone in the party has unlocked; -1 if anyone cannot play the stage. */
+    public int partyCapOrdinal() {
+        if (members.isEmpty()) return -1;
+        int cap = Integer.MAX_VALUE;
+        for (LobbyStatePacket.Member m : members) cap = Math.min(cap, m.maxDifficultyOrdinal());
+        return cap;
     }
 }

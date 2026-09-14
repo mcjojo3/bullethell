@@ -58,6 +58,22 @@ public final class BulletType {
     public int getId() { return id; }
 
     /**
+     * The type id to actually spawn for {@code typeId}. A type with {@code randomOf} stands
+     * for "one of these, picked per bullet"; every other type spawns as itself. A pick is
+     * not resolved again, so {@code randomOf} should list concrete types.
+     *
+     * Deliberately not the arena's seeded generator: the pick is cosmetic, and drawing from
+     * the seeded stream would shift every later pattern roll by however much each player
+     * happened to shoot - and that stream staying in step is what keeps co-op clients'
+     * fights alike.
+     */
+    public static int resolveSpawnId(int typeId) {
+        int[] pool = BulletTypeLoader.get(fromId(typeId)).randomOf;
+        if (pool.length == 0) return typeId;
+        return pool[java.util.concurrent.ThreadLocalRandom.current().nextInt(pool.length)];
+    }
+
+    /**
      * Player bullet pools: when {@link mc.sayda.bullethell.arena.BulletPool} spawn uses
      * {@code HOMING_USE_TYPE_DEFAULT}, homing steering is enabled for these types (e.g. Reimu ofudas).
      */

@@ -15,7 +15,14 @@ import java.util.UUID;
  */
 public class LobbyStatePacket {
 
-    public record Member(UUID uuid, String name, String characterId, boolean ready) {}
+    /**
+     * @param maxDifficultyOrdinal highest difficulty this member has unlocked the stage
+     *                             on; {@code -1} when they cannot play it
+     */
+    public record Member(UUID uuid, String name, String characterId, boolean ready, int maxDifficultyOrdinal) {}
+
+    /** Someone asking to join, shown under the roster for the host to answer. */
+    public record Pending(UUID uuid, String name) {}
 
     /** Sent when the lobby is gone; the client closes its screen. */
     public final boolean closed;
@@ -24,28 +31,34 @@ public class LobbyStatePacket {
     public final int difficultyOrdinal;
     public final boolean starting;
     public final List<Member> members;
+    public final List<Pending> pending;
 
     public LobbyStatePacket(boolean closed, UUID hostUuid, String stageId, int difficultyOrdinal,
-            boolean starting, List<Member> members) {
+            boolean starting, List<Member> members, List<Pending> pending) {
         this.closed = closed;
         this.hostUuid = hostUuid;
         this.stageId = stageId != null ? stageId : "";
         this.difficultyOrdinal = difficultyOrdinal;
         this.starting = starting;
         this.members = members;
+        this.pending = pending != null ? pending : List.of();
     }
 
     public static LobbyStatePacket of(LobbySession lobby) {
         List<Member> members = new ArrayList<>();
         for (LobbySession.Member m : lobby.members()) {
-            members.add(new Member(m.uuid, m.name, m.characterId, m.isReady()));
+            members.add(new Member(m.uuid, m.name, m.characterId, m.isReady(), m.maxDifficultyOrdinal));
+        }
+        List<Pending> pending = new ArrayList<>();
+        for (LobbySession.PendingJoin p : lobby.pendingJoins()) {
+            pending.add(new Pending(p.uuid, p.name));
         }
         return new LobbyStatePacket(false, lobby.hostUuid, lobby.stageId,
-                lobby.difficulty.ordinal(), lobby.starting, members);
+                lobby.difficulty.ordinal(), lobby.starting, members, pending);
     }
 
     public static LobbyStatePacket closed() {
-        return new LobbyStatePacket(true, new UUID(0, 0), "", 0, false, List.of());
+        return new LobbyStatePacket(true, new UUID(0, 0), "", 0, false, List.of(), List.of());
     }
 
     public void encode(FriendlyByteBuf buf) {
@@ -60,6 +73,12 @@ public class LobbyStatePacket {
             buf.writeUtf(m.name());
             buf.writeUtf(m.characterId());
             buf.writeBoolean(m.ready());
+            buf.writeVarInt(m.maxDifficultyOrdinal() + 1); // -1 = locked, so shift into VarInt range
+        }
+        buf.writeVarInt(pending.size());
+        for (Pending p : pending) {
+            buf.writeUUID(p.uuid());
+            buf.writeUtf(p.name());
         }
     }
 
@@ -72,8 +91,14 @@ public class LobbyStatePacket {
         int n = buf.readVarInt();
         List<Member> members = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
-            members.add(new Member(buf.readUUID(), buf.readUtf(), buf.readUtf(), buf.readBoolean()));
+            members.add(new Member(buf.readUUID(), buf.readUtf(), buf.readUtf(), buf.readBoolean(),
+                    buf.readVarInt() - 1));
         }
-        return new LobbyStatePacket(closed, host, stageId, diff, starting, members);
+        int np = buf.readVarInt();
+        List<Pending> pending = new ArrayList<>(np);
+        for (int i = 0; i < np; i++) {
+            pending.add(new Pending(buf.readUUID(), buf.readUtf()));
+        }
+        return new LobbyStatePacket(closed, host, stageId, diff, starting, members, pending);
     }
 }

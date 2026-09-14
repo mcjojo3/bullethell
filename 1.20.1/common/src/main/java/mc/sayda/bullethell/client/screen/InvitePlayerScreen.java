@@ -1,8 +1,9 @@
 package mc.sayda.bullethell.client.screen;
 
-import com.mojang.authlib.GameProfile;
 import mc.sayda.bullethell.client.BHSfx;
+import mc.sayda.bullethell.client.ClientLobbyState;
 import mc.sayda.bullethell.network.BHPackets;
+import mc.sayda.bullethell.network.LobbyStatePacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -11,126 +12,229 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Pick someone to invite to the party, from a scrolling list of everyone online.
+ *
+ * A list rather than a row of cards: a server can have far more players than fit across
+ * the screen, and a name is all there is to tell them apart. People already in the party
+ * stay listed but greyed out, so the roster reads the same here as it does in the lobby.
+ */
 @Environment(EnvType.CLIENT)
 public class InvitePlayerScreen extends Screen {
 
-    private static final int CARD_W = 120;
-    private static final int CARD_H = 60;
-    private static final int CARD_GAP = 16;
+    private static final int PANEL_W = 300;
+    private static final int ROW_H = 20;
     private static final int BTN_H = 20;
+    private static final int LIST_TOP = 72;
+
+    private static final int COL_TITLE = 0xFFFFE600;
+    private static final int COL_DIM = 0xFF8899AA;
+    private static final int COL_TEXT = 0xFFCCCCCC;
+    private static final int COL_SEL = 0xFFFFDD00;
+    private static final int COL_IN_PARTY = 0xFF55DD77;
+    private static final int COL_ROW_SEL = 0xFF1A1A38;
+
+    /** One online player, with how they already relate to this party. */
+    private record Candidate(UUID uuid, String name, boolean inParty, boolean requested) {}
 
     private final Screen parent;
-    private final List<PlayerInfo> players = new ArrayList<>();
-    private int selectedIndex = 0;
-    private int cardStartX;
-    private int cardTopY;
+    private final List<Candidate> candidates = new ArrayList<>();
+
+    private int selected = 0;
+    private int scroll = 0;
+    private int panelX;
+    private int listTop;
+    private int visibleRows;
+    private Button inviteBtn;
 
     public InvitePlayerScreen(Screen parent) {
         super(Component.literal("Invite Player"));
         this.parent = parent;
-        
-        UUID localUuid = Minecraft.getInstance().player.getUUID();
-        for (PlayerInfo info : Minecraft.getInstance().getConnection().getOnlinePlayers()) {
-            if (!info.getProfile().getId().equals(localUuid)) {
-                players.add(info);
-            }
-        }
     }
 
     @Override
     protected void init() {
         super.init();
-        rebuildButtons();
+        mc.sayda.bullethell.client.BHScaleManager.applyIdealScale();
+        refresh();
+        rebuild();
     }
 
-    private void rebuildButtons() {
-        clearWidgets();
-        int n = players.size();
-        if (n == 0) return;
+    /** Rebuilt on open so the list reflects the roster as it stands right now. */
+    private void refresh() {
+        candidates.clear();
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.getConnection() == null) return;
 
-        // Simple row layout for now (can be expanded to grid if many players)
-        int totalW = n * CARD_W + (n - 1) * CARD_GAP;
-        cardStartX = (width - totalW) / 2;
-        cardTopY = height / 2 - CARD_H / 2;
+        UUID self = mc.player.getUUID();
+        ClientLobbyState lobby = ClientLobbyState.INSTANCE;
 
-        for (int i = 0; i < n; i++) {
-            final int idx = i;
-            int bx = cardStartX + i * (CARD_W + CARD_GAP);
-            int btnX = bx + (CARD_W - 80) / 2;
-            int btnY = cardTopY + CARD_H - BTN_H - 6;
+        for (PlayerInfo info : mc.getConnection().getOnlinePlayers()) {
+            UUID id = info.getProfile().getId();
+            if (id.equals(self)) continue;
 
-            addRenderableWidget(Button.builder(
-                    Component.literal(i == selectedIndex ? "INVITE" : "SELECT"),
-                    btn -> {
-                        selectedIndex = idx;
-                        confirm();
-                    })
-                    .pos(btnX, btnY)
-                    .size(80, BTN_H)
-                    .build());
+            boolean inParty = false;
+            for (LobbyStatePacket.Member m : lobby.members) {
+                if (m.uuid().equals(id)) { inParty = true; break; }
+            }
+            boolean requested = false;
+            for (LobbyStatePacket.Pending p : lobby.pending) {
+                if (p.uuid().equals(id)) { requested = true; break; }
+            }
+            candidates.add(new Candidate(id, info.getProfile().getName(), inParty, requested));
         }
+        candidates.sort(Comparator.comparing(Candidate::name, String.CASE_INSENSITIVE_ORDER));
+
+        if (selected >= candidates.size()) selected = Math.max(0, candidates.size() - 1);
     }
+
+    private void rebuild() {
+        clearWidgets();
+        panelX = (width - PANEL_W) / 2;
+        listTop = LIST_TOP;
+        // Leave room for the buttons and the hint line below the list.
+        visibleRows = Math.max(3, (height - listTop - 70) / ROW_H);
+
+        int btnY = listTop + visibleRows * ROW_H + 12;
+
+        inviteBtn = Button.builder(Component.literal("Invite"), b -> confirm())
+                .pos(panelX, btnY).size(140, BTN_H).build();
+        inviteBtn.active = canInviteSelected();
+        addRenderableWidget(inviteBtn);
+
+        addRenderableWidget(Button.builder(Component.literal("Back"), b -> {
+            BHSfx.playBack();
+            onClose();
+        }).pos(panelX + PANEL_W - 140, btnY).size(140, BTN_H).build());
+
+        ensureVisible();
+    }
+
+    // ---------------------------------------------------------------- selection
+
+    private boolean canInviteSelected() {
+        if (selected < 0 || selected >= candidates.size()) return false;
+        return !candidates.get(selected).inParty();
+    }
+
+    private void ensureVisible() {
+        if (selected < scroll) scroll = selected;
+        else if (selected >= scroll + visibleRows) scroll = selected - visibleRows + 1;
+        clampScroll();
+    }
+
+    private void clampScroll() {
+        int max = Math.max(0, candidates.size() - visibleRows);
+        if (scroll > max) scroll = max;
+        if (scroll < 0) scroll = 0;
+    }
+
+    private void move(int delta) {
+        if (candidates.isEmpty()) return;
+        int next = selected + delta;
+        if (next < 0 || next >= candidates.size()) return;
+        selected = next;
+        BHSfx.playSelect();
+        ensureVisible();
+        if (inviteBtn != null) inviteBtn.active = canInviteSelected();
+    }
+
+    private void confirm() {
+        if (!canInviteSelected()) return;
+        Candidate target = candidates.get(selected);
+        BHSfx.playSelect();
+        BHPackets.sendInvitePlayer(target.uuid());
+        onClose();
+    }
+
+    // ---------------------------------------------------------------- render
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-        gfx.fill(0, 0, width, height, 0xAA000000); // Semi-transparent overlay
+        gfx.fill(0, 0, width, height, 0xFF0A0A14);
+        gfx.drawCenteredString(font, "INVITE PLAYER", width / 2, 24, COL_TITLE);
 
-        gfx.drawCenteredString(font, "INVITE CO-OP PARTNER", width / 2, 20, 0xFFFFE600);
+        if (candidates.isEmpty()) {
+            gfx.drawCenteredString(font, "No other players online.", width / 2, height / 2 - 4, COL_DIM);
+            super.render(gfx, mouseX, mouseY, partialTick);
+            return;
+        }
 
-        if (players.isEmpty()) {
-            gfx.drawCenteredString(font, "No other players online.", width / 2, height / 2, 0xFF8888AA);
-        } else {
-            gfx.drawCenteredString(font, "\u2190 / \u2192  browse     Enter  invite     ESC  cancel",
-                    width / 2, 33, 0xFF445566);
+        gfx.drawString(font, "ONLINE (" + candidates.size() + ")", panelX, listTop - 14, COL_DIM, false);
+        gfx.hLine(panelX, panelX + PANEL_W, listTop - 4, 0xFF223355);
 
-            int n = players.size();
-            for (int i = 0; i < n; i++) {
-                PlayerInfo info = players.get(i);
-                int bx = cardStartX + i * (CARD_W + CARD_GAP);
-                boolean sel = (i == selectedIndex);
+        int shown = Math.min(visibleRows, candidates.size() - scroll);
+        for (int i = 0; i < shown; i++) {
+            int idx = scroll + i;
+            Candidate c = candidates.get(idx);
+            int rowY = listTop + i * ROW_H;
+            boolean sel = idx == selected;
+            boolean hover = mouseX >= panelX && mouseX < panelX + PANEL_W
+                    && mouseY >= rowY && mouseY < rowY + ROW_H;
 
-                gfx.fill(bx, cardTopY, bx + CARD_W, cardTopY + CARD_H,
-                        sel ? 0xFF1A1A38 : 0xFF0A0A1E);
-                int brd = sel ? 0xFFFFE600 : 0xFF334466;
-                gfx.hLine(bx, bx + CARD_W - 1, cardTopY, brd);
-                gfx.hLine(bx, bx + CARD_W - 1, cardTopY + CARD_H - 1, brd);
-                gfx.vLine(bx, cardTopY, cardTopY + CARD_H, brd);
-                gfx.vLine(bx + CARD_W - 1, cardTopY, cardTopY + CARD_H, brd);
+            if (sel || hover) {
+                gfx.fill(panelX, rowY, panelX + PANEL_W, rowY + ROW_H - 2, COL_ROW_SEL);
+            }
+            int nameCol = c.inParty() ? COL_DIM : (sel ? COL_SEL : COL_TEXT);
+            gfx.drawString(font, c.name(), panelX + 6, rowY + 5, nameCol, false);
 
-                int cx = bx + CARD_W / 2;
-                int textY = cardTopY + 12;
-
-                gfx.drawCenteredString(font, info.getProfile().getName(), cx, textY, sel ? 0xFFFFDD00 : 0xFFCCCCCC);
-                
-                if (sel) {
-                    gfx.drawCenteredString(font, "\u25bc", cx, cardTopY + CARD_H - BTN_H - 6, 0xFFFFE600);
-                }
+            String status = c.inParty() ? "in party" : c.requested() ? "asked to join" : "";
+            if (!status.isEmpty()) {
+                gfx.drawString(font, status, panelX + PANEL_W - font.width(status) - 6, rowY + 5,
+                        c.inParty() ? COL_IN_PARTY : COL_DIM, false);
             }
         }
 
+        // Scroll position, only when the list actually overflows.
+        if (candidates.size() > visibleRows) {
+            int trackX = panelX + PANEL_W + 4;
+            int trackTop = listTop;
+            int trackH = visibleRows * ROW_H;
+            gfx.fill(trackX, trackTop, trackX + 2, trackTop + trackH, 0xFF223355);
+            int thumbH = Math.max(8, trackH * visibleRows / candidates.size());
+            int maxScroll = candidates.size() - visibleRows;
+            int thumbY = trackTop + (trackH - thumbH) * scroll / Math.max(1, maxScroll);
+            gfx.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, COL_TITLE);
+        }
+
+        String hint = canInviteSelected()
+                ? "↑ / ↓  browse     Enter  invite     ESC  back"
+                : "That player is already in your party.";
+        gfx.drawCenteredString(font, hint, width / 2, height - 26,
+                canInviteSelected() ? COL_DIM : COL_IN_PARTY);
+
         super.render(gfx, mouseX, mouseY, partialTick);
     }
-    
+
     @Override
     public void renderBackground(GuiGraphics gfx) {
-        // Overlay logic handled in render
+        // Solid fill happens in render().
     }
+
+    // ---------------------------------------------------------------- input
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (super.mouseClicked(mx, my, button)) return true;
-        int n = players.size();
-        for (int i = 0; i < n; i++) {
-            int bx = cardStartX + i * (CARD_W + CARD_GAP);
-            if (mx >= bx && mx < bx + CARD_W && my >= cardTopY && my < cardTopY + CARD_H) {
-                if (selectedIndex != i) {
-                    selectedIndex = i;
-                    rebuildButtons();
+
+        int shown = Math.min(visibleRows, Math.max(0, candidates.size() - scroll));
+        for (int i = 0; i < shown; i++) {
+            int rowY = listTop + i * ROW_H;
+            if (mx >= panelX && mx < panelX + PANEL_W && my >= rowY && my < rowY + ROW_H) {
+                int idx = scroll + i;
+                if (idx == selected) {
+                    confirm(); // second click on the same name invites
+                } else {
+                    selected = idx;
+                    BHSfx.playSelect();
+                    if (inviteBtn != null) inviteBtn.active = canInviteSelected();
                 }
                 return true;
             }
@@ -138,12 +242,36 @@ public class InvitePlayerScreen extends Screen {
         return false;
     }
 
-    private void confirm() {
-        if (players.isEmpty()) return;
-        PlayerInfo target = players.get(selectedIndex);
-        BHSfx.playSelect();
-        BHPackets.sendInvitePlayer(target.getProfile().getId());
-        onClose();
+    @Override
+    public boolean mouseScrolled(double mx, double my, double delta) {
+        if (candidates.size() > visibleRows) {
+            scroll -= (int) Math.signum(delta);
+            clampScroll();
+            return true;
+        }
+        return super.mouseScrolled(mx, my, delta);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            BHSfx.playBack();
+            onClose();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_UP) {
+            move(-1);
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_DOWN) {
+            move(1);
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+            confirm();
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -152,35 +280,7 @@ public class InvitePlayerScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 256) { // ESC
-            BHSfx.playBack();
-            onClose();
-            return true;
-        }
-        if (players.isEmpty()) return super.keyPressed(keyCode, scanCode, modifiers);
-        
-        if (keyCode == 263 && selectedIndex > 0) {
-            selectedIndex--;
-            BHSfx.playSelect();
-            rebuildButtons();
-            return true;
-        }
-        if (keyCode == 262 && selectedIndex < players.size() - 1) {
-            selectedIndex++;
-            BHSfx.playSelect();
-            rebuildButtons();
-            return true;
-        }
-        if (keyCode == 257 || keyCode == 335) {
-            confirm();
-            return true;
-        }
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
     public boolean isPauseScreen() {
-        return true;
+        return false;
     }
 }

@@ -499,8 +499,8 @@ public class ArenaContext {
     private final java.util.LinkedHashMap<UUID, PlayerState2D> coopPlayers = new java.util.LinkedHashMap<>();
     private final java.util.concurrent.ConcurrentHashMap<UUID, BulletPool> coopBullets = new java.util.concurrent.ConcurrentHashMap<>();
     private final java.util.LinkedHashMap<UUID, String> coopCharIds = new java.util.LinkedHashMap<>();
-    /** Participants currently holding the pause menu open. */
-    private final java.util.LinkedHashSet<UUID> pausedParticipants = new java.util.LinkedHashSet<>();
+    /** Participants currently holding the pause menu open, by display name. */
+    private final java.util.LinkedHashMap<UUID, String> pausedParticipants = new java.util.LinkedHashMap<>();
     /** Cached participant set – rebuilt only when coopPlayers membership changes. */
     private java.util.Set<UUID> cachedParticipants = null;
     /** Cached player-state list – rebuilt only when coopPlayers membership changes. */
@@ -551,17 +551,26 @@ public class ArenaContext {
     }
 
     /** Called from C2S pause packet when a participant opens/closes pause menu. */
-    public void setParticipantPaused(UUID uuid, boolean paused) {
+    public void setParticipantPaused(UUID uuid, boolean paused, String name) {
         if (uuid == null || !allParticipants().contains(uuid))
             return;
         if (paused)
-            pausedParticipants.add(uuid);
+            pausedParticipants.put(uuid, (name != null && !name.isBlank()) ? name : "A player");
         else
             pausedParticipants.remove(uuid);
     }
 
     public boolean hasPausedParticipants() {
         return !pausedParticipants.isEmpty();
+    }
+
+    /**
+     * Who is holding the fight, comma-separated; empty when nobody is. Without this the
+     * other players just see the arena stop dead with no explanation.
+     */
+    public String pausedByNames() {
+        if (pausedParticipants.isEmpty()) return "";
+        return String.join(", ", pausedParticipants.values());
     }
 
     public boolean isGloballyPaused() {
@@ -929,7 +938,11 @@ public class ArenaContext {
         }
 
         // 5. Player Actions (Shots)
-        tickPlayerShots(playerUuid, player, playerBullets);
+        // lives < 0 is eliminated - spectating while the rest of the party plays on. Their
+        // slot is checked exactly like a co-op slot: out of the run means no shots fired
+        // and nothing can hit them. Solo hides this, since the arena ends on elimination.
+        if (player.lives >= 0)
+            tickPlayerShots(playerUuid, player, playerBullets);
         for (var e : coopPlayers.entrySet()) {
             PlayerState2D cPs = e.getValue();
             BulletPool cPb = coopBullets.get(e.getKey());
@@ -939,13 +952,15 @@ public class ArenaContext {
         }
 
         // 6. Enemy Bullets & Items vs Players
-        checkEnemyBulletsVsPlayer(playerUuid, player);
+        if (player.lives >= 0)
+            checkEnemyBulletsVsPlayer(playerUuid, player);
         for (var e : coopPlayers.entrySet()) {
             if (e.getValue().lives >= 0)
                 checkEnemyBulletsVsPlayer(e.getKey(), e.getValue());
         }
 
-        checkLasersVsPlayer(playerUuid, player);
+        if (player.lives >= 0)
+            checkLasersVsPlayer(playerUuid, player);
         for (var e : coopPlayers.entrySet()) {
             if (e.getValue().lives >= 0)
                 checkLasersVsPlayer(e.getKey(), e.getValue());

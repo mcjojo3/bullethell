@@ -114,6 +114,8 @@ public class ClientArenaState {
 
     /** Server says the whole fight is held for a paused participant. */
     public boolean globallyPaused = false;
+    /** Who is holding it, comma-separated; empty when nobody is. */
+    public String pausedBy = "";
 
     // ---- Cached formatted strings (recomputed only when the source value changes) ----
     private long cachedScore = Long.MIN_VALUE;
@@ -249,10 +251,19 @@ public class ClientArenaState {
     public int bossMoveDir = 0;
 
     // --- sprite sheet animation ---
-    public int animRow = 0;
-    public int animLeanFrame = 0;
-    public int animIdleFrame = 0;
-    public int animIdleTick = 0;
+    /** The local player's own lean / idle state. */
+    public final CharacterAnim anim = new CharacterAnim();
+
+    /** One animation per co-op player, so each sprite leans from its own movement. */
+    private static final class CoopAnim {
+        final CharacterAnim anim = new CharacterAnim();
+        float lastX = Float.NaN;
+        /** Held between position syncs so the sprite does not flicker back to idle. */
+        float dir = 0f;
+        int stillTicks = 0;
+    }
+
+    private final java.util.Map<Integer, CoopAnim> coopAnims = new java.util.HashMap<>();
 
     // spell card declaration
     public String spellName = "";
@@ -463,6 +474,7 @@ public class ClientArenaState {
 
     public void applyArenaState(ArenaStatePacket pkt) {
         this.globallyPaused = pkt.active && pkt.globallyPaused;
+        this.pausedBy = pkt.pausedBy;
         applyArenaState(pkt.active, pkt.spectating, pkt.playerX, pkt.playerY,
                 pkt.lives, pkt.bombs, pkt.graze, pkt.power, pkt.playerIndex,
                 pkt.bossX, pkt.bossY, pkt.bossHp, pkt.bossMaxHp, pkt.bossPhase, pkt.bossMoveDir,
@@ -591,45 +603,42 @@ public class ClientArenaState {
      * positive=right, 0=idle).
      */
     public void updateAnimation(float dx) {
-        if (dx < 0f) {
-            if (animRow != 1) {
-                animLeanFrame = 0;
-                animIdleTick = 0;
-            }
-            animRow = 1;
-            if (++animIdleTick >= 2) {
-                animIdleTick = 0;
-                if (animLeanFrame == 0)
-                    animLeanFrame = 1;
-                else
-                    animLeanFrame = (animLeanFrame < 7) ? animLeanFrame + 1 : 1;
-            }
-        } else if (dx > 0f) {
-            if (animRow != 2) {
-                animLeanFrame = 0;
-                animIdleTick = 0;
-            }
-            animRow = 2;
-            if (++animIdleTick >= 2) {
-                animIdleTick = 0;
-                if (animLeanFrame == 0)
-                    animLeanFrame = 1;
-                else
-                    animLeanFrame = (animLeanFrame < 7) ? animLeanFrame + 1 : 1;
-            }
-        } else {
-            if (animLeanFrame > 0) {
-                animLeanFrame--;
-                animIdleTick = 0;
-            } else {
-                animRow = 0;
-                if (++animIdleTick >= 3) {
-                    animIdleTick = 0;
-                    if (++animIdleFrame >= 8)
-                        animIdleFrame = 0;
-                }
-            }
+        anim.update(dx);
+    }
+
+    /**
+     * Advances every co-op player's sprite animation from their own movement.
+     *
+     * Their positions arrive in periodic syncs rather than as per-tick input, so the
+     * direction is taken from the change in X and held for a few ticks; without that a
+     * sprite would snap back to idle between packets.
+     */
+    public void updateCoopAnimations() {
+        if (coopPlayers.isEmpty()) {
+            coopAnims.clear();
+            return;
         }
+        java.util.Set<Integer> seen = new java.util.HashSet<>();
+        for (mc.sayda.bullethell.network.CoopPlayersSyncPacket.Entry e : coopPlayers) {
+            seen.add(e.playerIndex());
+            CoopAnim ca = coopAnims.computeIfAbsent(e.playerIndex(), k -> new CoopAnim());
+            if (Float.isNaN(ca.lastX)) ca.lastX = e.x();
+            float dx = e.x() - ca.lastX;
+            ca.lastX = e.x();
+            if (Math.abs(dx) > 0.05f) {
+                ca.dir = Math.signum(dx);
+                ca.stillTicks = 0;
+            } else if (++ca.stillTicks > 3) {
+                ca.dir = 0f;
+            }
+            ca.anim.update(ca.dir);
+        }
+        coopAnims.keySet().retainAll(seen);
+    }
+
+    /** Animation for a co-op player, created the first time they are seen. */
+    public CharacterAnim coopAnim(int playerIndex) {
+        return coopAnims.computeIfAbsent(playerIndex, k -> new CoopAnim()).anim;
     }
 
     // ---------------------------------------------------------------- reset
@@ -646,6 +655,7 @@ public class ClientArenaState {
         debugEnemyBulletCount = 0;
         grazeChain = 0;
         globallyPaused = false;
+        pausedBy = "";
         lifePieces = 0;
         bombPieces = 0;
         power = 0;
@@ -663,10 +673,8 @@ public class ClientArenaState {
         dialogReadyCount = 0;
         dialogTotalCount = 0;
         dialogSlideInTick = 0;
-        animRow = 0;
-        animLeanFrame = 0;
-        animIdleFrame = 0;
-        animIdleTick = 0;
+        anim.reset();
+        coopAnims.clear();
         bossAnimCounter = 0;
         arenaAnimTick = 0;
         bossMoveDir = 0;

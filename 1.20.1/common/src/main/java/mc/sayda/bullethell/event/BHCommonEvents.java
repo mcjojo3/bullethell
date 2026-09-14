@@ -11,6 +11,7 @@ import mc.sayda.bullethell.arena.BulletPool;
 import mc.sayda.bullethell.arena.BulletHellManager;
 import mc.sayda.bullethell.arena.LastArenaRetryState;
 import mc.sayda.bullethell.arena.LastArenaShareState;
+import mc.sayda.bullethell.arena.RetryVoteState;
 import mc.sayda.bullethell.arena.ArenaEndShareSnapshot;
 import mc.sayda.bullethell.arena.VictoryXpRewards;
 import mc.sayda.bullethell.boss.CharacterDefinition;
@@ -52,6 +53,13 @@ public class BHCommonEvents {
             UUID uuid = player.getUUID();
             BHDebugMode.clear(uuid);
             LastArenaRetryState.remove(uuid);
+            // Nobody should be left waiting on a retry vote from someone who has gone.
+            mc.sayda.bullethell.network.PartyHandler.dropRetry(player.getServer(), uuid,
+                    player.getGameProfile().getName());
+            // A party cannot wait on someone who left the server: drop them from it, and
+            // forget anything they had asked or been asked.
+            mc.sayda.bullethell.network.PartyHandler.leave(player.getServer(), uuid);
+            BulletHellManager.INSTANCE.dropPartyRequests(uuid);
             if (!BulletHellManager.INSTANCE.hasArena(uuid)
                     && BulletHellManager.INSTANCE.isInMatch(uuid)) {
                 BulletHellManager.INSTANCE.leaveMatch(uuid);
@@ -107,6 +115,19 @@ public class BHCommonEvents {
         if (tryContinueToNextStage(server, hostUuid, ctx)) {
             // tryContinueToNextStage() already replaced the arena; nothing more to do.
             return;
+        }
+
+        // A co-op run belongs to everyone who played it, so hold the roster while the
+        // results screen collects a retry vote instead of restarting one player's fight.
+        if (!ctx.practiceMode && !ctx.testMode) {
+            List<UUID> roster = new ArrayList<>();
+            roster.add(hostUuid);
+            for (UUID pid : ctx.allParticipants())
+                if (!pid.equals(hostUuid)) roster.add(pid);
+            java.util.Map<UUID, String> characters = new java.util.LinkedHashMap<>();
+            for (UUID pid : roster) characters.put(pid, ctx.getCharacterId(pid));
+            RetryVoteState.open(hostUuid, roster, characters,
+                    ctx.stage != null ? ctx.stage.id : "", ctx.difficulty);
         }
 
         for (UUID pid : ctx.allParticipants()) {
@@ -269,12 +290,15 @@ public class BHCommonEvents {
             if (victoryXp > 0) player.giveExperiencePoints(victoryXp);
         }
 
+        // Above 1, the end screen collects a retry vote from the whole party rather than
+        // restarting one player's fight on its own.
+        int retryPartySize = (ctx.practiceMode || ctx.testMode) ? 1 : ctx.allParticipants().size();
         BHPackets.sendArenaEnd(player, new ArenaEndPacket(
                 ctx.isWon(), bossName, bossId, charId, charName, bossDialog,
                 scoreSelf, scoreTeam, victoryXp, ps.lives, ps.bombs, ps.graze,
                 ctx.getSpellsCaptured(), ctx.getSpellsAttempted(),
                 (float) ctx.getCompletionPercentage(),
-                stageId, ctx.difficulty.name()));
+                stageId, ctx.difficulty.name(), retryPartySize));
 
         if (ctx.stage != null && ctx.stage.rewards != null) {
             List<String> cmds = ctx.isWon()

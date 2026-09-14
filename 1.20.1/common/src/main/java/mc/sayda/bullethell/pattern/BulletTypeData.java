@@ -60,13 +60,19 @@ public final class BulletTypeData {
     public final boolean homing;
     /** When true, this bullet will freeze in place during Sakuya's time stop. */
     public final boolean sakuyaBlade;
+    /**
+     * Type ids to pick from, one per bullet, at spawn; empty for an ordinary type. Set by
+     * {@code "randomOf"} in bullet_types.json - e.g. a rainbow star that spawns as one of
+     * the coloured star types. Cosmetic only, so the choices should share a hitbox.
+     */
+    public final int[] randomOf;
 
     public BulletTypeData(int color, float radius, float hitboxMul, String texture,
             float textureScale, int sourceSize, int sourceHeight, Float baseAngleDeg,
             boolean applyTint, boolean lineHit,
             float lineCollisionHalfLength, float lineCollisionHalfWidth,
             float lineVisualHalfLength, float lineVisualHalfWidth,
-            boolean homing, boolean sakuyaBlade) {
+            boolean homing, boolean sakuyaBlade, int[] randomOf) {
         this.color = color;
         this.radius = radius;
         this.hitboxMul = hitboxMul;
@@ -83,5 +89,6 @@ public final class BulletTypeData {
         this.lineVisualHalfWidth = lineVisualHalfWidth;
         this.homing = homing;
         this.sakuyaBlade = sakuyaBlade;
+        this.randomOf = randomOf != null ? randomOf : new int[0];
     }
 }

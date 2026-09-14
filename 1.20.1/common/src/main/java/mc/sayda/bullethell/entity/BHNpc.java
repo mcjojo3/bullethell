@@ -195,7 +195,8 @@ public class BHNpc extends PathfinderMob {
             int maxOrd = BossProgression.maxAllowedDifficultyOrdinal(serverPlayer, bossId);
             String req = BossProgression.requirementSummary(bossId);
             BHPackets.sendOpenChallenge(serverPlayer,
-                    new OpenChallengePacket(getNpcId(), def.stageId, def.displayName, def.challengeText, maxOrd, req));
+                    new OpenChallengePacket(getNpcId(), def.stageId, def.displayName, def.challengeText, maxOrd, req,
+                            mc.sayda.bullethell.config.BullethellConfig.ALLOW_MULTIPLAYER.get()));
         }
         return InteractionResult.sidedSuccess(this.level().isClientSide);
     }

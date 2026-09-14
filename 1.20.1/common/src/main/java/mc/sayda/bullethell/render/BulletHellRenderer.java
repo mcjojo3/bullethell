@@ -223,7 +223,7 @@ public class BulletHellRenderer {
             int px = ox + (int) (epx * sx);
             int py = oy + (int) (epy * sy);
             int spriteHalf = Math.max(10, (int) (16 * (sx + sy) * 0.5f));
-            renderCharacterSprite(gfx, state.characterId, px, py, spriteHalf);
+            renderCharacterSprite(gfx, state.characterId, px, py, spriteHalf, state.anim);
             // Focus hitbox dot: small cyan disc centered on the true hitbox when focused
             if (showFocusDiamond && !showHitbox) {
                 int r = Math.max(2, Math.round(state.player.hitRadius * (sx + sy) * 0.5f));
@@ -243,7 +243,8 @@ public class BulletHellRenderer {
             int px = ox + (int) (cp.x() * sx);
             int py = oy + (int) (cp.y() * sy);
             int spriteHalf = Math.max(10, (int) (16 * (sx + sy) * 0.5f));
-            renderCharacterSprite(gfx, cp.characterId(), px, py, spriteHalf);
+            renderCharacterSprite(gfx, cp.characterId(), px, py, spriteHalf,
+                    state.coopAnim(cp.playerIndex()));
             renderPlayerMarker(gfx, px, py, cp.playerIndex(), false);
         }
 
@@ -702,6 +703,23 @@ public class BulletHellRenderer {
         ClientArenaState state = ClientArenaState.INSTANCE;
         Font font = Minecraft.getInstance().font;
         int lh = font.lineHeight; // typically 9 px
+
+        // ---- Held for a paused player ----
+        // Everyone else just sees the fight stop dead otherwise, with no way to tell a
+        // pause from a hang - so say whose menu it is.
+        if (state.globallyPaused) {
+            String who = state.pausedBy.isBlank() ? "Someone" : state.pausedBy;
+            String line = who + " paused the game";
+            int bw = font.width(line) + 16;
+            int bx = ox + (dw - bw) / 2;
+            int by = oy + dh / 2 - 10;
+            gfx.fill(bx, by, bx + bw, by + 20, 0xCC000018);
+            gfx.hLine(bx, bx + bw - 1, by, 0xFFFFE600);
+            gfx.hLine(bx, bx + bw - 1, by + 19, 0xFFFFE600);
+            gfx.vLine(bx, by, by + 20, 0xFFFFE600);
+            gfx.vLine(bx + bw - 1, by, by + 20, 0xFFFFE600);
+            gfx.drawCenteredString(font, line, ox + dw / 2, by + 6, 0xFFFFE600);
+        }
 
         // ---- Top bar stack (stacked rows, no overlap) ----
         int cursor = oy;
@@ -1606,16 +1624,15 @@ public class BulletHellRenderer {
      * Row 0 (v=0): idle animation (8 frames)
      * Row 1 (v=47): left lean transition (frame 0 = near-idle, frame 7 = full left)
      * Row 2 (v=94): right lean transition
-     * Animation state is read from {@link ClientArenaState}.
+     * The animation is passed in: each player on screen has their own, so the sprites do
+     * not all mirror whoever is local.
      * Falls back to a white square if the texture is missing.
      */
     private static void renderCharacterSprite(GuiGraphics gfx, String characterId,
-            int cx, int cy, int halfSz) {
+            int cx, int cy, int halfSz, mc.sayda.bullethell.client.CharacterAnim anim) {
         ResourceLocation tex = charTex(characterId);
-        ClientArenaState state = ClientArenaState.INSTANCE;
-        int col = (state.animRow == 0) ? state.animIdleFrame : state.animLeanFrame;
-        float u = col * 32f;
-        float v = state.animRow * 47f;
+        float u = anim.column() * 32f;
+        float v = anim.row * 47f;
         // Preserve the 32:47 aspect ratio; width = halfSz*2, height scaled accordingly
         int dstW = halfSz * 2;
         int dstH = (int) (dstW * 47f / 32f);

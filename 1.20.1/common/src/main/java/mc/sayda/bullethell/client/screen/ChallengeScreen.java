@@ -28,7 +28,8 @@ import org.lwjgl.glfw.GLFW;
  *   │   [Accept Challenge]  [Decline]    │
  *   └────────────────────────────────────┘
  *
- * Accept → opens {@link DifficultySelectScreen} with the NPC's stage ID.
+ * Accept → {@link PlayModeScreen}: singleplayer goes on to difficulty select, multiplayer
+ * opens a party for this stage. With AllowMultiplayer off it goes straight to difficulty select. Practice always goes straight to a solo run.
  * Decline → closes this screen.
  */
 @Environment(EnvType.CLIENT)
@@ -66,9 +67,13 @@ public class ChallengeScreen extends Screen {
                 btn -> {
                     if (!canAccept)
                         return;
-                    onClose();
-                    Minecraft.getInstance().setScreen(
-                            new DifficultySelectScreen(pkt.stageId, pkt.maxAllowedDifficultyOrdinal));
+                    // Swapped straight over rather than closed first: closing hands focus
+                    // back to the world for an instant, and the regrab warps the cursor to
+                    // the middle of the window before the next screen opens.
+                    // With parties turned off on the server there is no choice to make.
+                    Minecraft.getInstance().setScreen(pkt.allowMultiplayer
+                            ? new PlayModeScreen(pkt)
+                            : new DifficultySelectScreen(pkt.stageId, pkt.maxAllowedDifficultyOrdinal));
                 })
                 .bounds(btnStartX, btnY, btnW, btnH)
                 .build();
@@ -81,7 +86,7 @@ public class ChallengeScreen extends Screen {
                     if (!canAccept)
                         return;
                     BHSfx.playSelect();
-                    onClose();
+                    // Replaced directly, not closed first - see the Accept button above.
                     Minecraft.getInstance().setScreen(
                             new DifficultySelectScreen(pkt.stageId, pkt.maxAllowedDifficultyOrdinal, true));
                 })

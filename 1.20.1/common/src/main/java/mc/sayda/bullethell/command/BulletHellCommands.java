@@ -20,6 +20,7 @@ import mc.sayda.bullethell.boss.StageLoader;
 import mc.sayda.bullethell.debug.BHDebugMode;
 import mc.sayda.bullethell.network.TestModeOpenPacket;
 import mc.sayda.bullethell.network.BHPackets;
+import mc.sayda.bullethell.network.PartyHandler;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -45,10 +46,11 @@ import java.util.concurrent.CompletableFuture;
  * starts a boss-only arena (no fairy waves). Phase: 0 = from beginning; ≥1 =
  * skip to that
  * boss phase (1-based).
- * /bullethell join &lt;playerName&gt; - join another player's party
+ * /bullethell join &lt;playerName&gt; - ask a party host to let you in (they accept or deny)
+ * /bullethell accept | deny - answer your latest party invite or join request
+ * /bullethell share - post your last finished run to everyone online
  * /bullethell stop - end own arena or leave a coop match
  * /bullethell status - print current arena stats to chat
- * scheme is given
  * /bullethell test - operator (perm 2+): dev arena + overlay; temporary god
  * mode lasts only while test arena is active.
  * The same tree is registered as {@code /bh} (short alias).
@@ -72,8 +74,9 @@ public final class BulletHellCommands {
                 for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                         if (self != null && p.getUUID().equals(self))
                                 continue;
-                        // Parties form before the arena, so suggest anyone not already in one.
-                        if (!BulletHellManager.INSTANCE.isInMatch(p.getUUID()))
+                        // Only someone hosting a party can take a join request.
+                        var hosted = BulletHellManager.INSTANCE.getLobby(p.getUUID());
+                        if (hosted != null && hosted.isHost(p.getUUID()))
                                 names.add(p.getGameProfile().getName());
                 }
                 return SharedSuggestionProvider.suggest(names, builder);
@@ -164,13 +167,32 @@ public final class BulletHellCommands {
                                                                                                                                                 IntegerArgumentType
                                                                                                                                                                 .getInteger(ctx, "power")))))))))
 
-                                // ---- join <playerName> ----
+                                // ---- join <playerName>: ask a party host to let you in ----
                                 .then(Commands.literal("join")
                                                 .then(Commands.argument("player", StringArgumentType.word())
                                                                 .suggests(BulletHellCommands::suggestJoinHosts)
                                                                 .executes(ctx -> join(ctx.getSource(),
                                                                                 StringArgumentType.getString(ctx,
                                                                                                 "player")))))
+
+                                // ---- accept / deny: answer the latest party invite or join request ----
+                                .then(Commands.literal("accept")
+                                                .executes(ctx -> {
+                                                        PartyHandler.accept(ctx.getSource().getPlayerOrException());
+                                                        return 1;
+                                                }))
+                                .then(Commands.literal("deny")
+                                                .executes(ctx -> {
+                                                        PartyHandler.deny(ctx.getSource().getPlayerOrException());
+                                                        return 1;
+                                                }))
+
+                                // ---- share: post your last finished run to everyone ----
+                                .then(Commands.literal("share")
+                                                .executes(ctx -> {
+                                                        PartyHandler.shareLastRun(ctx.getSource().getPlayerOrException());
+                                                        return 1;
+                                                }))
 
                                 // ---- stop / leave ----
                                 .then(Commands.literal("stop")
@@ -428,47 +450,14 @@ public final class BulletHellCommands {
         }
 
         private static int join(CommandSourceStack src, String hostName) throws CommandSyntaxException {
-                ServerPlayer joiner = src.getPlayerOrException();
-
-                if (BulletHellManager.INSTANCE.isInMatch(joiner.getUUID())) {
-                        joiner.sendSystemMessage(Component.literal(
-                                        "[BulletHell] You are already in a match. Use /bullethell stop first."));
-                        return 0;
-                }
-
+                ServerPlayer requester = src.getPlayerOrException();
                 ServerPlayer host = src.getServer().getPlayerList().getPlayerByName(hostName);
-                if (host == null || !BulletHellManager.INSTANCE.hasArena(host.getUUID())) {
-                        joiner.sendSystemMessage(Component.literal(
-                                        "[BulletHell] Player '" + hostName + "' has no active arena."));
+                if (host == null) {
+                        requester.sendSystemMessage(Component.literal(
+                                        "[BulletHell] Player '" + hostName + "' is not online."));
                         return 0;
                 }
-                if (host.getUUID().equals(joiner.getUUID())) {
-                        joiner.sendSystemMessage(Component.literal(
-                                        "[BulletHell] You cannot join your own arena."));
-                        return 0;
-                }
-
-                if (BulletHellManager.INSTANCE.isInMatch(joiner.getUUID())) {
-                        joiner.sendSystemMessage(Component.literal(
-                                        "[BulletHell] Leave your current arena first."));
-                        return 0;
-                }
-                if (BulletHellManager.INSTANCE.isInMatch(host.getUUID())) {
-                        joiner.sendSystemMessage(Component.literal(
-                                        "[BulletHell] That player is already in a run - parties form before the arena starts."));
-                        return 0;
-                }
-
-                var lobby = BulletHellManager.INSTANCE.getOrCreateLobby(
-                                host.getUUID(), host.getName().getString(), "");
-                if (BulletHellManager.INSTANCE.joinLobby(host.getUUID(), joiner.getUUID(),
-                                joiner.getName().getString()) == null) {
-                        joiner.sendSystemMessage(Component.literal("[BulletHell] Could not join that party."));
-                        return 0;
-                }
-                host.sendSystemMessage(Component.literal(
-                                "[BulletHell] " + joiner.getName().getString() + " joined your party."));
-                BHPackets.broadcastLobby(src.getServer(), lobby);
+                PartyHandler.requestJoin(requester, host);
                 return 1;
         }
 
